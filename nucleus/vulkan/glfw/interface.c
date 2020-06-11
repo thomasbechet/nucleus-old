@@ -15,7 +15,13 @@ nu_result_t nuvk_glfw_load_interface(void)
         return NU_FAILURE;
     }
 
-    if (nu_module_load_interface(window_module, NUGLFW_WINDOW_INTERFACE, (nu_pfn_t*)&glfw_interface) != NU_SUCCESS) {
+    nuglfw_window_interface_loader_pfn_t load_interface;
+    if (nu_module_load_function(window_module, NUGLFW_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) != NU_SUCCESS) {
+        nu_warning(NUVK_LOGGER_VULKAN"Vulkan failed to load glfw loader.\n");
+        return NU_FAILURE;
+    }
+
+    if (load_interface(&glfw_interface) != NU_SUCCESS) {
         nu_warning(NUVK_LOGGER_VULKAN"Vulkan failed to load glfw interface.\n");
         return NU_FAILURE;
     }

@@ -27,10 +27,19 @@ nu_result_t nu_system_window_load(nu_window_api_t api)
         return result;
     }
 
-    /* load interface */
-    result = nu_module_load_interface(&_system.module, NU_WINDOW_INTERFACE, (nu_pfn_t*)&_system.interface);
+    /* load window interface accessor */
+    nu_window_interface_loader_pfn_t load_interface;
+    result = nu_module_load_function(&_system.module, NU_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_WINDOW_LOG_NAME"Missing window functions from module '%s'.\n", nu_window_api_names[api]);
+        nu_warning(NU_WINDOW_LOG_NAME" Failed to load window loader.\n");
+        return result;
+    }
+
+    /* load window interface */
+    result = load_interface(&_system.interface);
+    if (result != NU_SUCCESS) {
+        nu_warning(NU_WINDOW_LOG_NAME" Failed to load interface.\n");
+        return result;
     }
 
     /* initialize window system */

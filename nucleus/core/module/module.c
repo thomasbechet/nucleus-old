@@ -2,45 +2,11 @@
 
 #define NU_MODULE_LOG_NAME "[MODULE] "
 
-#define NU_MODULE_GET_INFO_NAME                         "nu_module_get_info"
-#define NU_MODULE_GET_SUPPORTED_INTERFACES_NAME         "nu_module_get_supported_interfaces"
-#define NU_MODULE_GET_INTERFACE_REQUIRED_FUNCTIONS_NAME "nu_module_get_interface_required_functions"
+#define NU_MODULE_GET_INFO_NAME "nu_module_get_info"
 
 #ifdef NU_PLATFORM_WINDOWS
     #include <windows.h>
 #endif
-
-// static nu_result_t nu_module_get_supported_interfaces(const nu_module_t *module, const char ***interfaces, uint32_t *count)
-// {
-//     nu_result_t (*get_supported_inferfaces)(const char***, uint32_t*);
-//     if (nu_module_load_function(module, NU_MODULE_GET_SUPPORTED_INTERFACES_NAME, (nu_pfn_t*)&get_supported_inferfaces) != NU_SUCCESS) {
-//         return NU_FAILURE;
-//     }
-
-//     if (get_supported_inferfaces(interfaces, count) != NU_SUCCESS) {
-
-//     }
-
-//     return NU_SUCCESS;
-// }
-static nu_result_t nu_module_get_interface_required_functions(
-    const nu_module_t *module, 
-    const char *interface_name,
-    const char ***functions,
-    uint32_t *count
-)
-{
-    nu_result_t (*get_interface_required_functions)(const char*, const char***, uint32_t*);
-    if (nu_module_load_function(module, NU_MODULE_GET_INTERFACE_REQUIRED_FUNCTIONS_NAME, (nu_pfn_t*)&get_interface_required_functions) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-
-    if (get_interface_required_functions(interface_name, functions, count) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-
-    return NU_SUCCESS;
-}
 
 nu_result_t nu_module_load(nu_module_t *module, const char *module_name)
 {
@@ -96,7 +62,6 @@ nu_result_t nu_module_unload(const nu_module_t *module)
 
     return NU_SUCCESS;
 }
-
 nu_result_t nu_module_load_function(const nu_module_t *module, const char *function_name, nu_pfn_t *function)
 {
 #if defined(NU_PLATFORM_WINDOWS)
@@ -111,22 +76,6 @@ nu_result_t nu_module_load_function(const nu_module_t *module, const char *funct
         nu_warning(NU_MODULE_LOG_NAME"Failed to get function named '%s'.\n", function_name);
         *function = NULL;
         return NU_FAILURE;
-    }
-
-    return NU_SUCCESS;
-}
-nu_result_t nu_module_load_interface(const nu_module_t *module, const char *interface_name, nu_pfn_t *interface_functions)
-{
-    const char **function_names;
-    uint32_t function_name_count;
-    if (nu_module_get_interface_required_functions(module, interface_name, &function_names, &function_name_count) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-
-    for (uint32_t i = 0; i < function_name_count; i++) {
-        if (nu_module_load_function(module, function_names[i], &interface_functions[i]) != NU_SUCCESS) {
-            return NU_FAILURE;
-        }
     }
 
     return NU_SUCCESS;

@@ -1,9 +1,14 @@
 #include "window.h"
 
-#include "interface.h"
 #include "../callback.h"
 #include "../logger.h"
 #include "../../vulkan/module/interface.h"
+
+static const uint32_t interface_count = 2;
+static const char *interfaces[] = {
+    NU_WINDOW_INTERFACE_NAME,
+    NUGLFW_WINDOW_INTERFACE_NAME
+};
 
 static GLFWwindow *_window;
 
@@ -11,33 +16,27 @@ nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
     info->id = NUGLFW_MODULE_ID;
     info->type = NU_MODULE_TYPE_WINDOW;
+    info->interface_count = interface_count;
+    info->interfaces = interfaces;
+
     return NU_SUCCESS;
 }
-nu_result_t nu_module_get_available_interface(const char ***interfaces, uint32_t *count)
-{
-    static const uint32_t available_interface_count = 2;
-    static const char *available_interfaces[] = {
-        NU_WINDOW_INTERFACE,
-        NUGLFW_WINDOW_INTERFACE
-    };
 
-    *count = available_interface_count;
-    *interfaces = available_interfaces;
+nu_result_t nu_window_interface_loader(nu_window_interface_t *interface)
+{
+    interface->initialize = nu_window_initialize;
+    interface->terminate  = nu_window_terminate;
+    interface->update     = nu_window_update;
+    interface->get_size   = nu_window_get_size;
+
     return NU_SUCCESS;
 }
-nu_result_t nu_module_get_interface_required_functions(
-    const char *interface_name,
-    const char ***functions,
-    uint32_t *count
-)
+nu_result_t nuglfw_window_interface_loader(nuglfw_window_interface_t *interface)
 {
-    if (strcmp(interface_name, NU_WINDOW_INTERFACE) == 0) {
-        return nu_window_interface_get_required_functions(functions, count);
-    } else if (strcmp(interface_name, NUGLFW_WINDOW_INTERFACE) == 0) {
-        return nuglfw_window_interface_get_required_functions(functions, count);
-    }
+    interface->create_window_surface            = nuglfw_create_window_surface;
+    interface->get_required_instance_extensions = nuglfw_get_required_instance_extensions;
 
-    return NU_FAILURE;
+    return NU_SUCCESS;
 }
 
 nu_result_t nu_window_initialize(void)
