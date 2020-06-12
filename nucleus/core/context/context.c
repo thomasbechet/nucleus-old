@@ -18,9 +18,16 @@ static nu_result_t nu_context_initialize(const nu_config_t *config)
     _context.should_stop = false;
     _context.config = *config;
 
+    /* load task system */
+    result = nu_system_task_load();
+    if (result != NU_SUCCESS) {
+        return result;
+    }
+
     /* load window system */
     result = nu_system_window_load(config->window_api);
     if (result != NU_SUCCESS) {
+        nu_system_task_unload();
         return result;
     }
 
@@ -28,6 +35,7 @@ static nu_result_t nu_context_initialize(const nu_config_t *config)
     result = nu_system_renderer_load(config->renderer_api);
     if (result != NU_SUCCESS) {
         nu_system_window_unload();
+        nu_system_task_unload();
         return result;
     }
 
@@ -37,6 +45,7 @@ static nu_result_t nu_context_terminate(void)
 {
     nu_system_renderer_unload();
     nu_system_window_unload();
+    nu_system_task_unload();
 
     return NU_SUCCESS;
 }
