@@ -1,5 +1,6 @@
 #include "renderer.h"
 
+#include "../module/interface.h"
 #include "../../vulkan/module/interface.h"
 
 #define NU_RENDERER_LOG_NAME "[RENDERER] "

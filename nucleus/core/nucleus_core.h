@@ -6,6 +6,7 @@
 #include "module/module.h"
 #include "system/renderer.h"
 #include "system/window.h"
+#include "system/task.h"
 #include "context/context.h"
 
 #endif

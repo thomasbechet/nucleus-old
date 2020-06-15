@@ -2,7 +2,6 @@
 #define NU_SYSTEM_WINDOW_H
 
 #include "../module/module.h"
-#include "../module/interface.h"
 
 typedef enum {
     NU_WINDOW_API_NONE = 0,

@@ -2,7 +2,6 @@
 #define NU_SYSTEM_RENDERER_H
 
 #include "../module/module.h"
-#include "../module/interface.h"
 
 typedef enum {
     NU_RENDERER_API_NONE   = 0,

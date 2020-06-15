@@ -1,5 +1,6 @@
 #include "window.h"
 
+#include "../module/interface.h"
 #include "../../glfw/module/interface.h"
 
 #define NU_WINDOW_LOG_NAME "[WINDOW] "

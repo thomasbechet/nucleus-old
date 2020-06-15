@@ -1,5 +1,9 @@
 #include "context.h"
 
+#include "../system/task.h"
+#include "../system/window.h"
+#include "../system/renderer.h"
+
 #define NU_CONTEXT_LOG_NAME "[CONTEXT] "
 
 typedef struct {
@@ -49,6 +53,7 @@ static nu_result_t nu_context_terminate(void)
 
     return NU_SUCCESS;
 }
+
 static nu_result_t nu_context_run(void)
 {
     while (!_context.should_stop) {

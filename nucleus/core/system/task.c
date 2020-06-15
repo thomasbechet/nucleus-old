@@ -1,6 +1,7 @@
 #include "task.h"
 
 #include "../module/interface.h"
+#include "../../task/module/interface.h"
 
 #define NU_TASK_LOG_NAME "[TASK] "
 
@@ -19,7 +20,7 @@ nu_result_t nu_system_task_load(void)
     memset(&_system, 0, sizeof(nu_system_task_t));
 
     /* load task module */
-    result = nu_module_load(&_system.module, "todo");
+    result = nu_module_load(&_system.module, NUTK_MODULE_NAME);
     if (result != NU_SUCCESS) {
         return result;
     }
@@ -67,25 +68,24 @@ nu_module_t *nu_system_task_get_module(void)
 
 nu_result_t nu_task_create(nu_task_t *task)
 {
-    return _system.interface.create_task(task);
+    return _system.interface.create(task);
 }
-nu_result_t nu_task_add_job(nu_task_t task, nu_job_t job)
+nu_result_t nu_task_perform(nu_task_t task, nu_job_t *jobs, uint32_t count)
 {
-    return _system.interface.add_job(task, job);
+    return _system.interface.perform(task, jobs, count);
 }
-nu_result_t nu_task_add_jobs(nu_task_t task, nu_job_t *jobs, uint32_t count)
+nu_result_t nu_task_perform_parallel(nu_task_t task, nu_job_t job, uint32_t count)
 {
-    return _system.interface.add_jobs(task, jobs, count);
-}
-nu_result_t nu_task_perform(nu_task_t task)
-{
-    return _system.interface.perform(task);
+    nu_result_t result;
+    result = NU_SUCCESS;
+
+    for (uint32_t i = 0; i < count; i++) {
+        result = _system.interface.perform(task, &job, 1);
+    }
+
+    return result;
 }
 nu_result_t nu_task_wait(nu_task_t task)
 {
     return _system.interface.wait(task);
-}
-bool nu_task_is_completed(nu_task_t task)
-{
-    return _system.interface.is_completed(task);
 }

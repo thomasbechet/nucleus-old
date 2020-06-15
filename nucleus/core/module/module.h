@@ -4,6 +4,7 @@
 #include "../common/common.h"
 
 typedef enum {
+    NU_MODULE_TYPE_TASK,
     NU_MODULE_TYPE_WINDOW,
     NU_MODULE_TYPE_RENDERER,
     NU_MODULE_TYPE_PLUGIN
