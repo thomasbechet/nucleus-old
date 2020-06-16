@@ -10,7 +10,7 @@ typedef enum {
 } nu_renderer_api_t;
 
 /* private system functions */
-nu_result_t nu_system_renderer_load(nu_renderer_api_t api);
+nu_result_t nu_system_renderer_load(void);
 nu_result_t nu_system_renderer_unload(void);
 nu_result_t nu_system_renderer_render(void);
 

@@ -9,8 +9,6 @@ typedef struct {
 } nu_init_info_t;
 
 NU_API nu_result_t nu_init(const nu_init_info_t *info);
-
 NU_API nu_result_t nu_context_request_stop(void);
-NU_API nu_config_t nu_context_get_config(void);
 
 #endif

@@ -2,7 +2,6 @@
 #define NU_COMMON_H
 
 #include <stdbool.h>
-#include <string.h>
 
 #include "macro.h"
 #include "logger.h"

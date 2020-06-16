@@ -1,4 +1,3 @@
-- Macro MATCH strcmp
 - Ini file
 
 - task system = compléter + trouver un cas d'application concret et refaire les tests (enlever sleep 1)

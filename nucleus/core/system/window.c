@@ -1,6 +1,7 @@
 #include "window.h"
 
 #include "../module/interface.h"
+#include "../context/config.h"
 #include "../../glfw/module/interface.h"
 
 #define NU_WINDOW_LOG_NAME "[WINDOW] "
@@ -17,10 +18,12 @@ typedef struct {
 
 static nu_system_window_t _system;
 
-nu_result_t nu_system_window_load(nu_window_api_t api)
+nu_result_t nu_system_window_load(void)
 {
     nu_result_t result;
     result = NU_SUCCESS;
+
+    nu_window_api_t api = nu_config_get().window_api;
 
     /* load module */
     result = nu_module_load(&_system.module, nu_window_api_names[api]);

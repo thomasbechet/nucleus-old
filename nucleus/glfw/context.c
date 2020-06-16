@@ -19,7 +19,7 @@ nu_result_t nuglfw_window_initialize(void)
         return NU_FAILURE;
     }
 
-    if (nu_context_get_config().renderer_api == NU_RENDERER_API_VULKAN) {
+    if (nu_config_get().renderer_api == NU_RENDERER_API_VULKAN) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 

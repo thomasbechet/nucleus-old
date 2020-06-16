@@ -1,6 +1,7 @@
 #include "renderer.h"
 
 #include "../module/interface.h"
+#include "../context/config.h"
 #include "../../vulkan/module/interface.h"
 
 #define NU_RENDERER_LOG_NAME "[RENDERER] "
@@ -18,12 +19,13 @@ typedef struct {
 
 static nu_system_renderer_t _system;
 
-nu_result_t nu_system_renderer_load(nu_renderer_api_t api)
+nu_result_t nu_system_renderer_load(void)
 {
     nu_result_t result;
     result = NU_SUCCESS;
 
     memset(&_system, 0, sizeof(nu_system_renderer_t));
+    nu_renderer_api_t api = nu_config_get().renderer_api;
 
     /* load renderer module */
     result = nu_module_load(&_system.module, nu_renderer_api_names[api]);

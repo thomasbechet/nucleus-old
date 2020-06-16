@@ -9,7 +9,7 @@ typedef enum {
 } nu_window_api_t;
 
 /* private system functions */
-nu_result_t nu_system_window_load(nu_window_api_t api);
+nu_result_t nu_system_window_load(void);
 nu_result_t nu_system_window_unload(void);
 nu_result_t nu_system_window_update(void);
 
