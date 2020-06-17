@@ -49,7 +49,7 @@ nu_result_t nuvk_debug_messenger_create(void)
     create_info.pfnUserCallback = debug_message_callback;
 
     if (create_debug_utils_messenger(nuvk_instance_get_handle(), &create_info, NULL, &_data.debug_messenger) != VK_SUCCESS) {
-        nu_warning(NUVK_LOGGER_VULKAN"Failed to create debug utils messsenger.\n");
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create debug utils messsenger.\n");
         return NU_FAILURE;
     }
 

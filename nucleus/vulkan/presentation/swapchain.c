@@ -133,7 +133,7 @@ static nu_result_t nuvk_create_images(void)
         create_info.subresourceRange.layerCount = 1;
 
         if (vkCreateImageView(nuvk_device_get_handle(), &create_info, NULL, &_data.image_views[i]) != VK_SUCCESS) {
-            nu_warning(NUVK_LOGGER_VULKAN"Failed to create image views.\n");
+            nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create image views.\n");
         }
     }
 
@@ -211,7 +211,7 @@ nu_result_t nuvk_swapchain_create(void)
     nuvk_swapchain_support_details_destroy(&details);
 
     if (vkCreateSwapchainKHR(nuvk_device_get_handle(), &create_info, NULL, &_data.swapchain) != VK_SUCCESS) {
-        nu_warning(NUVK_LOGGER_VULKAN"Failed to create swapchain.\n");
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create swapchain.\n");
         return NU_FAILURE;
     }
 
@@ -243,4 +243,12 @@ bool nuvk_swapchain_is_physical_device_suitable(VkPhysicalDevice physical_device
     nuvk_swapchain_support_details_destroy(&details);
 
     return suitable;
+}
+VkExtent2D nuvk_swapchain_get_extent(void)
+{
+    return _data.extent;
+}
+VkFormat nuvk_swapchain_get_format(void)
+{
+    return _data.format;
 }

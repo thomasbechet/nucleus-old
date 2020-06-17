@@ -2,8 +2,9 @@
 
 #include "../renderer.h"
 #include "../common/logger.h"
+#include "../presentation/device.h"
 
-static nu_result_t read_binary_file(const char *path, char **buffer, uint32_t *size)
+static nu_result_t read_shader_file(const char *path, char **buffer, uint32_t *size)
 {
     FILE *file;
     
@@ -15,17 +16,49 @@ static nu_result_t read_binary_file(const char *path, char **buffer, uint32_t *s
     *buffer = (char*)nu_malloc(sizeof(char) * (*size));
 
     if (*buffer == NULL) {
-        nu_warning(NUVK_LOGGER_VULKAN" Failed to load file %s.\n", path);
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to load file %s.\n", path);
         return NU_FAILURE;
     }
 
     if (fread(*buffer, sizeof(char), *size, file) != (*size)) {
-        nu_warning(NUVK_LOGGER_VULKAN" Failed to read file %s.\n", path);
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to read file %s.\n", path);
         nu_free(*buffer);
         return NU_FAILURE;
     }
 
     fclose(file);
+
+    return NU_SUCCESS;
+}
+
+nu_result_t nuvk_shader_module_create(VkShaderModule *shader_module, const char *file)
+{
+    char *code;
+    uint32_t size;
+
+    if (read_shader_file(file, &code, &size) != NU_SUCCESS) {
+        return NU_FAILURE;
+    }
+
+    VkShaderModuleCreateInfo create_info;
+    memset(&create_info, 0, sizeof(VkShaderModuleCreateInfo));
+    create_info.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    create_info.codeSize = size;
+    create_info.pCode = (uint32_t*)code;
+
+    if (vkCreateShaderModule(nuvk_device_get_handle(), &create_info, NULL, shader_module) != VK_SUCCESS) {
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create shader module.\n");
+        nu_free(code);
+        return NU_FAILURE;
+    }
+
+    nu_free(code);
+
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_shader_module_destroy(VkShaderModule shader_module)
+{
+    vkDestroyShaderModule(nuvk_device_get_handle(), shader_module, NULL);
 
     return NU_SUCCESS;
 }

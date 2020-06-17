@@ -31,7 +31,7 @@ static bool nuvk_check_instance_extensions_support(
             }
         }
         if (!all_extension_found) {
-            nu_warning(NUVK_LOGGER_VULKAN"Instance extension '%s' not supported.\n", extensions[i]);
+            nu_warning(NUVK_VULKAN_LOG_NAME"Instance extension '%s' not supported.\n", extensions[i]);
         }
     }
 
@@ -60,7 +60,7 @@ static bool nuvk_check_instance_layers_support(
             }
         }
         if (!all_layer_found) {
-            nu_warning(NUVK_LOGGER_VULKAN"Instance layer '%s' not supported.\n", layers[i]);
+            nu_warning(NUVK_VULKAN_LOG_NAME"Instance layer '%s' not supported.\n", layers[i]);
         }
     }
 
@@ -156,7 +156,7 @@ nu_result_t nuvk_instance_create(void)
     VkResult result;
     result = vkCreateInstance(&create_info, NULL, &_data.instance);
     if (result != VK_SUCCESS) {
-        nu_warning(NUVK_LOGGER_VULKAN"Failed to create instance.\n");
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create instance.\n");
         nu_free(instance_extensions);
         nu_free(instance_layers);
         return NU_FAILURE;

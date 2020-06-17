@@ -120,7 +120,7 @@ nu_result_t nuvk_physical_device_pick(void)
     device_count = 0;
     vkEnumeratePhysicalDevices(nuvk_instance_get_handle(), &device_count, NULL);
     if (device_count == 0) {
-        nu_warning(NUVK_LOGGER_VULKAN"Failed to find physical device with vulkan support.\n");
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to find physical device with vulkan support.\n");
         return NU_FAILURE;
     }
 
@@ -155,7 +155,7 @@ nu_result_t nuvk_physical_device_pick(void)
     }
     
     if (_data.physical_device == VK_NULL_HANDLE) {
-        nu_warning(NUVK_LOGGER_VULKAN"Failed to find suitable physical device.\n");
+        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to find suitable physical device.\n");
         nu_free(physical_devices);
         return NU_FAILURE;
     }
