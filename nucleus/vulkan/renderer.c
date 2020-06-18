@@ -10,11 +10,23 @@
 #include "presentation/swapchain.h"
 #include "pipeline/render_pass.h"
 #include "pipeline/graphics_pipeline.h"
+#include "render/framebuffer.h"
+#include "render/command.h"
+#include "render/render.h"
+
+typedef struct {
+    uint32_t current_frame;
+} nuvk_renderer_data_t;
+
+static nuvk_renderer_data_t _data;
 
 nu_result_t nuvk_renderer_initialize(void)
 {
     nu_result_t result;
     result = NU_SUCCESS;
+
+    /* data initialization */
+    _data.current_frame = 0;
 
     /* load glfw interface */
     nu_info(NUVK_VULKAN_LOG_NAME"Loading glfw interface...\n");
@@ -63,10 +75,42 @@ nu_result_t nuvk_renderer_initialize(void)
     result = nuvk_graphics_pipeline_create();
     if (result != NU_SUCCESS) return result;
 
+    /* create framebuffers */
+    nu_info(NUVK_VULKAN_LOG_NAME"Creating framebuffers...\n");
+    result = nuvk_framebuffer_create();
+    if (result != NU_SUCCESS) return result;
+
+    /* create command pool */
+    nu_info(NUVK_VULKAN_LOG_NAME"Creating command pool...\n");
+    result = nuvk_command_pool_create();
+    if (result != NU_SUCCESS) return result;
+
+    /* create command buffers */
+    nu_info(NUVK_VULKAN_LOG_NAME"Creating command buffers...\n");
+    result = nuvk_command_buffers_create();
+    if (result != NU_SUCCESS) return result;
+
+    /* create render */
+    nu_info(NUVK_VULKAN_LOG_NAME"Creating render...\n");
+    result = nuvk_render_create();
+    if (result != NU_SUCCESS) return result;
+
     return result;
 }
 nu_result_t nuvk_renderer_terminate(void)
 {
+    /* destroy render */
+    nuvk_render_destroy();
+
+    /* destroy command buffers */
+    nuvk_command_buffers_destroy();
+
+    /* destroy command pool */
+    nuvk_command_pool_destroy();
+
+    /* destroy framebuffers */
+    nuvk_framebuffer_destroy();
+
     /* destroy graphics pipeline */
     nuvk_graphics_pipeline_destroy();
 
@@ -94,5 +138,7 @@ nu_result_t nuvk_renderer_terminate(void)
 }
 nu_result_t nuvk_renderer_render(void)
 {
+    nuvk_render_draw();
+
     return NU_SUCCESS;
 }

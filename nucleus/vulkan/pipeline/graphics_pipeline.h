@@ -6,4 +6,6 @@
 nu_result_t nuvk_graphics_pipeline_create(void);
 nu_result_t nuvk_graphics_pipeline_destroy(void);
 
+VkPipeline nuvk_graphics_pipeline_get_handle(void);
+
 #endif

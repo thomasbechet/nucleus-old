@@ -244,6 +244,11 @@ bool nuvk_swapchain_is_physical_device_suitable(VkPhysicalDevice physical_device
 
     return suitable;
 }
+
+VkSwapchainKHR nuvk_swapchain_get_handle(void)
+{
+    return _data.swapchain;
+}
 VkExtent2D nuvk_swapchain_get_extent(void)
 {
     return _data.extent;
@@ -251,4 +256,9 @@ VkExtent2D nuvk_swapchain_get_extent(void)
 VkFormat nuvk_swapchain_get_format(void)
 {
     return _data.format;
+}
+const VkImageView *nuvk_swapchain_get_image_views(uint32_t *count)
+{
+    *count = _data.image_count;
+    return _data.image_views;
 }

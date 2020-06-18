@@ -195,3 +195,8 @@ nu_result_t nuvk_graphics_pipeline_destroy(void)
 
     return NU_SUCCESS;
 }
+
+VkPipeline nuvk_graphics_pipeline_get_handle(void)
+{
+    return _data.pipeline;
+}
