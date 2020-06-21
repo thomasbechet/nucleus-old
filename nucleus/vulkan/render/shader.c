@@ -1,8 +1,7 @@
 #include <stdio.h>
 
-#include "../renderer.h"
 #include "../common/logger.h"
-#include "../presentation/device.h"
+#include "../context/context.h"
 
 static nu_result_t read_shader_file(const char *path, char **buffer, uint32_t *size)
 {
@@ -33,6 +32,8 @@ static nu_result_t read_shader_file(const char *path, char **buffer, uint32_t *s
 
 nu_result_t nuvk_shader_module_create(VkShaderModule *shader_module, const char *file)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     char *code;
     uint32_t size;
 
@@ -46,7 +47,7 @@ nu_result_t nuvk_shader_module_create(VkShaderModule *shader_module, const char 
     create_info.codeSize = size;
     create_info.pCode = (uint32_t*)code;
 
-    if (vkCreateShaderModule(nuvk_device_get_handle(), &create_info, NULL, shader_module) != VK_SUCCESS) {
+    if (vkCreateShaderModule(ctx->device, &create_info, NULL, shader_module) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create shader module.\n");
         nu_free(code);
         return NU_FAILURE;
@@ -58,7 +59,9 @@ nu_result_t nuvk_shader_module_create(VkShaderModule *shader_module, const char 
 }
 nu_result_t nuvk_shader_module_destroy(VkShaderModule shader_module)
 {
-    vkDestroyShaderModule(nuvk_device_get_handle(), shader_module, NULL);
+    const nuvk_context_t *ctx = nuvk_context_get();
+
+    vkDestroyShaderModule(ctx->device, shader_module, NULL);
 
     return NU_SUCCESS;
 }

@@ -1,8 +1,7 @@
 #include "render.h"
 
 #include "../common/logger.h"
-#include "../presentation/device.h"
-#include "../presentation/swapchain.h"
+#include "../context/context.h"
 #include "command.h"
 #include "synchronization.h"
 
@@ -29,6 +28,8 @@ static nuvk_render_data_t _data;
 
 static void create_synchronization_objects(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* frame synchronization objects */
     for (uint32_t i = 0; i < NUVK_FRAME_RESOURCES_COUNT; i++) {
         nuvk_semaphore_create(&_data.frame_sync[i].image_available);
@@ -37,7 +38,7 @@ static void create_synchronization_objects(void)
     }
 
     /* image fences */
-    nuvk_swapchain_get_image_views(&_data.image_fence_count);
+    _data.image_fence_count = ctx->swapchain.image_count;
     _data.image_fences = (VkFence*)nu_malloc(sizeof(VkFence) * _data.image_fence_count);
     for (uint32_t i = 0; i < _data.image_fence_count; i++) {
         _data.image_fences[i] = VK_NULL_HANDLE;
@@ -68,8 +69,10 @@ nu_result_t nuvk_render_create(void)
 }
 nu_result_t nuvk_render_destroy(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* wait device idle */
-    vkDeviceWaitIdle(nuvk_device_get_handle());
+    vkDeviceWaitIdle(ctx->device);
 
     /* destroy synchronization objects */
     destroy_synchronization_objects();
@@ -79,17 +82,19 @@ nu_result_t nuvk_render_destroy(void)
 
 nu_result_t nuvk_render_draw(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* wait fence */
-    vkWaitForFences(nuvk_device_get_handle(), 1, &_data.frame_sync[_data.current_frame].fence, VK_TRUE, UINT64_MAX);
-    vkResetFences(nuvk_device_get_handle(), 1, &_data.frame_sync[_data.current_frame].fence);
+    vkWaitForFences(ctx->device, 1, &_data.frame_sync[_data.current_frame].fence, VK_TRUE, UINT64_MAX);
+    vkResetFences(ctx->device, 1, &_data.frame_sync[_data.current_frame].fence);
 
     /* acquire next image index */
     uint32_t image_index;
-    vkAcquireNextImageKHR(nuvk_device_get_handle(), nuvk_swapchain_get_handle(), UINT64_MAX,
+    vkAcquireNextImageKHR(ctx->device, ctx->swapchain.handle, UINT64_MAX,
         _data.frame_sync[_data.current_frame].image_available, VK_NULL_HANDLE, &image_index);
 
     if (_data.image_fences[image_index] != VK_NULL_HANDLE) {
-        vkWaitForFences(nuvk_device_get_handle(), 1, &_data.image_fences[image_index], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(ctx->device, 1, &_data.image_fences[image_index], VK_TRUE, UINT64_MAX);
     }
 
     _data.image_fences[image_index] = _data.frame_sync[_data.current_frame].fence;
@@ -117,8 +122,8 @@ nu_result_t nuvk_render_draw(void)
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores = signal_semaphore;
 
-    vkResetFences(nuvk_device_get_handle(), 1, &_data.frame_sync[_data.current_frame].fence);
-    if (vkQueueSubmit(nuvk_device_get_queues().graphics,
+    vkResetFences(ctx->device, 1, &_data.frame_sync[_data.current_frame].fence);
+    if (vkQueueSubmit(ctx->queues.graphics,
         1, &submit_info, _data.frame_sync[_data.current_frame].fence) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to submit draw command buffer.\n");
     }
@@ -130,13 +135,13 @@ nu_result_t nuvk_render_draw(void)
     present_info.waitSemaphoreCount = 1;
     present_info.pWaitSemaphores = signal_semaphore;
 
-    VkSwapchainKHR swapchains[] = {nuvk_swapchain_get_handle()};
+    VkSwapchainKHR swapchains[] = {ctx->swapchain.handle};
     present_info.swapchainCount = 1;
     present_info.pSwapchains = swapchains;
     present_info.pImageIndices = &image_index;
 
     /* present image */
-    vkQueuePresentKHR(nuvk_device_get_queues().presentation, &present_info);
+    vkQueuePresentKHR(ctx->queues.presentation, &present_info);
 
     /* advance next frame */
     _data.current_frame = (_data.current_frame + 1) % NUVK_FRAME_RESOURCES_COUNT;

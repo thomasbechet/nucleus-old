@@ -1,8 +1,7 @@
 #include "graphics_pipeline.h"
 
 #include "../common/logger.h"
-#include "../presentation/swapchain.h"
-#include "../presentation/device.h"
+#include "../context/context.h"
 #include "shader.h"
 #include "render_pass.h"
 
@@ -17,6 +16,8 @@ static nuvk_graphics_pipeline_data_t _data;
 
 nu_result_t nuvk_graphics_pipeline_create(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     nu_result_t result;
     result = NU_SUCCESS;
 
@@ -67,7 +68,7 @@ nu_result_t nuvk_graphics_pipeline_create(void)
     memset(&scissor, 0, sizeof(VkRect2D));
     viewport.x = 0.0f;
     viewport.y = 0.0f;
-    swapchain_extent = nuvk_swapchain_get_extent();
+    swapchain_extent = ctx->swapchain.extent;
     viewport.width = (float)swapchain_extent.width;
     viewport.height = (float)swapchain_extent.height;
     viewport.minDepth = 0.0f;
@@ -144,7 +145,7 @@ nu_result_t nuvk_graphics_pipeline_create(void)
     memset(&pipeline_layout_info, 0, sizeof(VkPipelineLayoutCreateInfo));
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     
-    if (vkCreatePipelineLayout(nuvk_device_get_handle(), &pipeline_layout_info, NULL, &_data.pipeline_layout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(ctx->device, &pipeline_layout_info, NULL, &_data.pipeline_layout) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create pipeline layout.\n");
         return NU_FAILURE;
     }
@@ -174,7 +175,7 @@ nu_result_t nuvk_graphics_pipeline_create(void)
     pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
     pipeline_info.basePipelineIndex = -1;
 
-    if (vkCreateGraphicsPipelines(nuvk_device_get_handle(), VK_NULL_HANDLE, 1, &pipeline_info, NULL, &_data.pipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(ctx->device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &_data.pipeline) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create graphics pipeline.\n");
         return NU_SUCCESS;
     }
@@ -183,11 +184,13 @@ nu_result_t nuvk_graphics_pipeline_create(void)
 }
 nu_result_t nuvk_graphics_pipeline_destroy(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* destroy pipeline */
-    vkDestroyPipeline(nuvk_device_get_handle(), _data.pipeline, NULL);
+    vkDestroyPipeline(ctx->device, _data.pipeline, NULL);
 
     /* destroy pipeline layout */
-    vkDestroyPipelineLayout(nuvk_device_get_handle(), _data.pipeline_layout, NULL);
+    vkDestroyPipelineLayout(ctx->device, _data.pipeline_layout, NULL);
 
     /* destroy shader modules */
     nuvk_shader_module_destroy(_data.vert_shader_module);

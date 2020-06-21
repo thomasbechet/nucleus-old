@@ -1,13 +1,6 @@
 #include "debug_messenger.h"
 
 #include "../common/logger.h"
-#include "instance.h"
-
-typedef struct {
-    VkDebugUtilsMessengerEXT debug_messenger;
-} nuvk_debug_messenger_data_t;
-
-static nuvk_debug_messenger_data_t _data;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL debug_message_callback(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -37,7 +30,7 @@ static void destroy_debug_utils_messenger(VkInstance instance, VkDebugUtilsMesse
     }
 }
 
-nu_result_t nuvk_debug_messenger_create(void)
+nu_result_t nuvk_debug_messenger_create(VkDebugUtilsMessengerEXT *debug_messenger, VkInstance instance)
 {
     VkDebugUtilsMessengerCreateInfoEXT create_info;
     memset(&create_info, 0, sizeof(VkDebugUtilsMessengerCreateInfoEXT));
@@ -48,17 +41,17 @@ nu_result_t nuvk_debug_messenger_create(void)
         VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     create_info.pfnUserCallback = debug_message_callback;
 
-    if (create_debug_utils_messenger(nuvk_instance_get_handle(), &create_info, NULL, &_data.debug_messenger) != VK_SUCCESS) {
+    if (create_debug_utils_messenger(instance, &create_info, NULL, debug_messenger) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create debug utils messsenger.\n");
         return NU_FAILURE;
     }
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_debug_messenger_destroy(void)
+nu_result_t nuvk_debug_messenger_destroy(VkDebugUtilsMessengerEXT debug_messenger, VkInstance instance)
 {
-    if (_data.debug_messenger != NULL) {
-        destroy_debug_utils_messenger(nuvk_instance_get_handle(), _data.debug_messenger, NULL);
+    if (debug_messenger != NULL) {
+        destroy_debug_utils_messenger(instance, debug_messenger, NULL);
     }
     return NU_SUCCESS;
 }

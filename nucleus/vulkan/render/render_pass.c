@@ -1,8 +1,7 @@
 #include "render_pass.h"
 
 #include "../common/logger.h"
-#include "../presentation/swapchain.h"
-#include "../presentation/device.h"
+#include "../context/context.h"
 
 typedef struct {
     VkRenderPass render_pass;
@@ -12,10 +11,12 @@ static nuvk_render_pass_data_t _data;
 
 nu_result_t nuvk_render_pass_create(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* color attachment */
     VkAttachmentDescription color_attachment;
     memset(&color_attachment, 0, sizeof(VkAttachmentDescription));
-    color_attachment.format = nuvk_swapchain_get_format();
+    color_attachment.format = ctx->swapchain.format;
     color_attachment.samples = VK_SAMPLE_COUNT_1_BIT;
     color_attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     color_attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -58,7 +59,7 @@ nu_result_t nuvk_render_pass_create(void)
     render_pass_info.dependencyCount = 1;
     render_pass_info.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(nuvk_device_get_handle(), &render_pass_info, NULL, &_data.render_pass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(ctx->device, &render_pass_info, NULL, &_data.render_pass) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create render pass.\n");
         return NU_FAILURE;
     }
@@ -67,7 +68,9 @@ nu_result_t nuvk_render_pass_create(void)
 }
 nu_result_t nuvk_render_pass_destroy(void)
 {
-    vkDestroyRenderPass(nuvk_device_get_handle(), _data.render_pass, NULL);
+    const nuvk_context_t *ctx = nuvk_context_get();
+
+    vkDestroyRenderPass(ctx->device, _data.render_pass, NULL);
 
     return NU_SUCCESS;
 }

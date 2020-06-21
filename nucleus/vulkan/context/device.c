@@ -3,21 +3,14 @@
 #include "../common/logger.h"
 #include "physical_device.h"
 
-typedef struct {
-    VkDevice device;
-    nuvk_queues_t queues;
-} nuvk_device_data_t;
-
-static nuvk_device_data_t _data;
-
-nu_result_t nuvk_device_create(void)
+nu_result_t nuvk_device_create(VkDevice *device, nuvk_queues_t *queues, VkSurfaceKHR surface, VkPhysicalDevice physical_device)
 {
     nu_result_t result;
     result = NU_SUCCESS;
 
     /* get queue family indices */
     nuvk_queue_family_indices_t indices;
-    indices = nuvk_physical_device_get_queue_family_indices();
+    nuvk_physical_device_get_queue_family_indices(&indices, surface, physical_device);
 
     /* queues info */
     float queue_priority = 1.0f;
@@ -44,7 +37,7 @@ nu_result_t nuvk_device_create(void)
     required_extensions = nuvk_physical_device_get_required_extensions(&required_extension_count);
 
     VkPhysicalDeviceFeatures features;
-    features = nuvk_physical_device_get_features();
+    nuvk_physical_device_get_features(&features, physical_device);
 
     VkDeviceCreateInfo device_create_info;
     memset(&device_create_info, 0, sizeof(VkDeviceCreateInfo));
@@ -55,32 +48,23 @@ nu_result_t nuvk_device_create(void)
     device_create_info.enabledExtensionCount = required_extension_count;
     device_create_info.ppEnabledExtensionNames = required_extensions;
 
-    if (vkCreateDevice(nuvk_physical_device_get_handle(), &device_create_info, NULL, &_data.device) != VK_SUCCESS) {
+    if (vkCreateDevice(physical_device, &device_create_info, NULL, device) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create logical device.\n");
         nu_free(queue_create_infos);
         return NU_FAILURE;
     }
 
-    /* get queues handle */
-    vkGetDeviceQueue(_data.device, indices.graphics_family, 0, &_data.queues.graphics);
-    vkGetDeviceQueue(_data.device, indices.presentation_family, 0, &_data.queues.presentation);
-
     nu_free(queue_create_infos);
+
+    /* recover queues */
+    vkGetDeviceQueue(*device, indices.graphics_family, 0, &queues->graphics);
+    vkGetDeviceQueue(*device, indices.presentation_family, 0, &queues->presentation);
 
     return result;
 }
-nu_result_t nuvk_device_destroy(void)
+nu_result_t nuvk_device_destroy(VkDevice device)
 {
-    vkDestroyDevice(_data.device, NULL);
+    vkDestroyDevice(device, NULL);
 
     return NU_SUCCESS;
-}
-
-VkDevice nuvk_device_get_handle(void)
-{
-    return _data.device;
-}
-nuvk_queues_t nuvk_device_get_queues(void)
-{
-    return _data.queues;
 }

@@ -13,21 +13,7 @@ typedef struct {
     VkPresentModeKHR *present_modes;
 } nuvk_swapchain_support_details_t;
 
-typedef struct {
-    VkFormat format;
-    VkExtent2D extent;
-    VkPresentModeKHR present_mode;
-
-    uint32_t image_count;
-    VkImage *images;
-    VkImageView *image_views;
-
-    VkSwapchainKHR swapchain;
-} nuvk_swapchain_data_t;
-
-static nuvk_swapchain_data_t _data;
-
-static nu_result_t nuvk_swapchain_support_details_create(
+static nu_result_t swapchain_support_details_create(
     nuvk_swapchain_support_details_t *details,
     VkPhysicalDevice physical_device,
     VkSurfaceKHR surface
@@ -52,7 +38,7 @@ static nu_result_t nuvk_swapchain_support_details_create(
 
     return NU_SUCCESS;
 }
-static nu_result_t nuvk_swapchain_support_details_destroy(nuvk_swapchain_support_details_t *details)
+static nu_result_t swapchain_support_details_destroy(nuvk_swapchain_support_details_t *details)
 {
     /* free formats */
     if (details->format_count > 0) {
@@ -69,7 +55,7 @@ static nu_result_t nuvk_swapchain_support_details_destroy(nuvk_swapchain_support
     return NU_SUCCESS;
 }
 
-static VkSurfaceFormatKHR nuvk_choose_swap_surface_format(const nuvk_swapchain_support_details_t *details)
+static VkSurfaceFormatKHR choose_swap_surface_format(const nuvk_swapchain_support_details_t *details)
 {
     for (uint32_t i = 0; i < details->format_count; i++) {
         if (details->formats[i].format == VK_FORMAT_B8G8R8A8_SRGB && details->formats[i].colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR) {
@@ -79,8 +65,10 @@ static VkSurfaceFormatKHR nuvk_choose_swap_surface_format(const nuvk_swapchain_s
 
     return details->formats[0];
 }
-static VkPresentModeKHR nuvk_choose_swap_present_format(const nuvk_swapchain_support_details_t *details)
+static VkPresentModeKHR choose_swap_present_format(const nuvk_swapchain_support_details_t *details)
 {
+    return VK_PRESENT_MODE_FIFO_KHR;
+
     for (uint32_t i = 0; i < details->present_mode_count; i++) {
         if (details->present_modes[i] == VK_PRESENT_MODE_MAILBOX_KHR) {
             return details->present_modes[i];
@@ -89,7 +77,7 @@ static VkPresentModeKHR nuvk_choose_swap_present_format(const nuvk_swapchain_sup
 
     return VK_PRESENT_MODE_FIFO_KHR;
 }
-static VkExtent2D nuvk_choose_swap_extent(const nuvk_swapchain_support_details_t *details)
+static VkExtent2D choose_swap_extent(const nuvk_swapchain_support_details_t *details)
 {
     if (details->capabilities.currentExtent.width != UINT32_MAX) {
         return details->capabilities.currentExtent;
@@ -104,24 +92,24 @@ static VkExtent2D nuvk_choose_swap_extent(const nuvk_swapchain_support_details_t
     }
 }
 
-static nu_result_t nuvk_create_images(void)
+static nu_result_t create_images(nuvk_swapchain_t *swapchain, VkDevice device)
 {
     /* recover images */
-    vkGetSwapchainImagesKHR(nuvk_device_get_handle(), _data.swapchain, 
-        &_data.image_count, NULL);
-    _data.images = (VkImage*)nu_malloc(sizeof(VkImage) * _data.image_count);
-    vkGetSwapchainImagesKHR(nuvk_device_get_handle(), _data.swapchain, 
-        &_data.image_count, _data.images);
+    uint32_t image_count;
+    vkGetSwapchainImagesKHR(device, swapchain->handle, &image_count, NULL);
+    VkImage *images = (VkImage*)nu_malloc(sizeof(VkImage) * image_count);
+    vkGetSwapchainImagesKHR(device, swapchain->handle, &image_count, images);
 
     /* create image views */
-    _data.image_views = (VkImageView*)nu_malloc(sizeof(VkImageView) * _data.image_count);
-    for (uint32_t i = 0; i < _data.image_count; i++) {
+    swapchain->image_count = image_count;
+    swapchain->images = (VkImageView*)nu_malloc(sizeof(VkImageView) * swapchain->image_count);
+    for (uint32_t i = 0; i < swapchain->image_count; i++) {
         VkImageViewCreateInfo create_info;
         memset(&create_info, 0, sizeof(VkImageViewCreateInfo));
         create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        create_info.image = _data.images[i];
+        create_info.image = images[i];
         create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        create_info.format = _data.format;
+        create_info.format = swapchain->format;
         create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
         create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
         create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -132,65 +120,69 @@ static nu_result_t nuvk_create_images(void)
         create_info.subresourceRange.baseArrayLayer = 0;
         create_info.subresourceRange.layerCount = 1;
 
-        if (vkCreateImageView(nuvk_device_get_handle(), &create_info, NULL, &_data.image_views[i]) != VK_SUCCESS) {
+        if (vkCreateImageView(device, &create_info, NULL, &swapchain->images[i]) != VK_SUCCESS) {
             nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create image views.\n");
         }
     }
 
+    nu_free(images);
+
     return NU_SUCCESS;
 }
-static nu_result_t nuvk_destroy_images(void)
+static nu_result_t destroy_images(nuvk_swapchain_t swapchain, VkDevice device)
 {
     /* destroy image views */
-    for (uint32_t i = 0; i < _data.image_count; i++) {
-        vkDestroyImageView(nuvk_device_get_handle(), _data.image_views[i], NULL);
+    for (uint32_t i = 0; i < swapchain.image_count; i++) {
+        vkDestroyImageView(device, swapchain.images[i], NULL);
     }
-    nu_free(_data.image_views);
-
-    /* free images */
-    nu_free(_data.images);
+    nu_free(swapchain.images);
 
     return NU_SUCCESS;
 }
 
-nu_result_t nuvk_swapchain_create(void)
+nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, VkSurfaceKHR surface, VkPhysicalDevice physical_device, VkDevice device)
 {
     nu_result_t result;
     result = NU_SUCCESS;
 
     /* retrieve details infos */
     nuvk_swapchain_support_details_t details;
-    result = nuvk_swapchain_support_details_create(&details, nuvk_physical_device_get_handle(), nuvk_surface_get_handle());
+    result = swapchain_support_details_create(&details, physical_device, surface);
     if (result != NU_SUCCESS) return result;
 
-    VkSurfaceFormatKHR surface_format = nuvk_choose_swap_surface_format(&details);
-    VkPresentModeKHR present_mode = nuvk_choose_swap_present_format(&details);
-    VkExtent2D extent = nuvk_choose_swap_extent(&details);
-
+    /* get format */
+    VkSurfaceFormatKHR surface_format = choose_swap_surface_format(&details);
+    /* get present mode */
+    VkPresentModeKHR present_mode = choose_swap_present_format(&details);
+    /* get extent */
+    VkExtent2D extent = choose_swap_extent(&details);
+    /* get image count */
     uint32_t image_count = details.capabilities.minImageCount + 1;
     uint32_t max_image_count = details.capabilities.maxImageCount;
     if (max_image_count > 0 && image_count > max_image_count) {
         image_count = max_image_count;
     }
 
-    _data.image_count = image_count;
-    _data.format = surface_format.format;
-    _data.extent = extent;
-    _data.present_mode = present_mode;
+    /* save info */
+    swapchain->format = surface_format.format;
+    swapchain->extent = extent;
+    swapchain->present_mode = present_mode;
+    swapchain->image_count = image_count;
 
     /* create swapchain */
     VkSwapchainCreateInfoKHR create_info;
     memset(&create_info, 0, sizeof(VkSwapchainCreateInfoKHR));
     create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    create_info.surface = nuvk_surface_get_handle();
-    create_info.minImageCount = _data.image_count;
-    create_info.imageFormat = _data.format;
+    create_info.surface = surface;
+    create_info.minImageCount = swapchain->image_count;
+    create_info.imageFormat = swapchain->format;
     create_info.imageColorSpace = surface_format.colorSpace;
-    create_info.imageExtent = _data.extent;
+    create_info.imageExtent = swapchain->extent;
     create_info.imageArrayLayers = 1;
     create_info.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    nuvk_queue_family_indices_t indices = nuvk_physical_device_get_queue_family_indices();
+    nuvk_queue_family_indices_t indices;
+    nuvk_physical_device_get_queue_family_indices(&indices, surface, physical_device);
     uint32_t queue_family_indices[] = {indices.graphics_family, indices.presentation_family};
     if (indices.graphics_family != indices.presentation_family) {
         create_info.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
@@ -204,61 +196,36 @@ nu_result_t nuvk_swapchain_create(void)
 
     create_info.preTransform = details.capabilities.currentTransform;
     create_info.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    create_info.presentMode = _data.present_mode;
+    create_info.presentMode = swapchain->present_mode;
     create_info.clipped = VK_TRUE;
     create_info.oldSwapchain = VK_NULL_HANDLE;
 
-    nuvk_swapchain_support_details_destroy(&details);
+    swapchain_support_details_destroy(&details);
 
-    if (vkCreateSwapchainKHR(nuvk_device_get_handle(), &create_info, NULL, &_data.swapchain) != VK_SUCCESS) {
+    if (vkCreateSwapchainKHR(device, &create_info, NULL, &swapchain->handle) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create swapchain.\n");
         return NU_FAILURE;
     }
 
-    _data.format = surface_format.format;
-    _data.extent = extent;
-
-    /* create image */
-    nuvk_create_images();
+    /* create image views */
+    create_images(swapchain, device);
 
     return result;
 }
-nu_result_t nuvk_swapchain_destroy(void)
+nu_result_t nuvk_swapchain_destroy(nuvk_swapchain_t swapchain, VkDevice device)
 {
-    /* destroy image views */
-    nuvk_destroy_images();
-
-    vkDestroySwapchainKHR(nuvk_device_get_handle(), _data.swapchain, NULL);
+    destroy_images(swapchain, device);
+    vkDestroySwapchainKHR(device, swapchain.handle, NULL);
 
     return NU_SUCCESS;
 }
 
-bool nuvk_swapchain_is_physical_device_suitable(VkPhysicalDevice physical_device)
+bool nuvk_swapchain_is_physical_device_suitable(VkPhysicalDevice physical_device, VkSurfaceKHR surface)
 {
     nuvk_swapchain_support_details_t details;
-    nuvk_swapchain_support_details_create(&details, physical_device, nuvk_surface_get_handle());
-
+    swapchain_support_details_create(&details, physical_device, surface);
     bool suitable = details.format_count > 0 && details.present_mode_count > 0;
-
-    nuvk_swapchain_support_details_destroy(&details);
+    swapchain_support_details_destroy(&details);
 
     return suitable;
-}
-
-VkSwapchainKHR nuvk_swapchain_get_handle(void)
-{
-    return _data.swapchain;
-}
-VkExtent2D nuvk_swapchain_get_extent(void)
-{
-    return _data.extent;
-}
-VkFormat nuvk_swapchain_get_format(void)
-{
-    return _data.format;
-}
-const VkImageView *nuvk_swapchain_get_image_views(uint32_t *count)
-{
-    *count = _data.image_count;
-    return _data.image_views;
 }

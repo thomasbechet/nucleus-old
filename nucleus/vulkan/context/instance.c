@@ -3,12 +3,6 @@
 #include "../common/logger.h"
 #include "../glfw/interface.h"
 
-typedef struct {
-    VkInstance instance;
-} nuvk_instance_data_t;
-
-static nuvk_instance_data_t _data;
-
 static bool nuvk_check_instance_extensions_support(
     const char **extensions,
     size_t extension_count
@@ -68,7 +62,7 @@ static bool nuvk_check_instance_layers_support(
     return all_layer_found;
 }
 
-nu_result_t nuvk_instance_create(void)
+nu_result_t nuvk_instance_create(VkInstance *instance)
 {
     /* Get required instance extensions (from glfw) */
     const char **required_instance_extensions;
@@ -154,7 +148,7 @@ nu_result_t nuvk_instance_create(void)
     create_info.ppEnabledLayerNames = instance_layers;
 
     VkResult result;
-    result = vkCreateInstance(&create_info, NULL, &_data.instance);
+    result = vkCreateInstance(&create_info, NULL, instance);
     if (result != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create instance.\n");
         nu_free(instance_extensions);
@@ -168,13 +162,9 @@ nu_result_t nuvk_instance_create(void)
 
     return result == VK_SUCCESS ? NU_SUCCESS : NU_FAILURE;
 }
-nu_result_t nuvk_instance_destroy(void)
+nu_result_t nuvk_instance_destroy(VkInstance instance)
 {
-    vkDestroyInstance(_data.instance, NULL);
+    vkDestroyInstance(instance, NULL);
 
     return NU_SUCCESS;
-}
-VkInstance nuvk_instance_get_handle(void)
-{
-    return _data.instance;
 }

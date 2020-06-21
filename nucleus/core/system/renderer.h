@@ -9,6 +9,10 @@ typedef enum {
     NU_RENDERER_API_OPENGL = 2
 } nu_renderer_api_t;
 
+typedef struct {
+    bool vertical_synchronization;
+} nu_renderer_create_info_t;
+
 /* private system functions */
 nu_result_t nu_system_renderer_load(void);
 nu_result_t nu_system_renderer_unload(void);

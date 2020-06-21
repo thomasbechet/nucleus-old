@@ -1,9 +1,8 @@
 #include "framebuffer.h"
 
 #include "../common/logger.h"
-#include "../presentation/device.h"
-#include "../presentation/swapchain.h"
-#include "../pipeline/render_pass.h"
+#include "../context/context.h"
+#include "render_pass.h"
 
 typedef struct {
     VkFramebuffer *framebuffers;
@@ -14,15 +13,15 @@ static nuvk_framebuffer_data_t _data;
 
 nu_result_t nuvk_framebuffer_create(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     nu_result_t result;
     result = NU_SUCCESS;
 
     /* recover image views and extent from the swapchain */
-    uint32_t image_count;
-    const VkImageView *image_views;
-    image_views = nuvk_swapchain_get_image_views(&image_count);
-    VkExtent2D extent;
-    extent = nuvk_swapchain_get_extent();
+    uint32_t image_count = ctx->swapchain.image_count;
+    const VkImageView *image_views = ctx->swapchain.images;
+    VkExtent2D extent = ctx->swapchain.extent;
 
     /* create framebuffers */
     _data.framebuffer_count = image_count;
@@ -43,7 +42,7 @@ nu_result_t nuvk_framebuffer_create(void)
         framebuffer_info.height = extent.height;
         framebuffer_info.layers = 1;
 
-        if (vkCreateFramebuffer(nuvk_device_get_handle(), &framebuffer_info, NULL, &_data.framebuffers[i]) != VK_SUCCESS) {
+        if (vkCreateFramebuffer(ctx->device, &framebuffer_info, NULL, &_data.framebuffers[i]) != VK_SUCCESS) {
             nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create framebuffer.\n");
             result = NU_FAILURE;
             break;
@@ -54,10 +53,12 @@ nu_result_t nuvk_framebuffer_create(void)
 }
 nu_result_t nuvk_framebuffer_destroy(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* destroy framebuffers */
     if (_data.framebuffers) {
         for (uint32_t i = 0; i < _data.framebuffer_count; i++) {
-            vkDestroyFramebuffer(nuvk_device_get_handle(), _data.framebuffers[i], NULL);
+            vkDestroyFramebuffer(ctx->device, _data.framebuffers[i], NULL);
         }
         nu_free(_data.framebuffers);
     }

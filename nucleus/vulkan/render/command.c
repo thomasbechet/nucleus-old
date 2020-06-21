@@ -1,13 +1,11 @@
 #include "command.h"
 
 #include "../common/logger.h"
-#include "../presentation/device.h"
-#include "../presentation/physical_device.h"
-#include "../presentation/swapchain.h"
-#include "../pipeline/graphics_pipeline.h"
-#include "../pipeline/render_pass.h"
+#include "../context/context.h"
 #include "framebuffer.h"
 #include "synchronization.h"
+#include "render_pass.h"
+#include "graphics_pipeline.h"
 
 typedef struct {
     VkCommandPool command_pool;
@@ -19,9 +17,10 @@ static nuvk_command_data_t _data;
 
 nu_result_t nuvk_command_pool_create(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* recover queue family indices from the physical device */
-    nuvk_queue_family_indices_t indices;
-    indices = nuvk_physical_device_get_queue_family_indices();
+    nuvk_queue_family_indices_t indices = ctx->queue_family_indices;
 
     /* create the pool info */
     VkCommandPoolCreateInfo pool_info;
@@ -29,7 +28,7 @@ nu_result_t nuvk_command_pool_create(void)
     pool_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     pool_info.queueFamilyIndex = indices.graphics_family;
 
-    if (vkCreateCommandPool(nuvk_device_get_handle(), &pool_info, NULL, &_data.command_pool) != VK_SUCCESS) {
+    if (vkCreateCommandPool(ctx->device, &pool_info, NULL, &_data.command_pool) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create command pool.\n");
         return NU_FAILURE;
     }
@@ -38,20 +37,23 @@ nu_result_t nuvk_command_pool_create(void)
 }
 nu_result_t nuvk_command_pool_destroy(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     /* destroy command pool */
-    vkDestroyCommandPool(nuvk_device_get_handle(), _data.command_pool, NULL);
+    vkDestroyCommandPool(ctx->device, _data.command_pool, NULL);
 
     return NU_SUCCESS;
 }
 
 nu_result_t nuvk_command_buffers_create(void)
 {
+    const nuvk_context_t *ctx = nuvk_context_get();
+
     nu_result_t result;
     result = NU_SUCCESS;
 
     /* recover required swapchain info */
-    VkExtent2D extent;
-    extent = nuvk_swapchain_get_extent();
+    VkExtent2D extent = ctx->swapchain.extent;
 
     /* recover framebuffers */
     const VkFramebuffer *framebuffers;
@@ -69,7 +71,7 @@ nu_result_t nuvk_command_buffers_create(void)
     alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     alloc_info.commandBufferCount = framebuffer_count;
 
-    if (vkAllocateCommandBuffers(nuvk_device_get_handle(), &alloc_info, _data.command_buffers) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(ctx->device, &alloc_info, _data.command_buffers) != VK_SUCCESS) {
         nu_warning(NUVK_VULKAN_LOG_NAME"Failed to allocate command buffers.\n");
         nu_free(_data.command_buffers);
         return NU_FAILURE;
