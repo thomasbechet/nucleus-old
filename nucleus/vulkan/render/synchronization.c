@@ -1,6 +1,5 @@
 #include "synchronization.h"
 
-#include "../common/logger.h"
 #include "../context/context.h"
 
 nu_result_t nuvk_semaphore_create(VkSemaphore *semaphore)

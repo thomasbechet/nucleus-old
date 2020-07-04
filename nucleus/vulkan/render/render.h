@@ -5,7 +5,6 @@
 
 nu_result_t nuvk_render_create(void);
 nu_result_t nuvk_render_destroy(void);
-
 nu_result_t nuvk_render_draw(void);
 
 #endif 

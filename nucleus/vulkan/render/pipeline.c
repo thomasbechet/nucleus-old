@@ -1,45 +1,55 @@
-#include "graphics_pipeline.h"
+#include "pipeline.h"
 
-#include "../common/logger.h"
 #include "../context/context.h"
-#include "shader.h"
-#include "render_pass.h"
 
-typedef struct {
-    VkShaderModule vert_shader_module;
-    VkShaderModule frag_shader_module;
-    VkPipelineLayout pipeline_layout;
-    VkPipeline pipeline;
-} nuvk_graphics_pipeline_data_t;
+nu_result_t nuvk_pipeline_layout_create_default(VkPipelineLayout *layout)
+{
+    const nuvk_context_t *ctx = nuvk_context_get();
 
-static nuvk_graphics_pipeline_data_t _data;
+    /* pipeline layout */
+    VkPipelineLayoutCreateInfo pipeline_layout_info;
+    memset(&pipeline_layout_info, 0, sizeof(VkPipelineLayoutCreateInfo));
+    pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    
+    if (vkCreatePipelineLayout(ctx->device, &pipeline_layout_info, NULL, layout) != VK_SUCCESS) {
+        return NU_FAILURE;
+    }
 
-nu_result_t nuvk_graphics_pipeline_create(void)
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_pipleine_layout_destroy(VkPipelineLayout layout)
+{
+    const nuvk_context_t *ctx = nuvk_context_get();
+    vkDestroyPipelineLayout(ctx->device, layout, NULL);
+    return NU_SUCCESS;
+}
+
+nu_result_t nuvk_pipeline_create_default(
+    VkPipeline *pipeline,
+    VkShaderModule vertex_shader_module,
+    VkShaderModule fragment_shader_module,
+    VkPipelineLayout layout,
+    VkRenderPass render_pass
+)
 {
     const nuvk_context_t *ctx = nuvk_context_get();
 
     nu_result_t result;
     result = NU_SUCCESS;
 
-    /* create shader modules */
-    result = nuvk_shader_module_create(&_data.vert_shader_module, "engine/shaders/shader.vert.spv");
-    if (result != NU_SUCCESS) return NU_FAILURE;
-    result = nuvk_shader_module_create(&_data.frag_shader_module, "engine/shaders/shader.frag.spv");
-    if (result != NU_SUCCESS) return NU_FAILURE;
-
     /* create shader stage */
     VkPipelineShaderStageCreateInfo vert_shader_stage_info;
     memset(&vert_shader_stage_info, 0, sizeof(VkPipelineShaderStageCreateInfo));
     vert_shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     vert_shader_stage_info.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vert_shader_stage_info.module = _data.vert_shader_module;
+    vert_shader_stage_info.module = vertex_shader_module;
     vert_shader_stage_info.pName = "main";
 
     VkPipelineShaderStageCreateInfo frag_shader_stage_info;
     memset(&frag_shader_stage_info, 0, sizeof(VkPipelineShaderStageCreateInfo));
     frag_shader_stage_info.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
     frag_shader_stage_info.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    frag_shader_stage_info.module = _data.frag_shader_module;
+    frag_shader_stage_info.module = fragment_shader_module;
     frag_shader_stage_info.pName = "main";
 
     VkPipelineShaderStageCreateInfo shader_stages[] = {vert_shader_stage_info, frag_shader_stage_info};
@@ -140,16 +150,6 @@ nu_result_t nuvk_graphics_pipeline_create(void)
     dynamic_state.dynamicStateCount = 2;
     dynamic_state.pDynamicStates = dynamic_states;
 
-    /* pipeline layout */
-    VkPipelineLayoutCreateInfo pipeline_layout_info;
-    memset(&pipeline_layout_info, 0, sizeof(VkPipelineLayoutCreateInfo));
-    pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    
-    if (vkCreatePipelineLayout(ctx->device, &pipeline_layout_info, NULL, &_data.pipeline_layout) != VK_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create pipeline layout.\n");
-        return NU_FAILURE;
-    }
-
     /* create graphics pipeline */
     VkGraphicsPipelineCreateInfo pipeline_info;
     memset(&pipeline_info, 0, sizeof(VkGraphicsPipelineCreateInfo));
@@ -167,39 +167,23 @@ nu_result_t nuvk_graphics_pipeline_create(void)
     pipeline_info.pColorBlendState = &color_blending;
     pipeline_info.pDynamicState = NULL;
 
-    pipeline_info.layout = _data.pipeline_layout;
+    pipeline_info.layout = layout;
 
-    pipeline_info.renderPass = nuvk_render_pass_get_handle();
+    pipeline_info.renderPass = render_pass;
     pipeline_info.subpass = 0;
 
     pipeline_info.basePipelineHandle = VK_NULL_HANDLE;
     pipeline_info.basePipelineIndex = -1;
 
-    if (vkCreateGraphicsPipelines(ctx->device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, &_data.pipeline) != VK_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create graphics pipeline.\n");
+    if (vkCreateGraphicsPipelines(ctx->device, VK_NULL_HANDLE, 1, &pipeline_info, NULL, pipeline) != VK_SUCCESS) {
         return NU_SUCCESS;
     }
 
     return result;
 }
-nu_result_t nuvk_graphics_pipeline_destroy(void)
+nu_result_t nuvk_pipeline_destroy(VkPipeline pipeline)
 {
     const nuvk_context_t *ctx = nuvk_context_get();
-
-    /* destroy pipeline */
-    vkDestroyPipeline(ctx->device, _data.pipeline, NULL);
-
-    /* destroy pipeline layout */
-    vkDestroyPipelineLayout(ctx->device, _data.pipeline_layout, NULL);
-
-    /* destroy shader modules */
-    nuvk_shader_module_destroy(_data.vert_shader_module);
-    nuvk_shader_module_destroy(_data.frag_shader_module);
-
+    vkDestroyPipeline(ctx->device, pipeline, NULL);
     return NU_SUCCESS;
-}
-
-VkPipeline nuvk_graphics_pipeline_get_handle(void)
-{
-    return _data.pipeline;
 }

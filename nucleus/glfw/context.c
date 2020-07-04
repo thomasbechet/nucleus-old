@@ -24,7 +24,8 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-    _window = glfwCreateWindow(mode->width, mode->height, "Window", glfwGetPrimaryMonitor(), NULL);
+    //_window = glfwCreateWindow(mode->width, mode->height, "Window", mode, NULL);
+    _window = glfwCreateWindow(800, 450, "Window", NULL, NULL);
     if (!_window) {
         nu_warning(NUGLFW_LOGGER_GLFW"Failed to create glfw window.\n");
         glfwTerminate();

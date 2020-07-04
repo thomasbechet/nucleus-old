@@ -3,9 +3,13 @@
 
 #include "../renderer.h"
 
-nu_result_t nuvk_framebuffer_create(void);
-nu_result_t nuvk_framebuffer_destroy(void);
-
-const VkFramebuffer *nuvk_framebuffer_get_swapchain(uint32_t *count);
+nu_result_t nuvk_framebuffer_create(
+    VkFramebuffer *framebuffer,
+    VkImageView *images,
+    uint32_t image_count,
+    VkExtent2D extent,
+    VkRenderPass render_pass
+);
+nu_result_t nuvk_framebuffer_destroy(VkFramebuffer framebuffer);
 
 #endif

@@ -37,6 +37,7 @@ typedef struct {
 
 nu_result_t nuvk_context_create(void);
 nu_result_t nuvk_context_destroy(void);
+nu_result_t nuvk_context_update_swapchain(void);
 const nuvk_context_t *nuvk_context_get(void);
 
 #endif 

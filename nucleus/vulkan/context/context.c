@@ -70,6 +70,10 @@ nu_result_t nuvk_context_destroy(void)
 
     return NU_SUCCESS;
 }
+nu_result_t nuvk_context_update_swapchain(void)
+{
+    vkDeviceWaitIdle(_data.device);
+}
 const nuvk_context_t *nuvk_context_get(void)
 {
     return &_data;

@@ -1,15 +1,8 @@
 #include "render_pass.h"
 
-#include "../common/logger.h"
 #include "../context/context.h"
 
-typedef struct {
-    VkRenderPass render_pass;
-} nuvk_render_pass_data_t;
-
-static nuvk_render_pass_data_t _data;
-
-nu_result_t nuvk_render_pass_create(void)
+nu_result_t nuvk_render_pass_create_default(VkRenderPass *renderpass)
 {
     const nuvk_context_t *ctx = nuvk_context_get();
 
@@ -59,23 +52,15 @@ nu_result_t nuvk_render_pass_create(void)
     render_pass_info.dependencyCount = 1;
     render_pass_info.pDependencies = &dependency;
 
-    if (vkCreateRenderPass(ctx->device, &render_pass_info, NULL, &_data.render_pass) != VK_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create render pass.\n");
+    if (vkCreateRenderPass(ctx->device, &render_pass_info, NULL, renderpass) != VK_SUCCESS) {
         return NU_FAILURE;
     }
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_render_pass_destroy(void)
+nu_result_t nuvk_render_pass_destroy(VkRenderPass renderpass)
 {
     const nuvk_context_t *ctx = nuvk_context_get();
-
-    vkDestroyRenderPass(ctx->device, _data.render_pass, NULL);
-
+    vkDestroyRenderPass(ctx->device, renderpass, NULL);
     return NU_SUCCESS;
-}
-
-VkRenderPass nuvk_render_pass_get_handle(void)
-{
-    return _data.render_pass;
 }
