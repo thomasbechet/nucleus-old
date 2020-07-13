@@ -121,7 +121,7 @@ static nu_result_t create_images(nuvk_swapchain_t *swapchain, VkDevice device)
         create_info.subresourceRange.layerCount = 1;
 
         if (vkCreateImageView(device, &create_info, NULL, &swapchain->images[i]) != VK_SUCCESS) {
-            nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create image views.\n");
+            nu_warning(NUVK_LOGGER_NAME"Failed to create image views.\n");
         }
     }
 
@@ -203,7 +203,7 @@ nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, VkSurfaceKHR surf
     swapchain_support_details_destroy(&details);
 
     if (vkCreateSwapchainKHR(device, &create_info, NULL, &swapchain->handle) != VK_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create swapchain.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create swapchain.\n");
         return NU_FAILURE;
     }
 

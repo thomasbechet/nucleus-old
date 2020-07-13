@@ -1,6 +1,6 @@
 #include "module.h"
 
-#define NU_MODULE_LOG_NAME "[MODULE] "
+#define NU_LOGGER_MODULE_NAME "[MODULE] "
 
 #define NU_MODULE_GET_INFO_NAME "nu_module_get_info"
 
@@ -30,20 +30,20 @@ nu_result_t nu_module_load(nu_module_t *module, const char *module_name)
     nu_free(path);
 
     if (!module->handle) {
-        nu_warning(NU_MODULE_LOG_NAME"Failed to load module '%s'.\n", module_name);
+        nu_warning(NU_LOGGER_MODULE_NAME"Failed to load module '%s'.\n", module_name);
         return NU_FAILURE;
     }
 
     /* load module info */
     nu_result_t (*module_get_info)(nu_module_info_t*);
     if (nu_module_load_function(module, NU_MODULE_GET_INFO_NAME, (nu_pfn_t*)&module_get_info) != NU_SUCCESS) {
-        nu_warning(NU_MODULE_LOG_NAME"'%s' function is required to load the module '%s'.\n", NU_MODULE_GET_INFO_NAME, module_name);
+        nu_warning(NU_LOGGER_MODULE_NAME"'%s' function is required to load the module '%s'.\n", NU_MODULE_GET_INFO_NAME, module_name);
         nu_module_unload(module);
         return NU_FAILURE;
     }
 
     if (module_get_info(&module->info) != NU_SUCCESS) {
-        nu_warning(NU_MODULE_LOG_NAME"Failed to retrieve info from module '%s'.\n", module_name);
+        nu_warning(NU_LOGGER_MODULE_NAME"Failed to retrieve info from module '%s'.\n", module_name);
         nu_module_unload(module);
         return NU_FAILURE;
     }
@@ -73,7 +73,7 @@ nu_result_t nu_module_load_function(const nu_module_t *module, const char *funct
 #endif
 
     if (!*function) {
-        nu_warning(NU_MODULE_LOG_NAME"Failed to get function named '%s'.\n", function_name);
+        nu_warning(NU_LOGGER_MODULE_NAME"Failed to get function named '%s'.\n", function_name);
         *function = NULL;
         return NU_FAILURE;
     }

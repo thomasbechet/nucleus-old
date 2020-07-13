@@ -6,6 +6,7 @@ SET(CMAKE_BUILD_TYPE Debug)
 #SET(CMAKE_BUILD_TYPE Release)
 
 SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
+SET(CMAKE_EXE_LINKER_FLAGS " -static")
 
 FIND_PACKAGE(OpenMP)
 if (OPENMP_FOUND)
@@ -30,6 +31,10 @@ ADD_LIBRARY(
 )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+    -static
+    -static-libgcc
+    -static-libstdc++
+    pthread
     mingw32
 )
 

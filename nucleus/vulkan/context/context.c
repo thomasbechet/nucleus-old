@@ -16,34 +16,34 @@ nu_result_t nuvk_context_create(void)
     result = NU_SUCCESS;
 
     /* create instance */
-    nu_info(NUVK_VULKAN_LOG_NAME"Context -- Creating instance...\n");
+    nu_info(NUVK_LOGGER_NAME"Context -- Creating instance...\n");
     result = nuvk_instance_create(&_data.instance);
     if (result != NU_SUCCESS) return result;
 
     /* create debug messenger */
-    nu_info(NUVK_VULKAN_LOG_NAME"Context -- Creating debug messenger...\n");
+    nu_info(NUVK_LOGGER_NAME"Context -- Creating debug messenger...\n");
 #ifdef NU_DEBUG
     result = nuvk_debug_messenger_create(&_data.debug_messenger, _data.instance);
     if (result != NU_SUCCESS) return result;
 #endif
 
     /* create surface */
-    nu_info(NUVK_VULKAN_LOG_NAME"Context -- Creating surface...\n");
+    nu_info(NUVK_LOGGER_NAME"Context -- Creating surface...\n");
     result = nuvk_surface_create(&_data.surface, _data.instance);
     if (result != NU_SUCCESS) return result;
 
     /* pick physical device */
-    nu_info(NUVK_VULKAN_LOG_NAME"Context -- Picking physical device...\n");
+    nu_info(NUVK_LOGGER_NAME"Context -- Picking physical device...\n");
     result = nuvk_physical_device_pick(&_data.physical_device, &_data.queue_family_indices, _data.instance, _data.surface);
     if (result != NU_SUCCESS) return result;
 
     /* create device (and recover queues) */
-    nu_info(NUVK_VULKAN_LOG_NAME"Context -- Creating device...\n");
+    nu_info(NUVK_LOGGER_NAME"Context -- Creating device...\n");
     result = nuvk_device_create(&_data.device, &_data.queues, _data.surface, _data.physical_device);
     if (result != NU_SUCCESS) return result;
 
     /* create swapchain */
-    nu_info(NUVK_VULKAN_LOG_NAME"Context -- Creating swapchain...\n");
+    nu_info(NUVK_LOGGER_NAME"Context -- Creating swapchain...\n");
     result = nuvk_swapchain_create(&_data.swapchain, _data.surface, _data.physical_device, _data.device);
     if (result != NU_SUCCESS) return result;
 

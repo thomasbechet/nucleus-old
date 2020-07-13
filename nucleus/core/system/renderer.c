@@ -2,12 +2,14 @@
 
 #include "../module/interface.h"
 #include "../context/config.h"
+#include "../../rasterizer/module/interface.h"
 #include "../../vulkan/module/interface.h"
 
-#define NU_RENDERER_LOG_NAME "[RENDERER] "
+#define NU_LOGGER_RENDERER_NAME "[RENDERER] "
 
 static const char *nu_renderer_api_names[] = {
     "nucleus-renderer-none",
+    NURZ_MODULE_NAME,
     NUVK_MODULE_NAME,
     "nucleus-opengl"
 };
@@ -37,21 +39,21 @@ nu_result_t nu_system_renderer_load(void)
     nu_renderer_interface_loader_pfn_t load_interface;
     result = nu_module_load_function(&_system.module, NU_RENDERER_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_RENDERER_LOG_NAME" Failed to load renderer loader.\n");
+        nu_warning(NU_LOGGER_RENDERER_NAME" Failed to load renderer loader.\n");
         return result;
     }
 
     /* load renderer interface */
     result = load_interface(&_system.interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_RENDERER_LOG_NAME" Failed to load interface.\n");
+        nu_warning(NU_LOGGER_RENDERER_NAME" Failed to load interface.\n");
         return result;
     }
 
     /* initialize renderer system */
     result = _system.interface.initialize();
     if (result != NU_SUCCESS) {
-        nu_warning(NU_RENDERER_LOG_NAME"Failed to initialize renderer system.\n");
+        nu_warning(NU_LOGGER_RENDERER_NAME"Failed to initialize renderer system.\n");
         return result;
     }
 

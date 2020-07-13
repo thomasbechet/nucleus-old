@@ -10,7 +10,7 @@ nu_result_t nuvk_surface_create(VkSurfaceKHR *surface, VkInstance instance)
 
     result = nuvk_glfw_create_window_surface(instance, surface);
     if (result != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create window surface.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create window surface.\n");
     }
 
     return result;

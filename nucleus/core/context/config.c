@@ -33,7 +33,9 @@ static nu_result_t load_ini_file(void)
     /* renderer api */
     const char *renderer_api;
     nu_config_get_string(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, &renderer_api, "");
-    if (NU_MATCH(renderer_api, "vulkan")) {
+    if (NU_MATCH(renderer_api, "rasterizer")) {
+        _data.config.renderer_api = NU_RENDERER_API_RASTERIZER;
+    } else if (NU_MATCH(renderer_api, "vulkan")) {
         _data.config.renderer_api = NU_RENDERER_API_VULKAN;
     } else if (NU_MATCH(renderer_api, "opengl")) {
         _data.config.renderer_api = NU_RENDERER_API_OPENGL;

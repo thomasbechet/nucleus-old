@@ -31,6 +31,7 @@ nu_result_t nuglfw_window_interface_loader(nuglfw_window_interface_t *interface)
 {
     interface->create_window_surface            = nuglfw_create_window_surface;
     interface->get_required_instance_extensions = nuglfw_get_required_instance_extensions;
+    interface->present_surface                  = nuglfw_present_surface;
 
     return NU_SUCCESS;
 }

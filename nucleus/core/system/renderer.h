@@ -4,9 +4,10 @@
 #include "../module/module.h"
 
 typedef enum {
-    NU_RENDERER_API_NONE   = 0,
-    NU_RENDERER_API_VULKAN = 1,
-    NU_RENDERER_API_OPENGL = 2
+    NU_RENDERER_API_NONE       = 0,
+    NU_RENDERER_API_RASTERIZER = 1, 
+    NU_RENDERER_API_VULKAN     = 2,
+    NU_RENDERER_API_OPENGL     = 3
 } nu_renderer_api_t;
 
 typedef struct {

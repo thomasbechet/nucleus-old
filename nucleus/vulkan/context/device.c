@@ -49,7 +49,7 @@ nu_result_t nuvk_device_create(VkDevice *device, nuvk_queues_t *queues, VkSurfac
     device_create_info.ppEnabledExtensionNames = required_extensions;
 
     if (vkCreateDevice(physical_device, &device_create_info, NULL, device) != VK_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create logical device.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create logical device.\n");
         nu_free(queue_create_infos);
         return NU_FAILURE;
     }

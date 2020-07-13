@@ -11,17 +11,17 @@ nu_result_t nuvk_renderer_initialize(void)
     result = NU_SUCCESS;
 
     /* load glfw interface */
-    nu_info(NUVK_VULKAN_LOG_NAME"Loading glfw interface...\n");
+    nu_info(NUVK_LOGGER_NAME"Loading glfw interface...\n");
     result = nuvk_glfw_load_interface();
     if (result != NU_SUCCESS) return result;
 
     /* creating context */
-    nu_info(NUVK_VULKAN_LOG_NAME"Creating context...\n");
+    nu_info(NUVK_LOGGER_NAME"Creating context...\n");
     result = nuvk_context_create();
     if (result != NU_SUCCESS) return result;
 
     /* create render */
-    nu_info(NUVK_VULKAN_LOG_NAME"Creating render...\n");
+    nu_info(NUVK_LOGGER_NAME"Creating render...\n");
     result = nuvk_render_create();
     if (result != NU_SUCCESS) return result;
 

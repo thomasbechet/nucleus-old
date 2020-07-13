@@ -50,7 +50,7 @@ static nuvk_render_data_t _data;
 static nu_result_t create_render_pass(void)
 {
     if (nuvk_render_pass_create_default(&_data.render_pass) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create render pass.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create render pass.\n");
         return NU_FAILURE;
     }
 
@@ -59,7 +59,7 @@ static nu_result_t create_render_pass(void)
 static nu_result_t destroy_render_pass(void)
 {
     if (nuvk_render_pass_destroy(_data.render_pass) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to destroy render pass.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to destroy render pass.\n");
         return NU_FAILURE;
     }
 
@@ -69,15 +69,15 @@ static nu_result_t destroy_render_pass(void)
 static nu_result_t create_pipeline(void)
 {   
     if (nuvk_shader_module_create(&_data.vertex_shader_module, "engine/shaders/shader.vert.spv") != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create vertex shader module.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create vertex shader module.\n");
         return NU_FAILURE;
     }
     if (nuvk_shader_module_create(&_data.fragment_shader_module, "engine/shaders/shader.frag.spv") != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create fragment shader module.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create fragment shader module.\n");
         return NU_FAILURE;
     }
     if (nuvk_pipeline_layout_create_default(&_data.pipeline_layout) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create pipeline layout.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create pipeline layout.\n");
         return NU_FAILURE;
     }
     if (nuvk_pipeline_create_default(
@@ -87,7 +87,7 @@ static nu_result_t create_pipeline(void)
         _data.pipeline_layout,
         _data.render_pass) != NU_SUCCESS)
     {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create pipeline.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create pipeline.\n");
         return NU_FAILURE;
     }
 
@@ -96,11 +96,11 @@ static nu_result_t create_pipeline(void)
 static nu_result_t destroy_pipeline(void)
 {
     if (nuvk_pipeline_destroy(_data.pipeline) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to destroy pipeline.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to destroy pipeline.\n");
         return NU_FAILURE;
     }
     if (nuvk_pipleine_layout_destroy(_data.pipeline_layout) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to destroy pipeline layout.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to destroy pipeline layout.\n");
         return NU_FAILURE;
     }
     if (nuvk_shader_module_destroy(_data.vertex_shader_module) != NU_SUCCESS) {
@@ -126,7 +126,7 @@ static nu_result_t create_framebuffers(void)
     _data.framebuffers = (VkFramebuffer*)nu_malloc(sizeof(VkFramebuffer) * _data.framebuffer_count);
     for (uint32_t i = 0; i < _data.framebuffer_count; i++) {
         if (nuvk_framebuffer_create(&_data.framebuffers[i], &images[i], 1, extent, _data.render_pass) != NU_SUCCESS) {
-            nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create framebuffer.\n");
+            nu_warning(NUVK_LOGGER_NAME"Failed to create framebuffer.\n");
             return NU_FAILURE;
         }
     }
@@ -137,7 +137,7 @@ static nu_result_t destroy_framebuffers(void)
 {
     for (uint32_t i = 0; i < _data.framebuffer_count; i++) {
         if (nuvk_framebuffer_destroy(_data.framebuffers[i]) != NU_SUCCESS) {
-            nu_warning(NUVK_VULKAN_LOG_NAME"Failed to destroy framebuffer.\n");
+            nu_warning(NUVK_LOGGER_NAME"Failed to destroy framebuffer.\n");
             return NU_FAILURE;
         }
     }
@@ -149,7 +149,7 @@ static nu_result_t destroy_framebuffers(void)
 static nu_result_t create_commands(void)
 {
     if (nuvk_command_pool_create(&_data.command_pool) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create command pool.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create command pool.\n");
     }
 
     _data.command_buffer_count = _data.framebuffer_count;
@@ -159,7 +159,7 @@ static nu_result_t create_commands(void)
         _data.command_buffer_count,
         _data.command_pool
     ) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to allocate command buffers.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to allocate command buffers.\n");
         return NU_FAILURE;
     }
 
@@ -170,7 +170,7 @@ static nu_result_t destroy_commands(void)
     nu_free(_data.command_buffers);
 
     if (nuvk_command_pool_destroy(_data.command_pool) != NU_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to destroy command pool.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to destroy command pool.\n");
     }
 
     return NU_SUCCESS;
@@ -186,7 +186,7 @@ static nu_result_t record_command_buffers(void)
         memset(&begin_info, 0, sizeof(VkCommandBufferBeginInfo));
         begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         if (vkBeginCommandBuffer(_data.command_buffers[i], &begin_info) != VK_SUCCESS) {
-            nu_warning(NUVK_VULKAN_LOG_NAME"Failed to begin recording command buffer.\n");
+            nu_warning(NUVK_LOGGER_NAME"Failed to begin recording command buffer.\n");
             break;
         }
 
@@ -219,7 +219,7 @@ static nu_result_t record_command_buffers(void)
 
         /* end recording command */
         if (vkEndCommandBuffer(_data.command_buffers[i]) != VK_SUCCESS) {
-            nu_warning(NUVK_VULKAN_LOG_NAME"Failed to end recording command buffer.\n");
+            nu_warning(NUVK_LOGGER_NAME"Failed to end recording command buffer.\n");
             return NU_FAILURE;
         }
     }
@@ -265,17 +265,17 @@ static nu_result_t destroy_synchronization_objects(void)
 nu_result_t nuvk_render_create(void)
 {
     /* initialize render */
-    nu_info(NUVK_VULKAN_LOG_NAME"Render -- Creating render pass...\n");
+    nu_info(NUVK_LOGGER_NAME"Render -- Creating render pass...\n");
     if (create_render_pass() != NU_SUCCESS) return NU_FAILURE;
-    nu_info(NUVK_VULKAN_LOG_NAME"Render -- Creating pipeline...\n");
+    nu_info(NUVK_LOGGER_NAME"Render -- Creating pipeline...\n");
     if (create_pipeline() != NU_SUCCESS) return NU_FAILURE;
-    nu_info(NUVK_VULKAN_LOG_NAME"Render -- Creating framebuffers...\n");
+    nu_info(NUVK_LOGGER_NAME"Render -- Creating framebuffers...\n");
     if (create_framebuffers() != NU_SUCCESS) return NU_FAILURE;
-    nu_info(NUVK_VULKAN_LOG_NAME"Render -- Creating commands...\n");
+    nu_info(NUVK_LOGGER_NAME"Render -- Creating commands...\n");
     if (create_commands() != NU_SUCCESS) return NU_FAILURE;
-    nu_info(NUVK_VULKAN_LOG_NAME"Render -- Recording command buffers...\n");
+    nu_info(NUVK_LOGGER_NAME"Render -- Recording command buffers...\n");
     if (record_command_buffers() != NU_SUCCESS) return NU_FAILURE;
-    nu_info(NUVK_VULKAN_LOG_NAME"Render -- Creating synchronization objects...\n");
+    nu_info(NUVK_LOGGER_NAME"Render -- Creating synchronization objects...\n");
     if (create_synchronization_objects() != NU_SUCCESS) return NU_FAILURE;
 
     /* initialize current frame index */

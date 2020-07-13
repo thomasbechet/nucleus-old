@@ -3,7 +3,7 @@
 #include "../module/interface.h"
 #include "../../task/module/interface.h"
 
-#define NU_TASK_LOG_NAME "[TASK] "
+#define NU_LOGGER_TASK_NAME "[TASK] "
 
 typedef struct {
     nu_module_t module;
@@ -29,21 +29,21 @@ nu_result_t nu_system_task_load(void)
     nu_task_interface_loader_pfn_t load_interface;
     result = nu_module_load_function(&_system.module, NU_TASK_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_TASK_LOG_NAME" Failed to load task loader.\n");
+        nu_warning(NU_LOGGER_TASK_NAME" Failed to load task loader.\n");
         return result;
     }
 
     /* load task interface */
     result = load_interface(&_system.interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_TASK_LOG_NAME" Failed to load interface.\n");
+        nu_warning(NU_LOGGER_TASK_NAME" Failed to load interface.\n");
         return result;
     }
 
     /* initialize task system */
     result = _system.interface.initialize();
     if (result != NU_SUCCESS) {
-        nu_warning(NU_TASK_LOG_NAME"Failed to initialize task system.\n");
+        nu_warning(NU_LOGGER_TASK_NAME"Failed to initialize task system.\n");
         return result;
     }
 

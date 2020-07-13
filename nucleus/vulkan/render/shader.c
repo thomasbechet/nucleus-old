@@ -15,12 +15,12 @@ static nu_result_t read_shader_file(const char *path, char **buffer, uint32_t *s
     *buffer = (char*)nu_malloc(sizeof(char) * (*size));
 
     if (*buffer == NULL) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to load file %s.\n", path);
+        nu_warning(NUVK_LOGGER_NAME"Failed to load file %s.\n", path);
         return NU_FAILURE;
     }
 
     if (fread(*buffer, sizeof(char), *size, file) != (*size)) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to read file %s.\n", path);
+        nu_warning(NUVK_LOGGER_NAME"Failed to read file %s.\n", path);
         nu_free(*buffer);
         return NU_FAILURE;
     }
@@ -48,7 +48,7 @@ nu_result_t nuvk_shader_module_create(VkShaderModule *shader_module, const char 
     create_info.pCode = (uint32_t*)code;
 
     if (vkCreateShaderModule(ctx->device, &create_info, NULL, shader_module) != VK_SUCCESS) {
-        nu_warning(NUVK_VULKAN_LOG_NAME"Failed to create shader module.\n");
+        nu_warning(NUVK_LOGGER_NAME"Failed to create shader module.\n");
         nu_free(code);
         return NU_FAILURE;
     }
