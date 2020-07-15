@@ -2,14 +2,14 @@
 
 #include "../module/interface.h"
 #include "../context/config.h"
-#include "../../rasterizer/module/interface.h"
+#include "../../softrast/module/interface.h"
 #include "../../vulkan/module/interface.h"
 
 #define NU_LOGGER_RENDERER_NAME "[RENDERER] "
 
 static const char *nu_renderer_api_names[] = {
     "nucleus-renderer-none",
-    NURZ_MODULE_NAME,
+    NUSR_MODULE_NAME,
     NUVK_MODULE_NAME,
     "nucleus-opengl"
 };

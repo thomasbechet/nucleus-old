@@ -1,4 +1,4 @@
-#include "rasterizer.h"
+#include "softrast.h"
 
 #include "common/logger.h"
 #include "memory/framebuffer.h"
@@ -9,10 +9,10 @@
 
 typedef struct {
     nuglfw_window_interface_t glfw_interface;
-    nurz_framebuffer_t framebuffer;
-} nurz_data_t;
+    nusr_framebuffer_t framebuffer;
+} nusr_data_t;
 
-static nurz_data_t _data;
+static nusr_data_t _data;
 
 static void profile(void);
 
@@ -20,18 +20,18 @@ static nu_result_t load_glfw_interface(void)
 {
     const nu_module_t *window_module = nu_system_window_get_module();
     if (window_module->info.id != NUGLFW_MODULE_ID) {
-        nu_fatal(NURZ_LOGGER_NAME"Rasterizer requires GLFW module to work.\n");
+        nu_fatal(NUSR_LOGGER_NAME"Software rasterizer requires GLFW module to work.\n");
         return NU_FAILURE;
     }
 
     nuglfw_window_interface_loader_pfn_t load_interface;
     if (nu_module_load_function(window_module, NUGLFW_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) != NU_SUCCESS) {
-        nu_warning(NURZ_LOGGER_NAME"Rasterizer failed to load glfw loader.\n");
+        nu_warning(NUSR_LOGGER_NAME"Software rasterizer failed to load glfw loader.\n");
         return NU_FAILURE;
     }
 
     if (load_interface(&_data.glfw_interface) != NU_SUCCESS) {
-        nu_warning(NURZ_LOGGER_NAME"Rasterizer failed to load glfw interface.\n");
+        nu_warning(NUSR_LOGGER_NAME"Software rasterizer failed to load glfw interface.\n");
         return NU_FAILURE;
     }
 
@@ -68,31 +68,31 @@ static float edge_function(const vec2 a, const vec2 b, const vec2 c)
     return (c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0]);
 }
 
-nu_result_t nurz_initialize(void)
+nu_result_t nusr_initialize(void)
 {
     /* loading glfw interface */
-    nu_info(NURZ_LOGGER_NAME"Loading glfw interface...\n");
+    nu_info(NUSR_LOGGER_NAME"Loading glfw interface...\n");
     if (load_glfw_interface() != NU_SUCCESS) {
-        nu_warning(NURZ_LOGGER_NAME"Failed to load glfw interface.\n");
+        nu_warning(NUSR_LOGGER_NAME"Failed to load glfw interface.\n");
         return NU_FAILURE;
     }
 
     /* creating framebuffer */
-    nu_info(NURZ_LOGGER_NAME"Creating framebuffer...\n");
-    nurz_framebuffer_create(&_data.framebuffer, 640, 360);
-    //nurz_framebuffer_create(&_data.framebuffer, 1920, 1080);
-    //nurz_framebuffer_create(&_data.framebuffer, 256, 144);
+    nu_info(NUSR_LOGGER_NAME"Creating framebuffer...\n");
+    nusr_framebuffer_create(&_data.framebuffer, 640, 360);
+    //nusr_framebuffer_create(&_data.framebuffer, 1920, 1080);
+    //nusr_framebuffer_create(&_data.framebuffer, 256, 144);
 
     return NU_SUCCESS;
 }
-nu_result_t nurz_terminate(void)
+nu_result_t nusr_terminate(void)
 {
     /* free framebuffer */
-    nurz_framebuffer_destroy(&_data.framebuffer);
+    nusr_framebuffer_destroy(&_data.framebuffer);
 
     return NU_SUCCESS;
 }
-nu_result_t nurz_render(void)
+nu_result_t nusr_render(void)
 {
     mat4 camera_mat4;
     mat4 camera_mat4_inv;
@@ -128,7 +128,7 @@ nu_result_t nurz_render(void)
     };
     static const uint32_t vcount = 6 * 6;
 
-    nurz_framebuffer_clear(&_data.framebuffer, 0x0);
+    nusr_framebuffer_clear(&_data.framebuffer, 0x0);
 
     for (uint32_t vi = 0; vi < vcount; vi += 3) {
 
@@ -176,7 +176,7 @@ nu_result_t nurz_render(void)
                     float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
                     float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
 
-                    nurz_framebuffer_set_rgb(&_data.framebuffer, i, j, r, g, b);
+                    nusr_framebuffer_set_rgb(&_data.framebuffer, i, j, r, g, b);
                 }
             }
         }

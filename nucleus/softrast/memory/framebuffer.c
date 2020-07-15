@@ -1,6 +1,6 @@
 #include "framebuffer.h"
 
-nu_result_t nurz_framebuffer_create(nurz_framebuffer_t *self, uint32_t width, uint32_t height)
+nu_result_t nusr_framebuffer_create(nusr_framebuffer_t *self, uint32_t width, uint32_t height)
 {
     self->pixels = (uint32_t*)nu_malloc(sizeof(uint32_t) * width * height);
     self->width = width;
@@ -8,7 +8,7 @@ nu_result_t nurz_framebuffer_create(nurz_framebuffer_t *self, uint32_t width, ui
 
     return NU_SUCCESS;
 }
-nu_result_t nurz_framebuffer_destroy(nurz_framebuffer_t *self)
+nu_result_t nusr_framebuffer_destroy(nusr_framebuffer_t *self)
 {
     nu_free(self->pixels);
     self->pixels = NULL;
@@ -17,13 +17,13 @@ nu_result_t nurz_framebuffer_destroy(nurz_framebuffer_t *self)
 
     return NU_SUCCESS;
 }
-nu_result_t nurz_framebuffer_clear(nurz_framebuffer_t *self, uint32_t color)
+nu_result_t nusr_framebuffer_clear(nusr_framebuffer_t *self, uint32_t color)
 {
     memset(self->pixels, color, sizeof(uint32_t) * self->width * self->height);
 
     return NU_SUCCESS;
 }
-nu_result_t nurz_framebuffer_set_rgb(nurz_framebuffer_t *self,
+nu_result_t nusr_framebuffer_set_rgb(nusr_framebuffer_t *self,
     uint32_t x, uint32_t y,
     float fr, float fg, float fb
 )

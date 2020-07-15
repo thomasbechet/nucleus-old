@@ -17,7 +17,7 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* pre context initialization */
-    if (nu_config_get().renderer_api == NU_RENDERER_API_RASTERIZER) {
+    if (nu_config_get().renderer_api == NU_RENDERER_API_SOFTRAST) {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -41,7 +41,7 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* post context initialization */
-    if (nu_config_get().renderer_api == NU_RENDERER_API_RASTERIZER) {
+    if (nu_config_get().renderer_api == NU_RENDERER_API_SOFTRAST) {
         glfwMakeContextCurrent(_window);
         glfwSwapInterval(1);
         if (glewInit()) {
@@ -58,7 +58,7 @@ nu_result_t nuglfw_window_initialize(void)
 }
 nu_result_t nuglfw_window_terminate(void)
 {
-    if (nu_config_get().renderer_api == NU_RENDERER_API_RASTERIZER) {
+    if (nu_config_get().renderer_api == NU_RENDERER_API_SOFTRAST) {
         nuglfw_surface_destroy();
     }
 
