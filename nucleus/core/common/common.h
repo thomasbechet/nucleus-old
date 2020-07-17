@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+#include "cglm/include/cglm/cglm.h"
+
 #include "macro.h"
 #include "logger.h"
 #include "memory.h"

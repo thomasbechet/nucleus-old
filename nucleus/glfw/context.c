@@ -43,7 +43,7 @@ nu_result_t nuglfw_window_initialize(void)
     /* post context initialization */
     if (nu_config_get().renderer_api == NU_RENDERER_API_SOFTRAST) {
         glfwMakeContextCurrent(_window);
-        glfwSwapInterval(1);
+        glfwSwapInterval(0);
         if (glewInit()) {
             nu_warning(NUGLFW_LOGGER_NAME"Failed to initialize glew.\n");
             return NU_FAILURE;

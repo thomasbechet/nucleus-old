@@ -2,10 +2,10 @@
 
 #include "common/logger.h"
 #include "memory/framebuffer.h"
+#include "scene/scene.h"
+#include "asset/mesh.h"
 
 #include "../glfw/module/interface.h"
-
-#include <cglm/cglm.h>
 
 typedef struct {
     nuglfw_window_interface_t glfw_interface;
@@ -15,6 +15,8 @@ typedef struct {
 static nusr_data_t _data;
 
 static void profile(void);
+static void test_initialize(void);
+static void test_update(void);
 
 static nu_result_t load_glfw_interface(void)
 {
@@ -38,36 +40,6 @@ static nu_result_t load_glfw_interface(void)
     return NU_SUCCESS;
 }
 
-static void project_vertex(const vec3 v, vec2 out)
-{
-    const float near = 0.1f;
-    const float l = -1;
-    const float r = 1;
-    const float b = -1;
-    const float t = 1;
-
-    /* convert to screen space */
-    vec2 pscreen = {
-        (near * v[0]) / v[2],
-        (near * v[1]) / v[2]
-    };
-
-    /* convert to NDC space */
-    vec2 pNDC = {
-        2 * pscreen[0] / (r - l) - (r + l) / (r - l),
-        2 * pscreen[1] / (t - b) - (t + b) / (t - b)
-    };
-
-    /* convert to raster space */
-    out[0] = (pscreen[0] + 1) / 2 * _data.framebuffer.width;
-    out[1] = (1 - pscreen[1]) / 2 * _data.framebuffer.height;
-}
-
-static float edge_function(const vec2 a, const vec2 b, const vec2 c)
-{
-    return (c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0]);
-}
-
 nu_result_t nusr_initialize(void)
 {
     /* loading glfw interface */
@@ -77,11 +49,21 @@ nu_result_t nusr_initialize(void)
         return NU_FAILURE;
     }
 
+    /* initialize assets */
+    nu_info(NUSR_LOGGER_NAME"Initializing asset buffers...\n");
+    nusr_mesh_initialize();
+
+    /* initialize scene */
+    nu_info(NUSR_LOGGER_NAME"Intializing scene memory...\n");
+    nusr_scene_initialize();
+
     /* creating framebuffer */
     nu_info(NUSR_LOGGER_NAME"Creating framebuffer...\n");
     nusr_framebuffer_create(&_data.framebuffer, 640, 360);
     //nusr_framebuffer_create(&_data.framebuffer, 1920, 1080);
     //nusr_framebuffer_create(&_data.framebuffer, 256, 144);
+
+    test_initialize();
 
     return NU_SUCCESS;
 }
@@ -90,98 +72,20 @@ nu_result_t nusr_terminate(void)
     /* free framebuffer */
     nusr_framebuffer_destroy(&_data.framebuffer);
 
+    /* terminate scene */
+    nusr_scene_terminate();
+
+    /* terminate assets */
+    nusr_mesh_terminate();
+
     return NU_SUCCESS;
 }
 nu_result_t nusr_render(void)
 {
-    mat4 camera_mat4;
-    mat4 camera_mat4_inv;
-    glm_lookat((vec3){1.0f, 1.0f, 0.0f}, (vec3){0.0f, 0.0f, 0.0f}, (vec3){0.0f, 1.0f, 0.0f}, camera_mat4);
-    glm_mat4_inv(camera_mat4, camera_mat4_inv);
-
-    static const vec3 vertices[8] =
-    {
-        {-1, -1, -1},
-        {1, -1, -1},
-        {1, 1, -1},
-        {-1, 1, -1},
-        {-1, -1, 1},
-        {1, -1, 1},
-        {1, 1, 1},
-        {-1, 1, 1}
-    };
-    static const vec2 uvs[4] =
-    {
-        {0, 0},
-        {1, 0},
-        {1, 1},
-        {0, 1}
-    };
-    static const uint32_t indices[6 * 6] =
-    {
-        0, 1, 3, 3, 1, 2,
-        1, 5, 2, 2, 5, 6,
-        5, 4, 6, 6, 4, 7,
-        4, 0, 7, 7, 0, 3,
-        3, 2, 7, 7, 2, 6,
-        4, 5, 0, 0, 5, 1
-    };
-    static const uint32_t vcount = 6 * 6;
+    test_update();
 
     nusr_framebuffer_clear(&_data.framebuffer, 0x0);
-
-    for (uint32_t vi = 0; vi < vcount; vi += 3) {
-
-        vec2 v0, v1, v2;
-
-        /* transform vertices */
-        vec4 tv0, tv1, tv2;
-        glm_vec4((float*)vertices[indices[vi + 0]], 1.0f, tv0);
-        glm_vec4((float*)vertices[indices[vi + 1]], 1.0f, tv1);
-        glm_vec4((float*)vertices[indices[vi + 2]], 1.0f, tv2);
-        glm_mat4_mulv(camera_mat4_inv, tv0, tv0);
-        glm_mat4_mulv(camera_mat4_inv, tv1, tv1);
-        glm_mat4_mulv(camera_mat4_inv, tv2, tv2);
-
-        /* project vertices */
-        project_vertex((float*)tv0, v0);
-        project_vertex((float*)tv1, v1);
-        project_vertex((float*)tv2, v2);
-
-        /* compute raster rectangle */
-        uint32_t wmin, wmax, hmin, hmax;
-        wmin = NU_MIN(v0[0], NU_MIN(v1[0], v2[0]));
-        wmax = NU_MAX(v0[0], NU_MAX(v1[0], v2[0]));
-        hmin = NU_MIN(v0[1], NU_MIN(v1[1], v2[1]));
-        hmax = NU_MAX(v0[1], NU_MAX(v1[1], v2[1]));
-
-        vec3 c0 = {1, 0, 0};
-        vec3 c1 = {0, 1, 0};
-        vec3 c2 = {0, 0, 1};
-
-        float area = edge_function(v0, v1, v2);
-
-        for (uint32_t j = hmin; j < hmax; j++) {
-            for (uint32_t i = wmin; i < wmax; i++) {
-                vec2 p = {i + 0.5, j + 0.5};
-                float w0 = edge_function(v1, v2, p);
-                float w1 = edge_function(v2, v0, p);
-                float w2 = edge_function(v0, v1, p);
-                if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-                    w0 /= area;
-                    w1 /= area;
-                    w2 /= area;
-
-                    float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
-                    float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
-                    float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
-
-                    nusr_framebuffer_set_rgb(&_data.framebuffer, i, j, r, g, b);
-                }
-            }
-        }
-    }
-
+    nusr_scene_render(&_data.framebuffer);
     _data.glfw_interface.present_surface(_data.framebuffer.width, _data.framebuffer.height, _data.framebuffer.pixels);
     
     profile();
@@ -208,4 +112,85 @@ static void profile(void)
         avg_count = 0;
     }
     QueryPerformanceCounter(&t1);
+}
+
+uint32_t staticmesh_id;
+static void test_initialize(void)
+{
+    static vec3 vertices[] =
+    {
+        {-1, -1, -1},
+        { 1, -1, -1},
+        { 1,  1, -1},
+        {-1,  1, -1},
+        {-1, -1,  1},
+        { 1, -1,  1},
+        { 1,  1,  1},
+        {-1,  1,  1}
+    };
+    static vec2 uvs[] =
+    {
+        {0, 0},
+        {1, 0},
+        {1, 1},
+        {0, 1}
+    };
+    static vec3 colors[] = {
+        {1, 1, 1},
+        {1, 1, 1},
+        {1, 1, 1},
+        {1, 1, 1},
+        {1, 1, 1},
+        {1, 1, 1},
+        {1, 1, 1},
+        {1, 1, 1}
+    };
+    static uint32_t indices[] =
+    {
+        0, 1, 3, 3, 1, 2,
+        1, 5, 2, 2, 5, 6,
+        5, 4, 6, 6, 4, 7,
+        4, 0, 7, 7, 0, 3,
+        3, 2, 7, 7, 2, 6,
+        4, 5, 0, 0, 5, 1
+    };
+    static uint32_t vcount = 6 * 6;
+
+    nusr_mesh_create_info_t mesh_info = {};
+    mesh_info.vertice_count = vcount;
+    mesh_info.positions = vertices;
+    mesh_info.uvs = uvs;
+    mesh_info.colors = colors;
+    mesh_info.indices = indices;
+    uint32_t mesh_id;
+    if (nusr_mesh_create(&mesh_id, &mesh_info) != NU_SUCCESS) {
+        nu_warning("Failed to create mesh.\n");
+    }
+
+    nusr_staticmesh_create_info_t staticmesh_info = {};
+    staticmesh_info.mesh = mesh_id;
+    glm_mat4_identity(staticmesh_info.transform);
+    
+    if (nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info) != NU_SUCCESS) {
+        nu_warning("Failed to create staticmesh.\n");
+    }
+
+    glm_translate(staticmesh_info.transform, (vec3){2.5f, 0.0f, 0.0f});
+    glm_scale(staticmesh_info.transform, (vec3){0.5f, 0.5f, 0.5f});
+    if (nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info) != NU_SUCCESS) {
+        nu_warning("Failed to create staticmesh.\n");
+    }
+
+    nusr_scene_camera_set_eye((vec3){5, 5, 5});
+}
+static void test_update(void)
+{
+    static float angle = 0.0f;
+    angle += 0.001f;
+    mat4 m;
+    glm_mat4_identity(m);
+    glm_rotate(m, angle, (vec3){0.0, 1.0, 0.0});
+    glm_translate(m, (vec3){2.5, 0.0, 0.0});
+    glm_scale(m, (vec3){0.5, 0.5, 0.5});
+    nusr_scene_staticmesh_set_transform(staticmesh_id, m);
 }
