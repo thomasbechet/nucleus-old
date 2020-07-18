@@ -8,6 +8,12 @@ typedef enum {
     NU_WINDOW_API_GLFW = 1
 } nu_window_api_t;
 
+typedef enum {
+    NU_WINDOW_MODE_FULLSCREEN,
+    NU_WINDOW_MODE_WINDOWED,
+    NU_WINDOW_MODE_BORDERLESS
+} nu_window_mode_t;
+
 /* private system functions */
 nu_result_t nu_system_window_load(void);
 nu_result_t nu_system_window_unload(void);

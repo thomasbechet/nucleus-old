@@ -31,9 +31,12 @@ nu_result_t nu_window_interface_loader(nu_window_interface_t *interface)
 }
 nu_result_t nu_input_interface_loader(nu_input_interface_t *interface)
 {
-    interface->initialize = nuglfw_input_initialize;
-    interface->terminate  = nuglfw_input_terminate;
-    interface->update     = nuglfw_input_update;
+    interface->initialize         = nuglfw_input_initialize;
+    interface->terminate          = nuglfw_input_terminate;
+    interface->update             = nuglfw_input_update;
+    interface->get_keyboard_state = nuglfw_input_get_keyboard_state;
+    interface->get_mouse_state    = nuglfw_input_get_mouse_state;
+    interface->get_mouse_motion   = nuglfw_input_get_mouse_motion;
 
     return NU_SUCCESS;
 }

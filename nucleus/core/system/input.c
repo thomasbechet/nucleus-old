@@ -17,7 +17,7 @@ nu_result_t nu_system_input_load(void)
     nu_result_t result;
     result = NU_SUCCESS;
 
-    nu_input_api_t api = nu_config_get().input_api;
+    nu_input_api_t api = nu_config_get().input.api;
 
     /* load module */
     if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
@@ -57,7 +57,7 @@ nu_result_t nu_system_input_unload(void)
     _system.interface.terminate();
 
     /* unload module */
-    if (nu_config_get().input_api == NU_INPUT_API_GLFW) {
+    if (nu_config_get().input.api == NU_INPUT_API_GLFW) {
         /* nothing to do */
     }
 
@@ -74,3 +74,15 @@ const nu_module_t *nu_system_input_get_module(void)
     return &_system.module;
 }
 
+nu_result_t nu_input_get_keyboard_state(nu_button_state_t *state, nu_keyboard_t button)
+{
+    return _system.interface.get_keyboard_state(state, button);
+}
+nu_result_t nu_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t button)
+{
+    return _system.interface.get_mouse_state(state, button);
+}
+nu_result_t nu_input_get_mouse_motion(vec2 motion)
+{
+    return _system.interface.get_mouse_motion(motion);
+}

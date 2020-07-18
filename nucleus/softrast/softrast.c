@@ -1,6 +1,7 @@
 #include "softrast.h"
 
 #include "common/logger.h"
+#include "common/config.h"
 #include "memory/framebuffer.h"
 #include "scene/scene.h"
 #include "asset/mesh.h"
@@ -59,9 +60,10 @@ nu_result_t nusr_initialize(void)
 
     /* creating framebuffer */
     nu_info(NUSR_LOGGER_NAME"Creating framebuffer...\n");
-    nusr_framebuffer_create(&_data.framebuffer, 640, 360);
-    //nusr_framebuffer_create(&_data.framebuffer, 1920, 1080);
-    //nusr_framebuffer_create(&_data.framebuffer, 256, 144);
+    uint32_t default_width, default_height;
+    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_WIDTH, &default_width, 640);
+    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_HEIGHT, &default_height, 360);
+    nusr_framebuffer_create(&_data.framebuffer, default_width, default_height);
 
     test_initialize();
 
@@ -93,28 +95,20 @@ nu_result_t nusr_render(void)
     return NU_SUCCESS;
 }
 
-#include <Windows.h>
 static void profile(void)
 {
-    static LARGE_INTEGER frequency;
-    static LARGE_INTEGER t1, t2;
-    static double delta;
-    static double avg = 0.0;
+    static float avg = 0.0;
     static uint32_t avg_count = 0;
-    QueryPerformanceCounter(&t2);
-    QueryPerformanceFrequency(&frequency);
-    delta = (t2.QuadPart - t1.QuadPart) * 1000.0 / frequency.QuadPart;
+    float delta = nu_context_get_delta_time();
     avg += delta;
     avg_count++;
     if (avg_count > 50) {
-        nu_info("delta %lf\n", avg / (double)avg_count);
+        nu_info("delta %f\n", avg / (float)avg_count);
         avg = 0.0;
         avg_count = 0;
     }
-    QueryPerformanceCounter(&t1);
 }
 
-uint32_t staticmesh_id;
 static void test_initialize(void)
 {
     static vec3 vertices[] =
@@ -167,31 +161,68 @@ static void test_initialize(void)
         nu_warning("Failed to create mesh.\n");
     }
 
+    uint32_t staticmesh_id;
     nusr_staticmesh_create_info_t staticmesh_info = {};
     staticmesh_info.mesh = mesh_id;
     glm_mat4_identity(staticmesh_info.transform);
-    
-    if (nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info) != NU_SUCCESS) {
-        nu_warning("Failed to create staticmesh.\n");
-    }
+    nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
-    glm_translate(staticmesh_info.transform, (vec3){2.5f, 0.0f, 0.0f});
+    glm_mat4_identity(staticmesh_info.transform);
+    glm_translate(staticmesh_info.transform, (vec3){3, 0, 0});
     glm_scale(staticmesh_info.transform, (vec3){0.5f, 0.5f, 0.5f});
-    if (nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info) != NU_SUCCESS) {
-        nu_warning("Failed to create staticmesh.\n");
-    }
+    nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
-    nusr_scene_camera_set_eye((vec3){3, 3, 3});
-    nusr_scene_camera_set_fov(70.0);
+    glm_mat4_identity(staticmesh_info.transform);
+    glm_translate(staticmesh_info.transform, (vec3){-3, 0, 0});
+    glm_scale(staticmesh_info.transform, (vec3){0.2, 2, 0.5});
+    nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 }
 static void test_update(void)
 {
-    static float angle = 0.0f;
-    angle += 0.001f;
-    mat4 m;
-    glm_mat4_identity(m);
-    glm_rotate(m, angle, (vec3){0.0, 1.0, 0.0});
-    glm_translate(m, (vec3){2.5, 0.0, 0.0});
-    glm_scale(m, (vec3){0.5, 0.5, 0.5});
-    nusr_scene_staticmesh_set_transform(staticmesh_id, m);
+    /* quit handling */
+    nu_button_state_t escape_state;
+    nu_input_get_keyboard_state(&escape_state, NU_KEYBOARD_ESCAPE);
+    if (escape_state == NU_BUTTON_PRESSED) {
+        nu_context_request_stop();
+    }
+
+    /* camera update */
+    vec2 motion;
+    nu_input_get_mouse_motion(motion);
+    static float yaw = 0.0f;
+    static float pitch = 0.0f;
+    yaw += motion[0] * 0.3f;
+    pitch -= motion[1] * 0.3f;
+    if (pitch < -90.0f) pitch = -90.0f;
+    if (pitch > 90.0f) pitch = 90.0f;
+    static mat4 camera;
+    glm_mat4_identity(camera);
+    glm_rotate(camera, -glm_rad(yaw), (vec3){0, 1, 0});
+    glm_rotate(camera, glm_rad(pitch), (vec3){1, 0, 0});
+    vec3 forward;
+    glm_mat4_mulv3(camera, (vec3){0, 0, -1}, 0, forward);
+    glm_normalize(forward);
+
+    static vec3 eye = {0, 0, 5};
+    vec3 move;
+    glm_vec3_fill(move, 0);
+    nu_button_state_t z_state, s_state, q_state, d_state;
+    nu_input_get_keyboard_state(&z_state, NU_KEYBOARD_W);
+    nu_input_get_keyboard_state(&s_state, NU_KEYBOARD_S);
+    nu_input_get_keyboard_state(&q_state, NU_KEYBOARD_A);
+    nu_input_get_keyboard_state(&d_state, NU_KEYBOARD_D);
+    if (z_state == NU_BUTTON_PRESSED) move[2] -= 1;
+    if (s_state == NU_BUTTON_PRESSED) move[2] += 1;
+    if (q_state == NU_BUTTON_PRESSED) move[0] -= 1;
+    if (d_state == NU_BUTTON_PRESSED) move[0] += 1;
+    glm_mat4_mulv3(camera, move, 0, move);
+    glm_normalize(move);
+    glm_vec3_scale(move, 0.01 * nu_context_get_delta_time(), move);
+    glm_vec3_add(eye, move, eye);
+    
+    vec3 center;
+    glm_vec3_add(eye, forward, center);
+    nusr_scene_camera_set_eye(eye);
+    nusr_scene_camera_set_center(center);
+    nusr_scene_camera_set_fov(glm_rad(90.0));
 }

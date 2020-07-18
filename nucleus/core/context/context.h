@@ -10,5 +10,6 @@ typedef struct {
 
 NU_API nu_result_t nu_init(const nu_init_info_t *info);
 NU_API nu_result_t nu_context_request_stop(void);
+NU_API float nu_context_get_delta_time(void);
 
 #endif

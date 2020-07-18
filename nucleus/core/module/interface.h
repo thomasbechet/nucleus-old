@@ -43,6 +43,9 @@ typedef struct {
     nu_result_t (*initialize)(void);
     nu_result_t (*terminate)(void);
     nu_result_t (*update)(void);
+    nu_result_t (*get_keyboard_state)(nu_button_state_t*, nu_keyboard_t);
+    nu_result_t (*get_mouse_state)(nu_button_state_t*, nu_mouse_t);
+    nu_result_t (*get_mouse_motion)(vec2);
 } nu_input_interface_t;
 
 typedef nu_result_t (*nu_input_interface_loader_pfn_t)(nu_input_interface_t*);

@@ -3,6 +3,9 @@
 
 #include "../../core/nucleus_core.h"
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 /* window interface */
 nu_result_t nuglfw_window_initialize(void);
 nu_result_t nuglfw_window_terminate(void);
@@ -17,5 +20,8 @@ nu_result_t nuglfw_present_surface(
     uint32_t height,
     void *pixels
 );
+
+/* utility functions */
+GLFWwindow *nuglfw_get_window(void);
 
 #endif

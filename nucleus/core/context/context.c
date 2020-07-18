@@ -15,8 +15,9 @@ typedef struct {
 } nu_context_loaded_state_t;
 
 typedef struct {
-    bool should_stop;
     nu_context_loaded_state_t loaded;
+    float delta_time;
+    bool should_stop;
 } nu_context_t;
 
 static nu_context_t _context;
@@ -28,8 +29,6 @@ static nu_result_t nu_context_initialize(const nu_init_info_t *info)
 {
     nu_result_t result;
     result = NU_SUCCESS;
-
-    nu_info(NU_CONTEXT_LOG_NAME"Starting context...\n");
 
     memset(&_context, 0, sizeof(nu_context_t));
     _context.should_stop     = false;
@@ -45,6 +44,9 @@ static nu_result_t nu_context_initialize(const nu_init_info_t *info)
         nu_fatal(NU_CONTEXT_LOG_NAME"Failed to configure the engine.\n");
     }
     _context.loaded.config = true;
+    if (nu_config_get().context.log_config) {
+        nu_config_log();
+    }
 
     /* load task system */
     nu_info(NU_CONTEXT_LOG_NAME"Starting task system...\n");
@@ -117,13 +119,17 @@ static nu_result_t nu_context_terminate(void)
 
 static nu_result_t nu_context_run(void)
 {
-    const float FIXED_TIMESTEP = 1.0f / 50.0f;
-    const float MAXIMUM_TIMESTEP = 1.0f / 10.0f;
-    float delta, accumulator, delta_time;
+    const float FIXED_TIMESTEP = 1.0f / 50.0f * 1000.0f;
+    const float MAXIMUM_TIMESTEP = 1.0f / 10.0f * 1000.0f;
+    float delta, accumulator;
+
+    nu_timer_t timer;
+    nu_timer_start(&timer);
 
     while (!_context.should_stop) {
         /* compute delta */
-        delta = 0.0f;
+        delta = nu_timer_get_time_elapsed(&timer);
+        nu_timer_start(&timer);
 
         if (delta > MAXIMUM_TIMESTEP)
             delta = MAXIMUM_TIMESTEP; /* slowing down */
@@ -136,14 +142,14 @@ static nu_result_t nu_context_run(void)
         /* process inputs */
         nu_system_input_update();
 
-        delta_time = FIXED_TIMESTEP;
+        _context.delta_time = FIXED_TIMESTEP;
         while (accumulator >= FIXED_TIMESTEP) {
             accumulator -= FIXED_TIMESTEP;
 
             /* process fixed update */
         }
 
-        delta_time = delta;
+        _context.delta_time = delta;
 
         /* process frame update */
 
@@ -190,6 +196,9 @@ nu_result_t nu_init(const nu_init_info_t *info)
 nu_result_t nu_context_request_stop(void)
 {
     _context.should_stop = true;
-
     return NU_SUCCESS;
+}
+float nu_context_get_delta_time(void)
+{
+    return _context.delta_time;
 }

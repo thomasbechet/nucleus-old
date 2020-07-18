@@ -87,6 +87,13 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *framebuffer)
             glm_project(mesh->positions[vi + 1], mvp, viewport, v1);
             glm_project(mesh->positions[vi + 2], mvp, viewport, v2);
 
+            glm_vec2_maxv(v0, (vec2){0, 0}, v0);
+            glm_vec2_maxv(v1, (vec2){0, 0}, v1);
+            glm_vec2_maxv(v2, (vec2){0, 0}, v2);
+            glm_vec2_minv(v0, (vec2){framebuffer->width, framebuffer->height}, v0);
+            glm_vec2_minv(v1, (vec2){framebuffer->width, framebuffer->height}, v1);
+            glm_vec2_minv(v2, (vec2){framebuffer->width, framebuffer->height}, v2);
+
             /* compute raster rectangle */
             uint32_t wmin, wmax, hmin, hmax;
             wmin = NU_MIN(v0[0], NU_MIN(v1[0], v2[0]));

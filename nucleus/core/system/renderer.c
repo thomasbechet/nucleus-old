@@ -27,7 +27,7 @@ nu_result_t nu_system_renderer_load(void)
     result = NU_SUCCESS;
 
     memset(&_system, 0, sizeof(nu_system_renderer_t));
-    nu_renderer_api_t api = nu_config_get().renderer_api;
+    nu_renderer_api_t api = nu_config_get().renderer.api;
 
     /* load renderer module */
     result = nu_module_load(&_system.module, nu_renderer_api_names[api]);
