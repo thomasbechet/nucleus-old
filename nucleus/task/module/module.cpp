@@ -1,4 +1,4 @@
-#include "task.hpp"
+#include "module.hpp"
 
 #include "interface.h"
 #include "../thread_pool.hpp"
@@ -43,8 +43,8 @@ static nu_result_t nutk_task_wait(nu_task_t task)
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
-    info->type = NU_MODULE_TYPE_TASK;
     info->id = NUTK_MODULE_ID;
+    info->flags = NU_MODULE_FLAG_TYPE_TASK;
     info->interface_count = interface_count;
     info->interfaces = interfaces;
 

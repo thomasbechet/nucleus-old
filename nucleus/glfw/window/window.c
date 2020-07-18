@@ -1,11 +1,11 @@
-#include "context.h"
+#include "window.h"
 
 #include <GL/glew.h>
 
+#include "../common/logger.h"
 #include "callback.h"
-#include "logger.h"
 #include "surface.h"
-#include "../vulkan/module/interface.h"
+#include "../../vulkan/module/interface.h"
 
 static GLFWwindow *_window;
 

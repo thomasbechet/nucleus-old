@@ -1,8 +1,9 @@
 #ifndef NU_CONFIG_H
 #define NU_CONFIG_H
 
-#include "../system/renderer.h"
 #include "../system/window.h"
+#include "../system/input.h"
+#include "../system/renderer.h"
 
 #define NU_CONFIG_CONTEXT_SECTION       "context"
 #define NU_CONFIG_CONTEXT_VERSION_MAJOR "version_major"
@@ -12,11 +13,15 @@
 #define NU_CONFIG_WINDOW_SECTION        "window"
 #define NU_CONFIG_WINDOW_API            "api"
 
+#define NU_CONFIG_INPUT_SECTION         "input"
+#define NU_CONFIG_INPUT_API             "api"
+
 #define NU_CONFIG_RENDERER_SECTION      "renderer"
 #define NU_CONFIG_RENDERER_API          "api"
 
 typedef struct {
     nu_window_api_t window_api;
+    nu_input_api_t input_api;
     nu_renderer_api_t renderer_api;
 } nu_config_t;
 

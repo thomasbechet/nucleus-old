@@ -1,5 +1,5 @@
-#ifndef NUSR_RENDERER_H
-#define NUSR_RENDERER_H
+#ifndef NUSR_MODULE_H
+#define NUSR_MODULE_H
 
 #include "interface.h"
 

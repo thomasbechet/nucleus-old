@@ -30,6 +30,15 @@ static nu_result_t load_ini_file(void)
         _data.config.window_api = NU_WINDOW_API_NONE;
     }
 
+    /* input api */
+    const char *input_api;
+    nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_API, &input_api, "");
+    if (NU_MATCH(input_api, "glfw")) {
+        _data.config.input_api = NU_INPUT_API_GLFW;
+    } else {
+        _data.config.input_api = NU_INPUT_API_NONE;
+    }
+
     /* renderer api */
     const char *renderer_api;
     nu_config_get_string(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, &renderer_api, "");

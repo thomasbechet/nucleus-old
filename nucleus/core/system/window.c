@@ -35,14 +35,14 @@ nu_result_t nu_system_window_load(void)
     nu_window_interface_loader_pfn_t load_interface;
     result = nu_module_load_function(&_system.module, NU_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_WINDOW_NAME" Failed to load window loader.\n");
+        nu_warning(NU_LOGGER_WINDOW_NAME"Failed to load window loader.\n");
         return result;
     }
 
     /* load window interface */
     result = load_interface(&_system.interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_WINDOW_NAME" Failed to load interface.\n");
+        nu_warning(NU_LOGGER_WINDOW_NAME"Failed to load interface.\n");
         return result;
     }
 

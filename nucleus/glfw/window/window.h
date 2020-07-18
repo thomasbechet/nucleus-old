@@ -1,7 +1,7 @@
-#ifndef NUGLFW_CONTEXT_H
-#define NUGLFW_CONTEXT_H
+#ifndef NUGLFW_WINDOW_H
+#define NUGLFW_WINDOW_H
 
-#include "../core/nucleus_core.h"
+#include "../../core/nucleus_core.h"
 
 /* window interface */
 nu_result_t nuglfw_window_initialize(void);

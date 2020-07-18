@@ -4,14 +4,15 @@
 #include "../common/common.h"
 
 typedef enum {
-    NU_MODULE_TYPE_TASK,
-    NU_MODULE_TYPE_WINDOW,
-    NU_MODULE_TYPE_RENDERER,
-    NU_MODULE_TYPE_PLUGIN
-} nu_module_type_t;
+    NU_MODULE_FLAG_TYPE_TASK      = 1 << 0,
+    NU_MODULE_FLAG_TYPE_WINDOW    = 1 << 1,
+    NU_MODULE_FLAG_TYPE_INPUT     = 1 << 2,
+    NU_MODULE_FLAG_TYPE_RENDERER  = 1 << 3,
+    NU_MODULE_FLAG_TYPE_PLUGIN    = 1 << 4
+} nu_module_flags_t;
 
 typedef struct {
-    nu_module_type_t type;
+    uint32_t flags;
     uint32_t id;
     uint32_t interface_count;
     const char **interfaces;

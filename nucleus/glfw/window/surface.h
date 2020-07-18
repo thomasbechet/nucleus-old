@@ -1,7 +1,7 @@
 #ifndef NUGLFW_SURFACE_H
 #define NUGLFW_SURFACE_H
 
-#include "../core/nucleus_core.h"
+#include "../../core/nucleus_core.h"
 
 nu_result_t nuglfw_surface_create(void);
 nu_result_t nuglfw_surface_destroy(void);

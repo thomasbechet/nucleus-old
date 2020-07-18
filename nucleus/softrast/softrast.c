@@ -181,7 +181,8 @@ static void test_initialize(void)
         nu_warning("Failed to create staticmesh.\n");
     }
 
-    nusr_scene_camera_set_eye((vec3){5, 5, 5});
+    nusr_scene_camera_set_eye((vec3){3, 3, 3});
+    nusr_scene_camera_set_fov(70.0);
 }
 static void test_update(void)
 {

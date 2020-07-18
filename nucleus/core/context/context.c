@@ -10,6 +10,7 @@ typedef struct {
     bool config;
     bool task;
     bool window;
+    bool input;
     bool renderer;
 } nu_context_loaded_state_t;
 
@@ -63,6 +64,15 @@ static nu_result_t nu_context_initialize(const nu_init_info_t *info)
     }
     _context.loaded.window = true;
 
+    /* load input system */
+    nu_info(NU_CONTEXT_LOG_NAME"Starting input system...\n");
+    result = nu_system_input_load();
+    if (result != NU_SUCCESS) {
+        nu_context_terminate();
+        return result;
+    }
+    _context.loaded.input = true;
+
     /* load renderer system */
     nu_info(NU_CONTEXT_LOG_NAME"Starting renderer system...\n");
     result = nu_system_renderer_load();
@@ -80,6 +90,11 @@ static nu_result_t nu_context_terminate(void)
         nu_info(NU_CONTEXT_LOG_NAME"Stopping renderer system...\n");
         nu_system_renderer_unload();
         _context.loaded.renderer = false;
+    }
+    if (_context.loaded.input) {
+        nu_info(NU_CONTEXT_LOG_NAME"Stopping input system...\n");
+        nu_system_input_unload();
+        _context.loaded.input = false;
     }
     if (_context.loaded.window) {
         nu_info(NU_CONTEXT_LOG_NAME"Stopping window system...\n");
@@ -102,8 +117,37 @@ static nu_result_t nu_context_terminate(void)
 
 static nu_result_t nu_context_run(void)
 {
+    const float FIXED_TIMESTEP = 1.0f / 50.0f;
+    const float MAXIMUM_TIMESTEP = 1.0f / 10.0f;
+    float delta, accumulator, delta_time;
+
     while (!_context.should_stop) {
+        /* compute delta */
+        delta = 0.0f;
+
+        if (delta > MAXIMUM_TIMESTEP)
+            delta = MAXIMUM_TIMESTEP; /* slowing down */
+
+        accumulator += delta;
+
+        /* process window */
         nu_system_window_update();
+
+        /* process inputs */
+        nu_system_input_update();
+
+        delta_time = FIXED_TIMESTEP;
+        while (accumulator >= FIXED_TIMESTEP) {
+            accumulator -= FIXED_TIMESTEP;
+
+            /* process fixed update */
+        }
+
+        delta_time = delta;
+
+        /* process frame update */
+
+        /* process render */
         nu_system_renderer_render();
     }
 

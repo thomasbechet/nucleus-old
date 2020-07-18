@@ -1,6 +1,6 @@
 #include "callback.h"
 
-#include "../core/nucleus_core.h"
+#include "../../core/nucleus_core.h"
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {

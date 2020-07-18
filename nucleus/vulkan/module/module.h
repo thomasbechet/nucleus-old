@@ -1,5 +1,5 @@
-#ifndef NUVK_MODULE_RENDERER_H
-#define NUVK_MODULE_RENDERER_H
+#ifndef NUVK_MODULE_H
+#define NUVK_MODULE_H
 
 #include "../../core/nucleus_core.h"
 

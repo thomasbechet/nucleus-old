@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "module.h"
 
 #include "../softrast.h"
 #include "../asset/mesh.h"
@@ -13,7 +13,7 @@ static const char *interfaces[] = {
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
     info->id = NUSR_MODULE_ID;
-    info->type = NU_MODULE_TYPE_RENDERER;
+    info->flags = NU_MODULE_FLAG_TYPE_RENDERER;
     info->interface_count = interface_count;
     info->interfaces = interfaces;
 
