@@ -173,9 +173,18 @@ static void test_initialize(void)
     nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
     glm_mat4_identity(staticmesh_info.transform);
-    glm_translate(staticmesh_info.transform, (vec3){-3, 0, 0});
-    glm_scale(staticmesh_info.transform, (vec3){0.2, 2, 0.5});
+    glm_translate(staticmesh_info.transform, (vec3){0, -4, 0});
+    glm_scale(staticmesh_info.transform, (vec3){100.0, 0.1, 100.0});
     nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+
+    for (uint32_t i = 0; i < 25; i++) {
+        for (uint32_t j = 0; j < 20; j++) {
+            glm_mat4_identity(staticmesh_info.transform);
+            glm_translate(staticmesh_info.transform, (vec3){i * 3, 0, j * 3});
+            glm_scale(staticmesh_info.transform, (vec3){0.5, 0.5, 0.5});
+            nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+        }
+    }
 }
 static void test_update(void)
 {

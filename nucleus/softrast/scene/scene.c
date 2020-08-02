@@ -2,7 +2,7 @@
 
 #include "../asset/mesh.h"
 
-#define MAX_STATICMESH_COUNT 64
+#define MAX_STATICMESH_COUNT 512
 
 typedef struct {
     vec3 eye;
@@ -27,9 +27,106 @@ typedef struct {
 
 static nusr_scene_data_t _data;
 
-static float edge_function(const vec2 a, const vec2 b, const vec2 c)
+static float pixel_coverage(const vec2 a, const vec2 b, const vec2 c)
 {
     return (c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0]);
+}
+static bool project_vertex(vec3 pos, mat4 m, vec4 vp, vec3 dest)
+{
+    CGLM_ALIGN(16) vec4 pos4, vone = GLM_VEC4_ONE_INIT;
+
+    /* multiply MVP */
+    glm_vec4(pos, 1.0f, pos4);
+    glm_mat4_mulv(m, pos4, pos4);
+
+    /* divide w */
+    glm_vec4_scale(pos4, 1.0f / pos4[3], pos4);
+    
+    /* (p + 1) / 2 */
+    glm_vec4_add(pos4, vone, pos4);
+    glm_vec4_scale(pos4, 0.5f, pos4);
+
+    /* convert to viewport */
+    dest[0] = pos4[0] * vp[2] + vp[0];
+    dest[1] = pos4[1] * vp[3] + vp[1];
+    dest[2] = pos4[2];
+
+    return true;
+}
+static void _vertex_transform(vec3 pos, mat4 m, vec4 dest)
+{
+    /* multiply MVP */
+    glm_vec4(pos, 1.0f, dest);
+    glm_mat4_mulv(m, dest, dest);
+}
+static void _vertex_raster(const vec4 vp, vec4 v, vec3 dest)
+{
+    /* (p + 1) / 2 */
+    glm_vec4_adds(v, 1.0f, v);
+    glm_vec4_scale(v, 0.5f, v);
+
+    /* convert to viewport */
+    dest[0] = v[0] * vp[2] + vp[0];
+    dest[1] = v[1] * vp[3] + vp[1];
+    dest[2] = v[2];
+}
+static bool clip_2D(const vec2 v0, const vec2 v1, const vec2 v2, const vec4 vp, vec4 tvp)
+{
+    float xmin = NU_MIN(v0[0], NU_MIN(v1[0], v2[0]));
+    float xmax = NU_MAX(v0[0], NU_MAX(v1[0], v2[0]));
+    float ymin = NU_MIN(v0[1], NU_MIN(v1[1], v2[1]));
+    float ymax = NU_MAX(v0[1], NU_MAX(v1[1], v2[1]));
+
+    if (xmin > vp[2] || xmax < 0 || ymin > vp[3] || ymax < 0) return false;
+
+    tvp[0] = NU_MAX(0, xmin);
+    tvp[1] = NU_MAX(0, ymin);
+    tvp[2] = NU_MIN(vp[2], xmax);
+    tvp[3] = NU_MIN(vp[3], ymax);
+
+    return true;
+}
+static bool project_and_clip(
+    const vec3 v0, const vec3 v1, const vec3 v2,
+    vec3 out_v0, vec3 out_v1, vec3 out_v2,
+    const mat4 mvp, const vec4 vp, vec4 tvp
+)
+{
+    vec4 tv0, tv1, tv2;
+    _vertex_transform((float*)v0, (vec4*)mvp, tv0);
+    _vertex_transform((float*)v1, (vec4*)mvp, tv1);
+    _vertex_transform((float*)v2, (vec4*)mvp, tv2);
+
+    /* clip depth */
+    if (tv0[3] <= 0 && tv1[3] <= 0 && tv2[3] <= 0) return false;
+
+    bool clip = true;
+    clip &= ((tv0[0] < -tv0[3] || tv0[0] > tv0[3]) || (tv0[1] < -tv0[3] || tv0[1] > tv0[3]) || (tv0[1] < -tv0[3] || tv0[1] > tv0[3]));
+    clip &= ((tv1[0] < -tv1[3] || tv1[0] > tv1[3]) || (tv1[1] < -tv1[3] || tv1[1] > tv1[3]) || (tv1[1] < -tv1[3] || tv1[1] > tv1[3]));
+    clip &= ((tv2[0] < -tv2[3] || tv2[0] > tv2[3]) || (tv2[1] < -tv2[3] || tv2[1] > tv2[3]) || (tv2[1] < -tv2[3] || tv2[1] > tv2[3]));
+    if (clip) return false;
+
+    /* divide w (NDC space) */
+    glm_vec4_scale(tv0, 1.0f / tv0[3], tv0);
+    glm_vec4_scale(tv1, 1.0f / tv1[3], tv1);
+    glm_vec4_scale(tv2, 1.0f / tv2[3], tv2);
+
+    /* project to viewport */
+    _vertex_raster(vp, tv0, out_v0);
+    _vertex_raster(vp, tv1, out_v1);
+    _vertex_raster(vp, tv2, out_v2);
+
+    /* compute triangle viewport */
+    float xmin = NU_MIN(out_v0[0], NU_MIN(out_v1[0], out_v2[0]));
+    float xmax = NU_MAX(out_v0[0], NU_MAX(out_v1[0], out_v2[0]));
+    float ymin = NU_MIN(out_v0[1], NU_MIN(out_v1[1], out_v2[1]));
+    float ymax = NU_MAX(out_v0[1], NU_MAX(out_v1[1], out_v2[1]));
+    tvp[0] = NU_MAX(0, xmin);
+    tvp[1] = NU_MAX(0, ymin);
+    tvp[2] = NU_MIN(vp[2], xmax);
+    tvp[3] = NU_MIN(vp[3], ymax);
+
+    return true;
 }
 
 nu_result_t nusr_scene_initialize(void)
@@ -82,41 +179,63 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *framebuffer)
         for (uint32_t vi = 0; vi < mesh->vertex_count; vi += 3) {
             vec4 viewport = {0, 0, framebuffer->width, framebuffer->height};
             
+            vec4 tvp;
             vec3 v0, v1, v2;
-            glm_project(mesh->positions[vi + 0], mvp, viewport, v0);
-            glm_project(mesh->positions[vi + 1], mvp, viewport, v1);
-            glm_project(mesh->positions[vi + 2], mvp, viewport, v2);
+            if (!project_and_clip(
+                mesh->positions[vi + 0],
+                mesh->positions[vi + 1],
+                mesh->positions[vi + 2],
+                v0, v1, v2,
+                mvp, viewport, tvp
+            )) continue;
+            
+            // clip = project_vertex(mesh->positions[vi + 0], mvp, viewport, v0);
+            // clip = project_vertex(mesh->positions[vi + 1], mvp, viewport, v1);
+            // clip = project_vertex(mesh->positions[vi + 2], mvp, viewport, v2);
 
-            glm_vec2_maxv(v0, (vec2){0, 0}, v0);
-            glm_vec2_maxv(v1, (vec2){0, 0}, v1);
-            glm_vec2_maxv(v2, (vec2){0, 0}, v2);
-            glm_vec2_minv(v0, (vec2){framebuffer->width, framebuffer->height}, v0);
-            glm_vec2_minv(v1, (vec2){framebuffer->width, framebuffer->height}, v1);
-            glm_vec2_minv(v2, (vec2){framebuffer->width, framebuffer->height}, v2);
+            // /* compute raster rectangle */
+            // if (!clip_2D(v0, v1, v2, viewport, tvp)) continue;
 
-            /* compute raster rectangle */
-            uint32_t wmin, wmax, hmin, hmax;
-            wmin = NU_MIN(v0[0], NU_MIN(v1[0], v2[0]));
-            wmax = NU_MAX(v0[0], NU_MAX(v1[0], v2[0]));
-            hmin = NU_MIN(v0[1], NU_MIN(v1[1], v2[1]));
-            hmax = NU_MAX(v0[1], NU_MAX(v1[1], v2[1]));
+            /* compute edges */
+            vec2 edge0, edge1, edge2;
+            glm_vec2_sub(v2, v1, edge0);
+            glm_vec2_sub(v0, v2, edge1);
+            glm_vec2_sub(v1, v0, edge2);
 
+            /* top left rule */
+            bool t0 = (edge0[0] != 0) ? (edge0[0] > 0) : (edge0[1] > 0);
+            bool t1 = (edge1[0] != 0) ? (edge1[0] > 0) : (edge1[1] > 0);
+            bool t2 = (edge2[0] != 0) ? (edge2[0] > 0) : (edge2[1] > 0);
+
+            /* colors */
             vec3 c0 = {1, 0, 0};
             vec3 c1 = {0, 1, 0};
             vec3 c2 = {0, 0, 1};
 
-            float area = edge_function(v0, v1, v2);
+            float area = pixel_coverage(v0, v1, v2);
+            
+            /* backface culling */
+            if (area < 0) continue;
 
-            for (uint32_t j = hmin; j < hmax; j++) {
-                for (uint32_t i = wmin; i < wmax; i++) {
-                    vec2 p = {i + 0.5, j + 0.5};
-                    float w0 = edge_function(v1, v2, p);
-                    float w1 = edge_function(v2, v0, p);
-                    float w2 = edge_function(v0, v1, p);
-                    if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
-                        w0 /= area;
-                        w1 /= area;
-                        w2 /= area;
+            for (uint32_t j = tvp[1]; j < tvp[3]; j++) {
+                for (uint32_t i = tvp[0]; i < tvp[2]; i++) {
+                    vec2 sample = {i + 0.5, j + 0.5};
+
+                    float w0 = pixel_coverage(v1, v2, sample);
+                    float w1 = pixel_coverage(v2, v0, sample);
+                    float w2 = pixel_coverage(v0, v1, sample);
+                    
+                    /* check sample with top left rule */
+                    bool included = true;
+                    included &= (w0 == 0) ? t0 : (w0 > 0);
+                    included &= (w1 == 0) ? t1 : (w1 > 0);
+                    included &= (w2 == 0) ? t2 : (w2 > 0);
+
+                    if (included) {
+                        const float area_inv = 1.0f / area;
+                        w0 *= area_inv;
+                        w1 *= area_inv;
+                        w2 = 1.0f - w0 - w1;
 
                         float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
                         float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
