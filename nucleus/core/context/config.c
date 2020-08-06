@@ -16,10 +16,7 @@ static config_data_t _data;
 static nu_result_t load_ini_file(void)
 {
     _data.ini = ini_load("engine/nucleus.ini");
-    if (!_data.ini) {
-        nu_warning(NU_CONFIG_LOG_NAME"Failed to load ini file.\n");
-        return NU_FAILURE;
-    }
+    if (!_data.ini) return NU_FAILURE;
 
     /* context */
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, &_data.config.context.version_major, 0);

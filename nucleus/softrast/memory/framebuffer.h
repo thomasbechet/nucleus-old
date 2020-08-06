@@ -3,10 +3,15 @@
 
 #include "../../core/common/common.h"
 
+typedef union {
+    uint32_t as_uint;
+    float as_float;
+} nusr_framebuffer_pixel_t;
+
 typedef struct {
     uint32_t width;
     uint32_t height;
-    uint32_t *pixels;
+    nusr_framebuffer_pixel_t *pixels;
 } nusr_framebuffer_t;
 
 nu_result_t nusr_framebuffer_create(nusr_framebuffer_t *self, uint32_t width, uint32_t height);

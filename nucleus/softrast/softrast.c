@@ -10,7 +10,8 @@
 
 typedef struct {
     nuglfw_window_interface_t glfw_interface;
-    nusr_framebuffer_t framebuffer;
+    nusr_framebuffer_t color_buffer;
+    nusr_framebuffer_t depth_buffer;
 } nusr_data_t;
 
 static nusr_data_t _data;
@@ -63,7 +64,8 @@ nu_result_t nusr_initialize(void)
     uint32_t default_width, default_height;
     nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_WIDTH, &default_width, 640);
     nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_HEIGHT, &default_height, 360);
-    nusr_framebuffer_create(&_data.framebuffer, default_width, default_height);
+    nusr_framebuffer_create(&_data.color_buffer, default_width, default_height);
+    nusr_framebuffer_create(&_data.depth_buffer, default_width, default_height);
 
     test_initialize();
 
@@ -72,7 +74,8 @@ nu_result_t nusr_initialize(void)
 nu_result_t nusr_terminate(void)
 {
     /* free framebuffer */
-    nusr_framebuffer_destroy(&_data.framebuffer);
+    nusr_framebuffer_destroy(&_data.color_buffer);
+    nusr_framebuffer_destroy(&_data.depth_buffer);
 
     /* terminate scene */
     nusr_scene_terminate();
@@ -86,9 +89,8 @@ nu_result_t nusr_render(void)
 {
     test_update();
 
-    nusr_framebuffer_clear(&_data.framebuffer, 0x0);
-    nusr_scene_render(&_data.framebuffer);
-    _data.glfw_interface.present_surface(_data.framebuffer.width, _data.framebuffer.height, _data.framebuffer.pixels);
+    nusr_scene_render(&_data.color_buffer, &_data.depth_buffer);
+    _data.glfw_interface.present_surface(_data.color_buffer.width, _data.color_buffer.height, _data.color_buffer.pixels);
     
     profile();
 
@@ -164,21 +166,14 @@ static void test_initialize(void)
     uint32_t staticmesh_id;
     nusr_staticmesh_create_info_t staticmesh_info = {};
     staticmesh_info.mesh = mesh_id;
-    glm_mat4_identity(staticmesh_info.transform);
-    nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
-
-    glm_mat4_identity(staticmesh_info.transform);
-    glm_translate(staticmesh_info.transform, (vec3){3, 0, 0});
-    glm_scale(staticmesh_info.transform, (vec3){0.5f, 0.5f, 0.5f});
-    nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
     glm_mat4_identity(staticmesh_info.transform);
     glm_translate(staticmesh_info.transform, (vec3){0, -4, 0});
     glm_scale(staticmesh_info.transform, (vec3){100.0, 0.1, 100.0});
     nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
-    for (uint32_t i = 0; i < 25; i++) {
-        for (uint32_t j = 0; j < 20; j++) {
+    for (uint32_t i = 0; i < 10; i++) {
+        for (uint32_t j = 0; j < 10; j++) {
             glm_mat4_identity(staticmesh_info.transform);
             glm_translate(staticmesh_info.transform, (vec3){i * 3, 0, j * 3});
             glm_scale(staticmesh_info.transform, (vec3){0.5, 0.5, 0.5});

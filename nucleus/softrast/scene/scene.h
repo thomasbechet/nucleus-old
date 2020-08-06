@@ -7,7 +7,7 @@
 
 nu_result_t nusr_scene_initialize(void);
 nu_result_t nusr_scene_terminate(void);
-nu_result_t nusr_scene_render(nusr_framebuffer_t *framebuffer);
+nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer_t *depth_buffer);
 
 nu_result_t nusr_scene_camera_set_fov(float fov);
 nu_result_t nusr_scene_camera_set_eye(const vec3 eye);
