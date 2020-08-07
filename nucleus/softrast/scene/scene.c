@@ -59,9 +59,17 @@ static bool clip_triangle(
 
     /* clip required */
     for (uint32_t i = 0; i < 3; i++) {
-        uint32_t id = i;
-        uint32_t nid = (id + 1) % 3;
-        if (outside[i] )
+        if (outside[i] && !outside[(i + 1) % 3] && !outside[(i + 1) % 3]) {
+            // if (outside[nid]) {
+                
+            // } else {
+            //     const vec4 near_plane = {0, 0, 1, 1};
+            //     float d0 = glm_vec4_dot(v[id], near_plane);
+            //     float d1 = glm_vec4_dot(v[nid], near_plane);
+            //     float t = d0 / (d0 - d1);
+            //     glm_vec4_lerp()
+            // }
+        }
     }
 
     return false;
@@ -214,6 +222,7 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
                             w2 = 1.0f - w0 - w1;
 
                             float depth = w0 * v0[2] + w1 * v1[2] + w2 * v2[2];
+                            depth /= 1.0f;
                             if (depth > 0.1f && depth < depth_buffer->pixels[j * depth_buffer->width + i].as_float) {
                                 float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
                                 float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
