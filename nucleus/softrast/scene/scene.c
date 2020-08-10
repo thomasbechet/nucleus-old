@@ -1,6 +1,7 @@
 #include "scene.h"
 
 #include "../asset/mesh.h"
+#include "../asset/texture.h"
 
 #define MAX_STATICMESH_COUNT 512
 
@@ -15,6 +16,7 @@ typedef struct {
 
 typedef struct {
     uint32_t mesh;
+    uint32_t texture;
     mat4 transform;
     bool active;
 } nusr_staticmesh_t;
@@ -33,9 +35,10 @@ static void vertex_shader(vec3 pos, mat4 m, vec4 dest)
     glm_vec4(pos, 1.0f, dest);
     glm_mat4_mulv(m, dest, dest);
 }
-/* Cohen Sutherland constants */
-static bool clip_triangle(
+
+static bool clip_triangle_and_perspective_devide(
     vec4 v[4],
+    vec2 uv[4],
     uint32_t indices[6],
     uint32_t *indice_count
 )
@@ -52,33 +55,118 @@ static bool clip_triangle(
         outside[i] = (v[i][3] <= 0) | (v[i][2] < -v[i][3]);
     }
 
+    /* perspective divide (NDC) */
+    for (uint32_t i = 0; i < 3; i++) {
+        glm_vec3_scale(v[i], 1.0f / v[i][3], v[i]);
+    }
+
     /* early test out */
     if ((outside[0] & outside[1] & outside[2]) != 0) return false;
     /* early test in  */
     if ((outside[0] | outside[1] | outside[2]) == 0) return true;
 
+    return false;
+
     /* clip required */
     for (uint32_t i = 0; i < 3; i++) {
-        if (outside[i] && !outside[(i + 1) % 3] && !outside[(i + 1) % 3]) {
-            // if (outside[nid]) {
+        float *vec, *vec_prev, *vec_next;
+        vec = v[i];
+        vec_next = v[(i + 1) % 3];
+        vec_prev = v[(i + 2) % 3];
+        bool out, out_prev, out_next;
+        out = outside[i];
+        out_next = v[(i + 1) % 3];
+        out_prev = v[(i + 2) % 3];
+        
+        const float zn = 0.1f;
+
+        if (out) {
+            if (out_next) { /* 2 out case 1 */
+                float x0 = vec_prev[0];
+                float y0 = vec_prev[1];
+                float z0 = vec_prev[2];
                 
-            // } else {
-            //     const vec4 near_plane = {0, 0, 1, 1};
-            //     float d0 = glm_vec4_dot(v[id], near_plane);
-            //     float d1 = glm_vec4_dot(v[nid], near_plane);
-            //     float t = d0 / (d0 - d1);
-            //     glm_vec4_lerp()
-            // }
+                float x1 = vec[0];
+                float y1 = vec[1];
+                float z1 = vec[2];
+
+                float s = (z0 - zn) / (z0 - z1);
+                float ix = x0 + s * (x1 - x0);
+                float iy = y0 + s * (y1 - y0);
+
+                vec[0] = ix;
+                vec[1] = iy;
+                vec[2] = zn;
+            } else if (out_prev) { /* 2 out case 2 */
+                float x0 = vec_next[0];
+                float y0 = vec_next[1];
+                float z0 = vec_next[2];
+                
+                float x1 = vec[0];
+                float y1 = vec[1];
+                float z1 = vec[2];
+
+                float s = (z0 - zn) / (z0 - z1);
+                float ix = x0 + s * (x1 - x0);
+                float iy = y0 + s * (y1 - y0);
+
+                vec[0] = ix;
+                vec[1] = iy;
+                vec[2] = zn;
+            } else { /* 1 out */
+                return false;
+                float x0, y0, z0;
+                float s, ix, iy;
+                float x1 = vec[0];
+                float y1 = vec[1];
+                float z1 = vec[2];
+                /* prev lerp */
+                x0 = vec_prev[0];
+                y0 = vec_prev[1];
+                z0 = vec_prev[2];
+                s = (z0 - zn) / (z0 - z1);
+                ix = x0 + s * (x1 - x0);
+                iy = y0 + s * (y1 - y0);
+                v[i][0] = ix;
+                v[i][1] = iy;
+                v[i][2] = zn;
+                /* next lerp */
+                x0 = vec_next[0];
+                y0 = vec_next[1];
+                z0 = vec_next[2];
+                s = (z0 - zn) / (z0 - z1);
+                ix = x0 + s * (x1 - x0);
+                iy = y0 + s * (y1 - y0);
+                v[3][0] = ix;
+                v[3][1] = iy;
+                v[3][2] = zn;
+                uv[3][0] = 0;
+                uv[3][1] = 0;
+                *indice_count = 6;
+                indices[3] = 3;
+                indices[4] = (i + 2) % 3; 
+                indices[5] = i;
+
+                return true;
+            }
         }
+
+        // zn=0.4; //near plane distance
+        // s=(z0-zn)/(z0-z1);
+        // ix=x0+s*(x1-x0);
+        // iy=y0+s*(y1-y0);
+        // w = 1 / z
+
+        // do uv clipping in linear space
     }
 
-    return false;
+    return true;
 }
 static void vertex_to_viewport(const vec3 v, vec4 vp, vec3 dest)
 {
     /* (p + 1) / 2 */
-    glm_vec3_adds((float*)v, 1.0f, dest);
-    glm_vec3_scale(dest, 0.5f, dest);
+    glm_vec2_adds((float*)v, 1.0f, dest);
+    glm_vec2_scale(dest, 0.5f, dest);
 
     /* convert to viewport */
     dest[0] = dest[0] * vp[2] + vp[0];
@@ -141,33 +229,52 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
         nusr_mesh_t *mesh;
         nusr_mesh_get(_data.staticmeshes[i].mesh, &mesh);
 
+        /* access texture */
+        nusr_texture_t *texture;
+        nusr_texture_get(_data.staticmeshes[i].texture, &texture);
+
         /* iterate over mesh triangles */
         for (uint32_t vi = 0; vi < mesh->vertex_count; vi += 3) {
             vec4 viewport = {0, 0, color_buffer->width, color_buffer->height};
+            vec4 tv[4]; /* one vertice can be added for the clipping step */
+            vec2 uv[4]; /* one uv can be added for the clipping step */
 
             /* transform vertices */
-            vec4 tv[4]; /* one vertices can be created for clipping step */
             vertex_shader(mesh->positions[vi + 0], mvp, tv[0]);
             vertex_shader(mesh->positions[vi + 1], mvp, tv[1]);
             vertex_shader(mesh->positions[vi + 2], mvp, tv[2]);
 
+            /* copy uvs */
+            glm_vec2_copy(mesh->uvs[vi + 0], uv[0]);
+            glm_vec2_copy(mesh->uvs[vi + 1], uv[1]);
+            glm_vec2_copy(mesh->uvs[vi + 2], uv[2]);
+
             /* clip vertices */
             uint32_t indices[6];
             uint32_t indice_count;
-            if (!clip_triangle(tv, indices, &indice_count)) continue;
+            if (!clip_triangle_and_perspective_devide(tv, uv, indices, &indice_count)) continue;
 
             for (uint32_t idx = 0; idx < indice_count; idx += 3) {
                 vec3 v0, v1, v2;
-
-                /* perspective divide (NDC) */
-                glm_vec3_scale(tv[indices[idx + 0]], 1.0f / tv[indices[idx + 0]][3], v0);
-                glm_vec3_scale(tv[indices[idx + 1]], 1.0f / tv[indices[idx + 1]][3], v1);
-                glm_vec3_scale(tv[indices[idx + 2]], 1.0f / tv[indices[idx + 2]][3], v2);
+                vec2 uv0, uv1, uv2;
 
                 /* vertices to viewport */
-                vertex_to_viewport(v0, viewport, v0);
-                vertex_to_viewport(v1, viewport, v1);
-                vertex_to_viewport(v2, viewport, v2);
+                vertex_to_viewport(tv[indices[idx + 0]], viewport, v0);
+                vertex_to_viewport(tv[indices[idx + 1]], viewport, v1);
+                vertex_to_viewport(tv[indices[idx + 2]], viewport, v2);
+
+                /* perspective correct uv */
+                // glm_vec2_scale(uv[indices[idx + 0]], v0[2], uv0);
+                // glm_vec2_scale(uv[indices[idx + 1]], v1[2], uv1);
+                // glm_vec2_scale(uv[indices[idx + 2]], v2[2], uv2);
+                glm_vec2_copy(uv[indices[idx + 0]], uv0);
+                glm_vec2_copy(uv[indices[idx + 1]], uv1);
+                glm_vec2_copy(uv[indices[idx + 2]], uv2);
+
+                /* correct z */
+                v0[2] = 1.0f / v0[2];
+                v1[2] = 1.0f / v1[2];
+                v2[2] = 1.0f / v2[2];
 
                 /* compute triangle viewport */
                 vec4 tvp;
@@ -190,15 +297,9 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
                 bool t0 = (edge0[0] != 0) ? (edge0[0] > 0) : (edge0[1] > 0);
                 bool t1 = (edge1[0] != 0) ? (edge1[0] > 0) : (edge1[1] > 0);
                 bool t2 = (edge2[0] != 0) ? (edge2[0] > 0) : (edge2[1] > 0);
-
-                /* colors */
-                vec3 c0 = {1, 0, 0};
-                vec3 c1 = {0, 1, 0};
-                vec3 c2 = {0, 0, 1};
-
-                float area = pixel_coverage(v0, v1, v2);
                 
                 /* backface culling */
+                float area = pixel_coverage(v0, v1, v2);
                 if (area < 0) continue;
 
                 for (uint32_t j = tvp[1]; j < tvp[3]; j++) {
@@ -221,14 +322,30 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
                             w1 *= area_inv;
                             w2 = 1.0f - w0 - w1;
 
-                            float depth = w0 * v0[2] + w1 * v1[2] + w2 * v2[2];
-                            depth /= 1.0f;
+                            float depth = 1.0f / (w0 * v0[2] + w1 * v1[2] + w2 * v2[2]);
                             if (depth > 0.1f && depth < depth_buffer->pixels[j * depth_buffer->width + i].as_float) {
-                                float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
-                                float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
-                                float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
                                 depth_buffer->pixels[j * depth_buffer->width + i].as_float = depth;
-                                nusr_framebuffer_set_rgb(color_buffer, i, j, r, g, b);
+                                
+                                float px = (w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]) * texture->width;
+                                float py = (w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]) * texture->height;
+                                //px *= depth;
+                                //py *= depth;
+
+                                uint32_t uvx = NU_MAX(0, NU_MIN(texture->width, (uint32_t)px));
+                                uint32_t uvy = NU_MAX(0, NU_MIN(texture->height, (uint32_t)py));
+                                
+                                // float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
+                                // float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
+                                // float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
+                                // r *= depth;
+                                // g *= depth;
+                                // b *= depth;
+                                
+                                // nusr_framebuffer_set_rgb(color_buffer, i, j, r, g, b);
+
+                                uint32_t color = texture->data[uvy * texture->width + uvx];
+                                color_buffer->pixels[j * color_buffer->width + i].as_uint = color;
+                                //color_buffer->pixels[j * color_buffer->width + i].as_uint = 0x00FFFFFF;
                             }
                         }
                     }
@@ -282,6 +399,7 @@ nu_result_t nusr_scene_staticmesh_create(uint32_t *id, const nusr_staticmesh_cre
 
     _data.staticmeshes[found_id].active = true;
     _data.staticmeshes[found_id].mesh = info->mesh;
+    _data.staticmeshes[found_id].texture = info->texture;
     glm_mat4_copy((vec4*)info->transform, _data.staticmeshes[found_id].transform);
 
     *id = found_id;

@@ -11,11 +11,22 @@
 
 typedef struct {
     uint32_t vertice_count;
+    bool use_indices;
+    bool use_colors;
     vec3 *positions;
     vec2 *uvs;
     vec3 *colors;
-    uint32_t *indices;
+    uint32_t *position_indices;
+    uint32_t *uv_indices;
+    uint32_t *color_indices;
 } nusr_mesh_create_info_t;
+
+typedef struct {
+    uint32_t width;
+    uint32_t height;
+    uint32_t channel;
+    unsigned char *data;
+} nusr_texture_create_info_t;
 
 typedef struct {
     vec3 eye;
@@ -26,6 +37,7 @@ typedef struct {
 
 typedef struct {
     uint32_t mesh;
+    uint32_t texture;
     mat4 transform;
 } nusr_staticmesh_create_info_t;
 

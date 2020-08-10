@@ -5,8 +5,12 @@
 #include "memory/framebuffer.h"
 #include "scene/scene.h"
 #include "asset/mesh.h"
+#include "asset/texture.h"
 
 #include "../glfw/module/interface.h"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
 
 typedef struct {
     nuglfw_window_interface_t glfw_interface;
@@ -54,6 +58,7 @@ nu_result_t nusr_initialize(void)
     /* initialize assets */
     nu_info(NUSR_LOGGER_NAME"Initializing asset buffers...\n");
     nusr_mesh_initialize();
+    nusr_texture_initialize();
 
     /* initialize scene */
     nu_info(NUSR_LOGGER_NAME"Intializing scene memory...\n");
@@ -81,6 +86,7 @@ nu_result_t nusr_terminate(void)
     nusr_scene_terminate();
 
     /* terminate assets */
+    nusr_texture_terminate();
     nusr_mesh_terminate();
 
     return NU_SUCCESS;
@@ -113,6 +119,22 @@ static void profile(void)
 
 static void test_initialize(void)
 {
+    /* load texture */
+    nusr_texture_create_info_t texture_info = {};
+    int width, height, channel;
+    unsigned char *ima_data = stbi_load("engine/image/rdr2.jpg", &width, &height, &channel, STBI_rgb);
+    if (!ima_data) nu_interrupt("Failed to load brick texture.\n");
+    texture_info.width = (uint32_t)width;
+    texture_info.height = (uint32_t)height;
+    texture_info.channel = (uint32_t)channel;
+    texture_info.data = ima_data;
+    uint32_t texture_id;
+    if (nusr_texture_create(&texture_id, &texture_info) != NU_SUCCESS) {
+        nu_warning("Failed to create texture.\n");
+    }
+    stbi_image_free(ima_data);
+
+    /* load cube mesh */
     static vec3 vertices[] =
     {
         {-1, -1, -1},
@@ -124,6 +146,15 @@ static void test_initialize(void)
         { 1,  1,  1},
         {-1,  1,  1}
     };
+    static uint32_t position_indices[] =
+    {
+        0, 1, 3, 3, 1, 2, /* back */
+        1, 5, 2, 2, 5, 6, /* right */
+        5, 4, 6, 6, 4, 7, /* front */
+        4, 0, 7, 7, 0, 3, /* left */
+        3, 2, 7, 7, 2, 6, /* top */
+        4, 5, 0, 0, 5, 1  /* bottom */
+    };
     static vec2 uvs[] =
     {
         {0, 0},
@@ -131,33 +162,26 @@ static void test_initialize(void)
         {1, 1},
         {0, 1}
     };
-    static vec3 colors[] = {
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1},
-        {1, 1, 1}
-    };
-    static uint32_t indices[] =
+    static uint32_t uv_indices[] =
     {
-        0, 1, 3, 3, 1, 2,
-        1, 5, 2, 2, 5, 6,
-        5, 4, 6, 6, 4, 7,
-        4, 0, 7, 7, 0, 3,
-        3, 2, 7, 7, 2, 6,
-        4, 5, 0, 0, 5, 1
+        1, 0, 2, 2, 0, 3, /* back */
+        1, 0, 2, 2, 0, 3, /* right */
+        1, 0, 2, 2, 0, 3, /* front */
+        1, 0, 2, 2, 0, 3, /* left */
+        3, 2, 0, 0, 2, 1, /* top */
+        3, 2, 0, 0, 2, 1 /* bottom */
     };
+    
     static uint32_t vcount = 6 * 6;
 
     nusr_mesh_create_info_t mesh_info = {};
     mesh_info.vertice_count = vcount;
+    mesh_info.use_indices = true;
+    mesh_info.use_colors = false;
     mesh_info.positions = vertices;
     mesh_info.uvs = uvs;
-    mesh_info.colors = colors;
-    mesh_info.indices = indices;
+    mesh_info.position_indices = position_indices;
+    mesh_info.uv_indices = uv_indices;
     uint32_t mesh_id;
     if (nusr_mesh_create(&mesh_id, &mesh_info) != NU_SUCCESS) {
         nu_warning("Failed to create mesh.\n");
@@ -166,6 +190,7 @@ static void test_initialize(void)
     uint32_t staticmesh_id;
     nusr_staticmesh_create_info_t staticmesh_info = {};
     staticmesh_info.mesh = mesh_id;
+    staticmesh_info.texture = texture_id;
 
     glm_mat4_identity(staticmesh_info.transform);
     glm_translate(staticmesh_info.transform, (vec3){0, -4, 0});
