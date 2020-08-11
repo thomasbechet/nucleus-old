@@ -40,15 +40,12 @@ nu_result_t nusr_texture_create(uint32_t *id, const nusr_texture_create_info_t *
     _data.textures[_data.next_id]->height = info->height;
     _data.textures[_data.next_id]->width = info->width;
 
-    nu_info("%d\n", info->channel);
     /* allocate memory */
     _data.textures[_data.next_id]->data = (uint32_t*)nu_malloc(sizeof(uint32_t) * info->width * info->height);
-    //memcpy(_data.textures[_data.next_id]->data, info->data, sizeof(uint32_t) * info->width * info->height);
     for (uint32_t p = 0; p < info->width * info->height; p++) {
         uint32_t color = ((uint32_t)(info->data[p * 3 + 0]) << 24) + ((uint32_t)(info->data[p * 3 + 1]) << 16) + ((uint32_t)(info->data[p * 3 + 2]) << 8);
         _data.textures[_data.next_id]->data[p] = color;
     }
-    //memset(_data.textures[_data.next_id]->data, 0x00FF00FF, sizeof(uint32_t) * info->width * info->height);
 
     /* save id */
     *id = _data.next_id;

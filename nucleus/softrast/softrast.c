@@ -184,18 +184,53 @@ static void test_initialize(void)
     mesh_info.uv_indices = uv_indices;
     uint32_t mesh_id;
     if (nusr_mesh_create(&mesh_id, &mesh_info) != NU_SUCCESS) {
-        nu_warning("Failed to create mesh.\n");
+        nu_warning("Failed to create cube mesh.\n");
     }
 
+    /* load triangle mesh */
+    static vec3 triangle_vertices[] = {
+        {0, 0, 0},
+        {10, 0, 0},
+        {0, 0, 10}
+    };
+    static vec2 triangle_uvs[] = {
+        {0, 1},
+        {1, 1},
+        {0, 0}
+    };
+
+    nusr_mesh_create_info_t triangle_mesh_info = {};
+    triangle_mesh_info.vertice_count = 3;
+    triangle_mesh_info.use_indices = false;
+    triangle_mesh_info.use_colors = false;
+    triangle_mesh_info.positions = triangle_vertices;
+    triangle_mesh_info.uvs = triangle_uvs;
+    triangle_mesh_info.position_indices = NULL;
+    triangle_mesh_info.uv_indices = NULL;
+    uint32_t triangle_mesh_id;
+    if (nusr_mesh_create(&triangle_mesh_id, &triangle_mesh_info) != NU_SUCCESS) {
+        nu_warning("Failed to create triangle mesh.\n");
+    }
+
+    /* create triangle mesh */
+    // uint32_t triangle_staticmesh;
+    // nusr_staticmesh_create_info_t tri_create_info = {};
+    // tri_create_info.mesh = triangle_mesh_id;
+    // tri_create_info.texture = texture_id;
+    // glm_mat4_identity(tri_create_info.transform);
+    // glm_translate(tri_create_info.transform, (vec3){0, 0, 0});
+    // nusr_scene_staticmesh_create(&triangle_staticmesh, &tri_create_info);
+
+    /* create static meshes */
     uint32_t staticmesh_id;
     nusr_staticmesh_create_info_t staticmesh_info = {};
     staticmesh_info.mesh = mesh_id;
     staticmesh_info.texture = texture_id;
 
-    glm_mat4_identity(staticmesh_info.transform);
-    glm_translate(staticmesh_info.transform, (vec3){0, -4, 0});
-    glm_scale(staticmesh_info.transform, (vec3){100.0, 0.1, 100.0});
-    nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+    // glm_mat4_identity(staticmesh_info.transform);
+    // glm_translate(staticmesh_info.transform, (vec3){0, -4, 0});
+    // glm_scale(staticmesh_info.transform, (vec3){100.0, 0.1, 100.0});
+    // nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
     for (uint32_t i = 0; i < 10; i++) {
         for (uint32_t j = 0; j < 10; j++) {

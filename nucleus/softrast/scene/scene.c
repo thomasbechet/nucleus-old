@@ -36,9 +36,21 @@ static void vertex_shader(vec3 pos, mat4 m, vec4 dest)
     glm_mat4_mulv(m, dest, dest);
 }
 
-static bool clip_triangle_and_perspective_devide(
-    vec4 v[4],
-    vec2 uv[4],
+static void clip_edge_near(
+    vec4 v0, vec4 v1, vec4 vclip,
+    vec2 uv0, vec2 uv1, vec2 uvclip
+)
+{
+    const vec4 near_plane = {0, 0, 1, 1};
+    float d0 = glm_vec4_dot(v0, (float*)near_plane);
+    float d1 = glm_vec4_dot(v1, (float*)near_plane);
+    float s = d0 / (d0 - d1);
+    glm_vec4_lerp(v0, v1, s, vclip);
+    glm_vec2_lerp(uv0, uv1, s, uvclip);
+}
+static bool clip_triangle(
+    vec4 vertices[4],
+    vec2 uvs[4],
     uint32_t indices[6],
     uint32_t *indice_count
 )
@@ -52,12 +64,7 @@ static bool clip_triangle_and_perspective_devide(
     /* compute outsides */
     bool outside[3];
     for (uint32_t i = 0; i < 3; i++) {
-        outside[i] = (v[i][3] <= 0) | (v[i][2] < -v[i][3]);
-    }
-
-    /* perspective divide (NDC) */
-    for (uint32_t i = 0; i < 3; i++) {
-        glm_vec3_scale(v[i], 1.0f / v[i][3], v[i]);
+        outside[i] = (vertices[i][3] <= 0) || (vertices[i][2] < -vertices[i][3]);
     }
 
     /* early test out */
@@ -65,113 +72,57 @@ static bool clip_triangle_and_perspective_devide(
     /* early test in  */
     if ((outside[0] | outside[1] | outside[2]) == 0) return true;
 
-    return false;
-
-    /* clip required */
+    /* clip vertices */
     for (uint32_t i = 0; i < 3; i++) {
         float *vec, *vec_prev, *vec_next;
-        vec = v[i];
-        vec_next = v[(i + 1) % 3];
-        vec_prev = v[(i + 2) % 3];
+        float *uv, *uv_prev, *uv_next;
         bool out, out_prev, out_next;
+        vec = vertices[i];
+        uv = uvs[i];
         out = outside[i];
-        out_next = v[(i + 1) % 3];
-        out_prev = v[(i + 2) % 3];
+
+        vec_next = vertices[(i + 1) % 3];
+        uv_next = uvs[(i + 1) % 3];
+        out_next = outside[(i + 1) % 3];
         
-        const float zn = 0.1f;
+        vec_prev = vertices[(i + 2) % 3];
+        uv_prev = uvs[(i + 2) % 3];
+        out_prev = outside[(i + 2) % 3];
+
+        // vec4 t0 = {0, 0, -0.5, -0.5}
 
         if (out) {
             if (out_next) { /* 2 out case 1 */
-                float x0 = vec_prev[0];
-                float y0 = vec_prev[1];
-                float z0 = vec_prev[2];
-                
-                float x1 = vec[0];
-                float y1 = vec[1];
-                float z1 = vec[2];
-
-                float s = (z0 - zn) / (z0 - z1);
-                float ix = x0 + s * (x1 - x0);
-                float iy = y0 + s * (y1 - y0);
-
-                vec[0] = ix;
-                vec[1] = iy;
-                vec[2] = zn;
+                clip_edge_near(vec, vec_prev, vec, uv, uv_prev, uv);
             } else if (out_prev) { /* 2 out case 2 */
-                float x0 = vec_next[0];
-                float y0 = vec_next[1];
-                float z0 = vec_next[2];
-                
-                float x1 = vec[0];
-                float y1 = vec[1];
-                float z1 = vec[2];
-
-                float s = (z0 - zn) / (z0 - z1);
-                float ix = x0 + s * (x1 - x0);
-                float iy = y0 + s * (y1 - y0);
-
-                vec[0] = ix;
-                vec[1] = iy;
-                vec[2] = zn;
+                clip_edge_near(vec, vec_next, vec, uv, uv_next, uv);
             } else { /* 1 out */
-                return false;
-                float x0, y0, z0;
-                float s, ix, iy;
-                float x1 = vec[0];
-                float y1 = vec[1];
-                float z1 = vec[2];
-                /* prev lerp */
-                x0 = vec_prev[0];
-                y0 = vec_prev[1];
-                z0 = vec_prev[2];
-                s = (z0 - zn) / (z0 - z1);
-                ix = x0 + s * (x1 - x0);
-                iy = y0 + s * (y1 - y0);
-                v[i][0] = ix;
-                v[i][1] = iy;
-                v[i][2] = zn;
-                /* next lerp */
-                x0 = vec_next[0];
-                y0 = vec_next[1];
-                z0 = vec_next[2];
-                s = (z0 - zn) / (z0 - z1);
-                ix = x0 + s * (x1 - x0);
-                iy = y0 + s * (y1 - y0);
-                v[3][0] = ix;
-                v[3][1] = iy;
-                v[3][2] = zn;
-                uv[3][0] = 0;
-                uv[3][1] = 0;
+                /* produce new vertex */
+                clip_edge_near(vec, vec_next, vertices[3], uv, uv_next, uvs[3]);
                 *indice_count = 6;
-                indices[3] = 3;
-                indices[4] = (i + 2) % 3; 
-                indices[5] = i;
+                indices[3] = i;
+                indices[4] = 3; /* new vertex */
+                indices[5] = (i + 1) % 3;
+
+                /* clip existing vertex */
+                clip_edge_near(vec, vec_prev, vec, uv, uv_prev, uv);
 
                 return true;
             }
         }
-
-        // zn=0.4; //near plane distance
-        // s=(z0-zn)/(z0-z1);
-        // ix=x0+s*(x1-x0);
-        // iy=y0+s*(y1-y0);
-        // w = 1 / z
-
-        // do uv clipping in linear space
     }
 
     return true;
 }
-static void vertex_to_viewport(const vec3 v, vec4 vp, vec3 dest)
+static void vertex_to_viewport(vec2 v, vec4 vp)
 {
     /* (p + 1) / 2 */
-    glm_vec2_adds((float*)v, 1.0f, dest);
-    glm_vec2_scale(dest, 0.5f, dest);
-
+    glm_vec2_adds(v, 1.0f, v);
+    glm_vec2_scale(v, 0.5f, v);
+    
     /* convert to viewport */
-    dest[0] = dest[0] * vp[2] + vp[0];
-    dest[1] = dest[1] * vp[3] + vp[1];
-    dest[2] = v[2];
+    glm_vec2_mul(v, vp + 2, v);
+    glm_vec2_add(v, vp + 0, v);
 }
 
 static float pixel_coverage(const vec2 a, const vec2 b, const vec2 c)
@@ -244,7 +195,7 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
             vertex_shader(mesh->positions[vi + 1], mvp, tv[1]);
             vertex_shader(mesh->positions[vi + 2], mvp, tv[2]);
 
-            /* copy uvs */
+            /* copy uv (should be done in vertex shader) */
             glm_vec2_copy(mesh->uvs[vi + 0], uv[0]);
             glm_vec2_copy(mesh->uvs[vi + 1], uv[1]);
             glm_vec2_copy(mesh->uvs[vi + 2], uv[2]);
@@ -252,29 +203,39 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
             /* clip vertices */
             uint32_t indices[6];
             uint32_t indice_count;
-            if (!clip_triangle_and_perspective_devide(tv, uv, indices, &indice_count)) continue;
+            if (!clip_triangle(tv, uv, indices, &indice_count)) continue;
 
+            /* perspective divide (NDC) */
+            uint32_t total_vertex = (indice_count > 3) ? 4 : 3;
+            for (uint32_t i = 0; i < total_vertex; i++) {
+                glm_vec3_scale(tv[i], 1.0f / tv[i][3], tv[i]);
+            }
+            
             for (uint32_t idx = 0; idx < indice_count; idx += 3) {
-                vec3 v0, v1, v2;
+                vec4 v0, v1, v2;
                 vec2 uv0, uv1, uv2;
 
                 /* vertices to viewport */
-                vertex_to_viewport(tv[indices[idx + 0]], viewport, v0);
-                vertex_to_viewport(tv[indices[idx + 1]], viewport, v1);
-                vertex_to_viewport(tv[indices[idx + 2]], viewport, v2);
+                glm_vec4_copy(tv[indices[idx + 0]], v0);
+                glm_vec4_copy(tv[indices[idx + 1]], v1);
+                glm_vec4_copy(tv[indices[idx + 2]], v2);
+                vertex_to_viewport(v0, viewport);
+                vertex_to_viewport(v1, viewport);
+                vertex_to_viewport(v2, viewport);
 
-                /* perspective correct uv */
-                // glm_vec2_scale(uv[indices[idx + 0]], v0[2], uv0);
-                // glm_vec2_scale(uv[indices[idx + 1]], v1[2], uv1);
-                // glm_vec2_scale(uv[indices[idx + 2]], v2[2], uv2);
+                /* copy uvs */
                 glm_vec2_copy(uv[indices[idx + 0]], uv0);
                 glm_vec2_copy(uv[indices[idx + 1]], uv1);
                 glm_vec2_copy(uv[indices[idx + 2]], uv2);
 
                 /* correct z */
-                v0[2] = 1.0f / v0[2];
-                v1[2] = 1.0f / v1[2];
-                v2[2] = 1.0f / v2[2];
+                // v0[2] = 1.0f / v0[2];
+                // v1[2] = 1.0f / v1[2];
+                // v2[2] = 1.0f / v2[2];
+
+                /* backface culling */
+                float area = pixel_coverage(v0, v1, v2);
+                if (area < 0) continue;
 
                 /* compute triangle viewport */
                 vec4 tvp;
@@ -297,10 +258,6 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
                 bool t0 = (edge0[0] != 0) ? (edge0[0] > 0) : (edge0[1] > 0);
                 bool t1 = (edge1[0] != 0) ? (edge1[0] > 0) : (edge1[1] > 0);
                 bool t2 = (edge2[0] != 0) ? (edge2[0] > 0) : (edge2[1] > 0);
-                
-                /* backface culling */
-                float area = pixel_coverage(v0, v1, v2);
-                if (area < 0) continue;
 
                 for (uint32_t j = tvp[1]; j < tvp[3]; j++) {
                     for (uint32_t i = tvp[0]; i < tvp[2]; i++) {
@@ -322,30 +279,31 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
                             w1 *= area_inv;
                             w2 = 1.0f - w0 - w1;
 
-                            float depth = 1.0f / (w0 * v0[2] + w1 * v1[2] + w2 * v2[2]);
-                            if (depth > 0.1f && depth < depth_buffer->pixels[j * depth_buffer->width + i].as_float) {
+                            /* depth test */
+                            float depth = (w0 * v0[3] + w1 * v1[3] + w2 * v2[3]);
+                            if (depth < depth_buffer->pixels[j * depth_buffer->width + i].as_float) {
                                 depth_buffer->pixels[j * depth_buffer->width + i].as_float = depth;
                                 
-                                float px = (w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]) * texture->width;
-                                float py = (w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]) * texture->height;
-                                //px *= depth;
-                                //py *= depth;
+                                /*     a * f_a / w_a   +   b * f_b / w_b   +  c * f_c / w_c  *
+                                 * f=-----------------------------------------------------   *
+                                 *        a / w_a      +      b / w_b      +     c / w_c     */
 
+                                /* correct linear interpolation */
+                                float a = w0 / v0[3];
+                                float b = w1 / v1[3];
+                                float c = w2 / v2[3];
+                                float inv_sum_abc = 1.0f / (a + b + c);
+
+                                /* interpolate uv coordinates */
+                                float px = (a * uv0[0] + b * uv1[0] + c * uv2[0]) * inv_sum_abc * texture->width;
+                                float py = (a * uv0[1] + b * uv1[1] + c * uv2[1]) * inv_sum_abc * texture->height;
                                 uint32_t uvx = NU_MAX(0, NU_MIN(texture->width, (uint32_t)px));
                                 uint32_t uvy = NU_MAX(0, NU_MIN(texture->height, (uint32_t)py));
-                                
-                                // float r = w0 * c0[0] + w1 * c1[0] + w2 * c2[0];
-                                // float g = w0 * c0[1] + w1 * c1[1] + w2 * c2[1];
-                                // float b = w0 * c0[2] + w1 * c1[2] + w2 * c2[2];
-                                // r *= depth;
-                                // g *= depth;
-                                // b *= depth;
-                                
-                                // nusr_framebuffer_set_rgb(color_buffer, i, j, r, g, b);
 
                                 uint32_t color = texture->data[uvy * texture->width + uvx];
+                                // uint32_t value = (uint32_t)(depth * 255.0f);
+                                // color = (value << 24) + (value << 16) + (value << 8);
                                 color_buffer->pixels[j * color_buffer->width + i].as_uint = color;
-                                //color_buffer->pixels[j * color_buffer->width + i].as_uint = 0x00FFFFFF;
                             }
                         }
                     }
