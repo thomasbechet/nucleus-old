@@ -96,9 +96,7 @@ nu_result_t nusr_mesh_create(uint32_t *id, const nusr_mesh_create_info_t *info)
 
 
     /* save id */
-    *id = _data.next_id;
-    
-    _data.next_id++;
+    *id = _data.next_id++;
 
     return NU_SUCCESS;
 }

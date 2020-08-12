@@ -6,6 +6,7 @@
 #include "scene/scene.h"
 #include "asset/mesh.h"
 #include "asset/texture.h"
+#include "asset/font.h"
 
 #include "../glfw/module/interface.h"
 
@@ -57,8 +58,9 @@ nu_result_t nusr_initialize(void)
 
     /* initialize assets */
     nu_info(NUSR_LOGGER_NAME"Initializing asset buffers...\n");
-    nusr_mesh_initialize();
-    nusr_texture_initialize();
+    if (nusr_mesh_initialize() != NU_SUCCESS) return NU_FAILURE;
+    if (nusr_texture_initialize() != NU_SUCCESS) return NU_FAILURE;
+    if (nusr_font_initialize() != NU_SUCCESS) return NU_FAILURE;
 
     /* initialize scene */
     nu_info(NUSR_LOGGER_NAME"Intializing scene memory...\n");
@@ -86,6 +88,7 @@ nu_result_t nusr_terminate(void)
     nusr_scene_terminate();
 
     /* terminate assets */
+    nusr_font_terminate();
     nusr_texture_terminate();
     nusr_mesh_terminate();
 
@@ -122,7 +125,7 @@ static void test_initialize(void)
     /* load texture */
     nusr_texture_create_info_t texture_info = {};
     int width, height, channel;
-    unsigned char *ima_data = stbi_load("engine/image/rdr2.jpg", &width, &height, &channel, STBI_rgb);
+    unsigned char *ima_data = stbi_load("engine/texture/brick.jpg", &width, &height, &channel, STBI_rgb);
     if (!ima_data) nu_interrupt("Failed to load brick texture.\n");
     texture_info.width = (uint32_t)width;
     texture_info.height = (uint32_t)height;
@@ -133,6 +136,12 @@ static void test_initialize(void)
         nu_warning("Failed to create texture.\n");
     }
     stbi_image_free(ima_data);
+
+    /* load font */
+    uint32_t font_id;
+    if (nusr_font_create(&font_id, "engine/font/Coder's Crux.ttf") != NU_SUCCESS) {
+        nu_fatal("Failed to create font.\n");
+    }
 
     /* load cube mesh */
     static nu_vec3_t vertices[] =

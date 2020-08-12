@@ -48,9 +48,7 @@ nu_result_t nusr_texture_create(uint32_t *id, const nusr_texture_create_info_t *
     }
 
     /* save id */
-    *id = _data.next_id;
-
-    _data.next_id++;
+    *id = _data.next_id++;
 
     return NU_SUCCESS;
 }

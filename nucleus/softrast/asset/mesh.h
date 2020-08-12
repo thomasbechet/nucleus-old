@@ -2,7 +2,6 @@
 #define NUSR_MESH_H
 
 #include "../module/interface.h"
-#include "../../core/nucleus_core.h"
 
 typedef struct {
     uint32_t vertex_count;
