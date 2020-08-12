@@ -78,9 +78,9 @@ static int glfw_mouse_buttons[] =
 };
 
 typedef struct {
-    vec2 mouse_motion;
-    vec2 mouse_position;
-    vec2 mouse_old_position;
+    nu_vec2_t mouse_motion;
+    nu_vec2_t mouse_position;
+    nu_vec2_t mouse_old_position;
 } nuglfw_input_data_t;
 
 static nuglfw_input_data_t _data;
@@ -103,7 +103,7 @@ nu_result_t nuglfw_input_initialize(void)
     glfwGetCursorPos(nuglfw_get_window(), &xpos, &ypos);
     _data.mouse_position[0] = (float)xpos;
     _data.mouse_position[1] = (float)ypos;
-    glm_vec2_copy(_data.mouse_position, _data.mouse_old_position);
+    nu_vec2_copy(_data.mouse_position, _data.mouse_old_position);
 
     return NU_SUCCESS;
 }
@@ -113,8 +113,8 @@ nu_result_t nuglfw_input_terminate(void)
 }
 nu_result_t nuglfw_input_update(void)
 {
-    glm_vec2_sub(_data.mouse_position, _data.mouse_old_position, _data.mouse_motion);
-    glm_vec2_copy(_data.mouse_position, _data.mouse_old_position);
+    nu_vec2_sub(_data.mouse_position, _data.mouse_old_position, _data.mouse_motion);
+    nu_vec2_copy(_data.mouse_position, _data.mouse_old_position);
 
     return NU_SUCCESS;
 }
@@ -128,8 +128,8 @@ nu_result_t nuglfw_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t bu
     *state = (glfwGetMouseButton(nuglfw_get_window(), glfw_mouse_buttons[(size_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
     return NU_SUCCESS;
 }
-nu_result_t nuglfw_input_get_mouse_motion(vec2 motion)
+nu_result_t nuglfw_input_get_mouse_motion(nu_vec2_t motion)
 {
-    glm_vec2_copy(_data.mouse_motion, motion);
+    nu_vec2_copy(_data.mouse_motion, motion);
     return NU_SUCCESS;
 }

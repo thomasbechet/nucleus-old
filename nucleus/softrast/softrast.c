@@ -135,7 +135,7 @@ static void test_initialize(void)
     stbi_image_free(ima_data);
 
     /* load cube mesh */
-    static vec3 vertices[] =
+    static nu_vec3_t vertices[] =
     {
         {-1, -1, -1},
         { 1, -1, -1},
@@ -155,7 +155,7 @@ static void test_initialize(void)
         3, 2, 7, 7, 2, 6, /* top */
         4, 5, 0, 0, 5, 1  /* bottom */
     };
-    static vec2 uvs[] =
+    static nu_vec2_t uvs[] =
     {
         {0, 0},
         {1, 0},
@@ -188,12 +188,12 @@ static void test_initialize(void)
     }
 
     /* load triangle mesh */
-    static vec3 triangle_vertices[] = {
+    static nu_vec3_t triangle_vertices[] = {
         {0, 0, 0},
         {10, 0, 0},
         {0, 0, 10}
     };
-    static vec2 triangle_uvs[] = {
+    static nu_vec2_t triangle_uvs[] = {
         {0, 1},
         {1, 1},
         {0, 0}
@@ -217,8 +217,8 @@ static void test_initialize(void)
     // nusr_staticmesh_create_info_t tri_create_info = {};
     // tri_create_info.mesh = triangle_mesh_id;
     // tri_create_info.texture = texture_id;
-    // glm_mat4_identity(tri_create_info.transform);
-    // glm_translate(tri_create_info.transform, (vec3){0, 0, 0});
+    // nu_mat4_identity(tri_create_info.transform);
+    // nu_translate(tri_create_info.transform, (nu_vec3_t){0, 0, 0});
     // nusr_scene_staticmesh_create(&triangle_staticmesh, &tri_create_info);
 
     /* create static meshes */
@@ -227,17 +227,24 @@ static void test_initialize(void)
     staticmesh_info.mesh = mesh_id;
     staticmesh_info.texture = texture_id;
 
-    // glm_mat4_identity(staticmesh_info.transform);
-    // glm_translate(staticmesh_info.transform, (vec3){0, -4, 0});
-    // glm_scale(staticmesh_info.transform, (vec3){100.0, 0.1, 100.0});
+    // nu_mat4_identity(staticmesh_info.transform);
+    // nu_translate(staticmesh_info.transform, (nu_vec3_t){0, -4, 0});
+    // nu_scale(staticmesh_info.transform, (nu_vec3_t){100.0, 0.1, 100.0});
     // nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
-    for (uint32_t i = 0; i < 10; i++) {
-        for (uint32_t j = 0; j < 10; j++) {
-            glm_mat4_identity(staticmesh_info.transform);
-            glm_translate(staticmesh_info.transform, (vec3){i * 3, 0, j * 3});
-            glm_scale(staticmesh_info.transform, (vec3){0.5, 0.5, 0.5});
-            nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+    // nu_mat4_identity(staticmesh_info.transform);
+    // nu_translate(staticmesh_info.transform, (nu_vec3_t){0, 0, 0});
+    // nu_scale(staticmesh_info.transform, (nu_vec3_t){5, 5, 0.5});
+    // nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+
+    for (uint32_t i = 0; i < 8; i++) {
+        for (uint32_t j = 0; j < 8; j++) {
+            for (uint32_t k = 0; k < 8; k++) {
+                nu_mat4_identity(staticmesh_info.transform);
+                nu_translate(staticmesh_info.transform, (nu_vec3_t){i * 2, k * 2, j * 2});
+                nu_scale(staticmesh_info.transform, (nu_vec3_t){0.5, 0.5, 0.5});
+                nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+            }
         }
     }
 }
@@ -251,25 +258,25 @@ static void test_update(void)
     }
 
     /* camera update */
-    vec2 motion;
+    nu_vec2_t motion;
     nu_input_get_mouse_motion(motion);
     static float yaw = 0.0f;
     static float pitch = 0.0f;
     yaw += motion[0] * 0.3f;
     pitch -= motion[1] * 0.3f;
-    if (pitch < -90.0f) pitch = -90.0f;
-    if (pitch > 90.0f) pitch = 90.0f;
-    static mat4 camera;
-    glm_mat4_identity(camera);
-    glm_rotate(camera, -glm_rad(yaw), (vec3){0, 1, 0});
-    glm_rotate(camera, glm_rad(pitch), (vec3){1, 0, 0});
-    vec3 forward;
-    glm_mat4_mulv3(camera, (vec3){0, 0, -1}, 0, forward);
-    glm_normalize(forward);
+    if (pitch <= -90.0f) pitch = -89.999f;
+    if (pitch >= 90.0f) pitch = 89.999f;
+    static nu_mat4_t camera;
+    nu_mat4_identity(camera);
+    nu_rotate(camera, -nu_radian(yaw), (nu_vec3_t){0, 1, 0});
+    nu_rotate(camera, nu_radian(pitch), (nu_vec3_t){1, 0, 0});
+    nu_vec3_t forward;
+    nu_mat4_mulv3(camera, (nu_vec3_t){0, 0, -1}, 0, forward);
+    nu_vec3_normalize(forward);
 
-    static vec3 eye = {0, 0, 5};
-    vec3 move;
-    glm_vec3_fill(move, 0);
+    static nu_vec3_t eye = {0, 0, 5};
+    nu_vec3_t move;
+    nu_vec3_zero(move);
     nu_button_state_t z_state, s_state, q_state, d_state;
     nu_input_get_keyboard_state(&z_state, NU_KEYBOARD_W);
     nu_input_get_keyboard_state(&s_state, NU_KEYBOARD_S);
@@ -279,14 +286,14 @@ static void test_update(void)
     if (s_state == NU_BUTTON_PRESSED) move[2] += 1;
     if (q_state == NU_BUTTON_PRESSED) move[0] -= 1;
     if (d_state == NU_BUTTON_PRESSED) move[0] += 1;
-    glm_mat4_mulv3(camera, move, 0, move);
-    glm_normalize(move);
-    glm_vec3_scale(move, 0.01 * nu_context_get_delta_time(), move);
-    glm_vec3_add(eye, move, eye);
+    nu_mat4_mulv3(camera, move, 0, move);
+    nu_vec3_normalize(move);
+    nu_vec3_muls(move, 0.01 * nu_context_get_delta_time(), move);
+    nu_vec3_add(eye, move, eye);
     
-    vec3 center;
-    glm_vec3_add(eye, forward, center);
+    nu_vec3_t center;
+    nu_vec3_add(eye, forward, center);
     nusr_scene_camera_set_eye(eye);
     nusr_scene_camera_set_center(center);
-    nusr_scene_camera_set_fov(glm_rad(90.0));
+    nusr_scene_camera_set_fov(nu_radian(90.0));
 }

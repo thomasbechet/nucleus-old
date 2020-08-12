@@ -82,7 +82,7 @@ nu_result_t nu_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t button
 {
     return _system.interface.get_mouse_state(state, button);
 }
-nu_result_t nu_input_get_mouse_motion(vec2 motion)
+nu_result_t nu_input_get_mouse_motion(nu_vec2_t motion)
 {
     return _system.interface.get_mouse_motion(motion);
 }

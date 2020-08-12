@@ -40,10 +40,10 @@ nu_result_t nusr_mesh_create(uint32_t *id, const nusr_mesh_create_info_t *info)
     _data.meshes[_data.next_id]->vertex_count = info->vertice_count;
 
     /* allocate memory */
-    _data.meshes[_data.next_id]->positions = (vec3*)nu_malloc(sizeof(vec3) * info->vertice_count);
-    _data.meshes[_data.next_id]->uvs = (vec2*)nu_malloc(sizeof(vec2) * info->vertice_count);
+    _data.meshes[_data.next_id]->positions = (nu_vec3_t*)nu_malloc(sizeof(nu_vec3_t) * info->vertice_count);
+    _data.meshes[_data.next_id]->uvs = (nu_vec2_t*)nu_malloc(sizeof(nu_vec2_t) * info->vertice_count);
     if (info->use_colors) {
-        _data.meshes[_data.next_id]->colors = (vec3*)nu_malloc(sizeof(vec3) * info->vertice_count);
+        _data.meshes[_data.next_id]->colors = (nu_vec3_t*)nu_malloc(sizeof(nu_vec3_t) * info->vertice_count);
     } else {
         _data.meshes[_data.next_id]->colors = NULL;
     }
@@ -53,20 +53,20 @@ nu_result_t nusr_mesh_create(uint32_t *id, const nusr_mesh_create_info_t *info)
         for (uint32_t i = 0; i < info->vertice_count; i++) {
             uint32_t position_indice = info->position_indices[i];
             uint32_t uv_indice = info->uv_indices[i];
-            glm_vec3_copy(info->positions[position_indice], _data.meshes[_data.next_id]->positions[i]);
-            glm_vec2_copy(info->uvs[uv_indice], _data.meshes[_data.next_id]->uvs[i]);
+            nu_vec3_copy(info->positions[position_indice], _data.meshes[_data.next_id]->positions[i]);
+            nu_vec2_copy(info->uvs[uv_indice], _data.meshes[_data.next_id]->uvs[i]);
             
             if (info->use_colors) {
                 uint32_t color_indice = info->color_indices[i];
-                glm_vec3_copy(info->colors[color_indice], _data.meshes[_data.next_id]->colors[i]);
+                nu_vec3_copy(info->colors[color_indice], _data.meshes[_data.next_id]->colors[i]);
             }
         }
     } else {
-        memcpy(_data.meshes[_data.next_id]->positions, info->positions, sizeof(vec3) * info->vertice_count);
-        memcpy(_data.meshes[_data.next_id]->uvs, info->uvs, sizeof(vec2) * info->vertice_count);
+        memcpy(_data.meshes[_data.next_id]->positions, info->positions, sizeof(nu_vec3_t) * info->vertice_count);
+        memcpy(_data.meshes[_data.next_id]->uvs, info->uvs, sizeof(nu_vec2_t) * info->vertice_count);
         
         if (info->use_colors) {
-            memcpy(_data.meshes[_data.next_id]->colors, info->colors, sizeof(vec3) * info->vertice_count);
+            memcpy(_data.meshes[_data.next_id]->colors, info->colors, sizeof(nu_vec3_t) * info->vertice_count);
         } else {
             _data.meshes[_data.next_id]->colors = NULL;
         }

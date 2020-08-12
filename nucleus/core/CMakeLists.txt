@@ -19,13 +19,11 @@ INCLUDE_DIRECTORIES(
     ../../extlibs/ini/include/
 )
 
-FILE(GLOB_RECURSE sources_cglm ${CMAKE_CURRENT_SOURCE_DIR}/../../extlibs/cglm/src/*.c)
 FILE(GLOB_RECURSE sources_ini ${CMAKE_CURRENT_SOURCE_DIR}/../../extlibs/ini/include/*.c)
 FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
 ADD_LIBRARY(
     ${PROJECT_NAME} SHARED
-    ${sources_cglm}
     ${sources_ini}
     ${sources}
 )

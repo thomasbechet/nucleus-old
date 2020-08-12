@@ -2,13 +2,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
 
 PROJECT(nucleus-softrast LANGUAGES C VERSION 0.0.1)
 
-SET(CMAKE_BUILD_TYPE Debug)
-#SET(CMAKE_BUILD_TYPE Release)
+#SET(CMAKE_BUILD_TYPE Debug)
+SET(CMAKE_BUILD_TYPE Release)
 
 SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 
 INCLUDE_DIRECTORIES(
-    ../../extlibs/cglm/include/
     ../../extlibs/stb/include/
 )
 

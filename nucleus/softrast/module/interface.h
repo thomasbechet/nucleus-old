@@ -13,9 +13,9 @@ typedef struct {
     uint32_t vertice_count;
     bool use_indices;
     bool use_colors;
-    vec3 *positions;
-    vec2 *uvs;
-    vec3 *colors;
+    nu_vec3_t *positions;
+    nu_vec2_t *uvs;
+    nu_vec3_t *colors;
     uint32_t *position_indices;
     uint32_t *uv_indices;
     uint32_t *color_indices;
@@ -29,16 +29,16 @@ typedef struct {
 } nusr_texture_create_info_t;
 
 typedef struct {
-    vec3 eye;
-    vec3 center;
-    vec3 up;
+    nu_vec3_t eye;
+    nu_vec3_t center;
+    nu_vec3_t up;
     float fov;
 } nusr_camera_create_info_t;
 
 typedef struct {
     uint32_t mesh;
     uint32_t texture;
-    mat4 transform;
+    nu_mat4_t transform;
 } nusr_staticmesh_create_info_t;
 
 typedef struct {
@@ -46,12 +46,12 @@ typedef struct {
     nu_result_t (*mesh_destroy)(uint32_t);
 
     nu_result_t (*camera_set_fov)(float);
-    nu_result_t (*camera_set_eye)(const vec3);
-    nu_result_t (*camera_set_center)(const vec3);
+    nu_result_t (*camera_set_eye)(const nu_vec3_t);
+    nu_result_t (*camera_set_center)(const nu_vec3_t);
 
     nu_result_t (*staticmesh_create)(uint32_t*, const nusr_staticmesh_create_info_t*);
     nu_result_t (*staticmesh_destroy)(uint32_t);
-    nu_result_t (*staticmesh_set_transform)(uint32_t, const mat4);
+    nu_result_t (*staticmesh_set_transform)(uint32_t, const nu_mat4_t);
 } nusr_renderer_interface_t;
 
 typedef nu_result_t (*nusr_renderer_interface_loader_pfn_t)(nusr_renderer_interface_t*);

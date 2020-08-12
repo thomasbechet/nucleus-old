@@ -6,9 +6,9 @@
 
 typedef struct {
     uint32_t vertex_count;
-    vec3 *positions;
-    vec2 *uvs;
-    vec3 *colors;
+    nu_vec3_t *positions;
+    nu_vec2_t *uvs;
+    nu_vec3_t *colors;
     float xmax;
     float xmin;
     float ymax;
