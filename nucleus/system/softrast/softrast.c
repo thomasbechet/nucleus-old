@@ -260,9 +260,9 @@ static void test_initialize(void)
 
     staticmesh_info.texture = brick_texture_id;
 
-    for (uint32_t i = 0; i < 1; i++) {
-        for (uint32_t j = 0; j < 1; j++) {
-            for (uint32_t k = 0; k < 1; k++) {
+    for (uint32_t i = 0; i < 5; i++) {
+        for (uint32_t j = 0; j < 5; j++) {
+            for (uint32_t k = 0; k < 5; k++) {
                 nu_mat4_identity(staticmesh_info.transform);
                 nu_translate(staticmesh_info.transform, (nu_vec3_t){i * 2, k * 2, j * 2});
                 nu_scale(staticmesh_info.transform, (nu_vec3_t){0.5, 0.5, 0.5});
@@ -273,6 +273,7 @@ static void test_initialize(void)
 
     nu_plugin_handle_t plugin;
     nu_plugin_load(&plugin, "engine/plugin/nucleus-debug", "nudebug_plugin_command");
+    nu_plugin_load(&plugin, "engine/plugin/nucleus-debug", "nudebug_plugin_console");
 }
 static void test_update(void)
 {
