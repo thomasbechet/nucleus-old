@@ -56,11 +56,11 @@ static nu_result_t load_ini_file(void)
     const char *input_cursor_mode;
     nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_CURSOR_MODE, &input_cursor_mode, "normal");
     if (NU_MATCH(input_cursor_mode, "normal")) {
-        _data.config.input.cursor_mode = NU_INPUT_CURSOR_MODE_NORMAL;
+        _data.config.input.cursor_mode = NU_CURSOR_MODE_NORMAL;
     } else if (NU_MATCH(input_cursor_mode, "hidden")) {
-        _data.config.input.cursor_mode = NU_INPUT_CURSOR_MODE_HIDDEN;
+        _data.config.input.cursor_mode = NU_CURSOR_MODE_HIDDEN;
     } else if (NU_MATCH(input_cursor_mode, "disable")) {
-        _data.config.input.cursor_mode = NU_INPUT_CURSOR_MODE_DISABLE;
+        _data.config.input.cursor_mode = NU_CURSOR_MODE_DISABLE;
     }
 
     /* renderer */

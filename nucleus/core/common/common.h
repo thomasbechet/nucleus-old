@@ -1,8 +1,6 @@
 #ifndef NU_COMMON_H
 #define NU_COMMON_H
 
-#include <stdbool.h>
-
 #include "input.h"
 #include "macro.h"
 #include "logger.h"

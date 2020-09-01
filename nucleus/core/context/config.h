@@ -42,7 +42,7 @@ typedef struct {
 
 typedef struct {
     nu_input_api_t api;
-    nu_input_cursor_mode_t cursor_mode;
+    nu_cursor_mode_t cursor_mode;
 } nu_config_input_t;
 
 typedef struct {

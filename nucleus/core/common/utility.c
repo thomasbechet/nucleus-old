@@ -1,14 +1,8 @@
 #include "utility.h"
 
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-#include "logger.h"
 #include "result.h"
 #include "memory.h"
+#include "logger.h"
 
 char *nu_sprintf(const char *format, ...)
 {

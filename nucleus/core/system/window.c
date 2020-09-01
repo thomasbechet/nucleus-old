@@ -2,23 +2,23 @@
 
 #include "../module/interface.h"
 #include "../context/config.h"
-#include "../../glfw/module/interface.h"
+#include "../../system/glfw/module/interface.h"
 
 #define NU_LOGGER_WINDOW_NAME "[WINDOW] "
 
 static const char *nu_window_api_names[] = {
-    "nucleus-window-none",
-    NUGLFW_MODULE_NAME
+    "engine/system/nucleus-window-none",
+    "engine/system/"NUGLFW_MODULE_NAME
 };
 
 typedef struct {
-    nu_module_t module;
+    nu_module_handle_t module;
     nu_window_interface_t interface;
 } nu_system_window_t;
 
 static nu_system_window_t _system;
 
-nu_result_t nu_system_window_load(void)
+nu_result_t nu_system_window_initialize(void)
 {
     nu_result_t result;
     result = NU_SUCCESS;
@@ -33,7 +33,7 @@ nu_result_t nu_system_window_load(void)
 
     /* load window interface accessor */
     nu_window_interface_loader_pfn_t load_interface;
-    result = nu_module_load_function(&_system.module, NU_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
+    result = nu_module_load_function(_system.module, NU_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_WINDOW_NAME"Failed to load window loader.\n");
         return result;
@@ -55,14 +55,10 @@ nu_result_t nu_system_window_load(void)
 
     return result;
 }
-nu_result_t nu_system_window_unload(void)
+nu_result_t nu_system_window_terminate(void)
 {
     /* terminate window system */
     _system.interface.terminate();
-
-    /* unload module */
-    nu_module_unload(&_system.module);
-    memset(&_system.interface, 0, sizeof(nu_window_interface_t));
     
     return NU_SUCCESS;
 }
@@ -72,9 +68,9 @@ nu_result_t nu_system_window_update(void)
     return NU_SUCCESS;
 }
 
-const nu_module_t *nu_system_window_get_module(void)
+nu_module_handle_t nu_system_window_get_module_handle(void)
 {
-    return &_system.module;
+    return _system.module;
 }
 
 nu_result_t nu_window_get_size(uint32_t *width, uint32_t *height)

@@ -14,7 +14,7 @@ ADD_EXECUTABLE(
 
 TARGET_LINK_LIBRARIES(
     ${PROJECT_NAME} PRIVATE
-    nucleus-core
+    nucleus
 )
 
 INSTALL(

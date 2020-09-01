@@ -3,8 +3,6 @@
 
 #include "platform.h"
 
-#include <stdint.h>
-
 typedef uint64_t nu_timer_t;
 
 NU_API void nu_timer_start(nu_timer_t *timer);

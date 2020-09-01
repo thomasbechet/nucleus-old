@@ -15,12 +15,12 @@ typedef struct {
 } nu_renderer_create_info_t;
 
 /* private system functions */
-nu_result_t nu_system_renderer_load(void);
-nu_result_t nu_system_renderer_unload(void);
+nu_result_t nu_system_renderer_initialize(void);
+nu_result_t nu_system_renderer_terminate(void);
 nu_result_t nu_system_renderer_render(void);
 
 /* public system functions */
-NU_API const nu_module_t *nu_system_renderer_get_module(void);
+NU_API nu_module_handle_t nu_system_renderer_get_module_handle(void);
 
 /* public renderer functions */
 

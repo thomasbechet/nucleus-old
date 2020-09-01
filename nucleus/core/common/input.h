@@ -84,4 +84,10 @@ typedef enum {
     NU_MOUSE_BUTTON6 = NU_MOUSE_BUTTON5 + 1
 } nu_mouse_t;
 
+typedef enum {
+    NU_CURSOR_MODE_NORMAL,
+    NU_CURSOR_MODE_HIDDEN,
+    NU_CURSOR_MODE_DISABLE
+} nu_cursor_mode_t;
+
 #endif

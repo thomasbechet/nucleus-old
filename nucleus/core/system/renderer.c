@@ -2,26 +2,26 @@
 
 #include "../module/interface.h"
 #include "../context/config.h"
-#include "../../softrast/module/interface.h"
-#include "../../vulkan/module/interface.h"
+#include "../../system/softrast/module/interface.h"
+#include "../../system/vulkan/module/interface.h"
 
 #define NU_LOGGER_RENDERER_NAME "[RENDERER] "
 
 static const char *nu_renderer_api_names[] = {
-    "nucleus-renderer-none",
-    NUSR_MODULE_NAME,
-    NUVK_MODULE_NAME,
-    "nucleus-opengl"
+    "engine/system/nucleus-renderer-none",
+    "engine/system/"NUSR_MODULE_NAME,
+    "engine/system/"NUVK_MODULE_NAME,
+    "engine/system/nucleus-opengl"
 };
 
 typedef struct {
-    nu_module_t module;
+    nu_module_handle_t module;
     nu_renderer_interface_t interface;
 } nu_system_renderer_t;
 
 static nu_system_renderer_t _system;
 
-nu_result_t nu_system_renderer_load(void)
+nu_result_t nu_system_renderer_initialize(void)
 {
     nu_result_t result;
     result = NU_SUCCESS;
@@ -37,16 +37,16 @@ nu_result_t nu_system_renderer_load(void)
 
     /* load renderer interface accessor */
     nu_renderer_interface_loader_pfn_t load_interface;
-    result = nu_module_load_function(&_system.module, NU_RENDERER_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
+    result = nu_module_load_function(_system.module, NU_RENDERER_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_RENDERER_NAME" Failed to load renderer loader.\n");
+        nu_warning(NU_LOGGER_RENDERER_NAME"Failed to load renderer loader.\n");
         return result;
     }
 
     /* load renderer interface */
     result = load_interface(&_system.interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_RENDERER_NAME" Failed to load interface.\n");
+        nu_warning(NU_LOGGER_RENDERER_NAME"Failed to load interface.\n");
         return result;
     }
 
@@ -59,14 +59,10 @@ nu_result_t nu_system_renderer_load(void)
 
     return result;
 }
-nu_result_t nu_system_renderer_unload(void)
+nu_result_t nu_system_renderer_terminate(void)
 {
     /* terminate renderer system */
     _system.interface.terminate();
-
-    /* unload module */
-    nu_module_unload(&_system.module);
-    memset(&_system.interface, 0, sizeof(nu_renderer_interface_t));
 
     return NU_SUCCESS;
 }
@@ -76,7 +72,7 @@ nu_result_t nu_system_renderer_render(void)
     return NU_SUCCESS;
 }
 
-const nu_module_t *nu_system_renderer_get_module(void)
+nu_module_handle_t nu_system_renderer_get_module_id(void)
 {
-    return &_system.module;
+    return _system.module;
 }

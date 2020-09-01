@@ -1,8 +1,6 @@
 #ifndef NU_LOGGER_H
 #define NU_LOGGER_H
 
-#include <stdarg.h>
-
 #include "platform.h"
 
 typedef enum {

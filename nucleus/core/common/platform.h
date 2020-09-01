@@ -1,6 +1,14 @@
 #ifndef NU_PLATFORM_H
 #define NU_PLATFORM_H
 
+#include <stdbool.h>
+#include <stdlib.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
+
 #if (defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__) || defined(_WIN32))
     #define NU_PLATFORM_WINDOWS
 #elif defined(__linux__) || defined(__unix__)

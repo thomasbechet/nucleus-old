@@ -15,12 +15,12 @@ typedef enum {
 } nu_window_mode_t;
 
 /* private system functions */
-nu_result_t nu_system_window_load(void);
-nu_result_t nu_system_window_unload(void);
+nu_result_t nu_system_window_initialize(void);
+nu_result_t nu_system_window_terminate(void);
 nu_result_t nu_system_window_update(void);
 
 /* public system functions */
-NU_API const nu_module_t *nu_system_window_get_module(void);
+NU_API nu_module_handle_t nu_system_window_get_module_handle(void);
 
 /* public window functions */
 NU_API nu_result_t nu_window_get_size(uint32_t *width, uint32_t *height);

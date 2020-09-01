@@ -3,6 +3,8 @@
 
 #include "../common/common.h"
 
+NU_DECLARE_HANDLE(nu_module_handle_t);
+
 typedef enum {
     NU_MODULE_FLAG_TYPE_TASK      = 1 << 0,
     NU_MODULE_FLAG_TYPE_WINDOW    = 1 << 1,
@@ -13,18 +15,18 @@ typedef enum {
 
 typedef struct {
     uint32_t flags;
-    uint32_t id;
-    uint32_t interface_count;
-    const char **interfaces;
+    nu_id_t id;
+    const char **plugins;
+    uint32_t plugin_count;
 } nu_module_info_t;
 
-typedef struct {
-    nu_module_info_t info;
-    void *handle;
-} nu_module_t;
+/* private functions */
+nu_result_t nu_module_initialize(void);
+nu_result_t nu_module_terminate(void);
 
-NU_API nu_result_t nu_module_load(nu_module_t *module, const char *module_name);
-NU_API nu_result_t nu_module_unload(const nu_module_t *module);
-NU_API nu_result_t nu_module_load_function(const nu_module_t *module, const char *function_name, nu_pfn_t *function);
+/* public functions */
+NU_API nu_result_t nu_module_load(nu_module_handle_t *handle, const char *path);
+NU_API nu_result_t nu_module_load_function(nu_module_handle_t handle, const char *function_name, nu_pfn_t *function);
+NU_API nu_id_t nu_module_get_id(nu_module_handle_t handle);
 
 #endif

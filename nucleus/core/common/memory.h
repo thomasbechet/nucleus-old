@@ -1,9 +1,6 @@
 #ifndef NU_MEMORY_H
 #define NU_MEMORY_H
 
-#include <stddef.h>
-#include <stdint.h>
-
 #include "platform.h"
 
 typedef void* nu_ptr_t;
