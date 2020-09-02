@@ -19,8 +19,8 @@ typedef struct {
 nu_result_t nusr_mesh_initialize(void);
 nu_result_t nusr_mesh_terminate(void);
 
-nu_result_t nusr_mesh_create(uint32_t *id, const nusr_mesh_create_info_t *info);
-nu_result_t nusr_mesh_destroy(uint32_t id);
+nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info);
+nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle);
 nu_result_t nusr_mesh_get(uint32_t id, nusr_mesh_t **p);
 
 #endif

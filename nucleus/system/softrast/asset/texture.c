@@ -30,7 +30,7 @@ nu_result_t nusr_texture_terminate(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nusr_texture_create(uint32_t *id, const nusr_texture_create_info_t *info)
+nu_result_t nusr_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info)
 {
     /* error check */
     if (_data.next_id >= MAX_TEXTURE_COUNT) return NU_FAILURE;
@@ -48,12 +48,14 @@ nu_result_t nusr_texture_create(uint32_t *id, const nusr_texture_create_info_t *
     }
 
     /* save id */
-    *id = _data.next_id++;
+    *((uint32_t*)handle) = _data.next_id++;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_texture_destroy(uint32_t id)
+nu_result_t nusr_texture_destroy(nu_renderer_texture_handle_t handle)
 {
+    uint32_t id = *((uint32_t*)handle);
+
     if (_data.next_id >= MAX_TEXTURE_COUNT) return NU_FAILURE;
     if (!_data.textures[id]) return NU_FAILURE;
 

@@ -48,17 +48,17 @@ nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer
     return NU_SUCCESS;
 }
 
-nu_result_t nusr_scene_camera_set_fov(float fov)
+nu_result_t nusr_scene_camera_set_fov(nu_renderer_camera_handle_t handle, float fov)
 {
     _data.camera.fov = fov;
     return NU_SUCCESS;
 }
-nu_result_t nusr_scene_camera_set_eye(const nu_vec3_t eye)
+nu_result_t nusr_scene_camera_set_eye(nu_renderer_camera_handle_t handle, const nu_vec3_t eye)
 {
     nu_vec3_copy(eye, _data.camera.eye);
     return NU_SUCCESS;
 }
-nu_result_t nusr_scene_camera_set_center(const nu_vec3_t center)
+nu_result_t nusr_scene_camera_set_center(nu_renderer_camera_handle_t handle, const nu_vec3_t center)
 {
     nu_vec3_copy(center, _data.camera.center);
     return NU_SUCCESS;

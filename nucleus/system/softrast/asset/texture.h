@@ -12,8 +12,8 @@ typedef struct {
 nu_result_t nusr_texture_initialize(void);
 nu_result_t nusr_texture_terminate(void);
 
-nu_result_t nusr_texture_create(uint32_t *id, const nusr_texture_create_info_t *info);
-nu_result_t nusr_texture_destroy(uint32_t id);
+nu_result_t nusr_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info);
+nu_result_t nusr_texture_destroy(nu_renderer_texture_handle_t handle);
 nu_result_t nusr_texture_get(uint32_t id, nusr_texture_t **p);
 
 #endif

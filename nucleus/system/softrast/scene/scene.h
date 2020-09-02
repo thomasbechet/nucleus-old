@@ -24,9 +24,9 @@ nu_result_t nusr_scene_initialize(void);
 nu_result_t nusr_scene_terminate(void);
 nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer_t *depth_buffer);
 
-nu_result_t nusr_scene_camera_set_fov(float fov);
-nu_result_t nusr_scene_camera_set_eye(const nu_vec3_t eye);
-nu_result_t nusr_scene_camera_set_center(const nu_vec3_t center);
+nu_result_t nusr_scene_camera_set_fov(nu_renderer_camera_handle_t handle, float fov);
+nu_result_t nusr_scene_camera_set_eye(nu_renderer_camera_handle_t handle, const nu_vec3_t eye);
+nu_result_t nusr_scene_camera_set_center(nu_renderer_camera_handle_t handle, const nu_vec3_t center);
 nu_result_t nusr_scene_camera_set_transform(const nu_mat4_t transform);
 
 nu_result_t nusr_scene_staticmesh_create(uint32_t *id, const nusr_staticmesh_create_info_t *info);

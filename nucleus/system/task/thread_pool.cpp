@@ -20,7 +20,7 @@ void thread_pool_t::start(unsigned workerCount) noexcept
 
         /* create queues */
         for (uint32_t i = 0; i < proc_count; i++)
-            m_queues.emplace_back(std::make_unique<rigtorp::MPMCQueue<nu_job_t>>(25));
+            m_queues.emplace_back(std::make_unique<rigtorp::MPMCQueue<nu_task_job_t>>(25));
         /* create workers */
         for (uint32_t i = 0; i < proc_count; i++)
             m_workers.emplace_back(std::make_unique<std::thread>(thread_pool_t::worker_main, this, i));
@@ -48,7 +48,7 @@ nu_task_handle_t thread_pool_t::create_task() noexcept
 {
     return 0;
 }
-void thread_pool_t::perform(nu_task_handle_t task, const nu_job_t *jobs, uint32_t count)
+void thread_pool_t::perform(nu_task_handle_t task, const nu_task_job_t *jobs, uint32_t count)
 {
     for (uint32_t i = 0; i < count; i++)
     {
@@ -68,7 +68,7 @@ void thread_pool_t::worker_main(uint32_t id) noexcept
 {
     bool was_working = false;
 
-    nu_job_t job;
+    nu_task_job_t job;
     while (m_running.load(std::memory_order_relaxed))
     {
         bool find = false;

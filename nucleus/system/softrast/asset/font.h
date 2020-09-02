@@ -27,8 +27,8 @@ typedef struct {
 nu_result_t nusr_font_initialize(void);
 nu_result_t nusr_font_terminate(void);
 
-nu_result_t nusr_font_create(uint32_t *id, const char *filename);
-nu_result_t nusr_font_destroy(uint32_t id);
+nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info);
+nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle);
 nu_result_t nusr_font_get(uint32_t id, nusr_font_t **p);
 
 #endif

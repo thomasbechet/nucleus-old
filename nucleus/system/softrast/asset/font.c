@@ -48,7 +48,7 @@ nu_result_t nusr_font_terminate(void)
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_font_create(uint32_t *id, const char* filename)
+nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
 {
     FT_Face face;
     FT_GlyphSlot glyph;
@@ -58,7 +58,7 @@ nu_result_t nusr_font_create(uint32_t *id, const char* filename)
     if (_data.next_id >= MAX_FONT_COUNT) return NU_FAILURE;
 
     /* load face */ 
-    error = FT_New_Face(_data.freetype, filename, 0, &face);
+    error = FT_New_Face(_data.freetype, info->filename, 0, &face);
     if (error) {
         if (error == FT_Err_Unknown_File_Format) {
             nu_warning(NUSR_LOGGER_NAME"Unknown file format.\n");
@@ -127,12 +127,14 @@ nu_result_t nusr_font_create(uint32_t *id, const char* filename)
     }
 
     /* save id */
-    *id = _data.next_id++;
+    *((uint32_t*)handle) = _data.next_id++;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_font_destroy(uint32_t id)
+nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)
 {
+    uint32_t id = *((uint32_t*)handle);
+
     if (_data.next_id >= MAX_FONT_COUNT) return NU_FAILURE;
     if (!_data.fonts[id]) return NU_FAILURE;
 

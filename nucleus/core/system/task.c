@@ -66,11 +66,11 @@ nu_result_t nu_task_create(nu_task_handle_t *task)
 {
     return _system.interface.create(task);
 }
-nu_result_t nu_task_perform(nu_task_handle_t task, nu_job_t *jobs, uint32_t count)
+nu_result_t nu_task_perform(nu_task_handle_t task, nu_task_job_t *jobs, uint32_t count)
 {
     return _system.interface.perform(task, jobs, count);
 }
-nu_result_t nu_task_perform_parallel(nu_task_handle_t task, nu_job_t job, uint32_t count)
+nu_result_t nu_task_perform_parallel(nu_task_handle_t task, nu_task_job_t job, uint32_t count)
 {
     nu_result_t result;
     result = NU_SUCCESS;

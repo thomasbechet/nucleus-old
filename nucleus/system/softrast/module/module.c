@@ -2,6 +2,8 @@
 
 #include "../softrast.h"
 #include "../asset/mesh.h"
+#include "../asset/texture.h"
+#include "../asset/font.h"
 #include "../scene/scene.h"
 
 static const uint32_t plugin_count = 0;
@@ -22,6 +24,19 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->initialize = nusr_initialize;
     interface->terminate  = nusr_terminate;
     interface->render     = nusr_render;
+
+    interface->mesh_create  = nusr_mesh_create;
+    interface->mesh_destroy = nusr_mesh_destroy;
+
+    interface->texture_create  = nusr_texture_create;
+    interface->texture_destroy = nusr_texture_destroy;
+
+    interface->font_create  = nusr_font_create;
+    interface->font_destroy = nusr_font_destroy;
+
+    interface->camera_create  = NULL;
+    interface->camera_destroy = NULL;
+    interface->camera_set_fov = nusr_scene_camera_set_fov;
 
     return NU_SUCCESS;
 }

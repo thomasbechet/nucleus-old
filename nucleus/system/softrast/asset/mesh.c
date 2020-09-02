@@ -30,7 +30,7 @@ nu_result_t nusr_mesh_terminate(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nusr_mesh_create(uint32_t *id, const nusr_mesh_create_info_t *info)
+nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
 {
     /* error check */
     if (_data.next_id >= MAX_MESH_COUNT) return NU_FAILURE;
@@ -96,12 +96,14 @@ nu_result_t nusr_mesh_create(uint32_t *id, const nusr_mesh_create_info_t *info)
 
 
     /* save id */
-    *id = _data.next_id++;
+    *((uint32_t*)handle) = _data.next_id++;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_mesh_destroy(uint32_t id)
+nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle)
 {
+    uint32_t id = *((uint32_t*)handle);
+
     if (_data.next_id >= MAX_MESH_COUNT) return NU_FAILURE;
     if (!_data.meshes[id]) return NU_FAILURE;
 

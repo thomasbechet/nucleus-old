@@ -26,7 +26,7 @@ namespace nucleus
         void stop() noexcept;
 
         nu_task_handle_t create_task() noexcept;
-        void perform(nu_task_handle_t task, const nu_job_t *jobs, uint32_t count);
+        void perform(nu_task_handle_t task, const nu_task_job_t *jobs, uint32_t count);
         void wait_task(nu_task_handle_t task);
 
     private:
@@ -39,7 +39,7 @@ namespace nucleus
         std::atomic_uint m_job_count;
 
         /* workers */
-        std::vector<std::unique_ptr<rigtorp::MPMCQueue<nu_job_t>>> m_queues;
+        std::vector<std::unique_ptr<rigtorp::MPMCQueue<nu_task_job_t>>> m_queues;
         std::vector<std::unique_ptr<std::thread>> m_workers;
         uint32_t m_next_worker;
 

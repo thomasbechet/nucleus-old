@@ -25,10 +25,9 @@ static nu_result_t nutk_task_terminate(void)
 static nu_result_t nutk_task_create(nu_task_handle_t *task)
 {
     *task = (nu_task_handle_t)_thread_pool->create_task();
-
     return NU_SUCCESS;
 }
-static nu_result_t nutk_task_perform(nu_task_handle_t task, nu_job_t *jobs, uint32_t count)
+static nu_result_t nutk_task_perform(nu_task_handle_t task, nu_task_job_t *jobs, uint32_t count)
 {
     _thread_pool->perform(task, jobs, count);
     return NU_SUCCESS;
