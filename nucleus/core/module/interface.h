@@ -74,6 +74,12 @@ typedef nu_result_t (*nu_input_interface_loader_pfn_t)(nu_input_interface_t*);
 #define NU_RENDERER_INTERFACE_NAME        "nu_renderer_interface"
 #define NU_RENDERER_INTERFACE_LOADER_NAME "nu_renderer_get_interface"
 
+NU_DECLARE_HANDLE(nu_renderer_mesh_handle_t);
+NU_DECLARE_HANDLE(nu_renderer_font_handle_t);
+NU_DECLARE_HANDLE(nu_renderer_texture_handle_t);
+NU_DECLARE_HANDLE(nu_renderer_camera_handle_t);
+NU_DECLARE_HANDLE(nu_renderer_staticmesh_handle_t);
+
 typedef struct {
     uint32_t vertice_count;
     bool use_indices;
@@ -109,12 +115,6 @@ typedef struct {
     nu_renderer_texture_handle_t texture;
     nu_mat4_t transform;
 } nu_renderer_staticmesh_create_info_t;
-
-NU_DECLARE_HANDLE(nu_renderer_mesh_handle_t);
-NU_DECLARE_HANDLE(nu_renderer_font_handle_t);
-NU_DECLARE_HANDLE(nu_renderer_texture_handle_t);
-NU_DECLARE_HANDLE(nu_renderer_camera_handle_t);
-NU_DECLARE_HANDLE(nu_renderer_staticmesh_handle_t);
 
 typedef struct {
     nu_result_t (*initialize)(void);

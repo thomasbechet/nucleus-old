@@ -135,7 +135,7 @@ static void profile(void)
 static void test_initialize(void)
 {
     /* load texture */
-    nusr_texture_create_info_t texture_info = {};
+    nu_renderer_texture_create_info_t texture_info = {};
     int width, height, channel;
     unsigned char *ima_data;
 
@@ -209,7 +209,7 @@ static void test_initialize(void)
     
     static uint32_t vcount = 6 * 6;
 
-    nusr_mesh_create_info_t mesh_info = {};
+    nu_renderer_mesh_create_info_t mesh_info = {};
     mesh_info.vertice_count = vcount;
     mesh_info.use_indices = true;
     mesh_info.use_colors = false;
@@ -234,7 +234,7 @@ static void test_initialize(void)
         {0, 0}
     };
 
-    nusr_mesh_create_info_t triangle_mesh_info = {};
+    nu_renderer_mesh_create_info_t triangle_mesh_info = {};
     triangle_mesh_info.vertice_count = 3;
     triangle_mesh_info.use_indices = false;
     triangle_mesh_info.use_colors = false;
@@ -249,14 +249,14 @@ static void test_initialize(void)
 
     /* create static meshes */
     uint32_t staticmesh_id;
-    nusr_staticmesh_create_info_t staticmesh_info = {};
+    nu_renderer_staticmesh_create_info_t staticmesh_info = {};
     staticmesh_info.mesh = mesh_id;
     staticmesh_info.texture = rdr2_texture_id;
 
     nu_mat4_identity(staticmesh_info.transform);
     nu_translate(staticmesh_info.transform, (nu_vec3_t){0, -4, 0});
     nu_scale(staticmesh_info.transform, (nu_vec3_t){100.0, 0.1, 100.0});
-    nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+    nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
     staticmesh_info.texture = brick_texture_id;
 
@@ -266,7 +266,7 @@ static void test_initialize(void)
                 nu_mat4_identity(staticmesh_info.transform);
                 nu_translate(staticmesh_info.transform, (nu_vec3_t){i * 2, k * 2, j * 2});
                 nu_scale(staticmesh_info.transform, (nu_vec3_t){0.5, 0.5, 0.5});
-                nusr_scene_staticmesh_create(&staticmesh_id, &staticmesh_info);
+                nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
             }
         }
     }
@@ -332,8 +332,8 @@ static void test_update(void)
         
         nu_vec3_t center;
         nu_vec3_add(eye, forward, center);
-        nusr_scene_camera_set_eye(eye);
-        nusr_scene_camera_set_center(center);
-        nusr_scene_camera_set_fov(nu_radian(90.0));
+        nu_renderer_camera_set_eye(NULL, eye);
+        nu_renderer_camera_set_center(NULL, center);
+        nu_renderer_camera_set_fov(NULL, nu_radian(90.0));
     }
 }

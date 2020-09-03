@@ -72,7 +72,7 @@ nu_result_t nusr_scene_camera_set_transform(const nu_mat4_t transform)
     return NU_SUCCESS;
 }
 
-nu_result_t nusr_scene_staticmesh_create(uint32_t *id, const nusr_staticmesh_create_info_t *info)
+nu_result_t nusr_scene_staticmesh_create(nu_renderer_staticmesh_handle_t *handle, const nu_renderer_staticmesh_create_info_t *info)
 {
     uint32_t found_id = MAX_STATICMESH_COUNT;
     for (uint32_t i = 0; i < _data.staticmesh_count; i++) {
@@ -93,20 +93,24 @@ nu_result_t nusr_scene_staticmesh_create(uint32_t *id, const nusr_staticmesh_cre
     _data.staticmeshes[found_id].texture = info->texture;
     nu_mat4_copy(info->transform, _data.staticmeshes[found_id].transform);
 
-    *id = found_id;
+    *((uint32_t*)handle) = found_id;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_scene_staticmesh_destroy(uint32_t id)
+nu_result_t nusr_scene_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle)
 {
+    uint32_t id = *((uint32_t*)handle);
+
     if (!_data.staticmeshes[id].active) return NU_FAILURE;
 
     _data.staticmeshes[id].active = false;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_scene_staticmesh_set_transform(uint32_t id, const nu_mat4_t m)
+nu_result_t nusr_scene_staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t m)
 {
+    uint32_t id = *((uint32_t*)handle);
+
     if (!_data.staticmeshes[id].active) return NU_FAILURE;
 
     nu_mat4_copy(m, _data.staticmeshes[id].transform);

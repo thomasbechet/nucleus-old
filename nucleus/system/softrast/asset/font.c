@@ -16,39 +16,7 @@ typedef struct {
 
 static nusr_asset_font_data_t _data;
 
-nu_result_t nusr_font_initialize(void)
-{
-    /* allocate memory */
-    _data.next_id = 0;
-    _data.fonts = (nusr_font_t**)nu_malloc(sizeof(nusr_font_t*) * MAX_FONT_COUNT);
-    memset(_data.fonts, 0, sizeof(nusr_font_t*) * MAX_FONT_COUNT);
-
-    /* initialize FreeType */
-    FT_Error error = FT_Init_FreeType(&_data.freetype);
-    if (error) {
-        nu_warning(NUSR_LOGGER_NAME"Failed to initialize FreeType.\n");
-        return NU_FAILURE;
-    }
-
-    return NU_SUCCESS;
-}
-nu_result_t nusr_font_terminate(void)
-{
-    /* terminate FreeType */
-    FT_Done_FreeType(_data.freetype);
-
-    /* free memory */
-    for (uint32_t i = 0; i < _data.next_id; i++) {
-        if (_data.fonts[i]) {
-            nusr_font_destroy(i);
-        }
-    }
-
-    nu_free(_data.fonts);
-
-    return NU_SUCCESS;
-}
-nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
+static nu_result_t create_font(uint32_t *id, const nu_renderer_font_create_info_t *info)
 {
     FT_Face face;
     FT_GlyphSlot glyph;
@@ -127,14 +95,12 @@ nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_rendere
     }
 
     /* save id */
-    *((uint32_t*)handle) = _data.next_id++;
+    *id = _data.next_id++;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)
+static nu_result_t destroy_font(uint32_t id)
 {
-    uint32_t id = *((uint32_t*)handle);
-
     if (_data.next_id >= MAX_FONT_COUNT) return NU_FAILURE;
     if (!_data.fonts[id]) return NU_FAILURE;
 
@@ -145,6 +111,53 @@ nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)
     _data.fonts[id] = NULL;
 
     return NU_SUCCESS;
+}
+
+nu_result_t nusr_font_initialize(void)
+{
+    /* allocate memory */
+    _data.next_id = 0;
+    _data.fonts = (nusr_font_t**)nu_malloc(sizeof(nusr_font_t*) * MAX_FONT_COUNT);
+    memset(_data.fonts, 0, sizeof(nusr_font_t*) * MAX_FONT_COUNT);
+
+    /* initialize FreeType */
+    FT_Error error = FT_Init_FreeType(&_data.freetype);
+    if (error) {
+        nu_warning(NUSR_LOGGER_NAME"Failed to initialize FreeType.\n");
+        return NU_FAILURE;
+    }
+
+    return NU_SUCCESS;
+}
+nu_result_t nusr_font_terminate(void)
+{
+    /* terminate FreeType */
+    FT_Done_FreeType(_data.freetype);
+
+    /* free memory */
+    for (uint32_t i = 0; i < _data.next_id; i++) {
+        if (_data.fonts[i]) {
+            destroy_font(i);
+        }
+    }
+
+    nu_free(_data.fonts);
+
+    return NU_SUCCESS;
+}
+nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
+{
+    uint32_t id;
+
+    nu_result_t result = create_font(&id, info);
+    if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
+
+    return result;
+}
+nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)
+{
+    uint32_t id = *((uint32_t*)handle);
+    return destroy_font(id);
 }
 nu_result_t nusr_font_get(uint32_t id, nusr_font_t **p)
 {

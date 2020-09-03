@@ -9,6 +9,15 @@ typedef struct {
 
 static nusr_asset_texture_data_t _data;
 
+static nu_result_t create_texture(uint32_t *id, const nu_renderer_texture_create_info_t *info)
+{
+
+}
+static nu_result_t destroy_texture(uint32_t id)
+{
+    
+}
+
 nu_result_t nusr_texture_initialize(void)
 {
     _data.next_id = 0;

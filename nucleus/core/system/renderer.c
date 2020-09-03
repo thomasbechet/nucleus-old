@@ -76,3 +76,62 @@ nu_module_handle_t nu_system_renderer_get_module_id(void)
 {
     return _system.module;
 }
+
+nu_result_t nu_renderer_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
+{
+    return _system.interface.mesh_create(handle, info);
+}
+nu_result_t nu_renderer_mesh_destroy(nu_renderer_mesh_handle_t handle)
+{
+    return _system.interface.mesh_destroy(handle);
+}
+nu_result_t nu_renderer_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info)
+{
+    return _system.interface.texture_create(handle, info);
+}
+nu_result_t nu_renderer_texture_destroy(nu_renderer_texture_handle_t handle)
+{
+    return _system.interface.texture_destroy(handle);
+}
+nu_result_t nu_renderer_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
+{
+    return _system.interface.font_create(handle, info);
+}
+nu_result_t nu_renderer_font_destroy(nu_renderer_font_handle_t handle)
+{
+    return _system.interface.font_destroy(handle);
+}
+
+nu_result_t nu_renderer_camera_create(nu_renderer_camera_handle_t *handle, const nu_renderer_camera_create_info_t *info)
+{
+    return _system.interface.camera_create(handle, info);
+}
+nu_result_t nu_renderer_camera_destroy(nu_renderer_camera_handle_t handle)
+{
+    return _system.interface.camera_destroy(handle);
+}
+nu_result_t nu_renderer_camera_set_fov(nu_renderer_camera_handle_t handle, float fov)
+{
+    return _system.interface.camera_set_fov(handle, fov);
+}
+nu_result_t nu_renderer_camera_set_eye(nu_renderer_camera_handle_t handle, const nu_vec3_t eye)
+{
+    return _system.interface.camera_set_eye(handle, eye);
+}
+nu_result_t nu_renderer_camera_set_center(nu_renderer_camera_handle_t handle, const nu_vec3_t center)
+{
+    return _system.interface.camera_set_center(handle, center);
+}
+
+nu_result_t nu_renderer_staticmesh_create(nu_renderer_staticmesh_handle_t *handle, const nu_renderer_staticmesh_create_info_t *info)
+{
+    return _system.interface.staticmesh_create(handle, info);
+}
+nu_result_t nu_renderer_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle)
+{
+    return _system.interface.staticmesh_destroy(handle);
+}
+nu_result_t nu_renderer_staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t transform)
+{
+    return _system.interface.staticmesh_set_transform(handle, transform);
+}

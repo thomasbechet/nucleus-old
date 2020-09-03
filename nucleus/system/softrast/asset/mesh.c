@@ -9,28 +9,7 @@ typedef struct {
 
 static nusr_asset_mesh_data_t _data;
 
-nu_result_t nusr_mesh_initialize(void)
-{
-    _data.next_id = 0;
-    _data.meshes = (nusr_mesh_t**)nu_malloc(sizeof(nusr_mesh_t*) * MAX_MESH_COUNT);
-    memset(_data.meshes, 0, sizeof(nusr_mesh_t*) * MAX_MESH_COUNT);
-
-    return NU_SUCCESS;
-}
-nu_result_t nusr_mesh_terminate(void)
-{
-    for (uint32_t i = 0; i < _data.next_id; i++) {
-        if (_data.meshes[i]) {
-            nusr_mesh_destroy(i);
-        }
-    }
-
-    nu_free(_data.meshes);
-
-    return NU_SUCCESS;
-}
-
-nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
+static nu_result_t create_mesh(uint32_t *id, const nu_renderer_mesh_create_info_t *info)
 {
     /* error check */
     if (_data.next_id >= MAX_MESH_COUNT) return NU_FAILURE;
@@ -96,14 +75,12 @@ nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_rendere
 
 
     /* save id */
-    *((uint32_t*)handle) = _data.next_id++;
+    *id = _data.next_id++;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle)
+static nu_result_t destroy_mesh(uint32_t id)
 {
-    uint32_t id = *((uint32_t*)handle);
-
     if (_data.next_id >= MAX_MESH_COUNT) return NU_FAILURE;
     if (!_data.meshes[id]) return NU_FAILURE;
 
@@ -117,6 +94,42 @@ nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle)
     _data.meshes[id] = NULL;
 
     return NU_SUCCESS;
+}
+
+nu_result_t nusr_mesh_initialize(void)
+{
+    _data.next_id = 0;
+    _data.meshes = (nusr_mesh_t**)nu_malloc(sizeof(nusr_mesh_t*) * MAX_MESH_COUNT);
+    memset(_data.meshes, 0, sizeof(nusr_mesh_t*) * MAX_MESH_COUNT);
+
+    return NU_SUCCESS;
+}
+nu_result_t nusr_mesh_terminate(void)
+{
+    for (uint32_t i = 0; i < _data.next_id; i++) {
+        if (_data.meshes[i]) {
+            destroy_mesh(i);
+        }
+    }
+
+    nu_free(_data.meshes);
+
+    return NU_SUCCESS;
+}
+
+nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
+{
+    uint32_t id;
+
+    nu_result_t result = create_mesh(&id, info);
+    if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
+
+    return result;
+}
+nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle)
+{
+    uint32_t id = *((uint32_t*)handle);
+    return destroy_mesh(id);
 }
 nu_result_t nusr_mesh_get(uint32_t id, nusr_mesh_t **p)
 {
