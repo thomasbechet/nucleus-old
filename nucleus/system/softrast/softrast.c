@@ -145,8 +145,8 @@ static void test_initialize(void)
     texture_info.height = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
     texture_info.data = ima_data;
-    uint32_t brick_texture_id;
-    if (nusr_texture_create(&brick_texture_id, &texture_info) != NU_SUCCESS) {
+    nu_renderer_texture_handle_t brick_texture_id;
+    if (nu_renderer_texture_create(&brick_texture_id, &texture_info) != NU_SUCCESS) {
         nu_warning("Failed to create texture.\n");
     }
     stbi_image_free(ima_data);
@@ -157,17 +157,11 @@ static void test_initialize(void)
     texture_info.height = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
     texture_info.data = ima_data;
-    uint32_t rdr2_texture_id;
-    if (nusr_texture_create(&rdr2_texture_id, &texture_info) != NU_SUCCESS) {
+    nu_renderer_texture_handle_t rdr2_texture_id;
+    if (nu_renderer_texture_create(&rdr2_texture_id, &texture_info) != NU_SUCCESS) {
         nu_warning("Failed to create texture.\n");
     }
     stbi_image_free(ima_data);
-
-    /* load font */
-    uint32_t font_id;
-    if (nusr_font_create(&font_id, "engine/font/Coder's Crux.ttf") != NU_SUCCESS) {
-        nu_fatal("Failed to create font.\n");
-    }
 
     /* load cube mesh */
     static nu_vec3_t vertices[] =
@@ -217,8 +211,8 @@ static void test_initialize(void)
     mesh_info.uvs = uvs;
     mesh_info.position_indices = position_indices;
     mesh_info.uv_indices = uv_indices;
-    uint32_t mesh_id;
-    if (nusr_mesh_create(&mesh_id, &mesh_info) != NU_SUCCESS) {
+    nu_renderer_mesh_handle_t mesh_id;
+    if (nu_renderer_mesh_create(&mesh_id, &mesh_info) != NU_SUCCESS) {
         nu_warning("Failed to create cube mesh.\n");
     }
 
@@ -242,13 +236,13 @@ static void test_initialize(void)
     triangle_mesh_info.uvs = triangle_uvs;
     triangle_mesh_info.position_indices = NULL;
     triangle_mesh_info.uv_indices = NULL;
-    uint32_t triangle_mesh_id;
-    if (nusr_mesh_create(&triangle_mesh_id, &triangle_mesh_info) != NU_SUCCESS) {
+    nu_renderer_mesh_handle_t triangle_mesh_id;
+    if (nu_renderer_mesh_create(&triangle_mesh_id, &triangle_mesh_info) != NU_SUCCESS) {
         nu_warning("Failed to create triangle mesh.\n");
     }
 
     /* create static meshes */
-    uint32_t staticmesh_id;
+    nu_renderer_staticmesh_handle_t staticmesh_id;
     nu_renderer_staticmesh_create_info_t staticmesh_info = {};
     staticmesh_info.mesh = mesh_id;
     staticmesh_info.texture = rdr2_texture_id;
@@ -270,10 +264,6 @@ static void test_initialize(void)
             }
         }
     }
-
-    nu_plugin_handle_t plugin;
-    nu_plugin_load(&plugin, "engine/plugin/nucleus-debug", "nudebug_plugin_command");
-    nu_plugin_load(&plugin, "engine/plugin/nucleus-debug", "nudebug_plugin_console");
 }
 static void test_update(void)
 {

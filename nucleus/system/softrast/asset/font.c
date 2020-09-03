@@ -148,10 +148,8 @@ nu_result_t nusr_font_terminate(void)
 nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
 {
     uint32_t id;
-
     nu_result_t result = create_font(&id, info);
     if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
-
     return result;
 }
 nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)

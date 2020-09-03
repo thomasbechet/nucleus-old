@@ -160,6 +160,10 @@ static nu_result_t nu_context_run(void)
     nu_timer_t timer;
     nu_timer_start(&timer);
 
+    nu_plugin_handle_t plugin;
+    nu_plugin_load(&plugin, "engine/plugin/nucleus-debug", "nudebug_plugin_command");
+    nu_plugin_load(&plugin, "engine/plugin/nucleus-debug", "nudebug_plugin_console");
+
     while (!_context.should_stop) {
         /* compute delta */
         delta = nu_timer_get_time_elapsed(&timer);

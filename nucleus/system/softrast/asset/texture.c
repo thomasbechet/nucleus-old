@@ -11,36 +11,6 @@ static nusr_asset_texture_data_t _data;
 
 static nu_result_t create_texture(uint32_t *id, const nu_renderer_texture_create_info_t *info)
 {
-
-}
-static nu_result_t destroy_texture(uint32_t id)
-{
-    
-}
-
-nu_result_t nusr_texture_initialize(void)
-{
-    _data.next_id = 0;
-    _data.textures = (nusr_texture_t**)nu_malloc(sizeof(nusr_texture_t*) * MAX_TEXTURE_COUNT);
-    memset(_data.textures, 0, sizeof(nusr_texture_t*) * MAX_TEXTURE_COUNT);
-
-    return NU_SUCCESS;
-}
-nu_result_t nusr_texture_terminate(void)
-{
-    for (uint32_t i = 0; i < _data.next_id; i++) {
-        if (_data.textures[i]) {
-            nusr_texture_destroy(i);
-        }
-    }
-
-    nu_free(_data.textures);
-
-    return NU_SUCCESS;
-}
-
-nu_result_t nusr_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info)
-{
     /* error check */
     if (_data.next_id >= MAX_TEXTURE_COUNT) return NU_FAILURE;
 
@@ -57,14 +27,12 @@ nu_result_t nusr_texture_create(nu_renderer_texture_handle_t *handle, const nu_r
     }
 
     /* save id */
-    *((uint32_t*)handle) = _data.next_id++;
+    *id = _data.next_id++;
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_texture_destroy(nu_renderer_texture_handle_t handle)
+static nu_result_t destroy_texture(uint32_t id)
 {
-    uint32_t id = *((uint32_t*)handle);
-
     if (_data.next_id >= MAX_TEXTURE_COUNT) return NU_FAILURE;
     if (!_data.textures[id]) return NU_FAILURE;
 
@@ -73,6 +41,40 @@ nu_result_t nusr_texture_destroy(nu_renderer_texture_handle_t handle)
     _data.textures[id] = NULL;
 
     return NU_SUCCESS;
+}
+
+nu_result_t nusr_texture_initialize(void)
+{
+    _data.next_id = 0;
+    _data.textures = (nusr_texture_t**)nu_malloc(sizeof(nusr_texture_t*) * MAX_TEXTURE_COUNT);
+    memset(_data.textures, 0, sizeof(nusr_texture_t*) * MAX_TEXTURE_COUNT);
+
+    return NU_SUCCESS;
+}
+nu_result_t nusr_texture_terminate(void)
+{
+    for (uint32_t i = 0; i < _data.next_id; i++) {
+        if (_data.textures[i]) {
+            destroy_texture(i);
+        }
+    }
+
+    nu_free(_data.textures);
+
+    return NU_SUCCESS;
+}
+
+nu_result_t nusr_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info)
+{
+    uint32_t id;
+    nu_result_t result = create_texture(&id, info);
+    if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
+    return result;
+}
+nu_result_t nusr_texture_destroy(nu_renderer_texture_handle_t handle)
+{
+    uint32_t id = *((uint32_t*)handle);
+    return destroy_texture(id);
 }
 nu_result_t nusr_texture_get(uint32_t id, nusr_texture_t **p)
 {

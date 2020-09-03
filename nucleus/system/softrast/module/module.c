@@ -5,6 +5,7 @@
 #include "../asset/texture.h"
 #include "../asset/font.h"
 #include "../scene/scene.h"
+#include "../gui/gui.h"
 
 static const uint32_t plugin_count = 0;
 static const char *plugins[] = {};
@@ -44,6 +45,11 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->staticmesh_create        = nusr_scene_staticmesh_create;
     interface->staticmesh_destroy       = nusr_scene_staticmesh_destroy;
     interface->staticmesh_set_transform = nusr_scene_staticmesh_set_transform;
+
+    interface->label_create       = nusr_gui_label_create;
+    interface->label_destroy      = nusr_gui_label_destroy;
+    interface->label_set_position = nusr_gui_label_set_position;
+    interface->label_set_text     = nusr_gui_label_set_text;
 
     return NU_SUCCESS;
 }

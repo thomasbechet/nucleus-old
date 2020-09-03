@@ -89,8 +89,8 @@ nu_result_t nusr_scene_staticmesh_create(nu_renderer_staticmesh_handle_t *handle
     }
 
     _data.staticmeshes[found_id].active = true;
-    _data.staticmeshes[found_id].mesh = info->mesh;
-    _data.staticmeshes[found_id].texture = info->texture;
+    _data.staticmeshes[found_id].mesh = (uint64_t)info->mesh;
+    _data.staticmeshes[found_id].texture = (uint64_t)info->texture;
     nu_mat4_copy(info->transform, _data.staticmeshes[found_id].transform);
 
     *((uint32_t*)handle) = found_id;

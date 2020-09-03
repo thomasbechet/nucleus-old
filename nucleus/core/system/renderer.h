@@ -2,6 +2,7 @@
 #define NU_SYSTEM_RENDERER_H
 
 #include "../module/module.h"
+#include "../module/interface.h"
 
 typedef enum {
     NU_RENDERER_API_NONE       = 0,
@@ -25,8 +26,10 @@ NU_API nu_module_handle_t nu_system_renderer_get_module_handle(void);
 /* public renderer functions */
 NU_API nu_result_t nu_renderer_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info);
 NU_API nu_result_t nu_renderer_mesh_destroy(nu_renderer_mesh_handle_t handle);
+
 NU_API nu_result_t nu_renderer_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info);
 NU_API nu_result_t nu_renderer_texture_destroy(nu_renderer_texture_handle_t handle);
+
 NU_API nu_result_t nu_renderer_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info);
 NU_API nu_result_t nu_renderer_font_destroy(nu_renderer_font_handle_t handle);
 
@@ -39,5 +42,10 @@ NU_API nu_result_t nu_renderer_camera_set_center(nu_renderer_camera_handle_t han
 NU_API nu_result_t nu_renderer_staticmesh_create(nu_renderer_staticmesh_handle_t *handle, const nu_renderer_staticmesh_create_info_t *info);
 NU_API nu_result_t nu_renderer_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle);
 NU_API nu_result_t nu_renderer_staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t transform);
+
+NU_API nu_result_t nu_renderer_label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info);
+NU_API nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle);
+NU_API nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, uint32_t x, uint32_t y);
+NU_API nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const char *text);
 
 #endif

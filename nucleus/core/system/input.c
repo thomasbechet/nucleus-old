@@ -1,6 +1,5 @@
 #include "input.h"
 
-#include "../module/interface.h"
 #include "../context/config.h"
 
 #define NU_LOGGER_INPUT_NAME "[INPUT] "

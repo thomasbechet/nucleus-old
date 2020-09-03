@@ -120,10 +120,8 @@ nu_result_t nusr_mesh_terminate(void)
 nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
 {
     uint32_t id;
-
     nu_result_t result = create_mesh(&id, info);
     if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
-
     return result;
 }
 nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle)

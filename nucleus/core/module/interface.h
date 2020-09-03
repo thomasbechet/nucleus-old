@@ -79,6 +79,7 @@ NU_DECLARE_HANDLE(nu_renderer_font_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_texture_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_camera_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_staticmesh_handle_t);
+NU_DECLARE_HANDLE(nu_renderer_label_handle_t);
 
 typedef struct {
     uint32_t vertice_count;
@@ -117,6 +118,13 @@ typedef struct {
 } nu_renderer_staticmesh_create_info_t;
 
 typedef struct {
+    uint32_t x;
+    uint32_t y;
+    const char *text;
+    nu_renderer_font_handle_t font;
+} nu_renderer_label_create_info_t;
+
+typedef struct {
     nu_result_t (*initialize)(void);
     nu_result_t (*terminate)(void);
     nu_result_t (*render)(void);
@@ -140,6 +148,11 @@ typedef struct {
     nu_result_t (*staticmesh_create)(nu_renderer_staticmesh_handle_t*, const nu_renderer_staticmesh_create_info_t*);
     nu_result_t (*staticmesh_destroy)(nu_renderer_staticmesh_handle_t);
     nu_result_t (*staticmesh_set_transform)(nu_renderer_staticmesh_handle_t, const nu_mat4_t);
+
+    nu_result_t (*label_create)(nu_renderer_label_handle_t*, const nu_renderer_label_create_info_t*);
+    nu_result_t (*label_destroy)(nu_renderer_label_handle_t);
+    nu_result_t (*label_set_position)(nu_renderer_label_handle_t, uint32_t, uint32_t);
+    nu_result_t (*label_set_text)(nu_renderer_label_handle_t, const char*);
 } nu_renderer_interface_t;
 
 typedef nu_result_t (*nu_renderer_interface_loader_pfn_t)(nu_renderer_interface_t*);

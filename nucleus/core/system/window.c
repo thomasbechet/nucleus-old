@@ -1,6 +1,5 @@
 #include "window.h"
 
-#include "../module/interface.h"
 #include "../context/config.h"
 #include "../../system/glfw/module/interface.h"
 

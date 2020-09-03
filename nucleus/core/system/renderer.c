@@ -1,6 +1,5 @@
 #include "renderer.h"
 
-#include "../module/interface.h"
 #include "../context/config.h"
 #include "../../system/softrast/module/interface.h"
 #include "../../system/vulkan/module/interface.h"
@@ -85,6 +84,7 @@ nu_result_t nu_renderer_mesh_destroy(nu_renderer_mesh_handle_t handle)
 {
     return _system.interface.mesh_destroy(handle);
 }
+
 nu_result_t nu_renderer_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info)
 {
     return _system.interface.texture_create(handle, info);
@@ -93,6 +93,7 @@ nu_result_t nu_renderer_texture_destroy(nu_renderer_texture_handle_t handle)
 {
     return _system.interface.texture_destroy(handle);
 }
+
 nu_result_t nu_renderer_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
 {
     return _system.interface.font_create(handle, info);
@@ -134,4 +135,21 @@ nu_result_t nu_renderer_staticmesh_destroy(nu_renderer_staticmesh_handle_t handl
 nu_result_t nu_renderer_staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t transform)
 {
     return _system.interface.staticmesh_set_transform(handle, transform);
+}
+
+nu_result_t nu_renderer_label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info)
+{
+    return _system.interface.label_create(handle, info);
+}
+nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle)
+{
+    return _system.interface.label_destroy(handle);
+}
+nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, uint32_t x, uint32_t y)
+{
+    return _system.interface.label_set_position(handle, x, y);
+}
+nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const char *text)
+{
+    return _system.interface.label_set_text(handle, text);
 }
