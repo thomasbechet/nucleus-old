@@ -151,7 +151,7 @@ typedef struct {
 
     nu_result_t (*label_create)(nu_renderer_label_handle_t*, const nu_renderer_label_create_info_t*);
     nu_result_t (*label_destroy)(nu_renderer_label_handle_t);
-    nu_result_t (*label_set_position)(nu_renderer_label_handle_t, uint32_t, uint32_t);
+    nu_result_t (*label_set_position)(nu_renderer_label_handle_t, int32_t, int32_t);
     nu_result_t (*label_set_text)(nu_renderer_label_handle_t, const char*);
 } nu_renderer_interface_t;
 

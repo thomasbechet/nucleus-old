@@ -45,7 +45,7 @@ NU_API nu_result_t nu_renderer_staticmesh_set_transform(nu_renderer_staticmesh_h
 
 NU_API nu_result_t nu_renderer_label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info);
 NU_API nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle);
-NU_API nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, uint32_t x, uint32_t y);
+NU_API nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y);
 NU_API nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const char *text);
 
 #endif

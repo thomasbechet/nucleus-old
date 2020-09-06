@@ -93,13 +93,13 @@ nu_result_t nusr_scene_staticmesh_create(nu_renderer_staticmesh_handle_t *handle
     _data.staticmeshes[found_id].texture = (uint64_t)info->texture;
     nu_mat4_copy(info->transform, _data.staticmeshes[found_id].transform);
 
-    *((uint32_t*)handle) = found_id;
+    *((uint64_t*)handle) = found_id;
 
     return NU_SUCCESS;
 }
 nu_result_t nusr_scene_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
 
     if (!_data.staticmeshes[id].active) return NU_FAILURE;
 
@@ -109,7 +109,7 @@ nu_result_t nusr_scene_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle
 }
 nu_result_t nusr_scene_staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t m)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
 
     if (!_data.staticmeshes[id].active) return NU_FAILURE;
 

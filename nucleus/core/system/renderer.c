@@ -145,7 +145,7 @@ nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle)
 {
     return _system.interface.label_destroy(handle);
 }
-nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, uint32_t x, uint32_t y)
+nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y)
 {
     return _system.interface.label_set_position(handle, x, y);
 }

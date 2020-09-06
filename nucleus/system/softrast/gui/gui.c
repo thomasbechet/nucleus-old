@@ -30,15 +30,6 @@ nu_result_t nusr_gui_terminate(void)
 }
 nu_result_t nusr_gui_render(nusr_framebuffer_t *color_buffer)
 {
-    // nu_cursor_mode_t cursor_mode;
-    // nu_input_get_cursor_mode(&cursor_mode);
-    // if (cursor_mode == NU_CURSOR_MODE_NORMAL) {
-    //     const char *str;
-    //     uint32_t str_len;
-    //     nu_input_get_keyboard_text(&str, &str_len);
-    //     if (str_len) strcat(_data.buf, str);
-    // }
-
     /* draw labels */
     for (uint32_t id = 0; id < _data.label_count; id++) {
         if (_data.labels[id].active) {
@@ -79,7 +70,7 @@ nu_result_t nusr_gui_label_create(nu_renderer_label_handle_t *handle, const nu_r
 }
 nu_result_t nusr_gui_label_destroy(nu_renderer_label_handle_t handle)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
 
     if (!_data.labels[id].active) return NU_FAILURE;
 
@@ -87,9 +78,9 @@ nu_result_t nusr_gui_label_destroy(nu_renderer_label_handle_t handle)
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_gui_label_set_position(nu_renderer_label_handle_t handle, uint32_t x, uint32_t y)
+nu_result_t nusr_gui_label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
 
     if (!_data.labels[id].active) return NU_FAILURE;
 
@@ -100,7 +91,7 @@ nu_result_t nusr_gui_label_set_position(nu_renderer_label_handle_t handle, uint3
 }
 nu_result_t nusr_gui_label_set_text(nu_renderer_label_handle_t handle, const char *text)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
 
     if (!_data.labels[id].active) return NU_FAILURE;
 
