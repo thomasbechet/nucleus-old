@@ -2,7 +2,7 @@
 
 #include "common/logger.h"
 #include "common/config.h"
-#include "memory/framebuffer.h"
+#include "viewport/viewport.h"
 #include "scene/scene.h"
 #include "gui/gui.h"
 #include "asset/mesh.h"
@@ -16,8 +16,6 @@
 
 typedef struct {
     nuglfw_window_interface_t glfw_interface;
-    nusr_framebuffer_t color_buffer;
-    nusr_framebuffer_t depth_buffer;
 } nusr_data_t;
 
 static nusr_data_t _data;
@@ -63,6 +61,10 @@ nu_result_t nusr_initialize(void)
     if (nusr_texture_initialize() != NU_SUCCESS) return NU_FAILURE;
     if (nusr_font_initialize() != NU_SUCCESS) return NU_FAILURE;
 
+    /* initialize viewport */
+    nu_info(NUSR_LOGGER_NAME"Initializing viewport...\n");
+    nusr_viewport_initialize();
+
     /* initialize scene */
     nu_info(NUSR_LOGGER_NAME"Intializing scene...\n");
     nusr_scene_initialize();
@@ -70,14 +72,6 @@ nu_result_t nusr_initialize(void)
     /* initialize gui */
     nu_info(NUSR_LOGGER_NAME"Initialize gui...\n");
     nusr_gui_initialize();
-
-    /* creating framebuffer */
-    nu_info(NUSR_LOGGER_NAME"Creating framebuffers...\n");
-    uint32_t default_width, default_height;
-    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_WIDTH, &default_width, 640);
-    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_HEIGHT, &default_height, 360);
-    nusr_framebuffer_create(&_data.color_buffer, default_width, default_height);
-    nusr_framebuffer_create(&_data.depth_buffer, default_width, default_height);
 
     test_initialize();
 

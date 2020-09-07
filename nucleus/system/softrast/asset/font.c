@@ -38,7 +38,7 @@ static nu_result_t create_font(uint32_t *id, const nu_renderer_font_create_info_
     glyph = face->glyph;
 
     /* set pixel sizes */
-    error = FT_Set_Pixel_Sizes(face, 0, 16);
+    error = FT_Set_Pixel_Sizes(face, 0, info->font_size);
     if (error) {
         nu_warning(NUSR_LOGGER_NAME"Failed to set font pixel sizes.\n");
     }

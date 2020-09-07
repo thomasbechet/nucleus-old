@@ -48,4 +48,6 @@ NU_API nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle);
 NU_API nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y);
 NU_API nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const char *text);
 
+NU_API nu_result_t nu_renderer_viewport_get_size(uint32_t *width, uint32_t *height);
+
 #endif

@@ -153,3 +153,8 @@ nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const 
 {
     return _system.interface.label_set_text(handle, text);
 }
+
+nu_result_t nu_renderer_viewport_get_size(uint32_t *width, uint32_t *height)
+{
+    return _system.interface.viewport_get_size(width, height);
+}

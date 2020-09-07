@@ -102,6 +102,7 @@ typedef struct {
 
 typedef struct {
     const char *filename;
+    uint32_t font_size;
 } nu_renderer_font_create_info_t;
 
 typedef struct {
@@ -153,6 +154,8 @@ typedef struct {
     nu_result_t (*label_destroy)(nu_renderer_label_handle_t);
     nu_result_t (*label_set_position)(nu_renderer_label_handle_t, int32_t, int32_t);
     nu_result_t (*label_set_text)(nu_renderer_label_handle_t, const char*);
+
+    nu_result_t (*viewport_get_size)(uint32_t*, uint32_t*);
 } nu_renderer_interface_t;
 
 typedef nu_result_t (*nu_renderer_interface_loader_pfn_t)(nu_renderer_interface_t*);

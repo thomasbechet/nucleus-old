@@ -2,7 +2,7 @@
 
 #include "render.h"
 
-#define MAX_LABEL_COUNT 128
+#define MAX_LABEL_COUNT 512
 
 typedef struct {
     uint32_t label_count;
@@ -34,7 +34,7 @@ nu_result_t nusr_gui_render(nusr_framebuffer_t *color_buffer)
     for (uint32_t id = 0; id < _data.label_count; id++) {
         if (_data.labels[id].active) {
             nusr_font_t *font;
-            nusr_font_get(id, &font);
+            nusr_font_get(_data.labels[id].font, &font);
             nusr_gui_render_label(color_buffer, _data.labels[id].x, _data.labels[id].y, font, _data.labels[id].text);
         }
     }

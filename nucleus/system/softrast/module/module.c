@@ -51,6 +51,8 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->label_set_position = nusr_gui_label_set_position;
     interface->label_set_text     = nusr_gui_label_set_text;
 
+    interface->viewport_get_size = nusr_scene_get_size;
+
     return NU_SUCCESS;
 }
 nu_result_t nusr_renderer_get_interface(nusr_renderer_interface_t *interface)

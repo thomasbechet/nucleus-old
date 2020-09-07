@@ -1,7 +1,7 @@
 #ifndef NU_RECT_H
 #define NU_RECT_H
 
-#include <stdint.h>
+#include "../platform.h"
 
 typedef struct {
     int32_t top;

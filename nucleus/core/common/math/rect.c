@@ -4,12 +4,13 @@
 
 void nu_rect_clip(nu_rect_t *rect, const nu_rect_t *bound)
 {
-    if ((rect->left + rect->width) > (bound->left + bound->width)) {
-        rect->width = 
-    }
-    rect->left = NU_MAX(rect->left, bound->left);
-    rect->top = NU_MAX(rect->top, bound->top);
-    if () {
+    int32_t left = NU_MIN(bound->left + (int32_t)bound->width, NU_MAX(rect->left, bound->left));
+    int32_t right = NU_MIN(bound->left + (int32_t)bound->width, NU_MAX(rect->left + (int32_t)rect->width, bound->left));
+    int32_t top = NU_MIN(bound->top + (int32_t)bound->height, NU_MAX(rect->top, bound->top));
+    int32_t bottom = NU_MIN(bound->top + (int32_t)bound->height, NU_MAX(rect->top + (int32_t)rect->height, bound->top));
 
-    }
+    rect->left = left;
+    rect->top = top;
+    rect->width = right - left;
+    rect->height = bottom - top;
 }
