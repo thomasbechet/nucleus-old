@@ -37,10 +37,10 @@ nu_result_t nusr_scene_terminate(void)
 
     return NU_SUCCESS;
 }
-nu_result_t nusr_scene_render(nusr_framebuffer_t *color_buffer, nusr_framebuffer_t *depth_buffer)
+nu_result_t nusr_scene_render(nusr_renderbuffer_t *renderbuffer)
 {
     nusr_scene_render_global(
-        color_buffer, depth_buffer,
+        renderbuffer,
         &_data.camera,
         _data.staticmeshes, _data.staticmesh_count
     );

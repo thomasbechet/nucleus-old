@@ -79,10 +79,6 @@ nu_result_t nusr_initialize(void)
 }
 nu_result_t nusr_terminate(void)
 {
-    /* free framebuffer */
-    nusr_framebuffer_destroy(&_data.color_buffer);
-    nusr_framebuffer_destroy(&_data.depth_buffer);
-
     /* terminate gui */
     nu_info(NUSR_LOGGER_NAME"Terminating gui...\n");
     nusr_gui_terminate();
@@ -90,6 +86,10 @@ nu_result_t nusr_terminate(void)
     /* terminate scene */
     nu_info(NUSR_LOGGER_NAME"Terminating scene...\n");
     nusr_scene_terminate();
+
+    /* terminate viewport */
+    nu_info(NUSR_LOGGER_NAME"Terminating viewport...\n");
+    nusr_viewport_terminate();
 
     /* terminate assets */
     nu_info(NUSR_LOGGER_NAME"Terminating assets...\n");
@@ -103,9 +103,16 @@ nu_result_t nusr_render(void)
 {
     test_update();
 
-    nusr_scene_render(&_data.color_buffer, &_data.depth_buffer);
-    nusr_gui_render(&_data.color_buffer);
-    _data.glfw_interface.present_surface(_data.color_buffer.width, _data.color_buffer.height, _data.color_buffer.pixels);
+    nusr_renderbuffer_t *renderbuffer;
+    nusr_viewport_get_renderbuffer(&renderbuffer);
+
+    nusr_scene_render(renderbuffer);
+    nusr_gui_render(renderbuffer);
+    _data.glfw_interface.present_surface(
+        renderbuffer->color_buffer.width, 
+        renderbuffer->color_buffer.height,
+        renderbuffer->color_buffer.pixels
+    );
     
     profile();
 
