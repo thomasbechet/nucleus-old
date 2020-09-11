@@ -2,12 +2,13 @@
 
 nu_result_t nudebug_plugin_command_initialize(void)
 {
-    nu_info("INITIALIZE COMMAND\n");
+    //nu_event_id_t event;
+    //nu_event_register(&event, sizeof());
+
     return NU_SUCCESS;
 }
 nu_result_t nudebug_plugin_command_terminate(void)
 {
-    nu_info("TERMINATE COMMAND\n");
     return NU_SUCCESS;
 }
 nu_result_t nudebug_plugin_command_update(void)

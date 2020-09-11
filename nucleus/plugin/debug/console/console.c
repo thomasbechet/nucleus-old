@@ -3,8 +3,7 @@
 #define MAX_LINE_BUFFER_SIZE 512
 
 typedef struct {
-    nu_renderer_font_handle_t font0;
-    nu_renderer_font_handle_t font1;
+    nu_renderer_font_handle_t font;
     nu_renderer_label_handle_t label;
     char line_buffer[MAX_LINE_BUFFER_SIZE];
     uint32_t line_buffer_size;
@@ -14,38 +13,43 @@ static nu_console_data_t _data;
 
 nu_result_t nudebug_plugin_console_initialize(void)
 {
+    const uint32_t font_size = 16;
+
+    /* recover viewport size */
+    uint32_t width, height;
+    nu_renderer_viewport_get_size(&width, &height);
+
+    /* create font */
     nu_renderer_font_create_info_t font_info;
-    
     font_info.filename = "engine/font/Coder's Crux.ttf";
-    font_info.font_size = 16;
-    if (nu_renderer_font_create(&_data.font0, &font_info) != NU_SUCCESS) {
+    font_info.font_size = font_size;
+    if (nu_renderer_font_create(&_data.font, &font_info) != NU_SUCCESS) {
         nu_fatal("Failed to create font.\n");
     }
 
-    font_info.filename = "engine/font/Coder's Crux.ttf";
-    font_info.font_size = 128;
-    if (nu_renderer_font_create(&_data.font1, &font_info) != NU_SUCCESS) {
-        nu_fatal("Failed to create font1.\n");
-    }
-
+    /* create command line label */
     nu_renderer_label_create_info_t label_info;
-    label_info.x = -1;
-    label_info.y = 50;
-    label_info.font = _data.font0;
+    label_info.x = font_size / 2;
+    label_info.y = height - font_size / 2;
+    label_info.font = _data.font;
     label_info.text = "";
     if (nu_renderer_label_create(&_data.label, &label_info) != NU_SUCCESS) {
         nu_fatal("Failed to create label.\n");
     }
 
+    /* initialize text */
     _data.line_buffer_size = 0;
+    nu_renderer_label_set_text(_data.label, "");
 
     return NU_SUCCESS;
 }
 nu_result_t nudebug_plugin_console_terminate(void)
 {
+    nu_renderer_font_destroy(_data.font);
+    nu_renderer_label_destroy(_data.label);
+
     return NU_SUCCESS;
 }
-#include <math.h>
 nu_result_t nudebug_plugin_console_update(void)
 {
     nu_cursor_mode_t cursor_mode;
@@ -73,12 +77,6 @@ nu_result_t nudebug_plugin_console_update(void)
             }
         }
     }
-
-    static float delta = 0.0f;
-    delta += nu_context_get_delta_time();
-    uint32_t x = 50;
-    uint32_t y = (uint32_t)(200.0f + cosf(nu_radian(delta)) * 100.0);
-    nu_renderer_label_set_position(_data.label, x, y);
 
     return NU_SUCCESS;
 }

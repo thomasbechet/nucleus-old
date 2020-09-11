@@ -154,7 +154,7 @@ nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_rendere
 }
 nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
     return destroy_font(id);
 }
 nu_result_t nusr_font_get(uint32_t id, nusr_font_t **p)

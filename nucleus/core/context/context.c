@@ -63,15 +63,6 @@ static nu_result_t nu_context_initialize(const nu_init_info_t *info)
     }
     _context.loaded.event = true;
 
-    /* start plugin system */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Initializing plugin...\n");
-    result = nu_plugin_initialize();
-    if (result != NU_SUCCESS) {
-        nu_context_terminate();
-        return result;
-    }
-    _context.loaded.plugin = true;
-
     /* start task system */
     nu_info(NU_CONTEXT_LOGGER_NAME"Starting task system...\n");
     result = nu_system_task_initialize();
@@ -108,10 +99,24 @@ static nu_result_t nu_context_initialize(const nu_init_info_t *info)
     }
     _context.loaded.renderer = true;
 
+    /* start plugin system */
+    nu_info(NU_CONTEXT_LOGGER_NAME"Initializing plugin...\n");
+    result = nu_plugin_initialize();
+    if (result != NU_SUCCESS) {
+        nu_context_terminate();
+        return result;
+    }
+    _context.loaded.plugin = true;
+
     return result;
 }
 static nu_result_t nu_context_terminate(void)
 {
+    if (_context.loaded.plugin) {
+        nu_info(NU_CONTEXT_LOGGER_NAME"Terminating plugin...\n");
+        nu_plugin_terminate();
+        _context.loaded.plugin = false;
+    }
     if (_context.loaded.renderer) {
         nu_info(NU_CONTEXT_LOGGER_NAME"Stopping renderer system...\n");
         nu_system_renderer_terminate();
@@ -131,11 +136,6 @@ static nu_result_t nu_context_terminate(void)
         nu_info(NU_CONTEXT_LOGGER_NAME"Stopping task system...\n");
         nu_system_task_terminate();
         _context.loaded.task = false;
-    }
-    if (_context.loaded.plugin) {
-        nu_info(NU_CONTEXT_LOGGER_NAME"Terminating plugin...\n");
-        nu_plugin_terminate();
-        _context.loaded.plugin = false;
     }
     if (_context.loaded.event) {
         nu_info(NU_CONTEXT_LOGGER_NAME"Terminating event...\n");

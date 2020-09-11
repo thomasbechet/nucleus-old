@@ -107,7 +107,7 @@ nu_result_t nusr_render(void)
     nusr_viewport_get_renderbuffer(&renderbuffer);
 
     nusr_scene_render(renderbuffer);
-    nusr_gui_render(renderbuffer);
+    nusr_gui_render(&renderbuffer->color_buffer);
     _data.glfw_interface.present_surface(
         renderbuffer->color_buffer.width, 
         renderbuffer->color_buffer.height,

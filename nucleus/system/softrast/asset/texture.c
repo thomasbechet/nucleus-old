@@ -73,7 +73,7 @@ nu_result_t nusr_texture_create(nu_renderer_texture_handle_t *handle, const nu_r
 }
 nu_result_t nusr_texture_destroy(nu_renderer_texture_handle_t handle)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
     return destroy_texture(id);
 }
 nu_result_t nusr_texture_get(uint32_t id, nusr_texture_t **p)

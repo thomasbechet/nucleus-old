@@ -5,6 +5,7 @@
 #include "../asset/texture.h"
 #include "../asset/font.h"
 #include "../scene/scene.h"
+#include "../viewport/viewport.h"
 #include "../gui/gui.h"
 
 static const uint32_t plugin_count = 0;
@@ -51,7 +52,7 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->label_set_position = nusr_gui_label_set_position;
     interface->label_set_text     = nusr_gui_label_set_text;
 
-    interface->viewport_get_size = nusr_scene_get_size;
+    interface->viewport_get_size = nusr_viewport_get_size;
 
     return NU_SUCCESS;
 }

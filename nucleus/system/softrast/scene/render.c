@@ -3,6 +3,7 @@
 #include "../asset/font.h"
 #include "../asset/mesh.h"
 #include "../asset/texture.h"
+#include "../viewport/viewport.h"
 
 static void vertex_shader(nu_vec3_t pos, nu_mat4_t m, nu_vec4_t dest)
 {
@@ -110,14 +111,18 @@ nu_result_t nusr_scene_render_global(
     uint32_t staticmesh_count
 )
 {
+    /* recover buffer size */
+    uint32_t width, height;
+    nusr_viewport_get_size(&width, &height);
+
     /* clear buffers */
-    nusr_framebuffer_clear(color_buffer, 0x0);
-    nusr_framebuffer_clear(depth_buffer, 0xFFFF7F7F); /* max float value */
+    nusr_framebuffer_clear(&renderbuffer->color_buffer, 0x0);
+    nusr_framebuffer_clear(&renderbuffer->depth_buffer, 0xFFFF7F7F); /* max float value */
 
     /* compute VP matrix from camera information */
     nu_mat4_t camera_projection, camera_view, vp;
     nu_lookat(camera->eye, camera->center, (nu_vec3_t){0.0f, 1.0f, 0.0f}, camera_view);
-    const float aspect = (double)color_buffer->width / (double)color_buffer->height;
+    const float aspect = (double)width / (double)height;
     nu_perspective(camera->fov, aspect, camera->near, camera->far, camera_projection);
     nu_mat4_mul(camera_projection, camera_view, vp);
 
@@ -139,7 +144,7 @@ nu_result_t nusr_scene_render_global(
 
         /* iterate over mesh triangles */
         for (uint32_t vi = 0; vi < mesh->vertex_count; vi += 3) {
-            nu_vec4_t viewport = {0, 0, color_buffer->width, color_buffer->height};
+            nu_vec4_t viewport = {0, 0, width, height};
             nu_vec4_t tv[4]; /* one vertice can be added for the clipping step */
             nu_vec2_t uv[4]; /* one uv can be added for the clipping step */
 
@@ -233,8 +238,8 @@ nu_result_t nusr_scene_render_global(
 
                             /* depth test */
                             float depth = (w0 * v0[3] + w1 * v1[3] + w2 * v2[3]);
-                            if (depth < depth_buffer->pixels[j * depth_buffer->width + i].as_float) {
-                                depth_buffer->pixels[j * depth_buffer->width + i].as_float = depth;
+                            if (depth < renderbuffer->depth_buffer.pixels[j * width + i].as_float) {
+                                renderbuffer->depth_buffer.pixels[j * width + i].as_float = depth;
                                 
                                 /* correct linear interpolation */
 
@@ -260,7 +265,7 @@ nu_result_t nusr_scene_render_global(
                                 uint32_t uvy = NU_MAX(0, NU_MIN(texture->height, (uint32_t)py));
 
                                 uint32_t color = texture->data[uvy * texture->width + uvx];
-                                nusr_framebuffer_set_uint(color_buffer, i, color_buffer->height - j - 1, color);
+                                nusr_framebuffer_set_uint(&renderbuffer->color_buffer, i, height - j - 1, color);
                             }
                         }
                     }

@@ -126,7 +126,7 @@ nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_rendere
 }
 nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle)
 {
-    uint32_t id = *((uint32_t*)handle);
+    uint32_t id = (uint64_t)handle;
     return destroy_mesh(id);
 }
 nu_result_t nusr_mesh_get(uint32_t id, nusr_mesh_t **p)
