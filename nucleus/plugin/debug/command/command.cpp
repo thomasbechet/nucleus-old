@@ -1,4 +1,4 @@
-#include "command.h"
+#include "command.hpp"
 
 nu_result_t nudebug_plugin_command_initialize(void)
 {

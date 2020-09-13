@@ -1,8 +1,8 @@
-#include "module.h"
+#include "module.hpp"
 
 #include "interface.h"
-#include "../console/console.h"
-#include "../command/command.h"
+#include "../console/console.hpp"
+#include "../command/command.hpp"
 
 static const uint32_t plugin_count = 2;
 static const char *plugins[] = {

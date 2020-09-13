@@ -1,2 +1,3 @@
 - task system = compléter + trouver un cas d'application concret et refaire les tests (enlever sleep 1)
 - créer un projet dans la section "Projects" (trello like)
+- mettre 'extern "C"' dans core/nucleus.h

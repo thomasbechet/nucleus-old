@@ -174,14 +174,14 @@ static nu_result_t nu_context_run(void)
 
         accumulator += delta;
 
-        /* dispatch events */
-        nu_event_dispatch_all();
-
         /* process window */
         nu_system_window_update();
 
         /* process inputs */
         nu_system_input_update();
+
+        /* dispatch events */
+        nu_event_dispatch_all();
 
         _context.delta_time = FIXED_TIMESTEP;
         while (accumulator >= FIXED_TIMESTEP) {

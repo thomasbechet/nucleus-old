@@ -2,8 +2,11 @@
 #define _NU_KEYBOARD_H_
 
 typedef enum {
-    NU_BUTTON_PRESSED,
-    NU_BUTTON_RELEASED
+    NU_BUTTON_PRESSED       = 0x1 << 0,
+    NU_BUTTON_RELEASED      = 0x1 << 1,
+    NU_BUTTON_JUST_PRESSED  = 0x1 << 2,
+    NU_BUTTON_JUST_RELEASED = 0x1 << 3,
+    NU_BUTTON_REPEATED      = 0x1 << 4
 } nu_button_state_t;
 
 typedef enum {

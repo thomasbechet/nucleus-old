@@ -29,6 +29,9 @@ nu_result_t nusr_font_terminate(void);
 
 nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info);
 nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle);
+nu_result_t nusr_font_get_text_size(nu_renderer_font_handle_t handle, const char *text, uint32_t *width, uint32_t *height);
+
 nu_result_t nusr_font_get(uint32_t id, nusr_font_t **p);
+nu_result_t nusr_font_get_glyph(const nusr_font_t *font, char c, const nusr_glyph_t **g);
 
 #endif

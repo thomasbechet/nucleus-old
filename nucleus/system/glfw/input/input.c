@@ -82,15 +82,42 @@ static int glfw_mouse_buttons[] =
 
 typedef struct {
     nu_cursor_mode_t cursor_mode;
+
     nu_vec2_t mouse_motion;
     nu_vec2_t mouse_position;
     nu_vec2_t mouse_old_position;
+    
     char text[MAX_TEXT_SIZE];
     uint32_t text_size;
+    
+    nu_button_state_t keyboard_button_states[GLFW_KEY_LAST];
 } nuglfw_input_data_t;
 
 static nuglfw_input_data_t _data;
 
+static void nuglfw_keyboard_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    if (key != GLFW_KEY_UNKNOWN) {
+        if (action == GLFW_REPEAT) {
+            _data.keyboard_button_states[key] |= NU_BUTTON_REPEATED;
+        } else {
+            bool was_pressed = (_data.keyboard_button_states[key] & NU_BUTTON_PRESSED);
+            if (action == GLFW_PRESS) {
+                _data.keyboard_button_states[key] |= NU_BUTTON_PRESSED;
+                _data.keyboard_button_states[key] &= ~NU_BUTTON_RELEASED;
+                if (!was_pressed) {
+                    _data.keyboard_button_states[key] |= NU_BUTTON_JUST_PRESSED;
+                }
+            } else if (action == GLFW_RELEASE) {
+                _data.keyboard_button_states[key] |= NU_BUTTON_RELEASED;
+                _data.keyboard_button_states[key] &= ~NU_BUTTON_PRESSED;
+                if (was_pressed) {
+                    _data.keyboard_button_states[key] |= NU_BUTTON_JUST_RELEASED;
+                }
+            }
+        }
+    }
+}
 static void nuglfw_cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
     _data.mouse_position[0] = (float)xpos;
@@ -104,17 +131,27 @@ static void nuglfw_character_callback(GLFWwindow *window, uint32_t codepoint)
 
 nu_result_t nuglfw_input_initialize(void)
 {
+    /* initialize was pressed states */
+    for (uint32_t i = 0; i < GLFW_KEY_LAST; i++) {
+        _data.keyboard_button_states[i] = 0x0;
+    }
+
+    /* initialize keyboard text */
     _data.text_size = 0;
 
+    /* setup default cursor mode */
     nuglfw_input_set_cursor_mode(nu_config_get().input.cursor_mode);
 
     if(glfwRawMouseMotionSupported()) {
         glfwSetInputMode(nuglfw_get_window(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
+    /* setup callbacks */
+    glfwSetKeyCallback(nuglfw_get_window(), nuglfw_keyboard_callback);
     glfwSetCursorPosCallback(nuglfw_get_window(), nuglfw_cursor_position_callback);
     glfwSetCharCallback(nuglfw_get_window(), nuglfw_character_callback);
 
+    /* get initial mouse position */
     double xpos, ypos;
     glfwGetCursorPos(nuglfw_get_window(), &xpos, &ypos);
     _data.mouse_position[0] = (float)xpos;
@@ -129,6 +166,7 @@ nu_result_t nuglfw_input_terminate(void)
 }
 nu_result_t nuglfw_input_update(void)
 {
+    /* update mouse motion */
     nu_vec2_sub(_data.mouse_position, _data.mouse_old_position, _data.mouse_motion);
     nu_vec2_copy(_data.mouse_position, _data.mouse_old_position);
 
@@ -137,7 +175,7 @@ nu_result_t nuglfw_input_update(void)
 
 nu_result_t nuglfw_input_get_keyboard_state(nu_button_state_t *state, nu_keyboard_t button)
 {
-    *state = (glfwGetKey(nuglfw_get_window(), glfw_keyboard_buttons[(size_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
+    *state = _data.keyboard_button_states[glfw_keyboard_buttons[(uint32_t)button]];
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_input_get_keyboard_text(const char **text, uint32_t *length)
@@ -148,7 +186,7 @@ nu_result_t nuglfw_input_get_keyboard_text(const char **text, uint32_t *length)
 }
 nu_result_t nuglfw_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t button)
 {
-    *state = (glfwGetMouseButton(nuglfw_get_window(), glfw_mouse_buttons[(size_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
+    *state = (glfwGetMouseButton(nuglfw_get_window(), glfw_mouse_buttons[(uint32_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_input_get_mouse_motion(nu_vec2_t motion)
@@ -175,9 +213,18 @@ nu_result_t nuglfw_input_set_cursor_mode(nu_cursor_mode_t mode)
     return NU_SUCCESS;
 }
 
-nu_result_t nuglfw_input_reset_keyboard_text(void)
+nu_result_t nuglfw_input_event_preupdate(void)
 {
+    /* reset keyboard text */
     _data.text_size = 0;
     memset(_data.text, 0, sizeof(char) * MAX_TEXT_SIZE);
+
+    /* reset keyboard states */
+    for (uint32_t i = 0; i < GLFW_KEY_LAST; i++) {
+        _data.keyboard_button_states[i] &= ~NU_BUTTON_JUST_PRESSED;
+        _data.keyboard_button_states[i] &= ~NU_BUTTON_JUST_RELEASED;
+        _data.keyboard_button_states[i] &= ~NU_BUTTON_REPEATED;
+    }
+
     return NU_SUCCESS;
 }

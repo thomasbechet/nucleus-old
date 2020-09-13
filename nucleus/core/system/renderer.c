@@ -102,6 +102,10 @@ nu_result_t nu_renderer_font_destroy(nu_renderer_font_handle_t handle)
 {
     return _system.interface.font_destroy(handle);
 }
+nu_result_t nu_renderer_font_get_text_size(nu_renderer_font_handle_t handle, const char *text, uint32_t *width, uint32_t *height)
+{
+    return _system.interface.font_get_text_size(handle, text, width, height);
+}
 
 nu_result_t nu_renderer_camera_create(nu_renderer_camera_handle_t *handle, const nu_renderer_camera_create_info_t *info)
 {
@@ -152,6 +156,19 @@ nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, in
 nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const char *text)
 {
     return _system.interface.label_set_text(handle, text);
+}
+
+nu_result_t nu_renderer_rectangle_create(nu_renderer_rectangle_handle_t *handle, const nu_renderer_rectangle_create_info_t *info)
+{
+    return _system.interface.rectangle_create(handle, info);
+}
+nu_result_t nu_renderer_rectangle_destroy(nu_renderer_rectangle_handle_t handle)
+{
+    return _system.interface.rectangle_destroy(handle);
+}
+nu_result_t nu_renderer_rectangle_set_rect(nu_renderer_rectangle_handle_t handle, nu_rect_t rect)
+{
+    return _system.interface.rectangle_set_rect(handle, rect);
 }
 
 nu_result_t nu_renderer_viewport_get_size(uint32_t *width, uint32_t *height)

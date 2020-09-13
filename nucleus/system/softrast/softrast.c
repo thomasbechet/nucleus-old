@@ -271,22 +271,13 @@ static void test_update(void)
     /* quit handling */
     nu_button_state_t escape_state;
     nu_input_get_keyboard_state(&escape_state, NU_KEYBOARD_ESCAPE);
-    if (escape_state == NU_BUTTON_PRESSED) {
+    if (escape_state & NU_BUTTON_PRESSED) {
         nu_context_request_stop();
-    }
-
-    nu_button_state_t f1_state, f2_state;
-    nu_input_get_keyboard_state(&f1_state, NU_KEYBOARD_F1);
-    nu_input_get_keyboard_state(&f2_state, NU_KEYBOARD_F2);
-    if (f1_state == NU_BUTTON_PRESSED) {
-        nu_input_set_cursor_mode(NU_CURSOR_MODE_NORMAL);
-    } else if (f2_state == NU_BUTTON_PRESSED) {
-        nu_input_set_cursor_mode(NU_CURSOR_MODE_DISABLE);
     }
 
     nu_cursor_mode_t cursor_mode;
     nu_input_get_cursor_mode(&cursor_mode);
-    if (cursor_mode == NU_CURSOR_MODE_DISABLE) {
+    if (cursor_mode & NU_CURSOR_MODE_DISABLE) {
         /* camera update */
         nu_vec2_t motion;
         nu_input_get_mouse_motion(motion);
@@ -307,18 +298,23 @@ static void test_update(void)
         static nu_vec3_t eye = {0, 0, 5};
         nu_vec3_t move;
         nu_vec3_zero(move);
-        nu_button_state_t z_state, s_state, q_state, d_state;
+        nu_button_state_t z_state, s_state, q_state, d_state, shift_state;
         nu_input_get_keyboard_state(&z_state, NU_KEYBOARD_W);
         nu_input_get_keyboard_state(&s_state, NU_KEYBOARD_S);
         nu_input_get_keyboard_state(&q_state, NU_KEYBOARD_A);
         nu_input_get_keyboard_state(&d_state, NU_KEYBOARD_D);
-        if (z_state == NU_BUTTON_PRESSED) move[2] -= 1;
-        if (s_state == NU_BUTTON_PRESSED) move[2] += 1;
-        if (q_state == NU_BUTTON_PRESSED) move[0] -= 1;
-        if (d_state == NU_BUTTON_PRESSED) move[0] += 1;
+        nu_input_get_keyboard_state(&shift_state, NU_KEYBOARD_LSHIT);
+        if (z_state & NU_BUTTON_PRESSED) move[2] -= 1;
+        if (s_state & NU_BUTTON_PRESSED) move[2] += 1;
+        if (q_state & NU_BUTTON_PRESSED) move[0] -= 1;
+        if (d_state & NU_BUTTON_PRESSED) move[0] += 1;
         nu_mat4_mulv3(camera, move, 0, move);
         nu_vec3_normalize(move);
-        nu_vec3_muls(move, 0.01 * nu_context_get_delta_time(), move);
+        if (shift_state & NU_BUTTON_PRESSED) {
+            nu_vec3_muls(move, 0.04 * nu_context_get_delta_time(), move);
+        } else {
+            nu_vec3_muls(move, 0.01 * nu_context_get_delta_time(), move);
+        }
         nu_vec3_add(eye, move, eye);
         
         nu_vec3_t center;

@@ -157,6 +157,30 @@ nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)
     uint32_t id = (uint64_t)handle;
     return destroy_font(id);
 }
+nu_result_t nusr_font_get_text_size(nu_renderer_font_handle_t handle, const char *text, uint32_t *width, uint32_t *height)
+{
+    uint32_t id = (uint64_t)handle;
+    nusr_font_t *font = _data.fonts[id];
+
+    uint32_t len = strlen(text);
+    uint32_t max_width = 0;
+    uint32_t max_height = 0;
+
+    for (uint32_t i = 0; i < len; i++) {
+        const nusr_glyph_t *g;
+        if (nusr_font_get_glyph(font, text[i], &g) != NU_SUCCESS) continue;
+
+        /* compute max height and width */
+        max_height = NU_MAX(max_height, g->bitmap_height);
+        max_width += g->advance_x;
+    }
+
+    *width = max_width;
+    *height = max_height;
+
+    return NU_SUCCESS;
+}
+
 nu_result_t nusr_font_get(uint32_t id, nusr_font_t **p)
 {
     if (_data.next_id >= MAX_FONT_COUNT) return NU_FAILURE;
@@ -164,5 +188,11 @@ nu_result_t nusr_font_get(uint32_t id, nusr_font_t **p)
 
     *p = _data.fonts[id];
 
+    return NU_SUCCESS;
+}
+nu_result_t nusr_font_get_glyph(const nusr_font_t *font, char c, const nusr_glyph_t **g)
+{
+    if ((int32_t)c < MIN_CHAR_CODE || (int32_t)c > MAX_CHAR_CODE) return NU_FAILURE;
+    *g = &font->glyphs[c - MIN_CHAR_CODE];
     return NU_SUCCESS;
 }

@@ -16,6 +16,6 @@ nu_result_t nuglfw_input_get_cursor_mode(nu_cursor_mode_t *mode);
 nu_result_t nuglfw_input_set_cursor_mode(nu_cursor_mode_t mode);
 
 /* utility function */
-nu_result_t nuglfw_input_reset_keyboard_text(void);
+nu_result_t nuglfw_input_event_preupdate(void);
 
 #endif

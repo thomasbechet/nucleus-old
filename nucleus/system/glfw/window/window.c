@@ -82,8 +82,8 @@ nu_result_t nuglfw_window_update(void)
         nu_context_request_stop();
     }
 
-    /* reset keyboard text */
-    nuglfw_input_reset_keyboard_text();
+    /* event input preupdate */
+    nuglfw_input_event_preupdate();
 
     /* trigger events */
     glfwPollEvents();

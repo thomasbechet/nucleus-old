@@ -80,6 +80,7 @@ NU_DECLARE_HANDLE(nu_renderer_texture_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_camera_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_staticmesh_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_label_handle_t);
+NU_DECLARE_HANDLE(nu_renderer_rectangle_handle_t);
 
 typedef struct {
     uint32_t vertice_count;
@@ -126,6 +127,11 @@ typedef struct {
 } nu_renderer_label_create_info_t;
 
 typedef struct {
+    nu_rect_t rect;
+    uint32_t color;
+} nu_renderer_rectangle_create_info_t;
+
+typedef struct {
     nu_result_t (*initialize)(void);
     nu_result_t (*terminate)(void);
     nu_result_t (*render)(void);
@@ -138,6 +144,7 @@ typedef struct {
 
     nu_result_t (*font_create)(nu_renderer_font_handle_t*, const nu_renderer_font_create_info_t*);
     nu_result_t (*font_destroy)(nu_renderer_font_handle_t);
+    nu_result_t (*font_get_text_size)(nu_renderer_font_handle_t, const char*, uint32_t*, uint32_t*);
 
     nu_result_t (*camera_create)(nu_renderer_camera_handle_t*, const nu_renderer_camera_create_info_t*);
     nu_result_t (*camera_destroy)(nu_renderer_camera_handle_t);
@@ -154,6 +161,10 @@ typedef struct {
     nu_result_t (*label_destroy)(nu_renderer_label_handle_t);
     nu_result_t (*label_set_position)(nu_renderer_label_handle_t, int32_t, int32_t);
     nu_result_t (*label_set_text)(nu_renderer_label_handle_t, const char*);
+
+    nu_result_t (*rectangle_create)(nu_renderer_rectangle_handle_t*, const nu_renderer_rectangle_create_info_t*);
+    nu_result_t (*rectangle_destroy)(nu_renderer_rectangle_handle_t);
+    nu_result_t (*rectangle_set_rect)(nu_renderer_rectangle_handle_t, nu_rect_t);
 
     nu_result_t (*viewport_get_size)(uint32_t*, uint32_t*);
 } nu_renderer_interface_t;
