@@ -26,34 +26,8 @@ typedef struct {
 
 static nu_console_data_t _data;
 
-static void update_cursor_position(void)
+console_t::console_t()
 {
-    uint32_t w, h, vw, vh;
-    nu_renderer_viewport_get_size(&vw, &vh);
-    nu_renderer_font_get_text_size(_data.font, _data.line_buffer, &w, &h);
-    _data.cursor_rect.left = (FONT_SIZE / 2) + w;
-    nu_renderer_rectangle_set_rect(_data.cursor_rectangle, _data.cursor_rect);
-}
-static void swap_cursor_visibility(void)
-{
-    _data.cursor_rect.height = (_data.cursor_rect.height > 0) ? 0 : 1;
-    nu_renderer_rectangle_set_rect(_data.cursor_rectangle, _data.cursor_rect);
-}
-static void hide_cursor(void)
-{
-    _data.cursor_rect.height = 0;
-    nu_renderer_rectangle_set_rect(_data.cursor_rectangle, _data.cursor_rect);
-}
-
-nu_result_t nudebug_plugin_console_initialize(void)
-{
-    _data.console = std::make_unique<console_t>();
-    return NU_SUCCESS;
-
-    /* recover viewport size */
-    uint32_t width, height;
-    nu_renderer_viewport_get_size(&width, &height);
-
     /* create font */
     nu_renderer_font_create_info_t font_info;
     font_info.filename = "engine/font/Coder's Crux.ttf";
@@ -62,55 +36,32 @@ nu_result_t nudebug_plugin_console_initialize(void)
         nu_fatal(NUDEBUG_LOGGER_NAME"Failed to create font.\n");
     }
 
-    /* create command line label */
-    nu_renderer_label_create_info_t label_info;
-    label_info.x = FONT_SIZE / 2;
-    label_info.y = height - FONT_SIZE / 2;
-    label_info.font = _data.font;
-    label_info.text = "";
-    if (nu_renderer_label_create(&_data.command_label, &label_info) != NU_SUCCESS) {
-        nu_fatal(NUDEBUG_LOGGER_NAME"Failed to create command label.\n");
-    }
+    /* create cursor */
+    m_cursor = std::make_unique<cursor_t>(1.0f);
 
-    /* create cursor rectangle */
-    nu_renderer_rectangle_create_info_t rectangle_info;
-    _data.cursor_rect.top = height - FONT_SIZE / 2;
-    _data.cursor_rect.left = FONT_SIZE / 2;
-    _data.cursor_rect.width = CURSOR_WIDTH;
-    _data.cursor_rect.height = 1;
-    rectangle_info.rect = _data.cursor_rect;
-    rectangle_info.color = 0xFFFFFFFF;
-    if (nu_renderer_rectangle_create(&_data.cursor_rectangle, &rectangle_info) != NU_SUCCESS) {
-        nu_fatal(NUDEBUG_LOGGER_NAME"Failed to create cursor rectangle.\n");
-    }
+    /* create command */
+    m_command_line = std::make_unique<command_line_t>(m_font);
 
-    /* initialize text */
-    _data.line_buffer_size = 0;
-    nu_renderer_label_set_text(_data.command_label, "");
-
-    return NU_SUCCESS;
+    /* set component position */
+    uint32_t w, h, vw, vh;
+    nu_renderer_viewport_get_size(&vw, &vh);
+    m_cursor->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
+    m_command_line->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
 }
-nu_result_t nudebug_plugin_console_terminate(void)
+console_t::~console_t()
 {
-    _data.console.reset();
-    return NU_SUCCESS;
+    /* destroy command line */
+    m_command_line.reset();
 
-    /* destroy label */
-    nu_renderer_label_destroy(_data.command_label);
-    
-    /* destroy rectangle */
-    nu_renderer_rectangle_destroy(_data.cursor_rectangle);
+    /* destroy cursor */
+    m_cursor.reset();
 
     /* destroy font */
-    nu_renderer_font_destroy(_data.font);
-
-    return NU_SUCCESS;
+    nu_renderer_font_destroy(m_font);
 }
-nu_result_t nudebug_plugin_console_update(void)
-{
-    _data.console->update();
-    return NU_SUCCESS;
 
+void console_t::update()
+{
     /* get cursor mode */
     nu_cursor_mode_t cursor_mode;
     nu_input_get_cursor_mode(&cursor_mode);
@@ -131,36 +82,38 @@ nu_result_t nudebug_plugin_console_update(void)
         const char *str;
         uint32_t str_len;
         nu_input_get_keyboard_text(&str, &str_len);
-        if (str_len && (_data.line_buffer_size + str_len) < MAX_LINE_BUFFER_SIZE) {
-            strcat(_data.line_buffer, str);
-            _data.line_buffer_size += str_len;
-            nu_renderer_label_set_text(_data.command_label, _data.line_buffer);
-
-            update_cursor_position();
+        if (str_len) {
+            m_command_line->append_at(m_command_line->size(), std::string(str));
         }
 
         /* backspace key */
         nu_button_state_t backspace_state;
         nu_input_get_keyboard_state(&backspace_state, NU_KEYBOARD_BACKSPACE);
         if (backspace_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
-            if (_data.line_buffer_size > 0) {
-                _data.line_buffer_size--;
-                _data.line_buffer[_data.line_buffer_size] = '\0';
-                nu_renderer_label_set_text(_data.command_label, _data.line_buffer);
-
-                update_cursor_position();
-            }
+            m_command_line->remove_at(m_command_line->size() - 1);
         }
 
         /* enter key */
         nu_button_state_t enter_state;
         nu_input_get_keyboard_state(&enter_state, NU_KEYBOARD_ENTER);
         if (enter_state & NU_BUTTON_JUST_PRESSED) {
-            _data.line_buffer_size = 0;
-            _data.line_buffer[0] = '\0';
-            nu_renderer_label_set_text(_data.command_label, "");
+            m_command_line->clear();
         }
     }
+}
 
+nu_result_t nudebug_plugin_console_initialize(void)
+{
+    _data.console = std::make_unique<console_t>();
+    return NU_SUCCESS;
+}
+nu_result_t nudebug_plugin_console_terminate(void)
+{
+    _data.console.reset();
+    return NU_SUCCESS;
+}
+nu_result_t nudebug_plugin_console_update(void)
+{
+    _data.console->update();
     return NU_SUCCESS;
 }

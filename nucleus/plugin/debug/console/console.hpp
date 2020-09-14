@@ -1,10 +1,10 @@
 #pragma once
 
-
 #include <string>
 #include <vector>
+#include <memory>
 
-#include "console_line.hpp"
+#include "command_line.hpp"
 #include "cursor.hpp"
 
 extern "C"
@@ -24,12 +24,11 @@ namespace nudebug
         console_t();
         ~console_t();
 
-        void update() noexcept;
+        void update();
 
     private:
-        console_line_t m_line;
-        std::vector<console_line_t> m_old_lines;
-        cursor_t m_cursor;
+        std::unique_ptr<command_line_t> m_command_line;
+        std::unique_ptr<cursor_t> m_cursor;
         nu_renderer_font_handle_t m_font;
     };
 }
