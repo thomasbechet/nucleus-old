@@ -62,7 +62,11 @@ static int glfw_keyboard_buttons[] =
     GLFW_KEY_TAB,
     GLFW_KEY_BACKSPACE,
     GLFW_KEY_LEFT_SHIFT,
-    GLFW_KEY_LEFT_CONTROL
+    GLFW_KEY_LEFT_CONTROL,
+    GLFW_KEY_LEFT,
+    GLFW_KEY_RIGHT,
+    GLFW_KEY_UP,
+    GLFW_KEY_DOWN
 };
 
 static int glfw_mouse_buttons[] = 

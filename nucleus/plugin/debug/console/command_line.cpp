@@ -33,10 +33,8 @@ void command_line_t::set_position(uint32_t x, uint32_t y)
 }
 void command_line_t::remove_at(uint32_t index)
 {
-    if (m_command.size() > 0) {
-        m_command.erase(m_command.begin() + index);
-        update_label_text();
-    }
+    m_command.erase(m_command.begin() + index);
+    update_label_text();
 }
 void command_line_t::append_at(uint32_t index, const std::string &str)
 {

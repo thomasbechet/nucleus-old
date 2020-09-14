@@ -38,6 +38,7 @@ console_t::console_t()
 
     /* create cursor */
     m_cursor = std::make_unique<cursor_t>(1.0f);
+    m_selected_character = 0;
 
     /* create command */
     m_command_line = std::make_unique<command_line_t>(m_font);
@@ -83,14 +84,46 @@ void console_t::update()
         uint32_t str_len;
         nu_input_get_keyboard_text(&str, &str_len);
         if (str_len) {
-            m_command_line->append_at(m_command_line->size(), std::string(str));
+            m_command_line->append_at(m_selected_character, std::string(str));
+            if (m_selected_character == m_command_line->size()) {
+                m_selected_character++;
+            }
+            update_cursor_advance();
         }
 
         /* backspace key */
         nu_button_state_t backspace_state;
         nu_input_get_keyboard_state(&backspace_state, NU_KEYBOARD_BACKSPACE);
         if (backspace_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
-            m_command_line->remove_at(m_command_line->size() - 1);
+            if (m_command_line->size() > 0) {
+                if (m_selected_character > 0) {
+                    m_selected_character--;
+                    m_command_line->remove_at(m_selected_character);
+                }
+                update_cursor_advance();
+            }
+        }
+
+        /* arrow keys */
+        nu_button_state_t up_state, down_state, left_state, right_state;
+        nu_input_get_keyboard_state(&up_state, NU_KEYBOARD_UP);
+        nu_input_get_keyboard_state(&down_state, NU_KEYBOARD_DOWN);
+        nu_input_get_keyboard_state(&left_state, NU_KEYBOARD_LEFT);
+        nu_input_get_keyboard_state(&right_state, NU_KEYBOARD_RIGHT);
+        if (up_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            
+        } else if (down_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+
+        } else if (left_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            if (m_selected_character > 0) {
+                m_selected_character--;
+                update_cursor_advance();
+            }
+        } else if (right_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            if (m_selected_character <= m_command_line->size()) {
+                m_selected_character++;
+                update_cursor_advance();
+            }
         }
 
         /* enter key */
@@ -98,8 +131,17 @@ void console_t::update()
         nu_input_get_keyboard_state(&enter_state, NU_KEYBOARD_ENTER);
         if (enter_state & NU_BUTTON_JUST_PRESSED) {
             m_command_line->clear();
+            update_cursor_advance();
         }
     }
+}
+
+void console_t::update_cursor_advance()
+{
+    uint32_t width, height;
+    std::string sub_string = m_command_line->get_command().substr(0, m_selected_character);
+    nu_renderer_font_get_text_size(m_font, sub_string.c_str(), &width, &height);
+    m_cursor->set_advance(width);
 }
 
 nu_result_t nudebug_plugin_console_initialize(void)

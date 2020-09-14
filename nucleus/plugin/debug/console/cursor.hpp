@@ -15,6 +15,7 @@ namespace nudebug
 
         void set_position(uint32_t x, uint32_t y);
         void set_visible(bool visible);
+        void set_advance(uint32_t advance);
 
         void update(float delta);
 
@@ -26,5 +27,6 @@ namespace nudebug
         float m_delta;
         float m_frequency;
         bool m_visible;
+        uint32_t m_advance;
     };
 }

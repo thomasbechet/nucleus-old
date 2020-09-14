@@ -27,8 +27,11 @@ namespace nudebug
         void update();
 
     private:
+        void update_cursor_advance();
+
         std::unique_ptr<command_line_t> m_command_line;
         std::unique_ptr<cursor_t> m_cursor;
+        uint32_t m_selected_character;
         nu_renderer_font_handle_t m_font;
     };
 }
