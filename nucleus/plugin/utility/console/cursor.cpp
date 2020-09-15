@@ -1,6 +1,6 @@
 #include "cursor.hpp"
 
-using namespace nudebug;
+using namespace nu::utility;
 
 cursor_t::cursor_t(float frequency)
 {

@@ -7,7 +7,7 @@ extern "C"
     #include "../../../core/nucleus.h"
 }
 
-namespace nudebug
+namespace nu::utility
 {
     class command_line_t
     {

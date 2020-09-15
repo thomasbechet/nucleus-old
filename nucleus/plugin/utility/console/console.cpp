@@ -6,7 +6,7 @@
 
 #define FONT_SIZE 16
 
-using namespace nudebug;
+using namespace nu::utility;
 
 typedef struct {    
     std::unique_ptr<console_t> console;
@@ -21,7 +21,7 @@ console_t::console_t()
     font_info.filename = "engine/font/Coder's Crux.ttf";
     font_info.font_size = FONT_SIZE;
     if (nu_renderer_font_create(&m_font, &font_info) != NU_SUCCESS) {
-        nu_fatal(NUDEBUG_LOGGER_NAME"Failed to create font.\n");
+        nu_fatal(NU_UTILITY_LOGGER_NAME"Failed to create font.\n");
     }
 
     /* create cursor */
@@ -59,7 +59,7 @@ void console_t::update()
 
     /* enable or disable console */
     nu_button_state_t button_state;
-    nu_input_get_keyboard_state(&button_state, NU_KEYBOARD_T);
+    nu_input_get_keyboard_state(&button_state, NU_KEYBOARD_F1);
     if (button_state & NU_BUTTON_JUST_PRESSED) {
         if (cursor_mode == NU_CURSOR_MODE_NORMAL) {
             nu_input_set_cursor_mode(NU_CURSOR_MODE_DISABLE);
@@ -98,8 +98,8 @@ void console_t::update()
                 if (m_selected_character > 0) {
                     m_selected_character--;
                     m_command_line->remove_at(m_selected_character);
+                    update_cursor_advance();
                 }
-                update_cursor_advance();
             }
         }
 
@@ -170,17 +170,17 @@ void console_t::set_command_line(std::string command)
     update_cursor_advance();
 }
 
-nu_result_t nudebug_plugin_console_initialize(void)
+nu_result_t nu_utility_plugin_console_initialize(void)
 {
     _data.console = std::make_unique<console_t>();
     return NU_SUCCESS;
 }
-nu_result_t nudebug_plugin_console_terminate(void)
+nu_result_t nu_utility_plugin_console_terminate(void)
 {
     _data.console.reset();
     return NU_SUCCESS;
 }
-nu_result_t nudebug_plugin_console_update(void)
+nu_result_t nu_utility_plugin_console_update(void)
 {
     _data.console->update();
     return NU_SUCCESS;

@@ -101,7 +101,7 @@ nu_result_t nu_plugin_load(nu_plugin_handle_t *handle, const char *module, const
     }
 
     /* save id */
-    *((uint32_t*)handle) = id;
+    *((uint64_t*)handle) = id;
     _data.plugin_count++;
 
     /* initialize plugin */

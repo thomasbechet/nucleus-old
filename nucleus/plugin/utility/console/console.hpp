@@ -12,11 +12,7 @@ extern "C"
     #include "../../../core/nucleus.h"
 }
 
-nu_result_t nudebug_plugin_console_initialize(void);
-nu_result_t nudebug_plugin_console_terminate(void);
-nu_result_t nudebug_plugin_console_update(void);
-
-namespace nudebug
+namespace nu::utility
 {
     class console_t
     {
@@ -38,3 +34,7 @@ namespace nudebug
         nu_renderer_font_handle_t m_font;
     };
 }
+
+nu_result_t nu_utility_plugin_console_initialize(void);
+nu_result_t nu_utility_plugin_console_terminate(void);
+nu_result_t nu_utility_plugin_console_update(void);
