@@ -40,6 +40,7 @@ void cursor_t::set_visible(bool visible)
 void cursor_t::set_advance(uint32_t advance)
 {
     m_advance = advance;
+    m_rect.height = 1;
     update_rectangle();
 }
 
@@ -59,6 +60,6 @@ void cursor_t::update_rectangle()
 {
     nu_rect_t rect = m_rect;
     rect.left += m_advance;
-    rect.height = m_visible ? 1 : 0;
+    if (!m_visible) rect.height = 0;
     nu_renderer_rectangle_set_rect(m_handle, rect);
 }

@@ -50,9 +50,19 @@ uint32_t command_line_t::size()
 {
     return m_command.size();
 }
+void command_line_t::set_command(std::string command)
+{
+    m_command = command;
+    update_label_text();
+}
 std::string command_line_t::get_command()
 {
     return m_command;
+}
+void command_line_t::set_visible(bool visible)
+{
+    m_visible = visible;
+    update_label_text();
 }
 
 void command_line_t::update_label_position()
@@ -61,5 +71,9 @@ void command_line_t::update_label_position()
 }
 void command_line_t::update_label_text()
 {
-    nu_renderer_label_set_text(m_handle, m_command.c_str());
+    if (m_visible) {
+        nu_renderer_label_set_text(m_handle, m_command.c_str());
+    } else {
+        nu_renderer_label_set_text(m_handle, "");
+    }
 }

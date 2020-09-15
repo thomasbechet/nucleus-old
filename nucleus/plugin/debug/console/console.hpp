@@ -28,8 +28,11 @@ namespace nudebug
 
     private:
         void update_cursor_advance();
+        void set_command_line(std::string command);
 
         std::unique_ptr<command_line_t> m_command_line;
+        std::vector<std::string> m_old_commands;
+        uint32_t m_selected_old_command;
         std::unique_ptr<cursor_t> m_cursor;
         uint32_t m_selected_character;
         nu_renderer_font_handle_t m_font;

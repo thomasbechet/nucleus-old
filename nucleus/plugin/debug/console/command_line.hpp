@@ -20,7 +20,9 @@ namespace nudebug
         void append_at(uint32_t index, const std::string &str);
         void clear();
         uint32_t size();
+        void set_command(std::string command);
         std::string get_command();
+        void set_visible(bool visible);
 
     private:
         void update_label_position();
@@ -29,6 +31,7 @@ namespace nudebug
         std::string m_command;
         uint32_t m_x;
         uint32_t m_y;
+        bool m_visible;
         nu_renderer_label_handle_t m_handle;
     };
 }
