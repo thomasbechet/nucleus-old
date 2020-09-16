@@ -7,10 +7,7 @@
 #include "command_line.hpp"
 #include "cursor.hpp"
 
-extern "C"
-{
-    #include "../../../core/nucleus.h"
-}
+#include "../../../core/nucleus.h"
 
 namespace nu::utility
 {
@@ -35,6 +32,6 @@ namespace nu::utility
     };
 }
 
-nu_result_t nu_utility_plugin_console_initialize(void);
-nu_result_t nu_utility_plugin_console_terminate(void);
-nu_result_t nu_utility_plugin_console_update(void);
+nu_result_t nuutils_plugin_console_initialize(void);
+nu_result_t nuutils_plugin_console_terminate(void);
+nu_result_t nuutils_plugin_console_update(void);

@@ -3,9 +3,11 @@
 
 #include "../../../core/nucleus.h"
 
+/* module */
 #define NUSR_MODULE_NAME "nucleus-softrast"
 #define NUSR_MODULE_ID 0x7
 
+/* renderer system */
 #define NUSR_RENDERER_INTERFACE_NAME        "nusr_renderer_interface"
 #define NUSR_RENDERER_INTERFACE_LOADER_NAME "nusr_renderer_get_interface"
 

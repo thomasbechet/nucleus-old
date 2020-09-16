@@ -10,6 +10,8 @@ typedef struct {
     void *messages;
     uint32_t message_count;
     uint32_t message_size;
+    nu_event_initialize_pfn_t initialize;
+    nu_event_terminate_pfn_t terminate;
 } nu_event_buffer_t;
 
 typedef struct {
@@ -39,10 +41,12 @@ nu_result_t nu_event_dispatch_all(void)
 {
     for (uint32_t ei = 0; ei < _data.event_count; ei++) {
         for (uint32_t mi = 0; mi < _data.events[ei].message_count; mi++) {
+            void *data = (void*)(_data.events[ei].messages + mi * _data.events[ei].message_size);
+            if (_data.events[ei].initialize) _data.events[ei].initialize(data);
             for (uint32_t si = 0; si < _data.events[ei].subscriber_count; si++) {
-                void *data = (void*)(_data.events[ei].messages + mi * _data.events[ei].message_size);
                 _data.events[ei].subscribers[si](ei, data);
             }
+            if (_data.events[ei].terminate) _data.events[ei].terminate(data);
         }
         _data.events[ei].message_count = 0;
     }
@@ -50,13 +54,15 @@ nu_result_t nu_event_dispatch_all(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nu_event_register(nu_event_id_t *id, uint32_t data_size)
+nu_result_t nu_event_create(nu_event_id_t *id, const nu_event_register_info_t *info)
 {
     if (_data.event_count >= MAX_EVENT_COUNT) return NU_FAILURE;
 
-    _data.events[_data.event_count].message_size = data_size;
+    _data.events[_data.event_count].message_size  = info->size;
     _data.events[_data.event_count].message_count = 0;
-    _data.events[_data.event_count].messages = nu_malloc(sizeof(data_size) * MAX_MESSAGE_PER_EVENT_COUNT);
+    _data.events[_data.event_count].messages      = nu_malloc(info->size * MAX_MESSAGE_PER_EVENT_COUNT);
+    _data.events[_data.event_count].initialize    = info->initialize;
+    _data.events[_data.event_count].terminate     = info->terminate;
 
     *id = _data.event_count++;
 

@@ -1,9 +1,6 @@
 #pragma once
 
-extern "C"
-{
-    #include "../../../core/nucleus.h"
-}
+#include "../../../core/nucleus.h"
 
 namespace nu::utility
 {

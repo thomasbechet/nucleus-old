@@ -1,6 +1,6 @@
 #include "command_line.hpp"
 
-#include "../common/logger.hpp"
+#include "logger.hpp"
 
 using namespace nu::utility;
 
@@ -16,7 +16,7 @@ command_line_t::command_line_t(nu_renderer_font_handle_t font)
     label_info.font = font;
     label_info.text = "";
     if (nu_renderer_label_create(&m_handle, &label_info) != NU_SUCCESS) {
-        nu_fatal(NU_UTILITY_LOGGER_NAME"Failed to create command label.\n");
+        nu_fatal(NUUTILS_LOGGER_NAME"Failed to create command label.\n");
     }
 }
 command_line_t::~command_line_t()

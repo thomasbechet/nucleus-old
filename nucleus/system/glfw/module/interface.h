@@ -3,9 +3,11 @@
 
 #include "../../../core/nucleus.h"
 
+/* module */
 #define NUGLFW_MODULE_NAME "nucleus-glfw"
 #define NUGLFW_MODULE_ID 0x4
 
+/* glfw system */
 #define NUGLFW_WINDOW_INTERFACE_NAME        "nuglfw_window_interface"
 #define NUGLFW_WINDOW_INTERFACE_LOADER_NAME "nuglfw_window_get_interface"
 

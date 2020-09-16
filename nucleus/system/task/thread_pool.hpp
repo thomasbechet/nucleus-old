@@ -10,10 +10,7 @@
 
 #include <MPMCQueue/MPMCQueue.h>
 
-extern "C"
-{
-    #include "../../core/nucleus.h"
-}
+#include "../../core/nucleus.h"
 
 namespace nucleus
 {
