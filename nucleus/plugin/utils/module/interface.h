@@ -21,7 +21,7 @@ typedef struct {
 
 typedef struct {
     nu_result_t (*get_event_id)(nu_event_id_t*);
-    nu_result_t (*post_command)(const char*);
+    nu_result_t (*execute)(const char*);
 } nuutils_command_interface_t;
 
 //nu_result_t (*nuutils_command_interface_loader_pfn_t)(nuutils_command_interface_t*);

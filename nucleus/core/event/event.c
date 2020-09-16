@@ -54,7 +54,7 @@ nu_result_t nu_event_dispatch_all(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nu_event_create(nu_event_id_t *id, const nu_event_register_info_t *info)
+nu_result_t nu_event_register(nu_event_id_t *id, const nu_event_register_info_t *info)
 {
     if (_data.event_count >= MAX_EVENT_COUNT) return NU_FAILURE;
 

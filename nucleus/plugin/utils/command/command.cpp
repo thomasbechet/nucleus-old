@@ -42,7 +42,7 @@ nu_result_t nuutils_command_get_event_id(nu_event_id_t *id)
 
     return NU_SUCCESS;
 }
-nu_result_t nuutils_command_post_command(const char *command)
+nu_result_t nuutils_command_execute(const char *command)
 {
     
 
@@ -52,7 +52,7 @@ nu_result_t nuutils_command_post_command(const char *command)
 nu_result_t nuutils_command_get_interface(nuutils_command_interface_t *interface)
 {
     interface->get_event_id = nuutils_command_get_event_id;
-    interface->post_command = nuutils_command_post_command;
+    interface->execute      = nuutils_command_execute;
 
     return NU_SUCCESS;
 }
