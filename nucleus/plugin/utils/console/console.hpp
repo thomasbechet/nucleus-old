@@ -9,6 +9,10 @@
 
 #include "../../../core/nucleus.h"
 
+nu_result_t nuutils_console_plugin_initialize(void);
+nu_result_t nuutils_console_plugin_terminate(void);
+nu_result_t nuutils_console_plugin_update(void);
+
 namespace nu::utility
 {
     class console_t
@@ -31,7 +35,3 @@ namespace nu::utility
         nu_renderer_font_handle_t m_font;
     };
 }
-
-nu_result_t nuutils_plugin_console_initialize(void);
-nu_result_t nuutils_plugin_console_terminate(void);
-nu_result_t nuutils_plugin_console_update(void);

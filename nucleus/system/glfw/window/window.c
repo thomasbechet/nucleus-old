@@ -90,9 +90,20 @@ nu_result_t nuglfw_window_update(void)
 
     return NU_SUCCESS;
 }
+
+nu_result_t nuglfw_window_set_size(uint32_t width, uint32_t height)
+{
+    glfwSetWindowSize(_window, width, height);
+    return NU_SUCCESS;
+}
 nu_result_t nuglfw_window_get_size(uint32_t *width, uint32_t *height)
 {
     glfwGetWindowSize(_window, (int*)width, (int*)height);
+    return NU_SUCCESS;
+}
+nu_result_t nuglfw_window_set_title(const char *title)
+{
+    glfwSetWindowTitle(_window, title);
     return NU_SUCCESS;
 }
 

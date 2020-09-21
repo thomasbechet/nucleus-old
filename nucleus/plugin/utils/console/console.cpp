@@ -2,6 +2,8 @@
 
 #include "logger.hpp"
 
+#include "../module/interface.h"
+
 #include <memory>
 
 #define FONT_SIZE 16
@@ -10,9 +12,53 @@ using namespace nu::utility;
 
 typedef struct {    
     std::unique_ptr<console_t> console;
+    nuutils_command_interface_t command_interface;
+    bool command_interface_loaded;
 } nu_console_data_t;
 
 static nu_console_data_t _data;
+
+static nu_result_t load_command_interface(void)
+{
+    nu_module_handle_t module;
+    if (nu_module_get_by_name(&module, NUUTILS_MODULE_NAME) != NU_SUCCESS) {
+        return NU_FAILURE;
+    }
+
+    nuutils_command_interface_loader_pfn_t load_interface;
+    if (nu_module_load_function(module, NUUTILS_COMMAND_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) != NU_SUCCESS) {
+        return NU_FAILURE;
+    }
+
+    if (load_interface(&_data.command_interface) != NU_SUCCESS) {
+        return NU_FAILURE;
+    }
+
+    return NU_SUCCESS;
+}
+
+nu_result_t nuutils_console_plugin_initialize(void)
+{
+    _data.command_interface_loaded = false;
+    if (load_command_interface() == NU_SUCCESS) {
+        _data.command_interface_loaded = true; 
+    } else {
+        nu_warning(NUUTILS_LOGGER_NAME"Using console without command plugin.\n");
+    }
+
+    _data.console = std::make_unique<console_t>();
+    return NU_SUCCESS;
+}
+nu_result_t nuutils_console_plugin_terminate(void)
+{
+    _data.console.reset();
+    return NU_SUCCESS;
+}
+nu_result_t nuutils_console_plugin_update(void)
+{
+    _data.console->update();
+    return NU_SUCCESS;
+}
 
 console_t::console_t()
 {
@@ -145,6 +191,11 @@ void console_t::update()
                 /* add command to old commands */
                 m_old_commands.push_back(m_command_line->get_command());
                 m_selected_old_command = m_old_commands.size();
+
+                /* execute command */
+                if (_data.command_interface_loaded) {
+                    _data.command_interface.execute(m_command_line->get_command().c_str());
+                }
                 
                 /* clear command line */
                 set_command_line("");
@@ -168,20 +219,4 @@ void console_t::set_command_line(std::string command)
     m_command_line->set_command(command);
     m_selected_character = command.size();
     update_cursor_advance();
-}
-
-nu_result_t nuutils_plugin_console_initialize(void)
-{
-    _data.console = std::make_unique<console_t>();
-    return NU_SUCCESS;
-}
-nu_result_t nuutils_plugin_console_terminate(void)
-{
-    _data.console.reset();
-    return NU_SUCCESS;
-}
-nu_result_t nuutils_plugin_console_update(void)
-{
-    _data.console->update();
-    return NU_SUCCESS;
 }

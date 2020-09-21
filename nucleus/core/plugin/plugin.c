@@ -8,6 +8,7 @@
 typedef struct {
     nu_module_handle_t module;
     nu_plugin_interface_t interface;
+    const char *name;
 } nu_plugin_t;
 
 typedef struct {
@@ -68,10 +69,17 @@ nu_result_t nu_plugin_late_update(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nu_plugin_load(nu_plugin_handle_t *handle, const char *module, const char *plugin)
+nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
 {
     nu_result_t result;
     result = NU_SUCCESS;
+
+    /* check exists */
+    for (uint32_t i = 0; i < _data.plugin_count; i++) {
+        if (_data.plugins[i].module == module && NU_MATCH(_data.plugins[i].name, plugin)) {
+            return NU_SUCCESS;
+        }
+    }
 
     /* error check */
     if (_data.plugin_count >= MAX_PLUGIN_COUNT) return NU_FAILURE;
@@ -79,14 +87,9 @@ nu_result_t nu_plugin_load(nu_plugin_handle_t *handle, const char *module, const
     /* choose id */
     uint32_t id = _data.plugin_count;
 
-    /* load module */
-    result = nu_module_load(&_data.plugins[id].module, module);
-    if (result != NU_SUCCESS) return result;
-
     /* load plugin interface accessor */
     nu_plugin_interface_loader_pfn_t load_interface;
-    result = nu_module_load_function(_data.plugins[id].module,
-        NU_PLUGIN_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
+    result = nu_module_load_function(module, NU_PLUGIN_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load plugin loader.\n");
         return result;
@@ -100,9 +103,9 @@ nu_result_t nu_plugin_load(nu_plugin_handle_t *handle, const char *module, const
         return result;
     }
 
-    /* save id */
-    *((uint64_t*)handle) = id;
-    _data.plugin_count++;
+    /* save plugin name and module*/
+    _data.plugins[id].module = module;
+    _data.plugins[id].name = plugin;
 
     /* initialize plugin */
     if (_data.plugins[id].interface.initialize) {
@@ -112,6 +115,9 @@ nu_result_t nu_plugin_load(nu_plugin_handle_t *handle, const char *module, const
             return result;
         }
     }
+
+    /* increment id */
+    _data.plugin_count++;
 
     return NU_SUCCESS;
 }

@@ -160,9 +160,10 @@ static nu_result_t nu_context_run(void)
     nu_timer_t timer;
     nu_timer_start(&timer);
 
-    nu_plugin_handle_t plugin;
-    nu_plugin_load(&plugin, "engine/plugin/nucleus-utility", "nu_utility_plugin_command");
-    nu_plugin_load(&plugin, "engine/plugin/nucleus-utility", "nu_utility_plugin_console");
+    nu_module_handle_t module;
+    nu_module_load(&module, "engine/plugin/nucleus-utils");
+    nu_plugin_require(module, "nuutils_command_plugin");
+    nu_plugin_require(module, "nuutils_console_plugin");
 
     while (!_context.should_stop) {
         /* compute delta */

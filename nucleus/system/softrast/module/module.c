@@ -13,10 +13,11 @@ static const char *plugins[] = {};
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
-    info->id = NUSR_MODULE_ID;
-    info->flags = NU_MODULE_FLAG_TYPE_RENDERER;
+    info->name         = NUSR_MODULE_NAME;
+    info->id           = NUSR_MODULE_ID;
+    info->flags        = NU_MODULE_FLAG_TYPE_RENDERER;
     info->plugin_count = plugin_count;
-    info->plugins = plugins;
+    info->plugins      = plugins;
 
     return NU_SUCCESS;
 }

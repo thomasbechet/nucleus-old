@@ -11,9 +11,11 @@
 #endif
 
 #define MAX_MODULE_COUNT 64
+#define MAX_MODULE_PATH_SIZE 256
 
 typedef struct {
     nu_module_info_t info;
+    char path[MAX_MODULE_PATH_SIZE];
     void *handle;
 } nu_module_t;
 
@@ -88,6 +90,9 @@ static nu_result_t load_module(nu_module_t *module, const char *filename)
         return NU_FAILURE;
     }
 
+    /* copy path */
+    strncpy(module->path, filename, MAX_MODULE_PATH_SIZE);
+
     /* load module info */
     nu_result_t (*module_get_info)(nu_module_info_t*);
     if (load_function(module, NU_MODULE_GET_INFO_NAME, (nu_pfn_t*)&module_get_info) != NU_SUCCESS) {
@@ -146,7 +151,44 @@ nu_result_t nu_module_load_function(nu_module_handle_t handle, const char *funct
 {
     return load_function(&_data.modules[(uint64_t)handle], function_name, function);
 }
+nu_result_t nu_module_get_by_name(nu_module_handle_t *handle, const char *name)
+{
+    for (uint32_t i = 0; i < _data.module_count; i++) {
+        if (NU_MATCH(_data.modules[i].info.name, name)) {
+            *((uint64_t*)handle) = i;
+            return NU_SUCCESS;
+        }
+    }
+
+    return NU_FAILURE;
+}
+nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, nu_id_t id)
+{
+    for (uint32_t i = 0; i < _data.module_count; i++) {
+        if (_data.modules[i].info.id == id) {
+            *((uint64_t*)handle) = i;
+            return NU_SUCCESS;
+        }
+    }
+
+    return NU_FAILURE;
+}
 nu_id_t nu_module_get_id(nu_module_handle_t handle)
 {
     return _data.modules[(uint64_t)handle].info.id;
+}
+nu_result_t nu_module_log(void)
+{
+    nu_info("===========================\n");
+    nu_info("          MODULES          \n");
+    nu_info("===========================\n");
+
+    for (uint32_t i = 0; i < _data.module_count; i++) {
+        nu_info("- %s\n", _data.modules[i].info.name);
+        for (uint32_t pi = 0; pi < _data.modules[i].info.plugin_count; pi++) {
+            nu_info("   - %s\n", _data.modules[i].info.plugins[pi]);
+        }
+    }
+
+    return NU_SUCCESS;
 }

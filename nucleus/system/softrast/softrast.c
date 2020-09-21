@@ -321,6 +321,6 @@ static void test_update(void)
         nu_vec3_add(eye, forward, center);
         nu_renderer_camera_set_eye(NULL, eye);
         nu_renderer_camera_set_center(NULL, center);
-        nu_renderer_camera_set_fov(NULL, nu_radian(90.0));
+        //nu_renderer_camera_set_fov(NULL, nu_radian(90.0));
     }
 }

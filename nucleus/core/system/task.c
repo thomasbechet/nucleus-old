@@ -18,7 +18,7 @@ nu_result_t nu_system_task_initialize(void)
 
     memset(&_system, 0, sizeof(nu_system_task_t));
 
-    /* load task module */
+    /* get task module */
     result = nu_module_load(&_system.module, "engine/system/"NUTK_MODULE_NAME);
     if (result != NU_SUCCESS) {
         return result;

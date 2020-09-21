@@ -8,10 +8,11 @@ static const char *plugins[] = {};
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
-    info->id = NUGLFW_MODULE_ID;
-    info->flags = NU_MODULE_FLAG_TYPE_WINDOW | NU_MODULE_FLAG_TYPE_INPUT;
+    info->name         = NUGLFW_MODULE_NAME;
+    info->id           = NUGLFW_MODULE_ID;
+    info->flags        = NU_MODULE_FLAG_TYPE_WINDOW | NU_MODULE_FLAG_TYPE_INPUT;
     info->plugin_count = plugin_count;
-    info->plugins = plugins;
+    info->plugins      = plugins;
 
     return NU_SUCCESS;
 }
@@ -21,7 +22,10 @@ nu_result_t nu_window_get_interface(nu_window_interface_t *interface)
     interface->initialize = nuglfw_window_initialize;
     interface->terminate  = nuglfw_window_terminate;
     interface->update     = nuglfw_window_update;
+
+    interface->set_size   = nuglfw_window_set_size;
     interface->get_size   = nuglfw_window_get_size;
+    interface->set_title  = nuglfw_window_set_title;
 
     return NU_SUCCESS;
 }

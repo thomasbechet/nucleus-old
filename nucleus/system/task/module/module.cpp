@@ -40,10 +40,11 @@ static nu_result_t nutk_task_wait(nu_task_handle_t task)
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
-    info->id = NUTK_MODULE_ID;
-    info->flags = NU_MODULE_FLAG_TYPE_TASK;
+    info->name         = NUTK_MODULE_NAME;
+    info->id           = NUTK_MODULE_ID;
+    info->flags        = NU_MODULE_FLAG_TYPE_TASK;
     info->plugin_count = plugin_count;
-    info->plugins = plugins;
+    info->plugins      = plugins;
 
     return NU_SUCCESS;
 }
