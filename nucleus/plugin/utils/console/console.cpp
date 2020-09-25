@@ -36,9 +36,14 @@ static nu_result_t load_command_interface(void)
 
     return NU_SUCCESS;
 }
+static nu_result_t on_event(nu_event_id_t id, void *data)
+{
+    return _data.console->on_event(id, data);
+}
 
 nu_result_t nuutils_console_plugin_initialize(void)
 {
+    /* load command interface */
     _data.command_interface_loaded = false;
     if (load_command_interface() == NU_SUCCESS) {
         _data.command_interface_loaded = true; 
@@ -46,7 +51,12 @@ nu_result_t nuutils_console_plugin_initialize(void)
         nu_warning(NUUTILS_LOGGER_NAME"Using console without command plugin.\n");
     }
 
+    /* subscribe event */
+    nu_event_subscribe(nu_renderer_viewport_resize_event_get_id(), on_event);
+
+    /* create console */
     _data.console = std::make_unique<console_t>();
+    
     return NU_SUCCESS;
 }
 nu_result_t nuutils_console_plugin_terminate(void)
@@ -80,10 +90,7 @@ console_t::console_t()
     m_selected_old_command = 0;
 
     /* set component position */
-    uint32_t w, h, vw, vh;
-    nu_renderer_viewport_get_size(&vw, &vh);
-    m_cursor->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
-    m_command_line->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
+    update_position();
 }
 console_t::~console_t()
 {
@@ -206,6 +213,14 @@ void console_t::update()
         m_cursor->update(nu_context_get_delta_time());
     }
 }
+nu_result_t console_t::on_event(nu_event_id_t id, void *data)
+{
+    if (id == nu_renderer_viewport_resize_event_get_id()) {
+        update_position();
+    }
+
+    return NU_SUCCESS;
+}
 
 void console_t::update_cursor_advance()
 {
@@ -219,4 +234,11 @@ void console_t::set_command_line(std::string command)
     m_command_line->set_command(command);
     m_selected_character = command.size();
     update_cursor_advance();
+}
+void console_t::update_position()
+{
+    uint32_t w, h, vw, vh;
+    nu_renderer_viewport_get_size(&vw, &vh);
+    m_cursor->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
+    m_command_line->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
 }

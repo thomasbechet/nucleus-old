@@ -73,7 +73,6 @@ static nu_result_t create_mesh(uint32_t *id, const nu_renderer_mesh_create_info_
     _data.meshes[_data.next_id]->zmax = zmax;
     _data.meshes[_data.next_id]->zmin = zmin;
 
-
     /* save id */
     *id = _data.next_id++;
 

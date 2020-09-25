@@ -79,7 +79,7 @@ static nu_result_t load_ini_file(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nu_config_load(nu_config_callback_t callback)
+nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
 {
     memset(&_data.config, 0, sizeof(nu_config_t));
 

@@ -9,7 +9,6 @@ SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_DEBUG} -O2")
 
 INCLUDE_DIRECTORIES(
-    ../../../extlibs/stb/include/
     ../../../extlibs/freetype/include/
 )
 

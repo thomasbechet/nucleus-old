@@ -5,7 +5,13 @@
 #include "../input/input.h"
 #include "../../vulkan/module/interface.h"
 
-static GLFWwindow *_window;
+typedef struct {
+    GLFWwindow *window;
+    uint32_t width;
+    uint32_t height;
+} nuglfw_window_data_t;
+
+static nuglfw_window_data_t _data;
 
 nu_result_t nuglfw_window_initialize(void)
 {
@@ -30,19 +36,12 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* create window */
-    nu_window_mode_t window_mode = nu_config_get().window.mode;
-    if (window_mode == NU_WINDOW_MODE_FULLSCREEN) {
-        const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        _window = glfwCreateWindow(mode->width, mode->height, "Window", glfwGetPrimaryMonitor(), NULL);
-    } else if (window_mode == NU_WINDOW_MODE_WINDOWED) {
-        uint32_t width = nu_config_get().window.width;
-        uint32_t height = nu_config_get().window.height;
-        _window = glfwCreateWindow(width, height, "Window", NULL, NULL);
-    } else {
+    _data.width = nu_config_get().window.width;
+    _data.height = nu_config_get().window.height;
+    _data.window = glfwCreateWindow(_data.width, _data.height, "Window", NULL, NULL);
+    nuglfw_window_set_mode(nu_config_get().window.mode);
 
-    }
-
-    if (!_window) {
+    if (!_data.window) {
         nu_warning(NUGLFW_LOGGER_NAME"Failed to create glfw window.\n");
         glfwTerminate();
         return NU_FAILURE;
@@ -50,7 +49,7 @@ nu_result_t nuglfw_window_initialize(void)
 
     /* post context initialization */
     if (nu_config_get().renderer.api == NU_RENDERER_API_SOFTRAST) {
-        glfwMakeContextCurrent(_window);
+        glfwMakeContextCurrent(_data.window);
         if (nu_config_get().window.vsync) {
             glfwSwapInterval(1);
         } else {
@@ -78,7 +77,7 @@ nu_result_t nuglfw_window_terminate(void)
 nu_result_t nuglfw_window_update(void)
 {
     /* check window exit */
-    if (glfwWindowShouldClose(_window)) {
+    if (glfwWindowShouldClose(_data.window)) {
         nu_context_request_stop();
     }
 
@@ -93,17 +92,37 @@ nu_result_t nuglfw_window_update(void)
 
 nu_result_t nuglfw_window_set_size(uint32_t width, uint32_t height)
 {
-    glfwSetWindowSize(_window, width, height);
+    _data.width = width;
+    _data.height = height;
+    glfwSetWindowSize(_data.window, width, height);
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_window_get_size(uint32_t *width, uint32_t *height)
 {
-    glfwGetWindowSize(_window, (int*)width, (int*)height);
+    glfwGetWindowSize(_data.window, (int*)width, (int*)height);
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_window_set_title(const char *title)
 {
-    glfwSetWindowTitle(_window, title);
+    glfwSetWindowTitle(_data.window, title);
+    return NU_SUCCESS;
+}
+nu_result_t nuglfw_window_set_mode(nu_window_mode_t mode)
+{
+    if (mode == NU_WINDOW_MODE_FULLSCREEN) {
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            glfwSetWindowMonitor(_data.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
+    } else if (mode == NU_WINDOW_MODE_WINDOWED) {
+        glfwSetWindowMonitor(_data.window, NULL, 10, 10, _data.width, _data.height, 0);
+    } else if (mode == NU_WINDOW_MODE_BORDERLESS) {
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+            glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+            glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+            glfwSetWindowMonitor(_data.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+
     return NU_SUCCESS;
 }
 
@@ -131,15 +150,20 @@ nu_result_t nuglfw_present_surface(
 )
 {
     int32_t w, h;
-    glfwGetWindowSize(_window, &w, &h);
+    glfwGetWindowSize(_data.window, &w, &h);
     glViewport(0, 0, w, h);
     nuglfw_surface_draw(width, height, pixels);
-    glfwSwapBuffers(_window);
+    glfwSwapBuffers(_data.window);
 
+    return NU_SUCCESS;
+}
+nu_result_t nuglfw_swap_buffers(void)
+{
+    glfwSwapBuffers(_data.window);
     return NU_SUCCESS;
 }
 
 GLFWwindow *nuglfw_get_window(void)
 {
-    return _window;
+    return _data.window;
 }

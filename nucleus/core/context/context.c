@@ -2,9 +2,10 @@
 
 #include "../event/event.h"
 #include "../plugin/plugin.h"
-#include "../system/task.h"
-#include "../system/window.h"
-#include "../system/renderer.h"
+#include "../system/task/task.h"
+#include "../system/window/window.h"
+#include "../system/renderer/renderer.h"
+#include "../system/input/input.h"
 
 #define NU_CONTEXT_LOGGER_NAME "[CONTEXT] "
 
@@ -19,6 +20,7 @@ typedef struct {
 } nu_context_loaded_state_t;
 
 typedef struct {
+    nu_context_callback_t callback;
     nu_context_loaded_state_t loaded;
     float delta_time;
     bool should_stop;
@@ -26,10 +28,10 @@ typedef struct {
 
 static nu_context_t _context;
 
-static nu_result_t nu_context_initialize(const nu_init_info_t *info);
+static nu_result_t nu_context_initialize(const nu_context_init_info_t *info);
 static nu_result_t nu_context_terminate(void);
 
-static nu_result_t nu_context_initialize(const nu_init_info_t *info)
+static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
 {
     nu_result_t result;
     result = NU_SUCCESS;
@@ -45,8 +47,11 @@ static nu_result_t nu_context_initialize(const nu_init_info_t *info)
 
     /* engine configuration */
     nu_info(NU_CONTEXT_LOGGER_NAME"Loading configuration...\n");
-    nu_config_callback_t callback = info ? info->config_callback : NULL; 
-    if (nu_config_load(callback) != NU_SUCCESS) {
+    if (info) {
+        _context.callback = info->callback;
+    }
+    
+    if (nu_config_load(_context.callback.config) != NU_SUCCESS) {
         nu_fatal(NU_CONTEXT_LOGGER_NAME"Failed to configure the engine.\n");
     }
     _context.loaded.config = true;
@@ -160,10 +165,8 @@ static nu_result_t nu_context_run(void)
     nu_timer_t timer;
     nu_timer_start(&timer);
 
-    nu_module_handle_t module;
-    nu_module_load(&module, "engine/plugin/nucleus-utils");
-    nu_plugin_require(module, "nuutils_command_plugin");
-    nu_plugin_require(module, "nuutils_console_plugin");
+    if (_context.callback.start) 
+        _context.callback.start();
 
     while (!_context.should_stop) {
         /* compute delta */
@@ -189,25 +192,34 @@ static nu_result_t nu_context_run(void)
             accumulator -= FIXED_TIMESTEP;
 
             /* process fixed update */
+            if (_context.callback.fixed_update) 
+                _context.callback.fixed_update();
             nu_plugin_fixed_update();
         }
 
         _context.delta_time = delta;
 
         /* process frame update */
+        if (_context.callback.update) 
+            _context.callback.update();
         nu_plugin_update();
 
         /* process late update */
+        if (_context.callback.late_update) 
+            _context.callback.late_update();
         nu_plugin_late_update();
 
         /* process render */
         nu_system_renderer_render();
     }
 
+    if (_context.callback.stop) 
+        _context.callback.stop();
+
     return NU_SUCCESS;
 }
 
-nu_result_t nu_init(const nu_init_info_t *info)
+nu_result_t nu_context_init(const nu_context_init_info_t *info)
 {
     nu_result_t result;
     result = NU_SUCCESS;

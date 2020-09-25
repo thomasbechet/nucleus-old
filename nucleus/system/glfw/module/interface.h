@@ -15,6 +15,7 @@ typedef struct {
     const char **(*get_required_instance_extensions)(uint32_t*);
     nu_result_t (*create_window_surface)(nu_ptr_t, nu_ptr_t);
     nu_result_t (*present_surface)(uint32_t, uint32_t, void*);
+    nu_result_t (*swap_buffers)(void);
 } nuglfw_window_interface_t;
 
 typedef nu_result_t (*nuglfw_window_interface_loader_pfn_t)(nuglfw_window_interface_t*);

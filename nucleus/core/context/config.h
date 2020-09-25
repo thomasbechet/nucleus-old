@@ -1,9 +1,9 @@
 #ifndef NU_CONFIG_H
 #define NU_CONFIG_H
 
-#include "../system/window.h"
-#include "../system/input.h"
-#include "../system/renderer.h"
+#include "../system/window/window.h"
+#include "../system/input/input.h"
+#include "../system/renderer/renderer.h"
 
 #define NU_CONFIG_CONTEXT_SECTION       "context"
 #define NU_CONFIG_CONTEXT_VERSION_MAJOR "version_major"
@@ -56,9 +56,9 @@ typedef struct {
     nu_config_renderer_t renderer;
 } nu_config_t;
 
-typedef nu_result_t (*nu_config_callback_t)(nu_config_t*);
+typedef nu_result_t (*nu_config_callback_pfn_t)(nu_config_t*);
 
-nu_result_t nu_config_load(nu_config_callback_t callback);
+nu_result_t nu_config_load(nu_config_callback_pfn_t callback);
 nu_result_t nu_config_unload(void);
 
 NU_API nu_config_t nu_config_get(void);
