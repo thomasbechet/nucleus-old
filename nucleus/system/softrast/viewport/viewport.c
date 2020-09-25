@@ -31,6 +31,14 @@ nu_result_t nusr_viewport_get_renderbuffer(nusr_renderbuffer_t **renderbuffer)
     
     return NU_SUCCESS;
 }
+nu_result_t nusr_viewport_set_size(uint32_t width, uint32_t height)
+{
+    /* recreate renderbuffer */
+    nusr_renderbuffer_destroy(&_data.renderbuffer);
+    nusr_renderbuffer_create(&_data.renderbuffer, width, height);
+
+    return NU_SUCCESS;
+}
 nu_result_t nusr_viewport_get_size(uint32_t *width, uint32_t *height)
 {
     *width = _data.renderbuffer.color_buffer.width;

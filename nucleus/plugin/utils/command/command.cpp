@@ -104,6 +104,20 @@ nu_result_t nuutils_command_execute(const char *cstr_command)
         nu_renderer_camera_set_fov(0, nu_radian(std::atof(tokens.at(1).c_str())));
     }
 
+    if (tokens.size() == 3 && tokens.at(0) == "viewport") {
+        nu_renderer_viewport_set_size(std::atoi(tokens.at(1).c_str()), std::atoi(tokens.at(2).c_str()));
+    }
+
+    if (tokens.size() == 2 && tokens.at(0) == "window") {
+        if (tokens.at(1) == "fullscreen") {
+            nu_window_set_mode(NU_WINDOW_MODE_FULLSCREEN);
+        } else if (tokens.at(1) == "windowed") {
+            nu_window_set_mode(NU_WINDOW_MODE_WINDOWED);
+        } else if (tokens.at(1) == "borderless") {
+            nu_window_set_mode(NU_WINDOW_MODE_BORDERLESS);
+        }
+    }
+
     return NU_SUCCESS;
 }
 

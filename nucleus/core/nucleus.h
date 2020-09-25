@@ -8,12 +8,13 @@ extern "C" {
 #include "common/common.h"
 #include "module/interface.h"
 #include "module/module.h"
-#include "system/renderer.h"
-#include "system/window.h"
-#include "system/task.h"
 #include "context/context.h"
 #include "event/event.h"
 #include "plugin/plugin.h"
+#include "system/renderer/renderer.h"
+#include "system/window/window.h"
+#include "system/task/task.h"
+#include "system/input/input.h"
 
 #ifdef __cplusplus
 }

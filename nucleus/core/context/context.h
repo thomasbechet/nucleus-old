@@ -5,10 +5,19 @@
 #include "../module/module.h"
 
 typedef struct {
-    nu_config_callback_t config_callback;
-} nu_init_info_t;
+    nu_config_callback_pfn_t config;
+    nu_result_t (*start)(void);
+    nu_result_t (*update)(void);
+    nu_result_t (*fixed_update)(void);
+    nu_result_t (*late_update)(void);
+    nu_result_t (*stop)(void);
+} nu_context_callback_t;
 
-NU_API nu_result_t nu_init(const nu_init_info_t *info);
+typedef struct {
+    nu_context_callback_t callback;
+} nu_context_init_info_t;
+
+NU_API nu_result_t nu_context_init(const nu_context_init_info_t *info);
 NU_API nu_result_t nu_context_request_stop(void);
 NU_API float nu_context_get_delta_time(void);
 

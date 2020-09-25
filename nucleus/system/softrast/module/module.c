@@ -58,6 +58,7 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->rectangle_destroy  = nusr_gui_rectangle_destroy;
     interface->rectangle_set_rect = nusr_gui_rectangle_set_rect;
 
+    interface->viewport_set_size = nusr_viewport_set_size;
     interface->viewport_get_size = nusr_viewport_get_size;
 
     return NU_SUCCESS;

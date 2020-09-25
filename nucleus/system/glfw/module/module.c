@@ -26,6 +26,7 @@ nu_result_t nu_window_get_interface(nu_window_interface_t *interface)
     interface->set_size   = nuglfw_window_set_size;
     interface->get_size   = nuglfw_window_get_size;
     interface->set_title  = nuglfw_window_set_title;
+    interface->set_mode   = nuglfw_window_set_mode;
 
     return NU_SUCCESS;
 }
@@ -48,6 +49,7 @@ nu_result_t nuglfw_window_get_interface(nuglfw_window_interface_t *interface)
     interface->create_window_surface            = nuglfw_create_window_surface;
     interface->get_required_instance_extensions = nuglfw_get_required_instance_extensions;
     interface->present_surface                  = nuglfw_present_surface;
+    interface->swap_buffers                     = nuglfw_swap_buffers;
 
     return NU_SUCCESS;
 }
