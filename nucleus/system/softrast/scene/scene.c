@@ -1,6 +1,7 @@
 #include "scene.h"
 
 #include "render.h"
+#include "../asset/material.h"
 
 #define MAX_STATICMESH_COUNT 1024
 
@@ -89,17 +90,25 @@ nu_result_t nusr_scene_staticmesh_create(nu_renderer_staticmesh_handle_t *handle
     }
 
     _data.staticmeshes[found_id].active = true;
-    _data.staticmeshes[found_id].mesh = (uint64_t)info->mesh;
-    _data.staticmeshes[found_id].texture = (uint64_t)info->texture;
+    _data.staticmeshes[found_id].mesh = NU_HANDLE_GET_ID(info->mesh);
+    nusr_material_t *material;
+    uint32_t material_id = NU_HANDLE_GET_ID(info->material);
+    nusr_material_get(material_id, &material);
+    if (!material->use_diffuse_uniform) {
+        _data.staticmeshes[found_id].texture = material->diffuse_texture;
+        _data.staticmeshes[found_id].has_texture = true;
+    } else {
+        _data.staticmeshes[found_id].has_texture = false;
+    }
     nu_mat4_copy(info->transform, _data.staticmeshes[found_id].transform);
 
-    *((uint64_t*)handle) = found_id;
+    NU_HANDLE_SET_ID(*handle, found_id);
 
     return NU_SUCCESS;
 }
 nu_result_t nusr_scene_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
 
     if (!_data.staticmeshes[id].active) return NU_FAILURE;
 
@@ -109,7 +118,7 @@ nu_result_t nusr_scene_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle
 }
 nu_result_t nusr_scene_staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t m)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
 
     if (!_data.staticmeshes[id].active) return NU_FAILURE;
 

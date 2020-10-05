@@ -31,6 +31,9 @@ NU_API nu_result_t nu_renderer_mesh_destroy(nu_renderer_mesh_handle_t handle);
 NU_API nu_result_t nu_renderer_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info);
 NU_API nu_result_t nu_renderer_texture_destroy(nu_renderer_texture_handle_t handle);
 
+NU_API nu_result_t nu_renderer_material_create(nu_renderer_material_handle_t *handle, const nu_renderer_material_create_info_t *info);
+NU_API nu_result_t nu_renderer_material_destroy(nu_renderer_material_handle_t handle);
+
 NU_API nu_result_t nu_renderer_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info);
 NU_API nu_result_t nu_renderer_font_destroy(nu_renderer_font_handle_t handle);
 NU_API nu_result_t nu_renderer_font_get_text_size(nu_renderer_font_handle_t handle, const char *text, uint32_t *width, uint32_t *height);

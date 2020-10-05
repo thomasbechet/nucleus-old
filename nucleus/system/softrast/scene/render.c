@@ -129,6 +129,7 @@ nu_result_t nusr_scene_render_global(
     /* iterate over staticmeshes */
     for (uint32_t i = 0; i < staticmesh_count; i++) {
         if (!staticmeshes[i].active) continue;
+        if (!staticmeshes[i].has_texture) continue; /* TBC */
 
         /* compute mvp matrix */
         nu_mat4_t mvp;

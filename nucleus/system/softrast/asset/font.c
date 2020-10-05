@@ -149,17 +149,17 @@ nu_result_t nusr_font_create(nu_renderer_font_handle_t *handle, const nu_rendere
 {
     uint32_t id;
     nu_result_t result = create_font(&id, info);
-    if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
+    if (result == NU_SUCCESS) NU_HANDLE_SET_ID(*handle, id);
     return result;
 }
 nu_result_t nusr_font_destroy(nu_renderer_font_handle_t handle)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
     return destroy_font(id);
 }
 nu_result_t nusr_font_get_text_size(nu_renderer_font_handle_t handle, const char *text, uint32_t *width, uint32_t *height)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
     nusr_font_t *font = _data.fonts[id];
 
     uint32_t len = strlen(text);
@@ -183,7 +183,7 @@ nu_result_t nusr_font_get_text_size(nu_renderer_font_handle_t handle, const char
 
 nu_result_t nusr_font_get(uint32_t id, nusr_font_t **p)
 {
-    if (_data.next_id >= MAX_FONT_COUNT) return NU_FAILURE;
+    if (id >= MAX_FONT_COUNT) return NU_FAILURE;
     if (!_data.fonts[id]) return NU_FAILURE;
 
     *p = _data.fonts[id];

@@ -83,8 +83,28 @@ static nu_result_t on_start(void)
     }
     stbi_image_free(ima_data);
 
+    /* create materials */
+    nu_renderer_material_create_info_t material_info;
+    material_info.diffuse_texture      = rdr2_texture_id;
+    material_info.use_diffuse_uniform  = false;
+    material_info.normal_texture       = NU_NULL_HANDLE;
+    material_info.use_normal_uniform   = false;
+    material_info.specular_texture     = NU_NULL_HANDLE;
+    material_info.use_specular_uniform = false;
+
+    nu_renderer_material_handle_t material0 = {0};
+    if (nu_renderer_material_create(&material0, &material_info) != NU_SUCCESS) {
+        nu_interrupt("Failed to create material0.\n");
+    }
+
+    nu_renderer_material_handle_t material1 = {0};
+    material_info.diffuse_texture = brick_texture_id;
+    if (nu_renderer_material_create(&material1, &material_info) != NU_SUCCESS) {
+        nu_interrupt("Failed to create material1.\n");
+    }
+
     /* load cube mesh */
-    static nu_vec3_t vertices[] =
+    nu_vec3_t positions[] =
     {
         {-1, -1, -1},
         { 1, -1, -1},
@@ -95,84 +115,58 @@ static nu_result_t on_start(void)
         { 1,  1,  1},
         {-1,  1,  1}
     };
-    static uint32_t position_indices[] =
+    uint32_t position_indices[] =
     {
-        0, 3, 1, 1, 3, 2, /* back */
-        1, 2, 5, 5, 2, 6, /* right */
-        5, 6, 4, 4, 6, 7, /* front */
-        4, 7, 0, 0, 7, 3, /* left */
-        3, 7, 2, 2, 7, 6, /* top */
+        0, 3, 1, 1, 3, 2, /* back   */
+        1, 2, 5, 5, 2, 6, /* right  */
+        5, 6, 4, 4, 6, 7, /* front  */
+        4, 7, 0, 0, 7, 3, /* left   */
+        3, 7, 2, 2, 7, 6, /* top    */
         4, 0, 5, 5, 0, 1  /* bottom */
     };
-    static nu_vec2_t uvs[] =
+    nu_vec2_t uvs[] =
     {
         {0, 0},
         {1, 0},
         {1, 1},
         {0, 1}
     };
-    static uint32_t uv_indices[] =
+    uint32_t uv_indices[] =
     {
-        1, 2, 0, 0, 2, 3, /* back */
-        1, 2, 0, 0, 2, 3, /* right */
-        1, 2, 0, 0, 2, 3, /* front */
-        1, 2, 0, 0, 2, 3, /* left */
-        3, 0, 2, 2, 0, 1, /* top */
-        3, 0, 2, 2, 0, 1 /* bottom */
+        1, 2, 0, 0, 2, 3, /* back   */
+        1, 2, 0, 0, 2, 3, /* right  */
+        1, 2, 0, 0, 2, 3, /* front  */
+        1, 2, 0, 0, 2, 3, /* left   */
+        3, 0, 2, 2, 0, 1, /* top    */
+        3, 0, 2, 2, 0, 1  /* bottom */
     };
-    
-    static uint32_t vcount = 6 * 6;
+    uint32_t indice_count = 6 * 6;
 
-    nu_renderer_mesh_create_info_t mesh_info = {};
-    mesh_info.vertice_count = vcount;
-    mesh_info.use_indices = true;
-    mesh_info.use_colors = false;
-    mesh_info.positions = vertices;
-    mesh_info.uvs = uvs;
+    nu_renderer_mesh_create_info_t mesh_info;
+    memset(&mesh_info, 0, sizeof(nu_renderer_mesh_create_info_t));
+    mesh_info.indice_count     = indice_count;
+    mesh_info.positions        = positions;
+    mesh_info.uvs              = uvs;
     mesh_info.position_indices = position_indices;
-    mesh_info.uv_indices = uv_indices;
+    mesh_info.uv_indices       = uv_indices;
+
     nu_renderer_mesh_handle_t mesh_id;
     if (nu_renderer_mesh_create(&mesh_id, &mesh_info) != NU_SUCCESS) {
         nu_warning("Failed to create cube mesh.\n");
-    }
-
-    /* load triangle mesh */
-    static nu_vec3_t triangle_vertices[] = {
-        {0, 0, 0},
-        {0, 0, 10},
-        {10, 0, 0}
-    };
-    static nu_vec2_t triangle_uvs[] = {
-        {0, 1},
-        {1, 1},
-        {0, 0}
-    };
-
-    nu_renderer_mesh_create_info_t triangle_mesh_info = {};
-    triangle_mesh_info.vertice_count = 3;
-    triangle_mesh_info.use_indices = false;
-    triangle_mesh_info.use_colors = false;
-    triangle_mesh_info.positions = triangle_vertices;
-    triangle_mesh_info.uvs = triangle_uvs;
-    triangle_mesh_info.position_indices = NULL;
-    triangle_mesh_info.uv_indices = NULL;
-    nu_renderer_mesh_handle_t triangle_mesh_id;
-    if (nu_renderer_mesh_create(&triangle_mesh_id, &triangle_mesh_info) != NU_SUCCESS) {
-        nu_warning("Failed to create triangle mesh.\n");
     }
 
     /* create static meshes */
     nu_renderer_staticmesh_handle_t staticmesh_id;
     nu_renderer_staticmesh_create_info_t staticmesh_info = {};
     staticmesh_info.mesh = mesh_id;
-    staticmesh_info.texture = rdr2_texture_id;
+    staticmesh_info.material = material0;
 
     nu_mat4_identity(staticmesh_info.transform);
     nu_translate(staticmesh_info.transform, (nu_vec3_t){0, -4, 0});
     nu_scale(staticmesh_info.transform, (nu_vec3_t){100.0, 0.1, 100.0});
     nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
 
-    staticmesh_info.texture = brick_texture_id;
+    staticmesh_info.material = material1;
 
     for (uint32_t i = 0; i < 5; i++) {
         for (uint32_t j = 0; j < 5; j++) {
@@ -185,19 +179,14 @@ static nu_result_t on_start(void)
         }
     }
 
-    /* create triangle */
-    staticmesh_info.texture = rdr2_texture_id;
-    staticmesh_info.mesh = triangle_mesh_id;
-    nu_mat4_identity(staticmesh_info.transform);
-    nu_translate(staticmesh_info.transform, (nu_vec3_t){0, 10, 0});
-    nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
-
     /* create monkey */
     nu_renderer_mesh_handle_t mesh_handle;
     if (load_monkey(&mesh_handle) == NU_SUCCESS) {
         staticmesh_info.mesh = mesh_handle;
+        staticmesh_info.material = material1;
         nu_mat4_identity(staticmesh_info.transform);
-        nu_translate(staticmesh_info.transform, (nu_vec3_t){0, 50, 0});
+        nu_translate(staticmesh_info.transform, (nu_vec3_t){0, 30, 0});
+        nu_scale(staticmesh_info.transform, (nu_vec3_t){4, 4, 4});
         nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
     } else {
         nu_warning("Failed to load monkey\n");

@@ -1,5 +1,7 @@
 #include "mesh.h"
 
+#include "../common/logger.h"
+
 #define MAX_MESH_COUNT 32
 
 typedef struct {
@@ -16,45 +18,30 @@ static nu_result_t create_mesh(uint32_t *id, const nu_renderer_mesh_create_info_
 
     /* create mesh */
     _data.meshes[_data.next_id] = (nusr_mesh_t*)nu_malloc(sizeof(nusr_mesh_t));
-    _data.meshes[_data.next_id]->vertex_count = info->vertice_count;
+    uint32_t vertex_count = (info->indice_count > 0) ? info->indice_count : info->vertex_count;
+    _data.meshes[_data.next_id]->vertex_count = vertex_count;
 
     /* allocate memory */
-    _data.meshes[_data.next_id]->positions = (nu_vec3_t*)nu_malloc(sizeof(nu_vec3_t) * info->vertice_count);
-    _data.meshes[_data.next_id]->uvs = (nu_vec2_t*)nu_malloc(sizeof(nu_vec2_t) * info->vertice_count);
-    if (info->use_colors) {
-        _data.meshes[_data.next_id]->colors = (nu_vec3_t*)nu_malloc(sizeof(nu_vec3_t) * info->vertice_count);
-    } else {
-        _data.meshes[_data.next_id]->colors = NULL;
-    }
-    
+    _data.meshes[_data.next_id]->positions = (nu_vec3_t*)nu_malloc(sizeof(nu_vec3_t) * vertex_count);
+    _data.meshes[_data.next_id]->uvs = (nu_vec2_t*)nu_malloc(sizeof(nu_vec2_t) * vertex_count);
+
     /* copy data */
-    if (info->use_indices) {
-        for (uint32_t i = 0; i < info->vertice_count; i++) {
+    if (info->indice_count > 0) {
+        for (uint32_t i = 0; i < info->indice_count; i++) {
             uint32_t position_indice = info->position_indices[i];
             uint32_t uv_indice = info->uv_indices[i];
             nu_vec3_copy(info->positions[position_indice], _data.meshes[_data.next_id]->positions[i]);
             nu_vec2_copy(info->uvs[uv_indice], _data.meshes[_data.next_id]->uvs[i]);
-            
-            if (info->use_colors) {
-                uint32_t color_indice = info->color_indices[i];
-                nu_vec3_copy(info->colors[color_indice], _data.meshes[_data.next_id]->colors[i]);
-            }
         }
     } else {
-        memcpy(_data.meshes[_data.next_id]->positions, info->positions, sizeof(nu_vec3_t) * info->vertice_count);
-        memcpy(_data.meshes[_data.next_id]->uvs, info->uvs, sizeof(nu_vec2_t) * info->vertice_count);
-        
-        if (info->use_colors) {
-            memcpy(_data.meshes[_data.next_id]->colors, info->colors, sizeof(nu_vec3_t) * info->vertice_count);
-        } else {
-            _data.meshes[_data.next_id]->colors = NULL;
-        }
+        memcpy(_data.meshes[_data.next_id]->positions, info->positions, sizeof(nu_vec3_t) * vertex_count);
+        memcpy(_data.meshes[_data.next_id]->uvs, info->uvs, sizeof(nu_vec2_t) * vertex_count);
     }
 
     /* compute min/max positions */
     float xmin, xmax, ymin, ymax, zmin, zmax;
     xmin = xmax = ymin = ymax = zmin = zmax = 0.0f;
-    for (uint32_t i = 0; i < _data.meshes[_data.next_id]->vertex_count; i++) {
+    for (uint32_t i = 0; i < vertex_count; i++) {
         float x, y, z;
         x = _data.meshes[_data.next_id]->positions[i][0];
         y = _data.meshes[_data.next_id]->positions[i][1];
@@ -85,9 +72,6 @@ static nu_result_t destroy_mesh(uint32_t id)
 
     nu_free(_data.meshes[id]->positions);
     nu_free(_data.meshes[id]->uvs);
-    if (_data.meshes[id]->colors) {
-        nu_free(_data.meshes[id]->colors);
-    }
 
     nu_free(_data.meshes[id]);
     _data.meshes[id] = NULL;
@@ -120,17 +104,17 @@ nu_result_t nusr_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_rendere
 {
     uint32_t id;
     nu_result_t result = create_mesh(&id, info);
-    if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
+    if (result == NU_SUCCESS) NU_HANDLE_SET_ID(*handle, id);
     return result;
 }
 nu_result_t nusr_mesh_destroy(nu_renderer_mesh_handle_t handle)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
     return destroy_mesh(id);
 }
 nu_result_t nusr_mesh_get(uint32_t id, nusr_mesh_t **p)
 {
-    if (_data.next_id >= MAX_MESH_COUNT) return NU_FAILURE;
+    if (id >= MAX_MESH_COUNT) return NU_FAILURE;
     if (!_data.meshes[id]) return NU_FAILURE;
 
     *p = _data.meshes[id];

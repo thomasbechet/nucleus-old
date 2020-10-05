@@ -7,6 +7,7 @@
 #include "gui/gui.h"
 #include "asset/mesh.h"
 #include "asset/texture.h"
+#include "asset/material.h"
 #include "asset/font.h"
 
 #include "../glfw/module/interface.h"
@@ -52,6 +53,7 @@ nu_result_t nusr_initialize(void)
     nu_info(NUSR_LOGGER_NAME"Initializing assets...\n");
     if (nusr_mesh_initialize() != NU_SUCCESS) return NU_FAILURE;
     if (nusr_texture_initialize() != NU_SUCCESS) return NU_FAILURE;
+    if (nusr_material_initialize() != NU_SUCCESS) return NU_FAILURE;
     if (nusr_font_initialize() != NU_SUCCESS) return NU_FAILURE;
 
     /* initialize viewport */
@@ -85,6 +87,7 @@ nu_result_t nusr_terminate(void)
     /* terminate assets */
     nu_info(NUSR_LOGGER_NAME"Terminating assets...\n");
     nusr_font_terminate();
+    nusr_material_terminate();
     nusr_texture_terminate();
     nusr_mesh_terminate();
 

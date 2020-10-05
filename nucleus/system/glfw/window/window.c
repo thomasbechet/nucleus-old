@@ -1,9 +1,13 @@
 #include "window.h"
 
-#include "../common/logger.h"
 #include "surface.h"
+#include "../common/logger.h"
 #include "../input/input.h"
 #include "../../vulkan/module/interface.h"
+
+#include <GL/glew.h>
+#define GLFW_INCLUDE_VULKAN
+#include <GLFW/glfw3.h>
 
 typedef struct {
     GLFWwindow *window;
@@ -21,12 +25,18 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* pre context initialization */
-    if (nu_config_get().renderer.api == NU_RENDERER_API_SOFTRAST) {
+    nu_renderer_api_t api = nu_config_get().renderer.api;
+    if (api == NU_RENDERER_API_SOFTRAST) {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 0);
-    } else if (nu_config_get().renderer.api == NU_RENDERER_API_VULKAN) {
+    } else if (api == NU_RENDERER_API_OPENGL) {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, 0);
+    } else if (api == NU_RENDERER_API_VULKAN) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         if (!glfwVulkanSupported()) { /* TODO */
             nu_warning(NUGLFW_LOGGER_NAME"Vulkan not supported...\n");
@@ -48,18 +58,17 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* post context initialization */
-    if (nu_config_get().renderer.api == NU_RENDERER_API_SOFTRAST) {
+    if (api == NU_RENDERER_API_SOFTRAST) {
         glfwMakeContextCurrent(_data.window);
-        if (nu_config_get().window.vsync) {
-            glfwSwapInterval(1);
-        } else {
-            glfwSwapInterval(0);
-        }
-        if (glewInit()) {
-            nu_warning(NUGLFW_LOGGER_NAME"Failed to initialize glew.\n");
-            return NU_FAILURE;
-        }
         nuglfw_surface_create();
+    } else if (api == NU_RENDERER_API_OPENGL) {
+        glfwMakeContextCurrent(_data.window);
+    }
+
+    if (nu_config_get().window.vsync) {
+        glfwSwapInterval(1);
+    } else {
+        glfwSwapInterval(0);
     }
 
     return NU_SUCCESS;
@@ -132,16 +141,20 @@ const char **nuglfw_get_required_instance_extensions(uint32_t *count)
 }
 nu_result_t nuglfw_create_window_surface(nu_ptr_t instance_ptr, nu_ptr_t surface_ptr)
 {
-    // VkInstance *instance = (VkInstance*)instance_ptr;
-    // VkSurfaceKHR *surface = (VkSurfaceKHR*)surface_ptr;
+#ifdef GLFW_INCLUDE_VULKAN
+    VkInstance *instance = (VkInstance*)instance_ptr;
+    VkSurfaceKHR *surface = (VkSurfaceKHR*)surface_ptr;
 
-    // VkResult result = glfwCreateWindowSurface(*instance, _window, NULL, surface);
-    // if (result != VK_SUCCESS) {
-    //     nu_warning(NUGLFW_LOGGER_GLFW"Failed to create surface.\n");
-    //     return NU_FAILURE; 
-    // }
+    VkResult result = glfwCreateWindowSurface(*instance, _data.window, NULL, surface);
+    if (result != VK_SUCCESS) {
+        nu_warning(NUGLFW_LOGGER_NAME"Failed to create surface.\n");
+        return NU_FAILURE; 
+    }
 
     return NU_SUCCESS;
+#else
+    return NU_FAILURE;
+#endif
 }
 nu_result_t nuglfw_present_surface(
     uint32_t width,
@@ -163,7 +176,7 @@ nu_result_t nuglfw_swap_buffers(void)
     return NU_SUCCESS;
 }
 
-GLFWwindow *nuglfw_get_window(void)
+nu_ptr_t nuglfw_get_window(void)
 {
-    return _data.window;
+    return (nu_ptr_t)_data.window;
 }

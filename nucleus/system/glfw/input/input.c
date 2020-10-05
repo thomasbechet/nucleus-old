@@ -3,6 +3,8 @@
 #include "../common/logger.h"
 #include "../window/window.h"
 
+#include <GLFW/glfw3.h>
+
 static int glfw_keyboard_buttons[] = 
 {
     GLFW_KEY_A,
@@ -85,6 +87,8 @@ static int glfw_mouse_buttons[] =
 #define MAX_TEXT_SIZE 256
 
 typedef struct {
+    GLFWwindow *window;
+
     nu_cursor_mode_t cursor_mode;
 
     nu_vec2_t mouse_motion;
@@ -135,6 +139,9 @@ static void nuglfw_character_callback(GLFWwindow *window, uint32_t codepoint)
 
 nu_result_t nuglfw_input_initialize(void)
 {
+    /* recover GLFWwindow */
+    _data.window = (GLFWwindow*)nuglfw_get_window();
+
     /* initialize was pressed states */
     for (uint32_t i = 0; i < GLFW_KEY_LAST; i++) {
         _data.keyboard_button_states[i] = 0x0;
@@ -147,17 +154,17 @@ nu_result_t nuglfw_input_initialize(void)
     nuglfw_input_set_cursor_mode(nu_config_get().input.cursor_mode);
 
     if(glfwRawMouseMotionSupported()) {
-        glfwSetInputMode(nuglfw_get_window(), GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        glfwSetInputMode(_data.window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
     /* setup callbacks */
-    glfwSetKeyCallback(nuglfw_get_window(), nuglfw_keyboard_callback);
-    glfwSetCursorPosCallback(nuglfw_get_window(), nuglfw_cursor_position_callback);
-    glfwSetCharCallback(nuglfw_get_window(), nuglfw_character_callback);
+    glfwSetKeyCallback(_data.window, nuglfw_keyboard_callback);
+    glfwSetCursorPosCallback(_data.window, nuglfw_cursor_position_callback);
+    glfwSetCharCallback(_data.window, nuglfw_character_callback);
 
     /* get initial mouse position */
     double xpos, ypos;
-    glfwGetCursorPos(nuglfw_get_window(), &xpos, &ypos);
+    glfwGetCursorPos(_data.window, &xpos, &ypos);
     _data.mouse_position[0] = (float)xpos;
     _data.mouse_position[1] = (float)ypos;
     nu_vec2_copy(_data.mouse_position, _data.mouse_old_position);
@@ -190,7 +197,7 @@ nu_result_t nuglfw_input_get_keyboard_text(const char **text, uint32_t *length)
 }
 nu_result_t nuglfw_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t button)
 {
-    *state = (glfwGetMouseButton(nuglfw_get_window(), glfw_mouse_buttons[(uint32_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
+    *state = (glfwGetMouseButton(_data.window, glfw_mouse_buttons[(uint32_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_input_get_mouse_motion(nu_vec2_t motion)
@@ -207,11 +214,11 @@ nu_result_t nuglfw_input_set_cursor_mode(nu_cursor_mode_t mode)
 {
     _data.cursor_mode = mode;
     if (mode == NU_CURSOR_MODE_NORMAL) {
-        glfwSetInputMode(nuglfw_get_window(), GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(_data.window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     } else if (mode == NU_CURSOR_MODE_HIDDEN) {
-        glfwSetInputMode(nuglfw_get_window(), GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+        glfwSetInputMode(_data.window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
     } else if (mode == NU_CURSOR_MODE_DISABLE) {
-        glfwSetInputMode(nuglfw_get_window(), GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(_data.window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     return NU_SUCCESS;

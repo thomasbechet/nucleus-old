@@ -79,16 +79,16 @@ nu_result_t nusr_gui_label_create(nu_renderer_label_handle_t *handle, const nu_r
     _data.labels[found_id].active = true;
     _data.labels[found_id].x = info->x;
     _data.labels[found_id].y = info->y;
-    _data.labels[found_id].font = (uint64_t)info->font;
+    _data.labels[found_id].font = NU_HANDLE_GET_ID(info->font);
     strncpy(_data.labels[found_id].text, info->text, NUSR_MAX_LABEL_TEXT_SIZE - 1); 
 
-    *((uint32_t*)handle) = found_id;
+    NU_HANDLE_SET_ID(*handle, found_id);
 
     return NU_SUCCESS;
 }
 nu_result_t nusr_gui_label_destroy(nu_renderer_label_handle_t handle)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
 
     if (!_data.labels[id].active) return NU_FAILURE;
 
@@ -98,7 +98,7 @@ nu_result_t nusr_gui_label_destroy(nu_renderer_label_handle_t handle)
 }
 nu_result_t nusr_gui_label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
 
     if (!_data.labels[id].active) return NU_FAILURE;
 
@@ -109,7 +109,7 @@ nu_result_t nusr_gui_label_set_position(nu_renderer_label_handle_t handle, int32
 }
 nu_result_t nusr_gui_label_set_text(nu_renderer_label_handle_t handle, const char *text)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
 
     if (!_data.labels[id].active) return NU_FAILURE;
 
@@ -138,13 +138,13 @@ nu_result_t nusr_gui_rectangle_create(nu_renderer_rectangle_handle_t *handle, co
     _data.rectangles[found_id].rect = info->rect;
     _data.rectangles[found_id].color = info->color;
 
-    *((uint32_t*)handle) = found_id;
+    NU_HANDLE_SET_ID(*handle, found_id);
 
     return NU_SUCCESS;
 }
 nu_result_t nusr_gui_rectangle_destroy(nu_renderer_rectangle_handle_t handle)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
 
     if (!_data.rectangles[id].active) return NU_FAILURE;
 
@@ -154,7 +154,7 @@ nu_result_t nusr_gui_rectangle_destroy(nu_renderer_rectangle_handle_t handle)
 }
 nu_result_t nusr_gui_rectangle_set_rect(nu_renderer_rectangle_handle_t handle, nu_rect_t rect)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
 
     if (!_data.rectangles[id].active) return NU_FAILURE;
 

@@ -3,6 +3,7 @@
 #include "../../context/config.h"
 #include "../../../system/softrast/module/interface.h"
 #include "../../../system/vulkan/module/interface.h"
+#include "../../../system/opengl/module/interface.h"
 
 #define NU_LOGGER_RENDERER_NAME "[RENDERER] "
 
@@ -10,7 +11,7 @@ static const char *nu_renderer_api_names[] = {
     "engine/system/nucleus-renderer-none",
     "engine/system/"NUSR_MODULE_NAME,
     "engine/system/"NUVK_MODULE_NAME,
-    "engine/system/nucleus-opengl"
+    "engine/system/"NUGL_MODULE_NAME
 };
 
 typedef struct {
@@ -114,6 +115,15 @@ nu_result_t nu_renderer_texture_create(nu_renderer_texture_handle_t *handle, con
 nu_result_t nu_renderer_texture_destroy(nu_renderer_texture_handle_t handle)
 {
     return _system.interface.texture_destroy(handle);
+}
+
+nu_result_t nu_renderer_material_create(nu_renderer_material_handle_t *handle, const nu_renderer_material_create_info_t *info)
+{
+    return _system.interface.material_create(handle, info);
+}
+nu_result_t nu_renderer_material_destroy(nu_renderer_material_handle_t handle)
+{
+    return _system.interface.material_destroy(handle);
 }
 
 nu_result_t nu_renderer_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
