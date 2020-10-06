@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
 
 PROJECT(nucleus-package VERSION 0.0.1)
 
-OPTION(NU_BUILD_VULKAN "Build nucleus-vulkan" OFF)
+OPTION(NU_BUILD_VULKAN "Build nucleus-vulkan" ON)
 OPTION(NU_DEBUG "Debug" ON)
 OPTION(NU_DEBUG_MEMORY "Debug memory" ON)
 
