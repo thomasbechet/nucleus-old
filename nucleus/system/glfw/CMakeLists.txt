@@ -9,12 +9,16 @@ SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 
 ADD_DEFINITIONS(-DGLEW_STATIC)
 
-FIND_PACKAGE(Vulkan REQUIRED FATAL_ERROR)
+IF (NU_BUILD_VULKAN)
+    FIND_PACKAGE(Vulkan REQUIRED FATAL_ERROR)
+ENDIF()
 
 INCLUDE_DIRECTORIES(
     ../../../extlibs/glfw/include/
     ../../../extlibs/glew/include/
-    ${Vulkan_INCLUDE_DIRS}
+    IF (NU_BUILD_VULKAN)
+        ${Vulkan_INCLUDE_DIRS}
+    ENDIF()
 )
 
 FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)

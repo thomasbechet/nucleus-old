@@ -6,7 +6,9 @@
 #include "../../vulkan/module/interface.h"
 
 #include <GL/glew.h>
-#define GLFW_INCLUDE_VULKAN
+#ifdef NU_BUILD_VULKAN
+    #define GLFW_INCLUDE_VULKAN
+#endif
 #include <GLFW/glfw3.h>
 
 typedef struct {

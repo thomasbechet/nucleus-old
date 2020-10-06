@@ -57,7 +57,7 @@ bool Engine::CheckValidationLayerSupport()
     for (const char *layerName : Engine::GetRequiredValidationLayers()) {
         bool layerFound = false;
         for (const auto &layerProperties : availableLayers) {
-            if (std::string(layerName) == std::string(layerProperties.layerName)) {
+            if (std::string(layerName) == std::string((const char*)layerProperties.layerName)) {
                 layerFound = true;
                 break;
             }
