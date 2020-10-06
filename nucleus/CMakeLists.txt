@@ -6,8 +6,7 @@ OPTION(NU_BUILD_VULKAN "Build nucleus-vulkan" ON)
 OPTION(NU_DEBUG "Debug" ON)
 OPTION(NU_DEBUG_MEMORY "Debug memory" ON)
 
-
-#Compile definitions
+# Add compile definitions
 IF (NU_DEBUG)
     ADD_COMPILE_DEFINITIONS(NU_DEBUG)
 ENDIF()
@@ -18,7 +17,7 @@ IF (NU_BUILD_VULKAN)
     ADD_COMPILE_DEFINITIONS(NU_BUILD_VULKAN)
 ENDIF()
 
-#Add subdirectories
+# Add subdirectories
 ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(system/task)
 ADD_SUBDIRECTORY(system/glfw)

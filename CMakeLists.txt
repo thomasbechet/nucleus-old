@@ -4,5 +4,6 @@ PROJECT(nucleus VERSION 0.0.1)
 
 SET(CMAKE_BUILD_TYPE Debug)
 
+# Add subdirectories
 ADD_SUBDIRECTORY(nucleus)
 ADD_SUBDIRECTORY(tests)
