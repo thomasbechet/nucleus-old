@@ -3,7 +3,6 @@
 #include "../common/logger.h"
 
 #include <GL/glew.h>
-#include <GLFW/glfw3.h>
 
 typedef struct {
     uint32_t width;
@@ -141,6 +140,11 @@ static void destroy_texture(void)
 
 nu_result_t nuglfw_surface_create(void)
 {
+    if (glewInit()) {
+        nu_warning(NUGLFW_LOGGER_NAME"Failed to initialize glew.\n");
+        return NU_FAILURE;
+    }
+
     _data.width = 0;
     _data.height = 0;
 

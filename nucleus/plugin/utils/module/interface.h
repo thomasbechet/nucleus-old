@@ -7,5 +7,6 @@
 
 #include "../console/interface.h"
 #include "../command/interface.h"
+#include "../loader/interface.h"
 
 #endif

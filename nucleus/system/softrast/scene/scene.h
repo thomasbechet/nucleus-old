@@ -16,6 +16,7 @@ typedef struct {
 typedef struct {
     uint32_t mesh;
     uint32_t texture;
+    bool has_texture;
     nu_mat4_t transform;
     bool active;
 } nusr_staticmesh_t;

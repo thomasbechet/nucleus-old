@@ -143,19 +143,20 @@ nu_result_t nu_module_load(nu_module_handle_t *handle, const char *path)
     }
 
     /* save id */
-    *((uint64_t*)handle) = _data.module_count++;
+    NU_HANDLE_SET_ID(*handle, _data.module_count++);
 
     return NU_SUCCESS;
 }
 nu_result_t nu_module_load_function(nu_module_handle_t handle, const char *function_name, nu_pfn_t *function)
 {
-    return load_function(&_data.modules[(uint64_t)handle], function_name, function);
+    uint32_t id = NU_HANDLE_GET_ID(handle);
+    return load_function(&_data.modules[id], function_name, function);
 }
 nu_result_t nu_module_get_by_name(nu_module_handle_t *handle, const char *name)
 {
     for (uint32_t i = 0; i < _data.module_count; i++) {
         if (NU_MATCH(_data.modules[i].info.name, name)) {
-            *((uint64_t*)handle) = i;
+            NU_HANDLE_SET_ID(*handle, i);
             return NU_SUCCESS;
         }
     }
@@ -166,7 +167,7 @@ nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, nu_id_t id)
 {
     for (uint32_t i = 0; i < _data.module_count; i++) {
         if (_data.modules[i].info.id == id) {
-            *((uint64_t*)handle) = i;
+            NU_HANDLE_SET_ID(*handle, i);
             return NU_SUCCESS;
         }
     }
@@ -175,7 +176,8 @@ nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, nu_id_t id)
 }
 nu_id_t nu_module_get_id(nu_module_handle_t handle)
 {
-    return _data.modules[(uint64_t)handle].info.id;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
+    return _data.modules[id].info.id;
 }
 nu_result_t nu_module_log(void)
 {

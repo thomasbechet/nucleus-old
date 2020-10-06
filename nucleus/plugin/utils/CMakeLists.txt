@@ -9,6 +9,11 @@ SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
 
 FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
+INCLUDE_DIRECTORIES(
+    ../../../extlibs/stb/include/
+    ../../../extlibs/tinyobjloader/include/
+)
+
 ADD_LIBRARY(
     ${PROJECT_NAME} SHARED
     ${sources}

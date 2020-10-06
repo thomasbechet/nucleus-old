@@ -3,8 +3,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
 PROJECT(nucleus_test LANGUAGES C VERSION 0.0.1)
 
 INCLUDE_DIRECTORIES(
-    "../"
-    ../extlibs/cglm/include/
+    ../
+    ../extlibs/stb/include/
+    ../extlibs/tinyobjloader/include/
 )
 
 ADD_EXECUTABLE(

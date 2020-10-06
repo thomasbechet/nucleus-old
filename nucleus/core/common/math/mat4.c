@@ -34,3 +34,7 @@ void nu_scale(nu_mat4_t m, const nu_vec3_t scale)
 {
     glm_scale(m, (float*)scale);
 }
+void nu_mat4_pick_mat3(const nu_mat4_t m, nu_mat3_t dest)
+{
+    glm_mat4_pick3t((vec4*)m, dest);
+}

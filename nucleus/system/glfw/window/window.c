@@ -1,11 +1,23 @@
 #include "window.h"
 
-#include "../common/logger.h"
 #include "surface.h"
+#include "../common/logger.h"
 #include "../input/input.h"
 #include "../../vulkan/module/interface.h"
 
-static GLFWwindow *_window;
+#include <GL/glew.h>
+#ifdef NU_BUILD_VULKAN
+    #define GLFW_INCLUDE_VULKAN
+#endif
+#include <GLFW/glfw3.h>
+
+typedef struct {
+    GLFWwindow *window;
+    uint32_t width;
+    uint32_t height;
+} nuglfw_window_data_t;
+
+static nuglfw_window_data_t _data;
 
 nu_result_t nuglfw_window_initialize(void)
 {
@@ -15,12 +27,18 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* pre context initialization */
-    if (nu_config_get().renderer.api == NU_RENDERER_API_SOFTRAST) {
+    nu_renderer_api_t api = nu_config_get().renderer.api;
+    if (api == NU_RENDERER_API_SOFTRAST) {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_SAMPLES, 0);
-    } else if (nu_config_get().renderer.api == NU_RENDERER_API_VULKAN) {
+    } else if (api == NU_RENDERER_API_OPENGL) {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_SAMPLES, 0);
+    } else if (api == NU_RENDERER_API_VULKAN) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         if (!glfwVulkanSupported()) { /* TODO */
             nu_warning(NUGLFW_LOGGER_NAME"Vulkan not supported...\n");
@@ -30,37 +48,29 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* create window */
-    nu_window_mode_t window_mode = nu_config_get().window.mode;
-    if (window_mode == NU_WINDOW_MODE_FULLSCREEN) {
-        const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        _window = glfwCreateWindow(mode->width, mode->height, "Window", glfwGetPrimaryMonitor(), NULL);
-    } else if (window_mode == NU_WINDOW_MODE_WINDOWED) {
-        uint32_t width = nu_config_get().window.width;
-        uint32_t height = nu_config_get().window.height;
-        _window = glfwCreateWindow(width, height, "Window", NULL, NULL);
-    } else {
+    _data.width = nu_config_get().window.width;
+    _data.height = nu_config_get().window.height;
+    _data.window = glfwCreateWindow(_data.width, _data.height, "Window", NULL, NULL);
+    nuglfw_window_set_mode(nu_config_get().window.mode);
 
-    }
-
-    if (!_window) {
+    if (!_data.window) {
         nu_warning(NUGLFW_LOGGER_NAME"Failed to create glfw window.\n");
         glfwTerminate();
         return NU_FAILURE;
     }
 
     /* post context initialization */
-    if (nu_config_get().renderer.api == NU_RENDERER_API_SOFTRAST) {
-        glfwMakeContextCurrent(_window);
-        if (nu_config_get().window.vsync) {
-            glfwSwapInterval(1);
-        } else {
-            glfwSwapInterval(0);
-        }
-        if (glewInit()) {
-            nu_warning(NUGLFW_LOGGER_NAME"Failed to initialize glew.\n");
-            return NU_FAILURE;
-        }
+    if (api == NU_RENDERER_API_SOFTRAST) {
+        glfwMakeContextCurrent(_data.window);
         nuglfw_surface_create();
+    } else if (api == NU_RENDERER_API_OPENGL) {
+        glfwMakeContextCurrent(_data.window);
+    }
+
+    if (nu_config_get().window.vsync) {
+        glfwSwapInterval(1);
+    } else {
+        glfwSwapInterval(0);
     }
 
     return NU_SUCCESS;
@@ -78,7 +88,7 @@ nu_result_t nuglfw_window_terminate(void)
 nu_result_t nuglfw_window_update(void)
 {
     /* check window exit */
-    if (glfwWindowShouldClose(_window)) {
+    if (glfwWindowShouldClose(_data.window)) {
         nu_context_request_stop();
     }
 
@@ -93,17 +103,37 @@ nu_result_t nuglfw_window_update(void)
 
 nu_result_t nuglfw_window_set_size(uint32_t width, uint32_t height)
 {
-    glfwSetWindowSize(_window, width, height);
+    _data.width = width;
+    _data.height = height;
+    glfwSetWindowSize(_data.window, width, height);
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_window_get_size(uint32_t *width, uint32_t *height)
 {
-    glfwGetWindowSize(_window, (int*)width, (int*)height);
+    glfwGetWindowSize(_data.window, (int*)width, (int*)height);
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_window_set_title(const char *title)
 {
-    glfwSetWindowTitle(_window, title);
+    glfwSetWindowTitle(_data.window, title);
+    return NU_SUCCESS;
+}
+nu_result_t nuglfw_window_set_mode(nu_window_mode_t mode)
+{
+    if (mode == NU_WINDOW_MODE_FULLSCREEN) {
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            glfwSetWindowMonitor(_data.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
+    } else if (mode == NU_WINDOW_MODE_WINDOWED) {
+        glfwSetWindowMonitor(_data.window, NULL, 10, 10, _data.width, _data.height, 0);
+    } else if (mode == NU_WINDOW_MODE_BORDERLESS) {
+        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+            glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+            glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+            glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+            glfwSetWindowMonitor(_data.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+
     return NU_SUCCESS;
 }
 
@@ -113,16 +143,20 @@ const char **nuglfw_get_required_instance_extensions(uint32_t *count)
 }
 nu_result_t nuglfw_create_window_surface(nu_ptr_t instance_ptr, nu_ptr_t surface_ptr)
 {
-    // VkInstance *instance = (VkInstance*)instance_ptr;
-    // VkSurfaceKHR *surface = (VkSurfaceKHR*)surface_ptr;
+#ifdef GLFW_INCLUDE_VULKAN
+    VkInstance *instance = (VkInstance*)instance_ptr;
+    VkSurfaceKHR *surface = (VkSurfaceKHR*)surface_ptr;
 
-    // VkResult result = glfwCreateWindowSurface(*instance, _window, NULL, surface);
-    // if (result != VK_SUCCESS) {
-    //     nu_warning(NUGLFW_LOGGER_GLFW"Failed to create surface.\n");
-    //     return NU_FAILURE; 
-    // }
+    VkResult result = glfwCreateWindowSurface(*instance, _data.window, NULL, surface);
+    if (result != VK_SUCCESS) {
+        nu_warning(NUGLFW_LOGGER_NAME"Failed to create surface.\n");
+        return NU_FAILURE; 
+    }
 
     return NU_SUCCESS;
+#else
+    return NU_FAILURE;
+#endif
 }
 nu_result_t nuglfw_present_surface(
     uint32_t width,
@@ -131,15 +165,20 @@ nu_result_t nuglfw_present_surface(
 )
 {
     int32_t w, h;
-    glfwGetWindowSize(_window, &w, &h);
+    glfwGetWindowSize(_data.window, &w, &h);
     glViewport(0, 0, w, h);
     nuglfw_surface_draw(width, height, pixels);
-    glfwSwapBuffers(_window);
+    glfwSwapBuffers(_data.window);
 
     return NU_SUCCESS;
 }
-
-GLFWwindow *nuglfw_get_window(void)
+nu_result_t nuglfw_swap_buffers(void)
 {
-    return _window;
+    glfwSwapBuffers(_data.window);
+    return NU_SUCCESS;
+}
+
+nu_ptr_t nuglfw_get_window(void)
+{
+    return (nu_ptr_t)_data.window;
 }

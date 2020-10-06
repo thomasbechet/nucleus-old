@@ -4,6 +4,7 @@
 #include "../asset/mesh.h"
 #include "../asset/texture.h"
 #include "../asset/font.h"
+#include "../asset/material.h"
 #include "../scene/scene.h"
 #include "../viewport/viewport.h"
 #include "../gui/gui.h"
@@ -34,6 +35,9 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->texture_create  = nusr_texture_create;
     interface->texture_destroy = nusr_texture_destroy;
 
+    interface->material_create  = nusr_material_create;
+    interface->material_destroy = nusr_material_destroy;
+
     interface->font_create        = nusr_font_create;
     interface->font_destroy       = nusr_font_destroy;
     interface->font_get_text_size = nusr_font_get_text_size;
@@ -58,6 +62,7 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->rectangle_destroy  = nusr_gui_rectangle_destroy;
     interface->rectangle_set_rect = nusr_gui_rectangle_set_rect;
 
+    interface->viewport_set_size = nusr_viewport_set_size;
     interface->viewport_get_size = nusr_viewport_get_size;
 
     return NU_SUCCESS;

@@ -79,7 +79,7 @@ static nu_result_t load_ini_file(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nu_config_load(nu_config_callback_t callback)
+nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
 {
     memset(&_data.config, 0, sizeof(nu_config_t));
 
@@ -113,9 +113,9 @@ nu_config_t nu_config_get(void)
 }
 nu_result_t nu_config_log(void)
 {
-    nu_info("===========================\n");
-    nu_info("       CONFIGURATION       \n");
-    nu_info("===========================\n");
+    nu_info("+-------------------------+\n");
+    nu_info("|      CONFIGURATION      |\n");
+    nu_info("+-------------------------+\n");
     /* context */
     nu_info("[%s]\n", NU_CONFIG_CONTEXT_SECTION);
     nu_info("- version_major: %d\n", _data.config.context.version_major);
@@ -144,7 +144,7 @@ nu_result_t nu_config_log(void)
     case NU_RENDERER_API_SOFTRAST: nu_info("- api: software rasterizer\n"); break;
     case NU_RENDERER_API_VULKAN: nu_info("- api: vulkan\n"); break;
     }
-    nu_info("===========================\n");
+    nu_info("+-------------------------+\n");
 
     return NU_SUCCESS;
 }

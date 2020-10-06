@@ -122,13 +122,14 @@ nu_result_t nusr_scene_render_global(
     /* compute VP matrix from camera information */
     nu_mat4_t camera_projection, camera_view, vp;
     nu_lookat(camera->eye, camera->center, (nu_vec3_t){0.0f, 1.0f, 0.0f}, camera_view);
-    const float aspect = (double)width / (double)height;
+    const float aspect = (float)width / (float)height;
     nu_perspective(camera->fov, aspect, camera->near, camera->far, camera_projection);
     nu_mat4_mul(camera_projection, camera_view, vp);
 
     /* iterate over staticmeshes */
     for (uint32_t i = 0; i < staticmesh_count; i++) {
         if (!staticmeshes[i].active) continue;
+        if (!staticmeshes[i].has_texture) continue; /* TBC */
 
         /* compute mvp matrix */
         nu_mat4_t mvp;
@@ -149,13 +150,13 @@ nu_result_t nusr_scene_render_global(
             nu_vec2_t uv[4]; /* one uv can be added for the clipping step */
 
             /* transform vertices */
-            vertex_shader(mesh->positions[vi + 0], mvp, tv[0]);
-            vertex_shader(mesh->positions[vi + 1], mvp, tv[1]);
+            vertex_shader(mesh->positions[vi + 1], mvp, tv[0]);
+            vertex_shader(mesh->positions[vi + 0], mvp, tv[1]);
             vertex_shader(mesh->positions[vi + 2], mvp, tv[2]);
 
             /* copy uv (should be done in vertex shader) */
-            nu_vec2_copy(mesh->uvs[vi + 0], uv[0]);
-            nu_vec2_copy(mesh->uvs[vi + 1], uv[1]);
+            nu_vec2_copy(mesh->uvs[vi + 1], uv[0]);
+            nu_vec2_copy(mesh->uvs[vi + 0], uv[1]);
             nu_vec2_copy(mesh->uvs[vi + 2], uv[2]);
 
             /* clip vertices */
@@ -188,7 +189,7 @@ nu_result_t nusr_scene_render_global(
 
                 /* backface culling */
                 float area = pixel_coverage(v0, v1, v2);
-                if (area < 0) continue;
+                if (area <= 0) continue;
 
                 /* compute triangle viewport */
                 nu_vec4_t tvp;
@@ -236,8 +237,16 @@ nu_result_t nusr_scene_render_global(
                             w1 *= area_inv;
                             w2 = 1.0f - w0 - w1;
 
+                            float a = w0 * inv_vw0;
+                            float b = w1 * inv_vw1;
+                            float c = w2 * inv_vw2;
+                            float inv_sum_abc = 1.0f / (a + b + c);
+                            a *= inv_sum_abc;
+                            b *= inv_sum_abc;
+                            c *= inv_sum_abc;
+
                             /* depth test */
-                            float depth = (w0 * v0[3] + w1 * v1[3] + w2 * v2[3]);
+                            float depth = (a * v0[3] + b * v1[3] + c * v2[3]);
                             if (depth < renderbuffer->depth_buffer.pixels[j * width + i].as_float) {
                                 renderbuffer->depth_buffer.pixels[j * width + i].as_float = depth;
                                 
@@ -247,14 +256,6 @@ nu_result_t nusr_scene_render_global(
                                  * f=-----------------------------------------------------   *
                                  *        a / w_a      +      b / w_b      +     c / w_c     */
                                  
-                                float a = w0 * inv_vw0;
-                                float b = w1 * inv_vw1;
-                                float c = w2 * inv_vw2;
-                                float inv_sum_abc = 1.0f / (a + b + c);
-                                a *= inv_sum_abc;
-                                b *= inv_sum_abc;
-                                c *= inv_sum_abc;
-
                                 float px = (a * uv0[0] + b * uv1[0] + c * uv2[0]) * texture->width;
                                 float py = (a * uv0[1] + b * uv1[1] + c * uv2[1]) * texture->height;
 

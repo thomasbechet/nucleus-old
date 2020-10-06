@@ -22,10 +22,12 @@ namespace nu::utility
         ~console_t();
 
         void update();
+        nu_result_t on_event(nu_event_id_t id, void *data);
 
     private:
         void update_cursor_advance();
         void set_command_line(std::string command);
+        void update_position();
 
         std::unique_ptr<command_line_t> m_command_line;
         std::vector<std::string> m_old_commands;

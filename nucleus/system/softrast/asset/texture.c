@@ -68,17 +68,17 @@ nu_result_t nusr_texture_create(nu_renderer_texture_handle_t *handle, const nu_r
 {
     uint32_t id;
     nu_result_t result = create_texture(&id, info);
-    if (result == NU_SUCCESS) *((uint32_t*)handle) = id;
+    if (result == NU_SUCCESS) NU_HANDLE_SET_ID(*handle, id);
     return result;
 }
 nu_result_t nusr_texture_destroy(nu_renderer_texture_handle_t handle)
 {
-    uint32_t id = (uint64_t)handle;
+    uint32_t id = NU_HANDLE_GET_ID(handle);
     return destroy_texture(id);
 }
 nu_result_t nusr_texture_get(uint32_t id, nusr_texture_t **p)
 {
-    if (_data.next_id >= MAX_TEXTURE_COUNT) return NU_FAILURE;
+    if (id >= MAX_TEXTURE_COUNT) return NU_FAILURE;
     if (!_data.textures[id]) return NU_FAILURE;
 
     *p = _data.textures[id];
