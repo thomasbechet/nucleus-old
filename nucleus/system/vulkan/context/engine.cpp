@@ -4,6 +4,7 @@
 #include "../utility/logger.hpp"
 
 #include <set>
+#include <fstream>
 
 using namespace nuvk;
 
@@ -162,6 +163,26 @@ vk::Extent2D Engine::ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR &capabili
         return actualExtent;
     }
 }
+vk::UniqueShaderModule Engine::CreateShaderModule(const vk::UniqueDevice &device, const std::string &filename)
+{
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+    if (!file.is_open()) {
+        Engine::Interrupt("Failed to open file '" + filename + "'");
+    }
+
+    uint32_t fileSize = file.tellg();
+    std::vector<char> buffer(fileSize);
+
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
+
+    return device->createShaderModuleUnique({
+        vk::ShaderModuleCreateFlagBits(),
+        buffer.size(),
+        reinterpret_cast<const uint32_t*>(buffer.data())
+    });
+}
 
 void Engine::initialize()
 {
@@ -172,10 +193,12 @@ void Engine::initialize()
     Logger::Info("Create logical device..."); createLogicalDevice();
     Logger::Info("Create swapchain..."); createSwapChain();
     Logger::Info("Create image views..."); createImageViews();
+    Logger::Info("Create render pass..."); createRenderPass();
+    Logger::Info("Create graphics pipeline..."); createGraphicsPipeline();
 }
 void Engine::terminate()
 {
-    m_device->destroySwapchainKHR(m_swapChain); /* destruction order */
+    m_swapChain.reset(); /* destruction order */
     m_instance->destroySurfaceKHR(m_surface); /* not using vk::UniqueSurfaceKHR */
 }
 
@@ -337,12 +360,12 @@ void Engine::createSwapChain()
     createInfo.oldSwapchain = vk::SwapchainKHR(nullptr);
 
     try {
-        m_swapChain = m_device->createSwapchainKHR(createInfo);
+        m_swapChain = m_device->createSwapchainKHRUnique(createInfo);
     } catch (vk::SystemError &err) {
         Engine::Interrupt("Failed to create swapchain.");
     }
 
-    m_swapChainImages = m_device->getSwapchainImagesKHR(m_swapChain);
+    m_swapChainImages = m_device->getSwapchainImagesKHR(*m_swapChain);
     m_swapChainImageFormat = surfaceFormat.format;
     m_swapChainExtent = extent;
 }
@@ -370,5 +393,141 @@ void Engine::createImageViews()
         } catch (vk::SystemError &err) {
             Engine::Interrupt("Failed to create image views.");
         }
+    }
+}
+void Engine::createRenderPass()
+{
+    vk::AttachmentDescription colorAttachment = {};
+    colorAttachment.format = m_swapChainImageFormat;
+    colorAttachment.samples = vk::SampleCountFlagBits::e1;
+    colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
+    colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
+    colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
+    colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
+    colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+
+    vk::AttachmentReference colorAttachmentRef = {};
+    colorAttachmentRef.attachment = 0;
+    colorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
+
+    vk::SubpassDescription subpass = {};
+    subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+    subpass.colorAttachmentCount = 1;
+    subpass.pColorAttachments = &colorAttachmentRef;
+
+    vk::RenderPassCreateInfo renderPassInfo = {};
+    renderPassInfo.attachmentCount = 1;
+    renderPassInfo.pAttachments = &colorAttachment;
+    renderPassInfo.subpassCount = 1;
+    renderPassInfo.pSubpasses = &subpass;
+
+    try {
+        m_renderPass = m_device->createRenderPassUnique(renderPassInfo);
+    } catch (vk::SystemError &err) {
+        Engine::Interrupt("Failed to create render pass.");
+    }
+}
+void Engine::createGraphicsPipeline()
+{
+    auto vertShaderModule = Engine::CreateShaderModule(m_device, "engine/shader/spirv/shader.vert.spv");
+    auto fragShaderModule = Engine::CreateShaderModule(m_device, "engine/shader/spirv/shader.frag.spv");
+
+    vk::PipelineShaderStageCreateInfo shaderStages[] = {
+        {
+            vk::PipelineShaderStageCreateFlags(),
+            vk::ShaderStageFlagBits::eVertex,
+            *vertShaderModule,
+            "main"
+        },
+        {
+            vk::PipelineShaderStageCreateFlagBits(),
+            vk::ShaderStageFlagBits::eFragment,
+            *fragShaderModule,
+            "main"
+        }
+    };
+
+    vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
+    vertexInputInfo.vertexBindingDescriptionCount = 0;
+    vertexInputInfo.vertexAttributeDescriptionCount = 0;
+
+    vk::PipelineInputAssemblyStateCreateInfo inputAssembly = {};
+    inputAssembly.topology = vk::PrimitiveTopology::eTriangleList;
+    inputAssembly.primitiveRestartEnable = VK_FALSE;
+
+    vk::Viewport viewport = {};
+    viewport.x = 0.0f;
+    viewport.y = 0.0f;
+    viewport.width = (float)m_swapChainExtent.width;
+    viewport.height = (float)m_swapChainExtent.height;
+    viewport.minDepth = 0.0f;
+    viewport.maxDepth = 1.0f;
+
+    vk::Rect2D scissor = {};
+    scissor.offset.x = 0.0f;
+    scissor.offset.y = 0.0f;
+    scissor.extent = m_swapChainExtent;
+
+    vk::PipelineViewportStateCreateInfo viewportState = {};
+    viewportState.viewportCount = 1;
+    viewportState.pViewports = &viewport;
+    viewportState.scissorCount = 1;
+    viewportState.pScissors = &scissor;
+
+    vk::PipelineRasterizationStateCreateInfo rasterizer = {};
+    rasterizer.depthClampEnable = VK_FALSE;
+    rasterizer.rasterizerDiscardEnable = VK_FALSE;
+    rasterizer.polygonMode = vk::PolygonMode::eFill;
+    rasterizer.lineWidth = 1.0f;
+    rasterizer.cullMode = vk::CullModeFlagBits::eBack;
+    rasterizer.frontFace = vk::FrontFace::eClockwise;
+    rasterizer.depthBiasEnable = VK_FALSE;
+
+    vk::PipelineMultisampleStateCreateInfo multisampling = {};
+    multisampling.sampleShadingEnable = VK_FALSE;
+    multisampling.rasterizationSamples = vk::SampleCountFlagBits::e1;
+
+    vk::PipelineColorBlendAttachmentState colorBlendAttachment = {};
+    colorBlendAttachment.colorWriteMask = vk::ColorComponentFlagBits::eR | vk::ColorComponentFlagBits::eG | vk::ColorComponentFlagBits::eB | vk::ColorComponentFlagBits::eA;
+    colorBlendAttachment.blendEnable = VK_FALSE;
+
+    vk::PipelineColorBlendStateCreateInfo colorBlending = {};
+    colorBlending.logicOpEnable = VK_FALSE;
+    colorBlending.logicOp = vk::LogicOp::eCopy;
+    colorBlending.attachmentCount = 1;
+    colorBlending.pAttachments = &colorBlendAttachment;
+    colorBlending.blendConstants[0] = 0.0f;
+    colorBlending.blendConstants[1] = 0.0f;
+    colorBlending.blendConstants[2] = 0.0f;
+    colorBlending.blendConstants[3] = 0.0f;
+
+    vk::PipelineLayoutCreateInfo pipelineLayoutInfo = {};
+    pipelineLayoutInfo.setLayoutCount = 0;
+    pipelineLayoutInfo.pushConstantRangeCount = 0;
+
+    try {
+        m_pipelineLayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo);
+    } catch (vk::SystemError &err) {
+        Engine::Interrupt("Failed to create pipeline layout.");
+    }
+
+    vk::GraphicsPipelineCreateInfo pipelineInfo = {};
+    pipelineInfo.stageCount = 2;
+    pipelineInfo.pStages = shaderStages;
+    pipelineInfo.pVertexInputState = &vertexInputInfo;
+    pipelineInfo.pInputAssemblyState = &inputAssembly;
+    pipelineInfo.pViewportState = &viewportState;
+    pipelineInfo.pRasterizationState = &rasterizer;
+    pipelineInfo.pMultisampleState = &multisampling;
+    pipelineInfo.pColorBlendState = &colorBlending;
+    pipelineInfo.layout = *m_pipelineLayout;
+    pipelineInfo.renderPass = *m_renderPass;
+    pipelineInfo.subpass = 0;
+    pipelineInfo.basePipelineHandle = nullptr;
+
+    try {
+        m_graphicsPipeline = m_device->createGraphicsPipelineUnique(nullptr, pipelineInfo);
+    } catch (vk::SystemError &err) {
+        Engine::Interrupt("Failed to create graphics pipeline.");
     }
 }

@@ -1,3 +1,3 @@
 import subprocess
 
-subprocess.Popen('nucleus_test', cwd='../build/bin/').wait()
+subprocess.call(['../build/bin/nucleus_test'], cwd='../build/bin/')

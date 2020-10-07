@@ -47,6 +47,7 @@ namespace nuvk
         static vk::SurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR> &availableFormats);
         static vk::PresentModeKHR ChooseSwapPresentMode(const std::vector<vk::PresentModeKHR> &availablePresentModes);
         static vk::Extent2D ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR &capabilities);
+        static vk::UniqueShaderModule CreateShaderModule(const vk::UniqueDevice &device, const std::string &filename);
 
         static constexpr bool USE_VALIDATION_LAYERS = true;
         static constexpr uint32_t WIDTH = 900;
@@ -63,6 +64,8 @@ namespace nuvk
         void createLogicalDevice();
         void createSwapChain();
         void createImageViews();
+        void createRenderPass();
+        void createGraphicsPipeline();
 
         GLFWInterface m_glfwInterface;
         vk::UniqueInstance m_instance;
@@ -75,10 +78,14 @@ namespace nuvk
         vk::Queue m_graphicsQueue;
         vk::Queue m_presentQueue;
 
-        vk::SwapchainKHR m_swapChain;
+        vk::UniqueSwapchainKHR m_swapChain;
         std::vector<vk::Image> m_swapChainImages;
         vk::Format m_swapChainImageFormat;
         vk::Extent2D m_swapChainExtent;
         std::vector<vk::UniqueImageView> m_swapChainImageViews;
+    
+        vk::UniqueRenderPass m_renderPass;
+        vk::UniquePipelineLayout m_pipelineLayout;
+        vk::UniquePipeline m_graphicsPipeline;
     };
 }
