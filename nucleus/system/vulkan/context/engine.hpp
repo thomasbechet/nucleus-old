@@ -52,10 +52,12 @@ namespace nuvk
         static constexpr bool USE_VALIDATION_LAYERS = true;
         static constexpr uint32_t WIDTH = 900;
         static constexpr uint32_t HEIGHT = 450;
+        static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
     private:
         void initialize();
         void terminate();
+        void drawFrame();
 
         void createInstance();
         void setupDebugCallback();
@@ -66,6 +68,10 @@ namespace nuvk
         void createImageViews();
         void createRenderPass();
         void createGraphicsPipeline();
+        void createFramebuffers();
+        void createCommandPool();
+        void createCommandBuffers();
+        void createSyncObjects();
 
         GLFWInterface m_glfwInterface;
         vk::UniqueInstance m_instance;
@@ -83,9 +89,20 @@ namespace nuvk
         vk::Format m_swapChainImageFormat;
         vk::Extent2D m_swapChainExtent;
         std::vector<vk::UniqueImageView> m_swapChainImageViews;
+        std::vector<vk::UniqueFramebuffer> m_swapChainFramebuffers;
     
         vk::UniqueRenderPass m_renderPass;
         vk::UniquePipelineLayout m_pipelineLayout;
         vk::UniquePipeline m_graphicsPipeline;
+
+        vk::UniqueCommandPool m_commandPool;
+        std::vector<vk::UniqueCommandBuffer> m_commandBuffers;
+
+        std::vector<vk::UniqueSemaphore> m_imageAvailableSemaphores;
+        std::vector<vk::UniqueSemaphore> m_renderFinishedSemaphores;
+        std::vector<vk::UniqueFence> m_inFlightFences;
+        uint32_t m_currentFrame;
+
+        bool m_framebufferResized = false;
     };
 }

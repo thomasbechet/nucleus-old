@@ -81,11 +81,11 @@ nu_result_t nugl::initialize(void)
     _data.content = std::make_unique<content_t>();
 
     /* default shader */
-    std::ifstream vstream("engine/shader/opengl/shader.vert");
+    std::ifstream vstream("engine/shader/glsl/shader.vert");
     std::string vertex_code((std::istreambuf_iterator<char>(vstream)),
         std::istreambuf_iterator<char>());
 
-    std::ifstream fstream("engine/shader/opengl/shader.frag");
+    std::ifstream fstream("engine/shader/glsl/shader.frag");
     std::string fragment_code((std::istreambuf_iterator<char>(fstream)),
         std::istreambuf_iterator<char>());
 

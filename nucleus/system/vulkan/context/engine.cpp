@@ -19,7 +19,7 @@ Engine::~Engine()
 
 void Engine::render()
 {
-    
+    drawFrame();
 }
 
 void Engine::Interrupt(std::string msg)
@@ -195,11 +195,59 @@ void Engine::initialize()
     Logger::Info("Create image views..."); createImageViews();
     Logger::Info("Create render pass..."); createRenderPass();
     Logger::Info("Create graphics pipeline..."); createGraphicsPipeline();
+    Logger::Info("Create framebuffers..."); createFramebuffers();
+    Logger::Info("Create command pool..."); createCommandPool();
+    Logger::Info("Create command buffers..."); createCommandBuffers();
+    Logger::Info("Create synchronization objects..."); createSyncObjects();
 }
 void Engine::terminate()
 {
+    m_device->waitIdle();
+
     m_swapChain.reset(); /* destruction order */
     m_instance->destroySurfaceKHR(m_surface); /* not using vk::UniqueSurfaceKHR */
+}
+void Engine::drawFrame()
+{
+    m_device->waitForFences(1, &(*m_inFlightFences[m_currentFrame]), VK_TRUE, std::numeric_limits<uint64_t>::max());
+    m_device->resetFences(1, &(*m_inFlightFences[m_currentFrame]));
+
+    uint32_t imageIndex = m_device->acquireNextImageKHR(*m_swapChain, std::numeric_limits<uint64_t>::max(), *m_imageAvailableSemaphores[m_currentFrame], nullptr).value;
+
+    vk::SubmitInfo submitInfo = {};
+
+    vk::Semaphore waitSemaphores[] = {*m_imageAvailableSemaphores[m_currentFrame]};
+    vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
+    submitInfo.waitSemaphoreCount = 1;
+    submitInfo.pWaitSemaphores = waitSemaphores;
+    submitInfo.pWaitDstStageMask = waitStages;
+
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &(*m_commandBuffers[imageIndex]);
+
+    vk::Semaphore signalSemaphores[] = {*m_renderFinishedSemaphores[m_currentFrame]};
+    submitInfo.signalSemaphoreCount = 1;
+    submitInfo.pSignalSemaphores = signalSemaphores;
+
+    try {
+        m_graphicsQueue.submit(submitInfo, *m_inFlightFences[m_currentFrame]);
+    } catch (vk::SystemError &err) {
+        Engine::Interrupt("Failed to submit draw command buffer.");
+    }
+
+    vk::PresentInfoKHR presentInfo = {};
+    presentInfo.waitSemaphoreCount = 1;
+    presentInfo.pWaitSemaphores = signalSemaphores;
+
+    vk::SwapchainKHR swapChains[] = {*m_swapChain};
+    presentInfo.swapchainCount = 1;
+    presentInfo.pSwapchains = swapChains;
+    presentInfo.pImageIndices = &imageIndex;
+    presentInfo.pResults = nullptr;
+
+    m_presentQueue.presentKHR(presentInfo);
+
+    m_currentFrame = (m_currentFrame + 1) % Engine::MAX_FRAMES_IN_FLIGHT;
 }
 
 void Engine::createInstance()
@@ -529,5 +577,106 @@ void Engine::createGraphicsPipeline()
         m_graphicsPipeline = m_device->createGraphicsPipelineUnique(nullptr, pipelineInfo);
     } catch (vk::SystemError &err) {
         Engine::Interrupt("Failed to create graphics pipeline.");
+    }
+}
+void Engine::createFramebuffers()
+{
+    m_swapChainFramebuffers.resize(m_swapChainImageViews.size());
+
+    for (uint32_t i = 0; i < m_swapChainImageViews.size(); i++) {
+        vk::ImageView attachments[] = {
+            *m_swapChainImageViews[i]
+        };
+
+        vk::FramebufferCreateInfo framebufferInfo = {};
+        framebufferInfo.renderPass = *m_renderPass;
+        framebufferInfo.attachmentCount = 1;
+        framebufferInfo.pAttachments = attachments;
+        framebufferInfo.width = m_swapChainExtent.width;
+        framebufferInfo.height = m_swapChainExtent.height;
+        framebufferInfo.layers = 1;
+
+        try {
+            m_swapChainFramebuffers[i] = m_device->createFramebufferUnique(framebufferInfo);
+        } catch (vk::SystemError &err) {
+            Engine::Interrupt("Failed to create framebuffer.");
+        }
+    }
+}
+void Engine::createCommandPool()
+{
+    QueueFamilyIndices queueFamilyIndices = Engine::FindQueueFamilies(m_physicalDevice, m_surface);
+
+    vk::CommandPoolCreateInfo poolInfo = {};
+    poolInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily.value();
+
+    try {
+        m_commandPool = m_device->createCommandPoolUnique(poolInfo);
+    } catch (vk::SystemError &err) {
+        Engine::Interrupt("Failed to create command pool.");
+    }
+}
+void Engine::createCommandBuffers()
+{
+    m_commandBuffers.resize(m_swapChainFramebuffers.size());
+
+    vk::CommandBufferAllocateInfo allocInfo = {};
+    allocInfo.commandPool = *m_commandPool;
+    allocInfo.level = vk::CommandBufferLevel::ePrimary;
+    allocInfo.commandBufferCount = (uint32_t)m_commandBuffers.size();
+
+    try {
+        m_commandBuffers = m_device->allocateCommandBuffersUnique(allocInfo);
+    } catch (vk::SystemError &err) {
+        Engine::Interrupt("Failed to allocate command buffers.");
+    }
+
+    for (uint32_t i = 0; i < m_commandBuffers.size(); i++) {
+        vk::CommandBufferBeginInfo beginInfo = {};
+        beginInfo.flags = vk::CommandBufferUsageFlagBits::eSimultaneousUse;
+
+        try {
+            m_commandBuffers[i]->begin(beginInfo);
+        } catch (vk::SystemError &err) {
+            Engine::Interrupt("Failed to begin recording command buffer.");
+        }
+
+        vk::RenderPassBeginInfo renderPassInfo = {};
+        renderPassInfo.renderPass = *m_renderPass;
+        renderPassInfo.framebuffer = *m_swapChainFramebuffers[i];
+        renderPassInfo.renderArea.offset.x = 0;
+        renderPassInfo.renderArea.offset.y = 0;
+        renderPassInfo.renderArea.extent = m_swapChainExtent;
+
+        vk::ClearValue clearColor = {std::array<float, 4>{0.0f, 0.0f, 0.0f, 1.0f}};
+        renderPassInfo.clearValueCount = 1;
+        renderPassInfo.pClearValues = &clearColor;
+
+        m_commandBuffers[i]->beginRenderPass(renderPassInfo, vk::SubpassContents::eInline);
+        m_commandBuffers[i]->bindPipeline(vk::PipelineBindPoint::eGraphics, *m_graphicsPipeline);
+        m_commandBuffers[i]->draw(3, 1, 0, 0);
+        m_commandBuffers[i]->endRenderPass();
+
+        try {
+            m_commandBuffers[i]->end();
+        } catch (vk::SystemError &err) {
+            Engine::Interrupt("Failed to record command buffer.");
+        }
+    }
+}
+void Engine::createSyncObjects()
+{
+    m_imageAvailableSemaphores.resize(Engine::MAX_FRAMES_IN_FLIGHT);
+    m_renderFinishedSemaphores.resize(Engine::MAX_FRAMES_IN_FLIGHT);
+    m_inFlightFences.resize(Engine::MAX_FRAMES_IN_FLIGHT);
+
+    try {
+        for (uint32_t i = 0; i < Engine::MAX_FRAMES_IN_FLIGHT; i++) {
+            m_imageAvailableSemaphores[i] = m_device->createSemaphoreUnique({});
+            m_renderFinishedSemaphores[i] = m_device->createSemaphoreUnique({});
+            m_inFlightFences[i] = m_device->createFenceUnique({vk::FenceCreateFlagBits::eSignaled});
+        }
+    } catch (vk::SystemError &err) {
+        Engine::Interrupt("Failed to create synchronization objects.");
     }
 }
