@@ -1,6 +1,10 @@
 #include "context.hpp"
 
+#include "swapchain.hpp"
+#include "engine.hpp"
+
 #include <optional>
+#include <set>
 
 using namespace nuvk;
 
@@ -14,42 +18,98 @@ struct QueueFamilyIndices
     }
 };
 
-struct SwapChainSupportDetails
+static bool CheckValidationLayerSupport();
+static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device);
+static bool IsDeviceSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface);
+static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface);
+
+static bool CheckValidationLayerSupport()
 {
-    vk::SurfaceCapabilitiesKHR capabilities;
-    std::vector<vk::SurfaceFormatKHR> formats;
-    std::vector<vk::PresentModeKHR> presentModes;
-};
+    auto availableLayers = vk::enumerateInstanceLayerProperties();
+
+    for (const char *layerName : Context::GetRequiredValidationLayers()) {
+        bool layerFound = false;
+        for (const auto &layerProperties : availableLayers) {
+            if (std::string(layerName) == std::string((const char*)layerProperties.layerName)) {
+                layerFound = true;
+                break;
+            }
+        }
+
+        if (!layerFound) {
+            return false;
+        }
+    }
+
+    return true;
+}
+static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device)
+{
+    std::vector<const char*> deviceExtensions = Context::GetRequiredDeviceExtensions();
+    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+    for (const auto &extension : device.enumerateDeviceExtensionProperties()) {
+        requiredExtensions.erase(extension.extensionName);
+    }
+
+    return requiredExtensions.empty();
+}
+static bool IsDeviceSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface)
+{
+    QueueFamilyIndices indices = FindQueueFamilies(device, surface);
+
+    bool extensionsSupported = CheckDeviceExtensionSupport(device);
+    
+    bool swapChainAdequate = false;
+    if (extensionsSupported) {
+        SwapChainSupportDetails swapChainSupport = Swapchain::QuerySwapChainSupport(device, surface);
+        swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+    }
+    
+    return indices.isComplete() && extensionsSupported && swapChainAdequate;
+}
+static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface)
+{
+    QueueFamilyIndices indices;
+    auto queueFamilies = device.getQueueFamilyProperties();
+    int i = 0;
+    for (const auto &queueFamily : queueFamilies) {
+        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
+            indices.graphicsFamily = i;
+        }
+
+        if (queueFamily.queueCount > 0 && device.getSurfaceSupportKHR(i, surface)) {
+            indices.presentFamily = i;
+        }
+
+        if (indices.isComplete()) break;
+    
+        i++;
+    }
+    return indices;
+}
 
 Context::Context(bool enableValidationLayers) : 
     Loggable("CONTEXT"),
     m_useValidationLayers(enableValidationLayers)
 {
-    Logger::Warning(this, "hello");
-
     // Create GLFW interface
     m_glfwInterface = std::make_unique<GLFWInterface>();
 
-    // Recover required glfw interface
-    uint32_t glfwExtensionCount = 0;
-    const char **glfwExtensions;
-    glfwExtensions = (*m_glfwInterface)->get_required_instance_extensions(&glfwExtensionCount);
-    std::vector<const char*> requiredExtensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-    // Save required extensions and layers
-    //m_requiredExtensions = requiredExtensions;
-    //m_requiredDeviceExtensions = deviceExtensions;
-    //m_requiredValidationLayers = validationLayers;
-
-    createInstance();
-    setupDebugCallback();
-    createSurface();
-    pickPhysicalDevice();
-    createLogicalDevice();
+    // Initialize context
+    Logger::Info(this, "Creating instance..."); createInstance();
+    Logger::Info(this, "Setup debug callback..."); setupDebugCallback();
+    Logger::Info(this, "Creating surface..."); createSurface();
+    Logger::Info(this, "Pick physical device..."); pickPhysicalDevice();
+    Logger::Info(this, "Creating logicial device..."); createLogicalDevice();
 }
 Context::~Context()
 {
+    m_device->waitIdle();
 
+    //m_swapChain.reset(); /* destruction order */
+    m_instance->destroySurfaceKHR(m_surface); /* not using vk::UniqueSurfaceKHR */
 }
 
 const vk::Device &Context::getDevice() const
@@ -67,7 +127,7 @@ const vk::Queue &Context::getPresentQueue() const
 
 void Context::createInstance()
 {
-    if (m_useValidationLayers && !Context::CheckValidationLayerSupport()) {
+    if (m_useValidationLayers && !CheckValidationLayerSupport()) {
         Engine::Interrupt("Validation layers requested, but not available.");
     }
 
@@ -79,7 +139,7 @@ void Context::createInstance()
         VK_API_VERSION_1_0
     );
 
-    auto extensions = Context::GetRequiredExtensions(m_glfwInterface);
+    auto extensions = GetRequiredExtensions(*m_glfwInterface, m_useValidationLayers);
 
     auto createInfo = vk::InstanceCreateInfo(
         vk::InstanceCreateFlags(),
@@ -88,7 +148,7 @@ void Context::createInstance()
         static_cast<uint32_t>(extensions.size()), extensions.data() // enabled extensions
     );
 
-    auto validationLayers = Context::GetRequiredValidationLayers();
+    auto validationLayers = GetRequiredValidationLayers();
     if (m_useValidationLayers) { // adding enabled layers
         createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
         createInfo.ppEnabledLayerNames = validationLayers.data();
@@ -110,7 +170,7 @@ void Context::createSurface()
 {
     VkSurfaceKHR rawSurface;
     VkInstance instance = *m_instance;
-    if (m_glfwInterface->create_window_surface(&instance, &rawSurface) != NU_SUCCESS) {
+    if ((*m_glfwInterface)->create_window_surface(&instance, &rawSurface) != NU_SUCCESS) {
         Engine::Interrupt("Failed to create surface from GLFW.");
     }
     m_surface = rawSurface;
@@ -123,7 +183,7 @@ void Context::pickPhysicalDevice()
     }
 
     for (const auto &device : devices) {
-        if (Context::IsDeviceSuitable(device, m_surface)) {
+        if (IsDeviceSuitable(device, m_surface)) {
             m_physicalDevice = device;
             break;
         }
@@ -135,7 +195,7 @@ void Context::pickPhysicalDevice()
 }
 void Context::createLogicalDevice()
 {
-    QueueFamilyIndices indices = Context::FindQueueFamilies(m_physicalDevice, m_surface);
+    QueueFamilyIndices indices = FindQueueFamilies(m_physicalDevice, m_surface);
 
     std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
@@ -181,7 +241,7 @@ void Context::createLogicalDevice()
     m_presentQueue = m_device->getQueue(indices.presentFamily.value(), 0);
 }
 
-std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers)
+std::vector<const char*> Context::GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers)
 {
     uint32_t glfwExtensionCount = 0;
     const char **glfwExtensions;
@@ -194,80 +254,15 @@ std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, boo
 
     return extensions;
 }
-std::vector<const char*> GetRequiredValidationLayers()
+std::vector<const char*> Context::GetRequiredValidationLayers()
 {
     return {
         "VK_LAYER_KHRONOS_validation"
     };
 }
-std::vector<const char*> GetRequiredDeviceExtensions()
+std::vector<const char*> Context::GetRequiredDeviceExtensions()
 {
     return {
         "VK_KHR_swapchain"
     };
-}
-bool CheckValidationLayerSupport()
-{
-    auto availableLayers = vk::enumerateInstanceLayerProperties();
-
-    for (const char *layerName : Context::GetRequiredValidationLayers()) {
-        bool layerFound = false;
-        for (const auto &layerProperties : availableLayers) {
-            if (std::string(layerName) == std::string((const char*)layerProperties.layerName)) {
-                layerFound = true;
-                break;
-            }
-        }
-
-        if (!layerFound) {
-            return false;
-        }
-    }
-
-    return true;
-}
-bool CheckDeviceExtensionSupport(vk::PhysicalDevice device)
-{
-    std::vector<const char*> deviceExtensions = Context::GetRequiredDeviceExtensions();
-    std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
-
-    for (const auto &extension : device.enumerateDeviceExtensionProperties()) {
-        requiredExtensions.erase(extension.extensionName);
-    }
-
-    return requiredExtensions.empty();
-}
-bool IsDeviceSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface)
-{
-    QueueFamilyIndices indices = Context::FindQueueFamilies(device, surface);
-
-    bool extensionsSupported = Context::CheckDeviceExtensionSupport(device);
-    
-    bool swapChainAdequate = false;
-    if (extensionsSupported) {
-        SwapChainSupportDetails swapChainSupport = Context::QuerySwapChainSupport(device, surface);
-        swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-    }
-    
-    return indices.isComplete() && extensionsSupported && swapChainAdequate;
-}
-QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface)
-{
-    QueueFamilyIndices indices;
-    auto queueFamilies = device.getQueueFamilyProperties();
-    int i = 0;
-    for (const auto &queueFamily : queueFamilies) {
-        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
-            indices.graphicsFamily = i;
-        }
-
-        if (queueFamily.queueCount > 0 && device.getSurfaceSupportKHR(i, surface)) {
-            indices.presentFamily = i;
-        }
-
-        if (indices.isComplete()) break;
-    
-        i++;
-    }
-    return indices;
 }

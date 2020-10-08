@@ -10,8 +10,6 @@
 
 namespace nuvk
 {
-    struct QueueFamilyIndices;
-
     class Context : public Loggable
     {
     public:
@@ -34,11 +32,6 @@ namespace nuvk
         static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool enableValidationLayers);
         static std::vector<const char*> GetRequiredValidationLayers();
         static std::vector<const char*> GetRequiredDeviceExtensions();
-    private:
-        static bool CheckValidationLayerSupport();
-        static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device);
-        static bool IsDeviceSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface);
-        static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface);
 
     private:
         std::unique_ptr<GLFWInterface> m_glfwInterface;
