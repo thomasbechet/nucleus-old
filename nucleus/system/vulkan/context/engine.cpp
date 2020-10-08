@@ -209,7 +209,9 @@ void Engine::terminate()
 }
 void Engine::drawFrame()
 {
-    m_device->waitForFences(1, &(*m_inFlightFences[m_currentFrame]), VK_TRUE, std::numeric_limits<uint64_t>::max());
+    if (m_device->waitForFences(1, &(*m_inFlightFences[m_currentFrame]), VK_TRUE, std::numeric_limits<uint64_t>::max()) != vk::Result::eSuccess) {
+        Engine::Interrupt("Failed to wait fences.");
+    }
     m_device->resetFences(1, &(*m_inFlightFences[m_currentFrame]));
 
     uint32_t imageIndex = m_device->acquireNextImageKHR(*m_swapChain, std::numeric_limits<uint64_t>::max(), *m_imageAvailableSemaphores[m_currentFrame], nullptr).value;
@@ -245,7 +247,9 @@ void Engine::drawFrame()
     presentInfo.pImageIndices = &imageIndex;
     presentInfo.pResults = nullptr;
 
-    m_presentQueue.presentKHR(presentInfo);
+    if (m_presentQueue.presentKHR(presentInfo) != vk::Result::eSuccess) {
+        Engine::Interrupt("Failed to presentKHR.");
+    }
 
     m_currentFrame = (m_currentFrame + 1) % Engine::MAX_FRAMES_IN_FLIGHT;
 }
@@ -574,7 +578,7 @@ void Engine::createGraphicsPipeline()
     pipelineInfo.basePipelineHandle = nullptr;
 
     try {
-        m_graphicsPipeline = m_device->createGraphicsPipelineUnique(nullptr, pipelineInfo);
+        m_graphicsPipeline = m_device->createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
     } catch (vk::SystemError &err) {
         Engine::Interrupt("Failed to create graphics pipeline.");
     }
