@@ -5,16 +5,19 @@
 
 #include <set>
 #include <fstream>
+#include <memory>
 
 using namespace nuvk;
 
 Engine::Engine()
 {
-    initialize();
+    std::unique_ptr<Context> context = std::make_unique<Context>();
+    
+    //initialize();
 }
 Engine::~Engine()
 {
-    terminate();
+    //terminate();
 }
 
 void Engine::render()
