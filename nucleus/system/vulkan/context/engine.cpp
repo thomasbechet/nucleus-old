@@ -2,6 +2,7 @@
 
 #include <nucleus/nucleus.h>
 #include "../utility/logger.hpp"
+#include "context.hpp"
 
 #include <set>
 #include <fstream>
@@ -22,7 +23,7 @@ Engine::~Engine()
 
 void Engine::render()
 {
-    drawFrame();
+    //drawFrame();
 }
 
 void Engine::Interrupt(std::string msg)

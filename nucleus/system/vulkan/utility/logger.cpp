@@ -21,13 +21,13 @@ void Logger::Fatal(std::string msg)
 
 void Logger::Info(const Loggable *loggable, std::string msg)
 {
-    Info("[" + loggable->getLogSection() + "]" + msg);
+    nu_info(("[NUVK][" + loggable->getLogSection() + "]" + msg + "\n").c_str());
 }
 void Logger::Warning(const Loggable *loggable, std::string msg)
 {
-    Warning("[" + loggable->getLogSection() + "]" + msg);
+    nu_warning(("[NUVK][" + loggable->getLogSection() + "]" + msg + "\n").c_str());
 }
 void Logger::Fatal(const Loggable *loggable, std::string msg)
 {
-    Fatal("[" + loggable->getLogSection() + "]" + msg);
+    nu_fatal(("[NUVK][" + loggable->getLogSection() + "]" + msg + "\n").c_str());
 }

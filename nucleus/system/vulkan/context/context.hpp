@@ -10,20 +10,18 @@
 
 namespace nuvk
 {
+    struct QueueFamilyIndices;
+
     class Context : public Loggable
     {
     public:
-        Context(
-            const std::vector<const char*> &extensions,
-            const std::vector<const char*> &deviceExtensions,
-            const std::vector<const char*> &validationLayers
-        );
+        Context(bool enableValidationLayers = true);
         ~Context();
         
     public:
-        vk::Device &getDevice() const;
-        vk::Queue &getGraphicsQueue() const;
-        vk::Queue &getPresentQueue() const;
+        const vk::Device &getDevice() const;
+        const vk::Queue &getGraphicsQueue() const;
+        const vk::Queue &getPresentQueue() const;
 
     private:
         void createInstance();
@@ -32,13 +30,17 @@ namespace nuvk
         void pickPhysicalDevice();
         void createLogicalDevice();
 
+    public:
+        static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool enableValidationLayers);
+        static std::vector<const char*> GetRequiredValidationLayers();
+        static std::vector<const char*> GetRequiredDeviceExtensions();
     private:
+        static bool CheckValidationLayerSupport();
+        static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device);
+        static bool IsDeviceSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface);
+        static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface);
 
     private:
-        std::vector<const char*> m_requiredExtensions;
-        std::vector<const char*> m_requiredDeviceExtensions;
-        std::vector<const char*> m_requiredValidationLayers;
-
         std::unique_ptr<GLFWInterface> m_glfwInterface;
         vk::UniqueInstance m_instance;
         std::unique_ptr<DebugUtilsMessenger> m_debugUtilsMessenger;
@@ -49,5 +51,7 @@ namespace nuvk
 
         vk::Queue m_graphicsQueue;
         vk::Queue m_presentQueue;
+
+        bool m_useValidationLayers;
     };
 }
