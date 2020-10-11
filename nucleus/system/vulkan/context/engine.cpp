@@ -2,7 +2,6 @@
 
 #include <nucleus/nucleus.h>
 #include "../utility/logger.hpp"
-#include "context.hpp"
 
 #include <set>
 #include <fstream>
@@ -12,7 +11,8 @@ using namespace nuvk;
 
 Engine::Engine()
 {
-    std::unique_ptr<Context> context = std::make_unique<Context>();
+    m_context = std::make_unique<Context>();
+    m_swapchain = std::make_unique<Swapchain>();
     
     //initialize();
 }

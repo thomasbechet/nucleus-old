@@ -13,6 +13,11 @@ namespace nuvk
     class Context : public Loggable
     {
     public:
+        static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool enableValidationLayers);
+        static std::vector<const char*> GetRequiredValidationLayers();
+        static std::vector<const char*> GetRequiredDeviceExtensions();
+
+    public:
         Context(bool enableValidationLayers = true);
         ~Context();
         
@@ -27,11 +32,6 @@ namespace nuvk
         void createSurface();
         void pickPhysicalDevice();
         void createLogicalDevice();
-
-    public:
-        static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool enableValidationLayers);
-        static std::vector<const char*> GetRequiredValidationLayers();
-        static std::vector<const char*> GetRequiredDeviceExtensions();
 
     private:
         std::unique_ptr<GLFWInterface> m_glfwInterface;

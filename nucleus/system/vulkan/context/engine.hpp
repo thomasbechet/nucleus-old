@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../utility/glfwinterface.hpp"
-#include "../utility/debugutilsmessenger.hpp"
+#include "context.hpp"
+#include "swapchain.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -58,6 +58,9 @@ namespace nuvk
         void initialize();
         void terminate();
         void drawFrame();
+
+        std::unique_ptr<Context> m_context;
+        std::unique_ptr<Swapchain> m_swapchain;
 
         // void createInstance();
         // void setupDebugCallback();
