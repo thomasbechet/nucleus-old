@@ -1,5 +1,7 @@
 #include "context.hpp"
 
+#include "../utility/glfwinterface.hpp"
+#include "../utility/debugutilsmessenger.hpp"
 #include "swapchain.hpp"
 #include "engine.hpp"
 
@@ -7,6 +9,94 @@
 #include <set>
 
 using namespace nuvk;
+
+namespace
+{
+    static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers)
+    {
+        uint32_t glfwExtensionCount = 0;
+        const char **glfwExtensions;
+        glfwExtensions = glfwInterface->get_required_instance_extensions(&glfwExtensionCount);
+
+        std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
+        if (useValidationLayers) {
+            extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        }
+
+        return extensions;
+    }
+    static std::vector<const char*> GetRequiredValidationLayers()
+    {
+        return {
+            "VK_LAYER_KHRONOS_validation"
+        };
+    }
+    static std::vector<const char*> GetRequiredDeviceExtensions()
+    {
+        return {
+            "VK_KHR_swapchain"
+        };
+    }
+
+    static vk::UniqueInstance CreateInstance(
+        bool useValidationLayers,
+        GLFWInterface &glfwInterface
+    ) 
+    {
+        if (useValidationLayers && !CheckValidationLayerSupport()) {
+            Engine::Interrupt("Validation layers requested, but not available.");
+        }
+
+        auto appInfo = vk::ApplicationInfo(
+            "Vulkan Renderer",
+            VK_MAKE_VERSION(1, 0, 0),
+            "Nucleus Engine",
+            VK_MAKE_VERSION(1, 0, 0),
+            VK_API_VERSION_1_0
+        );
+
+        auto extensions = ::GetRequiredExtensions(glfwInterface, useValidationLayers);
+
+        auto createInfo = vk::InstanceCreateInfo(
+            vk::InstanceCreateFlags(),
+            &appInfo,
+            0, nullptr, // enabled layers
+            static_cast<uint32_t>(extensions.size()), extensions.data() // enabled extensions
+        );
+
+        auto validationLayers = ::GetRequiredValidationLayers();
+        if (useValidationLayers) { // adding enabled layers
+            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+            createInfo.ppEnabledLayerNames = validationLayers.data();
+        }
+
+        try {
+            return vk::createInstanceUnique(createInfo, nullptr);
+        } catch(vk::SystemError &err) {
+            Logger::Fatal(this, err.what());
+            Engine::Interrupt("Failed to create instance.");
+        }
+    }
+}
+
+struct Context::Internal
+{
+    const vk::UniqueInstance instance;
+    std::unique_ptr<GLFWInterface> glfwInterface;
+    std::unique_ptr<DebugUtilsMessenger> debugUtilsMessenger;
+
+    Internal()
+    {
+        glfwInterface = std::make_unique<GLFWInterface>();
+        instance = ::CreateInstance(true)
+    }
+    ~Internal()
+    {
+
+    }
+};
+
+Context::Context() : internal(MakeInternalPtr<Internal>()) {}
 
 struct QueueFamilyIndices
 {
@@ -239,30 +329,4 @@ void Context::createLogicalDevice()
 
     m_graphicsQueue = m_device->getQueue(indices.graphicsFamily.value(), 0);
     m_presentQueue = m_device->getQueue(indices.presentFamily.value(), 0);
-}
-
-std::vector<const char*> Context::GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers)
-{
-    uint32_t glfwExtensionCount = 0;
-    const char **glfwExtensions;
-    glfwExtensions = glfwInterface->get_required_instance_extensions(&glfwExtensionCount);
-
-    std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
-    if (useValidationLayers) {
-        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
-    }
-
-    return extensions;
-}
-std::vector<const char*> Context::GetRequiredValidationLayers()
-{
-    return {
-        "VK_LAYER_KHRONOS_validation"
-    };
-}
-std::vector<const char*> Context::GetRequiredDeviceExtensions()
-{
-    return {
-        "VK_KHR_swapchain"
-    };
 }
