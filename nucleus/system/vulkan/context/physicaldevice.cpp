@@ -1,5 +1,7 @@
 #include "physicaldevice.hpp"
 
+#include "engine.hpp"
+
 using namespace nuvk;
 
 namespace
@@ -33,7 +35,7 @@ struct PhysicalDevice::Internal
 
     Internal()
     {
-        
+        physicalDevice = ::PickPhysicalDevice(instance, surface); 
     }
     ~Internal()
     {

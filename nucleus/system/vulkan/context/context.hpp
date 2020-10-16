@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../utility/loggable.hpp"
 #include "../utility/internalptr.hpp"
 
 #include <vulkan/vulkan.hpp>
@@ -9,9 +8,12 @@
 
 namespace nuvk
 {
-    class Context : public Loggable
+    class Context
     {
     public:
+        inline constexpr auto Section = "CONTEXT";
+        vk::UniqueDevice &getDevice();
+        vk::SurfaceKHR &getSurface();
 
     private:
         struct Internal;

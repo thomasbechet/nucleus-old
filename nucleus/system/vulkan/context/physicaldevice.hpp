@@ -9,6 +9,7 @@ namespace nuvk
     class PhysicalDevice
     {
     public:
+        inline constexpr auto Section = "PHYSICALDEVICE";
         static IsSuitable(vk::PhysicalDevice &device, vk::SurfaceKHR &surface);
 
     private:
