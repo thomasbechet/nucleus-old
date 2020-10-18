@@ -1,25 +1,35 @@
 #include "surface.hpp"
 
+#include "../utility/glfwinterface.hpp"
+
 using namespace nuvk;
 
 namespace
 {
-    static VkSurfaceKHR CreateInstance()
+    static VkSurfaceKHR CreateSurface(
+        vk::UniqueInstance &instance,
+        GLFWInterface &glfwInterface
+    )
     {
         VkSurfaceKHR rawSurface;
-        VkInstance instance = *m_instance;
-        if ((*m_glfwInterface)->create_window_surface(&instance, &rawSurface) != NU_SUCCESS) {
+        VkInstance vkinstance = *instance;
+        if (glfwInterface->create_window_surface(&vkinstance, &rawSurface) != NU_SUCCESS) {
             Engine::Interrupt("Failed to create surface from GLFW.");
         }
-        m_surface = rawSurface;
+        return rawSurface;
     }
 }
 
 struct Surface::Internal
 {
-    Internal()
-    {
+    vk::SurfaceKHR surface;
 
+    Internal(
+        vk::UniqueInstance &instance,
+        GLFWInterface &glfwInterface
+    )
+    {
+        surface = ::CreateSurface(instance, glfwInterface);
     }
     ~Internal()
     {
@@ -27,9 +37,12 @@ struct Surface::Internal
     }
 };
 
-Surface::Surface() : internal(MakeInternalPtr<Internal>()) {}
+Surface::Surface(
+    vk::UniqueInstance &instance,
+    GLFWInterface &glfwInterface
+) : internal(MakeInternalPtr<Internal>(instance, glfwInterface)) {}
 
 vk::SurfaceKHR &Surface::getSurface()
 {
-
+    return internal->surface;
 }

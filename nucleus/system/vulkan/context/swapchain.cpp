@@ -2,6 +2,54 @@
 
 using namespace nuvk;
 
+namespace
+{
+    static void CreateSwapchain()
+    {
+
+    }
+    static void CreateImageViews()
+    {
+
+    }
+
+    static vk::SurfaceFormatKHR ChooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR> &availableFormats)
+    {
+
+    }
+    static vk::PresentModeKHR ChooseSwapPresentMode(const std::vector<vk::PresentModeKHR> &availablePresentModes)
+    {
+
+    }
+    static vk::Extent2D ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR &capabilities)
+    {
+
+    }
+}
+
+struct Swapchain::Internal
+{
+    vk::UniqueSwapchainKHR swapChain;
+    std::vector<vk::Image> swapChainImages;
+    vk::Format swapChainImageFormat;
+    vk::Extent2D swapChainExtent;
+    std::vector<vk::UniqueImageView> swapChainImageViews;
+    std::vector<vk::UniqueFramebuffer> swapChainFramebuffers;
+
+    Internal()
+    {
+
+    }
+    ~Internal()
+    {
+
+    }
+}
+
+Swapchain::Swapchain(
+
+) : internal(MakeInternalPtr<Internal>()) {}
+
 SwapChainSupportDetails Swapchain::QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface)
 {
     SwapChainSupportDetails details;
@@ -9,17 +57,6 @@ SwapChainSupportDetails Swapchain::QuerySwapChainSupport(vk::PhysicalDevice devi
     details.formats = device.getSurfaceFormatsKHR(surface);
     details.presentModes = device.getSurfacePresentModesKHR(surface);
     return details;
-}
-
-Swapchain::Swapchain(Context &context) : 
-    Loggable("SWAPCHAIN"),
-    m_context(context)
-{
-
-}
-Swapchain::~Swapchain()
-{
-
 }
 
 void Swapchain::createSwapchain()

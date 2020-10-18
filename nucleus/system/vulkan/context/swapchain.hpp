@@ -1,7 +1,6 @@
 #pragma once
 
-#include "context.hpp"
-#include "../utility/loggable.hpp"
+#include "../utility/internalptr.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -14,27 +13,17 @@ namespace nuvk
         std::vector<vk::PresentModeKHR> presentModes;
     };
 
-    class Swapchain : public Loggable
+    class Swapchain
     {
     public:
-        static SwapChainSupportDetails QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface);
-    
-    public:
-        Swapchain(Context &context);
-        ~Swapchain();
+        inline constexpr auto Section = "SWAPCHAIN";
 
-    public:
-        void createSwapchain();
-        void createImageViews();
+        Swapchain(Context &context);
+
+        static SwapChainSupportDetails QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface);        
     
     private:
-        vk::UniqueSwapchainKHR m_swapChain;
-        std::vector<vk::Image> m_swapChainImages;
-        vk::Format m_swapChainImageFormat;
-        vk::Extent2D m_swapChainExtent;
-        std::vector<vk::UniqueImageView> m_swapChainImageViews;
-        std::vector<vk::UniqueFramebuffer> m_swapChainFramebuffers;
-
-        Context &m_context;
+        struct Internal;
+        InternalPtr<Internal> internal;
     };
 }

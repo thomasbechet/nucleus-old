@@ -11,6 +11,11 @@ namespace nuvk
     public:
         inline constexpr auto Section = "SURFACE";
 
+        Surface(
+            vk::UniqueInstance &instance,
+            GLFWInterface &glfwInterface
+        );
+        
         vk::SurfaceKHR &getSurface();
 
     private:

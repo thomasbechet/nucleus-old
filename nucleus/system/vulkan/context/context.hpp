@@ -12,17 +12,18 @@ namespace nuvk
     {
     public:
         inline constexpr auto Section = "CONTEXT";
+        
         vk::UniqueDevice &getDevice();
         vk::SurfaceKHR &getSurface();
+
+        static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers);
+        static std::vector<const char*> GetRequiredValidationLayers();
+        static std::vector<const char*> GetRequiredDeviceExtensions()
+
 
     private:
         struct Internal;
         InternalPtr<Internal> internal;
-
-    // public:
-    //     static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool enableValidationLayers);
-    //     static std::vector<const char*> GetRequiredValidationLayers();
-    //     static std::vector<const char*> GetRequiredDeviceExtensions();
 
     // public:
     //     Context(bool enableValidationLayers = true);
