@@ -120,14 +120,6 @@ void Engine::Interrupt(std::string msg)
 //     }
 //     return indices;
 // }
-// SwapChainSupportDetails Engine::QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface)
-// {
-//     SwapChainSupportDetails details;
-//     details.capabilities = device.getSurfaceCapabilitiesKHR(surface);
-//     details.formats = device.getSurfaceFormatsKHR(surface);
-//     details.presentModes = device.getSurfacePresentModesKHR(surface);
-//     return details;
-// }
 // vk::SurfaceFormatKHR Engine::ChooseSwapSurfaceFormat(const std::vector<vk::SurfaceFormatKHR> &availableFormats)
 // {
 //     if (availableFormats.size() == 1 && availableFormats[0].format == vk::Format::eUndefined) {
@@ -141,31 +133,6 @@ void Engine::Interrupt(std::string msg)
 //     }
 
 //     return availableFormats[0];
-// }
-// vk::PresentModeKHR Engine::ChooseSwapPresentMode(const std::vector<vk::PresentModeKHR> &availablePresentModes)
-// {
-//     vk::PresentModeKHR bestMode = vk::PresentModeKHR::eFifo;
-
-//     for (const auto &availablePresentMode : availablePresentModes) {
-//         if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
-//             return availablePresentMode;
-//         } else if (availablePresentMode == vk::PresentModeKHR::eImmediate) {
-//             bestMode = availablePresentMode;
-//         }
-//     }
-
-//     return bestMode;
-// }
-// vk::Extent2D Engine::ChooseSwapExtent(const vk::SurfaceCapabilitiesKHR &capabilities)
-// {
-//     if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
-//         return capabilities.currentExtent;
-//     } else {
-//         vk::Extent2D actualExtent = {static_cast<uint32_t>(Engine::WIDTH), static_cast<uint32_t>(Engine::HEIGHT)};
-//         actualExtent.width = std::max(capabilities.minImageExtent.width, std::min(capabilities.maxImageExtent.width, actualExtent.width));
-//         actualExtent.height = std::max(capabilities.minImageExtent.height, std::min(capabilities.maxImageExtent.height, actualExtent.height));
-//         return actualExtent;
-//     }
 // }
 // vk::UniqueShaderModule Engine::CreateShaderModule(const vk::UniqueDevice &device, const std::string &filename)
 // {

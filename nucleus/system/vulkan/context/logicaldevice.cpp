@@ -84,6 +84,10 @@ LogicalDevice::LogicalDevice(
     bool useValidationLayers
 ) : internal(MakeInternalPtr<Internal>(physicalDevice, surface, useValidationLayers)) {}
 
+vk::UniqueDevice &LogicalDevice::getLogicalDevice()
+{
+    return internal->device;
+}
 vk::Queue &LogicalDevice::getGraphicsQueue()
 {
     return internal->graphicsQueue;

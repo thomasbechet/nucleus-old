@@ -2,6 +2,10 @@
 
 #include "../utility/glfwinterface.hpp"
 #include "../utility/debugutilsmessenger.hpp"
+#include "instance.hpp"
+#include "surface.hpp"
+#include "physicaldevice.hpp"
+#include "logicaldevice.hpp"
 #include "swapchain.hpp"
 #include "engine.hpp"
 
@@ -12,57 +16,72 @@ using namespace nuvk;
 
 namespace
 {
-    static vk::UniqueInstance CreateInstance(
-        bool useValidationLayers,
-        GLFWInterface &glfwInterface
-    ) 
-    {
-        if (useValidationLayers && !CheckValidationLayerSupport()) {
-            Engine::Interrupt("Validation layers requested, but not available.");
-        }
-
-        auto appInfo = vk::ApplicationInfo(
-            "Vulkan Renderer",
-            VK_MAKE_VERSION(1, 0, 0),
-            "Nucleus Engine",
-            VK_MAKE_VERSION(1, 0, 0),
-            VK_API_VERSION_1_0
-        );
-
-        auto extensions = Context::GetRequiredExtensions(glfwInterface, useValidationLayers);
-
-        auto createInfo = vk::InstanceCreateInfo(
-            vk::InstanceCreateFlags(),
-            &appInfo,
-            0, nullptr, // enabled layers
-            static_cast<uint32_t>(extensions.size()), extensions.data() // enabled extensions
-        );
-
-        auto validationLayers = Context::GetRequiredValidationLayers();
-        if (useValidationLayers) { // adding enabled layers
-            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-            createInfo.ppEnabledLayerNames = validationLayers.data();
-        }
-
-        try {
-            return vk::createInstanceUnique(createInfo, nullptr);
-        } catch(vk::SystemError &err) {
-            Logger::Fatal(Context::Section, err.what());
-            Engine::Interrupt("Failed to create instance.");
-        }
-    }
+    
 }
 
 struct Context::Internal
 {
     const vk::UniqueInstance instance;
+    
     std::unique_ptr<GLFWInterface> glfwInterface;
+    std::unique_ptr<Instance> instance;
     std::unique_ptr<DebugUtilsMessenger> debugUtilsMessenger;
+    std::unique_ptr<Surface> surface;
+    std::unique_ptr<PhysicalDevice> physicalDevice;
+    std::unique_ptr<LogicalDevice> logicalDevice;
+    std::unique_ptr<Swapchain> swapchain;
 
     Internal()
     {
+        const bool enableValidationLayers = true;
+
+        Logger::Info(this, "Creating instance..."); createInstance();
+    
+    Logger::Info(this, "Creating surface..."); createSurface();
+    Logger::Info(this, "Pick physical device..."); pickPhysicalDevice();
+    Logger::Info(this, "Creating logicial device..."); createLogicalDevice();
+
+        // get glfw interface
+        Logger::Info(Context::Section, "Getting GLFW interface..."); createInstance();
         glfwInterface = std::make_unique<GLFWInterface>();
-        instance = ::CreateInstance(true)
+        
+        // create instance
+        Logger::Info(Context::Section, "Creating instance..."); createInstance();
+        instance = std::make_unique<Instance>(enableValidationLayers);
+        
+        // create debug utils messenger
+        Logger::Info(Context::Section, "Creating debug utils messenger..."); createInstance();
+        debugUtilsMessenger = std::make_unique<DebugUtilsMessenger>(*instance);
+        
+        // create surface
+        Logger::Info(Context::Section, "Creating surface..."); createInstance();
+        surface = std::make_unique<Surface>(
+            instance->getInstance(),
+            *glfwInterface
+        );
+
+        // create physical surface
+        Logger::Info(Context::Section, "Picking physical device..."); createInstance();
+        physicalDevice = std::make_unique<PhysicalDevice>(
+            *instance,
+            surface->getSurface()  
+        );
+
+        // create logical device
+        Logger::Info(Context::Section, "Creating logical device..."); createInstance();
+        logicalDevice = std::make_unique<LogicalDevice>(
+            physicalDevice->getPhysicalDevice()
+            surface->getSurface(),
+            enableValidationLayers
+        );
+
+        // create swapchain
+        Logger::Info(Context::Section, "Creating swapchain..."); createInstance();
+        swapchain = std::make_unique<Swapchain>(
+            logicalDevice->getLogicalDevice(),
+            physicalDevice->getPhysicalDevice(),
+            surface->getSurface()
+        );
     }
     ~Internal()
     {
@@ -70,7 +89,9 @@ struct Context::Internal
     }
 };
 
-Context::Context() : internal(MakeInternalPtr<Internal>()) {}
+Context::Context(
+    bool enableValidationLayers
+) : internal(MakeInternalPtr<Internal>(enableValidationLayers)) {}
 
 std::vector<const char*> Context::GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers)
 {
@@ -98,31 +119,6 @@ std::vector<const char*> Context::GetRequiredDeviceExtensions()
     };
 }
 
-static bool CheckValidationLayerSupport();
-static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device);
-static bool IsDeviceSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface);
-static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface);
-
-static bool CheckValidationLayerSupport()
-{
-    auto availableLayers = vk::enumerateInstanceLayerProperties();
-
-    for (const char *layerName : Context::GetRequiredValidationLayers()) {
-        bool layerFound = false;
-        for (const auto &layerProperties : availableLayers) {
-            if (std::string(layerName) == std::string((const char*)layerProperties.layerName)) {
-                layerFound = true;
-                break;
-            }
-        }
-
-        if (!layerFound) {
-            return false;
-        }
-    }
-
-    return true;
-}
 static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device)
 {
     std::vector<const char*> deviceExtensions = Context::GetRequiredDeviceExtensions();

@@ -13,13 +13,14 @@ namespace nuvk
     public:
         inline constexpr auto Section = "CONTEXT";
         
+        Context(bool enableValidationLayers = true);
+
         vk::UniqueDevice &getDevice();
         vk::SurfaceKHR &getSurface();
 
         static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers);
         static std::vector<const char*> GetRequiredValidationLayers();
         static std::vector<const char*> GetRequiredDeviceExtensions()
-
 
     private:
         struct Internal;

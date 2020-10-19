@@ -12,8 +12,13 @@ namespace nuvk
     public:
         inline constexpr auto Section = "LOGICALDEVICE";
 
-        LogicalDevice(PhysicalDevice &physicalDevice);
+        LogicalDevice(
+            vk::PhysicalDevice &physicalDevice,
+            VkSurfaceKHR &surface,
+            bool useValidationLayers
+        );
 
+        vk::UniqueDevice &getLogicalDevice();
         vk::Queue &getGraphicsQueue();
         vk::Queue &getPresentQueue();
 

@@ -18,7 +18,11 @@ namespace nuvk
     public:
         inline constexpr auto Section = "SWAPCHAIN";
 
-        Swapchain(Context &context);
+        Swapchain(
+            vk::UniqueDevice &device,
+            vk::PhysicalDevice &physicalDevice,
+            VkSurfaceKHR &surface
+        );
 
         static SwapChainSupportDetails QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface);        
     

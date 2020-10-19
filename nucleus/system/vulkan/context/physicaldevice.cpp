@@ -55,6 +55,11 @@ PhysicalDevice::PhysicalDevice(
     vk::SurfaceKHR &surface
 ) : internal(MakeInternalPtr<Internal>()) {}
 
+vk::PhysicalDevice PhysicalDevice::getPhysicalDevice()
+{
+    return internal->physicalDevice;
+}
+
 bool PhysicalDevice::IsSuitable(vk::PhysicalDevice &device, vk::SurfaceKHR &surface)
 {
     QueueFamilyIndices indices = FindQueueFamilies(device, surface);
