@@ -10,11 +10,11 @@ namespace nuvk
     class LogicalDevice
     {
     public:
-        inline constexpr auto Section = "LOGICALDEVICE";
+        static inline constexpr std::string_view Section = "LOGICALDEVICE";
 
         LogicalDevice(
-            vk::PhysicalDevice &physicalDevice,
-            VkSurfaceKHR &surface,
+            vk::PhysicalDevice physicalDevice,
+            VkSurfaceKHR surface,
             bool useValidationLayers
         );
 

@@ -7,7 +7,25 @@ using namespace nuvk;
 
 static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
 {
-    Logger::Info(std::string(pCallbackData->pMessage));
+    switch (messageSeverity)
+    {
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
+        Logger::Warning("CALLBACK", std::string(pCallbackData->pMessage));
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
+        Logger::Info("CALLBACK", std::string(pCallbackData->pMessage));
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
+        Logger::Warning("CALLBACK", std::string(pCallbackData->pMessage));
+        break;
+    case VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT:
+        Logger::Fatal("CALLBACK", std::string(pCallbackData->pMessage));
+        break;
+    default:
+        Logger::Info("CALLBACK", std::string(pCallbackData->pMessage));
+        break;
+    }
+
     return VK_FALSE;
 }
 

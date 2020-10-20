@@ -1,6 +1,8 @@
 #include "surface.hpp"
 
 #include "../utility/glfwinterface.hpp"
+#include "engine.hpp"
+#include "surface.hpp"
 
 using namespace nuvk;
 
@@ -23,17 +25,18 @@ namespace
 struct Surface::Internal
 {
     vk::SurfaceKHR surface;
+    vk::UniqueInstance &instance;
 
     Internal(
         vk::UniqueInstance &instance,
         GLFWInterface &glfwInterface
-    )
+    ) : instance(instance)
     {
         surface = ::CreateSurface(instance, glfwInterface);
     }
     ~Internal()
     {
-
+        instance->destroySurfaceKHR(surface);
     }
 };
 
@@ -42,7 +45,7 @@ Surface::Surface(
     GLFWInterface &glfwInterface
 ) : internal(MakeInternalPtr<Internal>(instance, glfwInterface)) {}
 
-vk::SurfaceKHR &Surface::getSurface()
+VkSurfaceKHR Surface::getSurface()
 {
     return internal->surface;
 }

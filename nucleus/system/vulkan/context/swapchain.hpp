@@ -16,12 +16,13 @@ namespace nuvk
     class Swapchain
     {
     public:
-        inline constexpr auto Section = "SWAPCHAIN";
+        static inline constexpr std::string_view Section = "SWAPCHAIN";
 
         Swapchain(
             vk::UniqueDevice &device,
-            vk::PhysicalDevice &physicalDevice,
-            VkSurfaceKHR &surface
+            vk::PhysicalDevice physicalDevice,
+            VkSurfaceKHR surface,
+            uint32_t width, uint32_t height
         );
 
         static SwapChainSupportDetails QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface);        

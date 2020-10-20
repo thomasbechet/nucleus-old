@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
+#include "../utility/glfwinterface.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -9,14 +10,14 @@ namespace nuvk
     class Surface
     {
     public:
-        inline constexpr auto Section = "SURFACE";
+        static inline constexpr std::string_view Section = "SURFACE";
 
         Surface(
             vk::UniqueInstance &instance,
             GLFWInterface &glfwInterface
         );
         
-        vk::SurfaceKHR &getSurface();
+        VkSurfaceKHR getSurface();
 
     private:
         struct Internal;

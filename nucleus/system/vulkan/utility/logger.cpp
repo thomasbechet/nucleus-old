@@ -1,33 +1,31 @@
 #include "logger.hpp"
 
-#include "loggable.hpp"
-
 #include <nucleus/nucleus.h>
 
 using namespace nuvk;
 
-void Logger::Info(std::string msg)
+void Logger::Info(std::string_view msg)
 {
-    nu_info(("[NUVK] " + msg + "\n").c_str());
+    nu_info(("[NUVK] " + std::string(msg) + "\n").c_str());
 }
-void Logger::Warning(std::string msg)
+void Logger::Warning(std::string_view msg)
 {
-    nu_warning(("[NUVK] " + msg + "\n").c_str());
+    nu_warning(("[NUVK] " + std::string(msg) + "\n").c_str());
 }
-void Logger::Fatal(std::string msg)
+void Logger::Fatal(std::string_view msg)
 {
-    nu_fatal(("[NUVK] " + msg + "\n").c_str());
+    nu_fatal(("[NUVK] " + std::string(msg) + "\n").c_str());
 }
 
-void Logger::Info(std::string section, std::string msg)
+void Logger::Info(std::string_view section, std::string_view msg)
 {
-    nu_info(("[NUVK][" + section + "]" + msg + "\n").c_str());
+    nu_info(("[NUVK][" + std::string(section) + "]" + std::string(msg) + "\n").c_str());
 }
-void Logger::Warning(std::string section, std::string msg)
+void Logger::Warning(std::string_view section, std::string_view msg)
 {
-    nu_warning(("[NUVK][" + section + "]" + msg + "\n").c_str());
+    nu_warning(("[NUVK][" + std::string(section) + "]" + std::string(msg) + "\n").c_str());
 }
-void Logger::Fatal(std::string section, std::string msg)
+void Logger::Fatal(std::string_view section, std::string_view msg)
 {
-    nu_fatal(("[NUVK][" + section + "]" + msg + "\n").c_str());
+    nu_fatal(("[NUVK][" + std::string(section) + "]" + std::string(msg) + "\n").c_str());
 }

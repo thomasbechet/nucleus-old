@@ -1,5 +1,9 @@
 #include "instance.hpp"
 
+#include "../utility/logger.hpp"
+#include "engine.hpp"
+#include "context.hpp"
+
 using namespace nuvk;
 
 namespace
@@ -28,11 +32,12 @@ namespace
     }
 
     static vk::UniqueInstance CreateInstance(
+        GLFWInterface &glfwInterface,
         bool enableValidationLayers
     )
     {
-        auto layers = Context::GetRequiredValidationLayers();
-        if (enableValidationLayers && !CheckValidationLayerSupport(layers)) {
+        auto requiredValidationLayers = Context::GetRequiredValidationLayers();
+        if (enableValidationLayers && !CheckValidationLayerSupport(requiredValidationLayers)) {
             Engine::Interrupt("Validation layers requested, but not available.");
         }
 
@@ -44,13 +49,13 @@ namespace
             VK_API_VERSION_1_0
         );
 
-        auto extensions = Context::GetRequiredExtensions();
+        auto requiredExtensions = Context::GetRequiredExtensions(glfwInterface, enableValidationLayers);
 
         auto createInfo = vk::InstanceCreateInfo(
             vk::InstanceCreateFlags(),
             &appInfo,
             0, nullptr, // enabled layers
-            static_cast<uint32_t>(extensions.size()), extensions.data() // enabled extensions
+            static_cast<uint32_t>(requiredExtensions.size()), requiredExtensions.data() // enabled extensions
         );
 
         auto validationLayers = requiredValidationLayers;
@@ -62,9 +67,11 @@ namespace
         try {
             return vk::createInstanceUnique(createInfo, nullptr);
         } catch(vk::SystemError &err) {
-            Logger::Fatal(Context::Section, err.what());
+            Logger::Fatal(Instance::Section, err.what());
             Engine::Interrupt("Failed to create instance.");
         }
+
+        throw std::runtime_error("Unknown error.");
     }
 }
 
@@ -73,10 +80,11 @@ struct Instance::Internal
     vk::UniqueInstance instance;
 
     Internal(
+        GLFWInterface &interface,
         bool enableValidationLayers
     )
     {
-        instance = ::CreateInstance(enableValidationLayers);
+        instance = ::CreateInstance(interface, enableValidationLayers);
     }
     ~Internal()
     {
@@ -85,8 +93,9 @@ struct Instance::Internal
 };
 
 Instance::Instance(
+    GLFWInterface &glfwInterface,
     bool enableValidationLayers
-) : internal(MakeInternalPtr<Internal>(enableValidationLayers)) {}
+) : internal(MakeInternalPtr<Internal>(glfwInterface, enableValidationLayers)) {}
 
 vk::UniqueInstance &Instance::getInstance()
 {

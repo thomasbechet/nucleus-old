@@ -1,14 +1,44 @@
 #include "physicaldevice.hpp"
 
 #include "engine.hpp"
+#include "swapchain.hpp"
+
+#include <set>
 
 using namespace nuvk;
 
 namespace
 {
+    static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device)
+    {
+        std::vector<const char*> deviceExtensions = Context::GetRequiredDeviceExtensions();
+        std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+
+        for (const auto &extension : device.enumerateDeviceExtensionProperties()) {
+            requiredExtensions.erase(extension.extensionName);
+        }
+
+        return requiredExtensions.empty();
+    }
+
+    static bool IsSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface)
+    {
+        QueueFamilyIndices indices = PhysicalDevice::FindQueueFamilies(device, surface);
+
+        bool extensionsSupported = CheckDeviceExtensionSupport(device);
+        
+        bool swapChainAdequate = false;
+        if (extensionsSupported) {
+            SwapChainSupportDetails swapChainSupport = Swapchain::QuerySwapChainSupport(device, surface);
+            swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
+        }
+        
+        return indices.isComplete() && extensionsSupported && swapChainAdequate;
+    }
+
     static vk::PhysicalDevice PickPhysicalDevice(
         vk::UniqueInstance &instance,
-        vk::SurfaceKHR &surface
+        vk::SurfaceKHR surface
     )
     {
         vk::PhysicalDevice physicalDevice;
@@ -19,7 +49,7 @@ namespace
         }
 
         for (const auto &device : devices) {
-            if (PhysicalDevice::IsSuitable(device, surface)) {
+            if (::IsSuitable(device, surface)) {
                 physicalDevice = device;
                 break;
             }
@@ -39,7 +69,7 @@ struct PhysicalDevice::Internal
 
     Internal(
         vk::UniqueInstance &instance,
-        vk::SurfaceKHR &surface
+        vk::SurfaceKHR surface
     )
     {
         physicalDevice = ::PickPhysicalDevice(instance, surface); 
@@ -52,28 +82,14 @@ struct PhysicalDevice::Internal
 
 PhysicalDevice::PhysicalDevice(
     vk::UniqueInstance &instance,
-    vk::SurfaceKHR &surface
-) : internal(MakeInternalPtr<Internal>()) {}
+    vk::SurfaceKHR surface
+) : internal(MakeInternalPtr<Internal>(instance, surface)) {}
 
 vk::PhysicalDevice PhysicalDevice::getPhysicalDevice()
 {
     return internal->physicalDevice;
 }
 
-bool PhysicalDevice::IsSuitable(vk::PhysicalDevice &device, vk::SurfaceKHR &surface)
-{
-    QueueFamilyIndices indices = FindQueueFamilies(device, surface);
-
-    bool extensionsSupported = CheckDeviceExtensionSupport(device);
-    
-    bool swapChainAdequate = false;
-    if (extensionsSupported) {
-        SwapChainSupportDetails swapChainSupport = Swapchain::QuerySwapChainSupport(device, surface);
-        swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
-    }
-    
-    return indices.isComplete() && extensionsSupported && swapChainAdequate;
-}
 QueueFamilyIndices PhysicalDevice::FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface)
 {
     QueueFamilyIndices indices;

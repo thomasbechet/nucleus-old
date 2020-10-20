@@ -21,16 +21,15 @@ namespace nuvk
     class PhysicalDevice
     {
     public:
-        inline constexpr auto Section = "PHYSICALDEVICE";
+        static inline constexpr std::string_view Section = "PHYSICALDEVICE";
 
         PhysicalDevice(
             vk::UniqueInstance &instance,
-            vk::SurfaceKHR &surface
+            vk::SurfaceKHR surface
         );
 
         vk::PhysicalDevice getPhysicalDevice();
         
-        static IsSuitable(vk::PhysicalDevice &device, vk::SurfaceKHR &surface);
         static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface);
 
     private:

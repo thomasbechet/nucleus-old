@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
+#include "../utility/glfwinterface.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -9,14 +10,14 @@ namespace nuvk
     class Instance
     {
     public:
-        Instance(bool enableValidationLayers = true);
+        static inline constexpr std::string_view Section = "INSTANCE";
+
+        Instance(GLFWInterface &interface, bool enableValidationLayers = true);
 
         vk::UniqueInstance &getInstance();
 
-        static bool CheckValidationLayerSupport(const std::vector<const char*> &instanceLayers);
-
     private:
-        struct Instance;
-        InternalPtr<Instance> instance;
+        struct Internal;
+        InternalPtr<Internal> internal;
     };
 }

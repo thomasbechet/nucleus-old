@@ -1,12 +1,15 @@
 #include "logicaldevice.hpp"
 
+#include "context.hpp"
+#include "engine.hpp"
+
 #include <set>
 
 using namespace nuvk;
 
 namespace
 {
-    static void CreateLogicalDevice(
+    static vk::UniqueDevice CreateLogicalDevice(
         vk::PhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         bool useValidationLayers
@@ -53,6 +56,8 @@ namespace
         } catch(vk::SystemError &err) {
             Engine::Interrupt("Failed to create logical device.");
         }
+
+        throw std::runtime_error("Unknown error.");
     }
 }
 
@@ -63,14 +68,15 @@ struct LogicalDevice::Internal
     vk::Queue presentQueue;
 
     Internal(
-        vk::PhysicalDevice &physicalDevice,
+        vk::PhysicalDevice physicalDevice,
         VkSurfaceKHR &surface,
         bool useValidationLayers
     )
     {
         device = ::CreateLogicalDevice(physicalDevice, surface, useValidationLayers);
-        graphicsQueue = m_device->getQueue(indices.graphicsFamily.value(), 0);
-        presentQueue = m_device->getQueue(indices.presentFamily.value(), 0);
+        QueueFamilyIndices indices = PhysicalDevice::FindQueueFamilies(physicalDevice, surface);
+        graphicsQueue = device->getQueue(indices.graphicsFamily.value(), 0);
+        presentQueue = device->getQueue(indices.presentFamily.value(), 0);
     }
     ~Internal()
     {
@@ -79,8 +85,8 @@ struct LogicalDevice::Internal
 };
 
 LogicalDevice::LogicalDevice(
-    vk::PhysicalDevice &physicalDevice,
-    VkSurfaceKHR &surface,
+    vk::PhysicalDevice physicalDevice,
+    VkSurfaceKHR surface,
     bool useValidationLayers
 ) : internal(MakeInternalPtr<Internal>(physicalDevice, surface, useValidationLayers)) {}
 

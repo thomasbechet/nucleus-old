@@ -11,13 +11,17 @@ using namespace nuvk;
 
 Engine::Engine()
 {
-    m_context = std::make_unique<Context>();
-    m_swapchain = std::make_unique<Swapchain>();
+    // m_context = std::make_unique<Context>();
+    // m_swapchain = std::make_unique<Swapchain>();
     
     //initialize();
+
+    m_context = std::make_unique<Context>();
 }
 Engine::~Engine()
 {
+    m_context.reset();
+
     //terminate();
 }
 
@@ -26,9 +30,9 @@ void Engine::render()
     //drawFrame();
 }
 
-void Engine::Interrupt(std::string msg)
+void Engine::Interrupt(std::string_view msg)
 {
-    nu_interrupt(("[NUVK] " + msg + "\n").c_str());
+    nu_interrupt(("[NUVK] " + std::string(msg) + "\n").c_str());
 }
 // std::vector<const char*> Engine::GetRequiredExtensions(GLFWInterface &glfwInterface)
 // {

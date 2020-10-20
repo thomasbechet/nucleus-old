@@ -1,11 +1,6 @@
 #pragma once
 
 #include "context.hpp"
-#include "swapchain.hpp"
-
-#include <vulkan/vulkan.hpp>
-
-#include <optional>
 
 namespace nuvk
 {
@@ -35,7 +30,7 @@ namespace nuvk
         void render();
 
     public:
-        static void Interrupt(std::string msg);
+        static void Interrupt(std::string_view msg);
         // static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface);
         // static std::vector<const char*> GetRequiredValidationLayers();
         // static std::vector<const char*> GetRequiredDeviceExtensions();
@@ -60,7 +55,6 @@ namespace nuvk
         void drawFrame();
 
         std::unique_ptr<Context> m_context;
-        std::unique_ptr<Swapchain> m_swapchain;
 
         // void createInstance();
         // void setupDebugCallback();

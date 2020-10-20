@@ -1,26 +1,27 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
+#include "../utility/glfwinterface.hpp"
 
 #include <vulkan/vulkan.hpp>
 
-#include <memory>
+#include <string>
 
 namespace nuvk
 {
     class Context
     {
     public:
-        inline constexpr auto Section = "CONTEXT";
+        static inline constexpr std::string_view Section = "CONTEXT";
         
-        Context(bool enableValidationLayers = true);
+        Context();
 
         vk::UniqueDevice &getDevice();
         vk::SurfaceKHR &getSurface();
 
         static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers);
         static std::vector<const char*> GetRequiredValidationLayers();
-        static std::vector<const char*> GetRequiredDeviceExtensions()
+        static std::vector<const char*> GetRequiredDeviceExtensions();
 
     private:
         struct Internal;
