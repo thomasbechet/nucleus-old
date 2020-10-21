@@ -18,6 +18,7 @@ namespace nuvk
         );
         
         VkSurfaceKHR getSurface();
+        vk::Format getFormat();
 
     private:
         struct Internal;

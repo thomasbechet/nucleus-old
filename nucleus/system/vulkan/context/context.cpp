@@ -1,14 +1,11 @@
 #include "context.hpp"
 
+#include "../engine/engine.hpp"
 #include "../utility/glfwinterface.hpp"
 #include "../utility/debugutilsmessenger.hpp"
 #include "../utility/logger.hpp"
 #include "instance.hpp"
-#include "surface.hpp"
 #include "physicaldevice.hpp"
-#include "logicaldevice.hpp"
-#include "swapchain.hpp"
-#include "engine.hpp"
 
 #include <optional>
 #include <set>
@@ -27,7 +24,7 @@ struct Context::Internal
     std::unique_ptr<DebugUtilsMessenger> debugUtilsMessenger;
     std::unique_ptr<Surface> surface;
     std::unique_ptr<PhysicalDevice> physicalDevice;
-    std::unique_ptr<LogicalDevice> logicalDevice;
+    std::unique_ptr<Device> device;
     std::unique_ptr<Swapchain> swapchain;
 
     Internal()
@@ -60,9 +57,9 @@ struct Context::Internal
             surface->getSurface()  
         );
 
-        // create logical device
-        Logger::Info(Context::Section, "Creating logical device...");
-        logicalDevice = std::make_unique<LogicalDevice>(
+        // create device
+        Logger::Info(Context::Section, "Creating device...");
+        device = std::make_unique<Device>(
             physicalDevice->getPhysicalDevice(),
             surface->getSurface(),
             enableValidationLayers
@@ -71,7 +68,7 @@ struct Context::Internal
         // create swapchain
         Logger::Info(Context::Section, "Creating swapchain...");
         swapchain = std::make_unique<Swapchain>(
-            logicalDevice->getLogicalDevice(),
+            device->getDevice(),
             physicalDevice->getPhysicalDevice(),
             surface->getSurface(),
             900, 450
@@ -79,10 +76,10 @@ struct Context::Internal
     }
     ~Internal()
     {
-        logicalDevice->getLogicalDevice()->waitIdle();
+        device->getDevice().waitIdle();
 
         swapchain.reset();
-        logicalDevice.reset();
+        device.reset();
         physicalDevice.reset();
         surface.reset();
         debugUtilsMessenger.reset();
@@ -92,6 +89,19 @@ struct Context::Internal
 };
 
 Context::Context() : internal(MakeInternalPtr<Internal>()) {}
+
+Device &Context::getDevice()
+{
+    return *internal->device;
+}
+Surface &Context::getSurface()
+{
+    return *internal->surface;
+}
+Swapchain &Context::getSwapchain()
+{
+    return *internal->swapchain;
+}
 
 std::vector<const char*> Context::GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers)
 {

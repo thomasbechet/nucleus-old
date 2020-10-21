@@ -1,6 +1,6 @@
 #include "swapchain.hpp"
 
-#include "engine.hpp"
+#include "../engine/engine.hpp"
 #include "physicaldevice.hpp"
 
 using namespace nuvk;
@@ -48,7 +48,7 @@ namespace
     }
 
     static vk::UniqueSwapchainKHR CreateSwapchain(
-        vk::UniqueDevice &device,
+        vk::Device &device,
         vk::PhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         uint32_t width, uint32_t height,
@@ -99,9 +99,9 @@ namespace
         createInfo.oldSwapchain = vk::SwapchainKHR(nullptr);
 
         try {
-            vk::UniqueSwapchainKHR swapChain = device->createSwapchainKHRUnique(createInfo);
+            vk::UniqueSwapchainKHR swapChain = device.createSwapchainKHRUnique(createInfo);
 
-            swapChainImages = device->getSwapchainImagesKHR(*swapChain);
+            swapChainImages = device.getSwapchainImagesKHR(*swapChain);
             swapChainImageFormat = surfaceFormat.format;
             swapChainExtent = extent;
 
@@ -112,9 +112,38 @@ namespace
 
         throw std::runtime_error("Unknown error.");
     }
-    static void CreateImageViews()
+    static std::vector<vk::UniqueImageView> CreateImageViews(
+        vk::Device &device,
+        std::vector<vk::Image> &swapchainImages,
+        vk::Format &swapchainImageFormat
+    )
     {
+        std::vector<vk::UniqueImageView> swapChainImageViews;
+        swapChainImageViews.resize(swapchainImages.size());
 
+        for (uint32_t i = 0; i < swapchainImages.size(); i++) {
+            vk::ImageViewCreateInfo createInfo = {};
+            createInfo.image = swapchainImages[i];
+            createInfo.viewType = vk::ImageViewType::e2D;
+            createInfo.format = swapchainImageFormat;
+            createInfo.components.r = vk::ComponentSwizzle::eIdentity;
+            createInfo.components.g = vk::ComponentSwizzle::eIdentity;
+            createInfo.components.b = vk::ComponentSwizzle::eIdentity;
+            createInfo.components.a = vk::ComponentSwizzle::eIdentity;
+            createInfo.subresourceRange.aspectMask = vk::ImageAspectFlagBits::eColor;
+            createInfo.subresourceRange.baseMipLevel = 0;
+            createInfo.subresourceRange.levelCount = 1;
+            createInfo.subresourceRange.baseArrayLayer = 0;
+            createInfo.subresourceRange.layerCount = 1;
+
+            try {
+                swapChainImageViews[i] = device.createImageViewUnique(createInfo);
+            } catch (vk::SystemError &err) {
+                Engine::Interrupt("Failed to create image views.");
+            }
+        }
+
+        return swapChainImageViews;
     }
 }
 
@@ -129,7 +158,7 @@ struct Swapchain::Internal
     std::vector<vk::UniqueFramebuffer> swapchainFramebuffers;
 
     Internal(
-        vk::UniqueDevice &device,
+        vk::Device &device,
         vk::PhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         uint32_t width, uint32_t height
@@ -137,6 +166,7 @@ struct Swapchain::Internal
     {
         swapchain = ::CreateSwapchain(device, physicalDevice, surface, width, height, 
             swapchainImages, swapchainImageFormat, swapchainExtent);
+        swapchainImageViews = ::CreateImageViews(device, swapchainImages, swapchainImageFormat);
     }
     ~Internal()
     {
@@ -145,11 +175,16 @@ struct Swapchain::Internal
 };
 
 Swapchain::Swapchain(
-    vk::UniqueDevice &device,
+    vk::Device &device,
     vk::PhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
     uint32_t width, uint32_t height
 ) : internal(MakeInternalPtr<Internal>(device, physicalDevice, surface, width, height)) {}
+
+vk::Format Swapchain::getFormat()
+{
+    return internal->swapchainImageFormat;
+}
 
 SwapChainSupportDetails Swapchain::QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface)
 {

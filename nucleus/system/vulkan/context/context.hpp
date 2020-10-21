@@ -2,6 +2,9 @@
 
 #include "../utility/internalptr.hpp"
 #include "../utility/glfwinterface.hpp"
+#include "device.hpp"
+#include "surface.hpp"
+#include "swapchain.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -16,8 +19,9 @@ namespace nuvk
         
         Context();
 
-        vk::UniqueDevice &getDevice();
-        vk::SurfaceKHR &getSurface();
+        Device &getDevice();
+        Surface &getSurface();
+        Swapchain &getSwapchain();
 
         static std::vector<const char*> GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers);
         static std::vector<const char*> GetRequiredValidationLayers();

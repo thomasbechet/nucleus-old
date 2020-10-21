@@ -1,6 +1,6 @@
 #include "glfwinterface.hpp"
 
-#include "../context/engine.hpp"
+#include "../engine/engine.hpp"
 
 using namespace nuvk;
 

@@ -1,7 +1,7 @@
 #include "instance.hpp"
 
 #include "../utility/logger.hpp"
-#include "engine.hpp"
+#include "../engine/engine.hpp"
 #include "context.hpp"
 
 using namespace nuvk;

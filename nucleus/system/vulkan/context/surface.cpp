@@ -1,7 +1,7 @@
 #include "surface.hpp"
 
 #include "../utility/glfwinterface.hpp"
-#include "engine.hpp"
+#include "../engine/engine.hpp"
 #include "surface.hpp"
 
 using namespace nuvk;

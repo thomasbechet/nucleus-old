@@ -17,9 +17,11 @@ Engine::Engine()
     //initialize();
 
     m_context = std::make_unique<Context>();
+    m_renderContext = std::make_unique<RenderContext>(*m_context);
 }
 Engine::~Engine()
 {
+    m_renderContext.reset();
     m_context.reset();
 
     //terminate();

@@ -1,26 +1,10 @@
 #pragma once
 
-#include "context.hpp"
+#include "../context/context.hpp"
+#include "../render/rendercontext.hpp"
 
 namespace nuvk
 {
-    // struct QueueFamilyIndices
-    // {
-    //     std::optional<uint32_t> graphicsFamily;
-    //     std::optional<uint32_t> presentFamily;
-
-    //     bool isComplete() {
-    //         return graphicsFamily.has_value() && presentFamily.has_value();
-    //     }
-    // };
-
-    // struct SwapChainSupportDetails
-    // {
-    //     vk::SurfaceCapabilitiesKHR capabilities;
-    //     std::vector<vk::SurfaceFormatKHR> formats;
-    //     std::vector<vk::PresentModeKHR> presentModes;
-    // };
-
     class Engine
     {
     public:
@@ -55,6 +39,7 @@ namespace nuvk
         void drawFrame();
 
         std::unique_ptr<Context> m_context;
+        std::unique_ptr<RenderContext> m_renderContext;
 
         // void createInstance();
         // void setupDebugCallback();
