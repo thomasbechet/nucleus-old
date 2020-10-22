@@ -9,7 +9,13 @@ namespace nuvk
     class Pipeline
     {
     public:
-        Pipeline();
+        static inline constexpr std::string_view Section = "PIPELINE";
+
+        Pipeline(
+            const vk::Device &device,
+            const vk::RenderPass &renderPass,
+            vk::Extent2D extent
+        );
 
     private:
         struct Internal;

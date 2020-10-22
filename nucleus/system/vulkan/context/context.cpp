@@ -6,6 +6,11 @@
 #include "../utility/logger.hpp"
 #include "instance.hpp"
 #include "physicaldevice.hpp"
+#include "device.hpp"
+#include "surface.hpp"
+#include "swapchain.hpp"
+#include "renderpass.hpp"
+#include "pipeline.hpp"
 
 #include <optional>
 #include <set>
@@ -26,6 +31,8 @@ struct Context::Internal
     std::unique_ptr<PhysicalDevice> physicalDevice;
     std::unique_ptr<Device> device;
     std::unique_ptr<Swapchain> swapchain;
+    std::unique_ptr<RenderPass> renderPass;
+    std::unique_ptr<Pipeline> pipeline;
 
     Internal()
     {
@@ -73,11 +80,28 @@ struct Context::Internal
             surface->getSurface(),
             900, 450
         );
+
+        // create renderpass
+        Logger::Info(Context::Section, "Creating renderpass...");
+        renderPass = std::make_unique<RenderPass>(
+            device->getDevice(),
+            swapchain->getFormat()
+        );
+
+        // create pipeline
+        Logger::Info(Context::Section, "Creating pipeline...");
+        pipeline = std::make_unique<Pipeline>(
+            device->getDevice(),
+            renderPass->getRenderPass(),
+            swapchain->getExtent()
+        );
     }
     ~Internal()
     {
         device->getDevice().waitIdle();
 
+        pipeline.reset();
+        renderPass.reset();
         swapchain.reset();
         device.reset();
         physicalDevice.reset();
@@ -89,19 +113,6 @@ struct Context::Internal
 };
 
 Context::Context() : internal(MakeInternalPtr<Internal>()) {}
-
-Device &Context::getDevice()
-{
-    return *internal->device;
-}
-Surface &Context::getSurface()
-{
-    return *internal->surface;
-}
-Swapchain &Context::getSwapchain()
-{
-    return *internal->swapchain;
-}
 
 std::vector<const char*> Context::GetRequiredExtensions(GLFWInterface &glfwInterface, bool useValidationLayers)
 {

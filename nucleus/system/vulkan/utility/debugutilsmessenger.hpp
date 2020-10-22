@@ -7,11 +7,11 @@ namespace nuvk
     class DebugUtilsMessenger
     {
     public:
-        DebugUtilsMessenger(vk::UniqueInstance &instance);
+        DebugUtilsMessenger(const vk::Instance &instance);
         ~DebugUtilsMessenger();
 
     private:
         VkDebugUtilsMessengerEXT m_callback;
-        vk::UniqueInstance &m_instance;
+        const vk::Instance &m_instance;
     };
 }

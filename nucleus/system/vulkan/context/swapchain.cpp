@@ -48,7 +48,7 @@ namespace
     }
 
     static vk::UniqueSwapchainKHR CreateSwapchain(
-        vk::Device &device,
+        const vk::Device &device,
         vk::PhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         uint32_t width, uint32_t height,
@@ -113,7 +113,7 @@ namespace
         throw std::runtime_error("Unknown error.");
     }
     static std::vector<vk::UniqueImageView> CreateImageViews(
-        vk::Device &device,
+        const vk::Device &device,
         std::vector<vk::Image> &swapchainImages,
         vk::Format &swapchainImageFormat
     )
@@ -158,7 +158,7 @@ struct Swapchain::Internal
     std::vector<vk::UniqueFramebuffer> swapchainFramebuffers;
 
     Internal(
-        vk::Device &device,
+        const vk::Device &device,
         vk::PhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         uint32_t width, uint32_t height
@@ -175,7 +175,7 @@ struct Swapchain::Internal
 };
 
 Swapchain::Swapchain(
-    vk::Device &device,
+    const vk::Device &device,
     vk::PhysicalDevice physicalDevice,
     VkSurfaceKHR surface,
     uint32_t width, uint32_t height
@@ -184,6 +184,18 @@ Swapchain::Swapchain(
 vk::Format Swapchain::getFormat()
 {
     return internal->swapchainImageFormat;
+}
+vk::Extent2D Swapchain::getExtent()
+{
+    return internal->swapchainExtent;
+}
+std::vector<vk::ImageView> Swapchain::getImageViews() const
+{
+    std::vector<vk::ImageView> imageViews;
+    for (auto &imageView : internal->swapchainImageViews) {
+        imageViews.push_back(*imageView);
+    }
+    return imageViews;
 }
 
 SwapChainSupportDetails Swapchain::QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface)

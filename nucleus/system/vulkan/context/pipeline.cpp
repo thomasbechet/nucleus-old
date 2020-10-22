@@ -1,11 +1,14 @@
 #include "pipeline.hpp"
 
+#include "../engine/engine.hpp"
+#include "../utility/shaderhelper.hpp"
+
 using namespace nuvk;
 
 namespace 
 {
     vk::UniquePipelineLayout CreatePipelineLayout(
-
+        const vk::Device &device
     )
     {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo = {};
@@ -13,18 +16,23 @@ namespace
         pipelineLayoutInfo.pushConstantRangeCount = 0;
 
         try {
-            m_pipelineLayout = m_device->createPipelineLayoutUnique(pipelineLayoutInfo);
+            return device.createPipelineLayoutUnique(pipelineLayoutInfo);
         } catch (vk::SystemError &err) {
             Engine::Interrupt("Failed to create pipeline layout.");
         }
+
+        throw std::runtime_error("Unknown error.");
     }
 
     vk::UniquePipeline CreatePipeline(
-
+        const vk::Device &device,
+        const vk::PipelineLayout &pipelineLayout,
+        const vk::RenderPass &renderPass,
+        vk::Extent2D extent
     )
     {
-        auto vertShaderModule = Engine::CreateShaderModule(m_device, "engine/shader/spirv/shader.vert.spv");
-        auto fragShaderModule = Engine::CreateShaderModule(m_device, "engine/shader/spirv/shader.frag.spv");
+        auto vertShaderModule = ShaderHelper::CreateShaderModule(device, "engine/shader/spirv/shader.vert.spv");
+        auto fragShaderModule = ShaderHelper::CreateShaderModule(device, "engine/shader/spirv/shader.frag.spv");
 
         vk::PipelineShaderStageCreateInfo shaderStages[] = {
             {
@@ -52,15 +60,15 @@ namespace
         vk::Viewport viewport = {};
         viewport.x = 0.0f;
         viewport.y = 0.0f;
-        viewport.width = (float)m_swapChainExtent.width;
-        viewport.height = (float)m_swapChainExtent.height;
+        viewport.width = (float)extent.width;
+        viewport.height = (float)extent.height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
         vk::Rect2D scissor = {};
         scissor.offset.x = 0.0f;
         scissor.offset.y = 0.0f;
-        scissor.extent = m_swapChainExtent;
+        scissor.extent = extent;
 
         vk::PipelineViewportStateCreateInfo viewportState = {};
         viewportState.viewportCount = 1;
@@ -104,26 +112,34 @@ namespace
         pipelineInfo.pRasterizationState = &rasterizer;
         pipelineInfo.pMultisampleState = &multisampling;
         pipelineInfo.pColorBlendState = &colorBlending;
-        pipelineInfo.layout = *m_pipelineLayout;
-        pipelineInfo.renderPass = *m_renderPass;
+        pipelineInfo.layout = pipelineLayout;
+        pipelineInfo.renderPass = renderPass;
         pipelineInfo.subpass = 0;
         pipelineInfo.basePipelineHandle = nullptr;
 
         try {
-            m_graphicsPipeline = m_device->createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
+            return device.createGraphicsPipelineUnique(nullptr, pipelineInfo).value;
         } catch (vk::SystemError &err) {
             Engine::Interrupt("Failed to create graphics pipeline.");
         }
+
+        throw std::runtime_error("Unknown error.");
     }
 }
 
 struct Pipeline::Internal
 {
+    vk::UniquePipelineLayout pipelineLayout;
     vk::UniquePipeline pipeline;
 
-    Internal()
+    Internal(
+        const vk::Device &device,
+        const vk::RenderPass &renderPass,
+        vk::Extent2D extent
+    )
     {
-        pipeline = ::CreatePipeline();
+        pipelineLayout = ::CreatePipelineLayout(device);
+        pipeline = ::CreatePipeline(device, *pipelineLayout, renderPass, extent);
     }
     ~Internal()
     {
@@ -131,6 +147,9 @@ struct Pipeline::Internal
     }
 };
 
-Pipeline::Pipeline() : 
-    internal(MakeInternalPtr<Internal>()) {}
+Pipeline::Pipeline(
+    const vk::Device &device,
+    const vk::RenderPass &renderPass,
+    vk::Extent2D extent
+) : internal(MakeInternalPtr<Internal>(device, renderPass, extent)) {}
 

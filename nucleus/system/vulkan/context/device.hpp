@@ -18,9 +18,11 @@ namespace nuvk
             bool useValidationLayers
         );
 
-        vk::Device &getDevice();
-        vk::Queue &getGraphicsQueue();
-        vk::Queue &getPresentQueue();
+        const vk::Device &getDevice() const;
+        const vk::Queue &getGraphicsQueue() const;
+        uint32_t getGraphicsQueueIndex() const;
+        const vk::Queue &getPresentQueue() const;
+        uint32_t getPresentQueueIndex() const;
 
     private:
         struct Internal;

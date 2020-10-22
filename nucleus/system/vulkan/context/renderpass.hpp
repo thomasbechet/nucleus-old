@@ -12,7 +12,7 @@ namespace nuvk
         static constexpr std::string_view Section = "RENDERPASS";
 
         RenderPass(
-            vk::Device &device,
+            const vk::Device &device,
             vk::Format swapChainFormat
         );
 

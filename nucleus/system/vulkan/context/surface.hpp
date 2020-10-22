@@ -13,7 +13,7 @@ namespace nuvk
         static inline constexpr std::string_view Section = "SURFACE";
 
         Surface(
-            vk::UniqueInstance &instance,
+            const vk::Instance &instance,
             GLFWInterface &glfwInterface
         );
         

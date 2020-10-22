@@ -24,7 +24,7 @@ namespace nuvk
         static inline constexpr std::string_view Section = "PHYSICALDEVICE";
 
         PhysicalDevice(
-            vk::UniqueInstance &instance,
+            const vk::Instance &instance,
             vk::SurfaceKHR surface
         );
 

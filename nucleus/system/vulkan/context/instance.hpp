@@ -14,7 +14,7 @@ namespace nuvk
 
         Instance(GLFWInterface &interface, bool enableValidationLayers = true);
 
-        vk::UniqueInstance &getInstance();
+        vk::Instance &getInstance();
 
     private:
         struct Internal;

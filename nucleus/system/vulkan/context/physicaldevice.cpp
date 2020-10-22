@@ -37,13 +37,13 @@ namespace
     }
 
     static vk::PhysicalDevice PickPhysicalDevice(
-        vk::UniqueInstance &instance,
+        const vk::Instance &instance,
         vk::SurfaceKHR surface
     )
     {
         vk::PhysicalDevice physicalDevice;
 
-        auto devices = instance->enumeratePhysicalDevices();
+        auto devices = instance.enumeratePhysicalDevices();
         if (devices.size() == 0) {
             Engine::Interrupt("Failed to find GPUs with Vulkan support.");
         }
@@ -68,7 +68,7 @@ struct PhysicalDevice::Internal
     vk::PhysicalDevice physicalDevice;
 
     Internal(
-        vk::UniqueInstance &instance,
+        const vk::Instance &instance,
         vk::SurfaceKHR surface
     )
     {
@@ -81,7 +81,7 @@ struct PhysicalDevice::Internal
 };
 
 PhysicalDevice::PhysicalDevice(
-    vk::UniqueInstance &instance,
+    const vk::Instance &instance,
     vk::SurfaceKHR surface
 ) : internal(MakeInternalPtr<Internal>(instance, surface)) {}
 

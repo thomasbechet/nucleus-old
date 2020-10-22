@@ -10,7 +10,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(VkDebugUtilsMessageSeverityF
     switch (messageSeverity)
     {
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT:
-        Logger::Warning("CALLBACK", std::string(pCallbackData->pMessage));
+        Logger::Info("CALLBACK", std::string(pCallbackData->pMessage));
         break;
     case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
         Logger::Info("CALLBACK", std::string(pCallbackData->pMessage));
@@ -47,22 +47,22 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
     }
 }
 
-DebugUtilsMessenger::DebugUtilsMessenger(vk::UniqueInstance &instance) :
+DebugUtilsMessenger::DebugUtilsMessenger(const vk::Instance &instance) :
     m_instance(instance)
 {
     auto createInfo = vk::DebugUtilsMessengerCreateInfoEXT(
         vk::DebugUtilsMessengerCreateFlagsEXT(),
-        vk::DebugUtilsMessageSeverityFlagBitsEXT::eVerbose | vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
+        vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
         vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
         DebugCallback,
         nullptr
     );
 
-    if (CreateDebugUtilsMessengerEXT(*m_instance, reinterpret_cast<const VkDebugUtilsMessengerCreateInfoEXT*>(&createInfo), nullptr, &m_callback) != VK_SUCCESS) {
+    if (CreateDebugUtilsMessengerEXT(m_instance, reinterpret_cast<const VkDebugUtilsMessengerCreateInfoEXT*>(&createInfo), nullptr, &m_callback) != VK_SUCCESS) {
         Engine::Interrupt("Failed to setup debug callback.");
     }
 }
 DebugUtilsMessenger::~DebugUtilsMessenger()
 {
-    DestroyDebugUtilsMessengerEXT(*m_instance, m_callback, nullptr);
+    DestroyDebugUtilsMessengerEXT(m_instance, m_callback, nullptr);
 }

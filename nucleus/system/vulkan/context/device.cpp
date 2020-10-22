@@ -66,6 +66,8 @@ struct Device::Internal
     vk::UniqueDevice device;
     vk::Queue graphicsQueue;
     vk::Queue presentQueue;
+    uint32_t graphicsQueueIndex;
+    uint32_t presentQueueIndex;
 
     Internal(
         vk::PhysicalDevice physicalDevice,
@@ -77,6 +79,8 @@ struct Device::Internal
         QueueFamilyIndices indices = PhysicalDevice::FindQueueFamilies(physicalDevice, surface);
         graphicsQueue = device->getQueue(indices.graphicsFamily.value(), 0);
         presentQueue = device->getQueue(indices.presentFamily.value(), 0);
+        graphicsQueueIndex = indices.graphicsFamily.value();
+        presentQueueIndex = indices.presentFamily.value();
     }
     ~Internal()
     {
@@ -90,15 +94,23 @@ Device::Device(
     bool useValidationLayers
 ) : internal(MakeInternalPtr<Internal>(physicalDevice, surface, useValidationLayers)) {}
 
-vk::Device &Device::getDevice()
+const vk::Device &Device::getDevice() const
 {
     return *internal->device;
 }
-vk::Queue &Device::getGraphicsQueue()
+const vk::Queue &Device::getGraphicsQueue() const
 {
     return internal->graphicsQueue;
 }
-vk::Queue &Device::getPresentQueue()
+uint32_t Device::getGraphicsQueueIndex() const
+{
+    return internal->graphicsQueueIndex;
+}
+const vk::Queue &Device::getPresentQueue() const
 {
     return internal->presentQueue;
+}
+uint32_t Device::getPresentQueueIndex() const
+{
+    return internal->presentQueueIndex;
 }

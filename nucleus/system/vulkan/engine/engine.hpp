@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../context/context.hpp"
-#include "../render/rendercontext.hpp"
 
 namespace nuvk
 {
@@ -39,7 +38,6 @@ namespace nuvk
         void drawFrame();
 
         std::unique_ptr<Context> m_context;
-        std::unique_ptr<RenderContext> m_renderContext;
 
         // void createInstance();
         // void setupDebugCallback();

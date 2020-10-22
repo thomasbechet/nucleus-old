@@ -97,7 +97,7 @@ Instance::Instance(
     bool enableValidationLayers
 ) : internal(MakeInternalPtr<Internal>(glfwInterface, enableValidationLayers)) {}
 
-vk::UniqueInstance &Instance::getInstance()
+vk::Instance &Instance::getInstance()
 {
-    return internal->instance;
+    return *internal->instance;
 }
