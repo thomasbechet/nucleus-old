@@ -24,7 +24,7 @@ namespace
     static vk::PresentModeKHR ChooseSwapPresentMode(const std::vector<vk::PresentModeKHR> &availablePresentModes)
     {
         vk::PresentModeKHR bestMode = vk::PresentModeKHR::eFifo;
-
+        
         for (const auto &availablePresentMode : availablePresentModes) {
             if (availablePresentMode == vk::PresentModeKHR::eMailbox) {
                 return availablePresentMode;
@@ -158,15 +158,26 @@ struct Swapchain::Internal
     std::vector<vk::UniqueFramebuffer> swapchainFramebuffers;
 
     Internal(
-        const vk::Device &device,
-        vk::PhysicalDevice physicalDevice,
-        VkSurfaceKHR surface,
+        const Device &device,
+        const PhysicalDevice &physicalDevice,
+        const Surface &surface,
         uint32_t width, uint32_t height
     )
     {
-        swapchain = ::CreateSwapchain(device, physicalDevice, surface, width, height, 
-            swapchainImages, swapchainImageFormat, swapchainExtent);
-        swapchainImageViews = ::CreateImageViews(device, swapchainImages, swapchainImageFormat);
+        swapchain = ::CreateSwapchain(
+            device.getDevice(), 
+            physicalDevice.getPhysicalDevice(), 
+            surface.getSurface(), 
+            width, height, 
+            swapchainImages, 
+            swapchainImageFormat,
+            swapchainExtent
+        );
+        swapchainImageViews = ::CreateImageViews(
+            device.getDevice(), 
+            swapchainImages, 
+            swapchainImageFormat
+        );
     }
     ~Internal()
     {
@@ -175,17 +186,17 @@ struct Swapchain::Internal
 };
 
 Swapchain::Swapchain(
-    const vk::Device &device,
-    vk::PhysicalDevice physicalDevice,
-    VkSurfaceKHR surface,
+    const Device &device,
+    const PhysicalDevice &physicalDevice,
+    const Surface &surface,
     uint32_t width, uint32_t height
 ) : internal(MakeInternalPtr<Internal>(device, physicalDevice, surface, width, height)) {}
 
-vk::Format Swapchain::getFormat()
+vk::Format Swapchain::getFormat() const
 {
     return internal->swapchainImageFormat;
 }
-vk::Extent2D Swapchain::getExtent()
+vk::Extent2D Swapchain::getExtent() const
 {
     return internal->swapchainExtent;
 }
@@ -196,6 +207,10 @@ std::vector<vk::ImageView> Swapchain::getImageViews() const
         imageViews.push_back(*imageView);
     }
     return imageViews;
+}
+const vk::SwapchainKHR &Swapchain::getSwapchain() const
+{
+    return *internal->swapchain;
 }
 
 SwapChainSupportDetails Swapchain::QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface)

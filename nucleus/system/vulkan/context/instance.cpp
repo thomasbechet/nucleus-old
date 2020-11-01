@@ -2,7 +2,7 @@
 
 #include "../utility/logger.hpp"
 #include "../engine/engine.hpp"
-#include "context.hpp"
+#include "device.hpp"
 
 using namespace nuvk;
 
@@ -32,11 +32,11 @@ namespace
     }
 
     static vk::UniqueInstance CreateInstance(
-        GLFWInterface &glfwInterface,
+        const WindowInterface &interface,
         bool enableValidationLayers
     )
     {
-        auto requiredValidationLayers = Context::GetRequiredValidationLayers();
+        auto requiredValidationLayers = Device::GetRequiredValidationLayers();
         if (enableValidationLayers && !CheckValidationLayerSupport(requiredValidationLayers)) {
             Engine::Interrupt("Validation layers requested, but not available.");
         }
@@ -49,7 +49,7 @@ namespace
             VK_API_VERSION_1_0
         );
 
-        auto requiredExtensions = Context::GetRequiredExtensions(glfwInterface, enableValidationLayers);
+        auto requiredExtensions = Instance::GetRequiredExtensions(interface, enableValidationLayers);
 
         auto createInfo = vk::InstanceCreateInfo(
             vk::InstanceCreateFlags(),
@@ -80,7 +80,7 @@ struct Instance::Internal
     vk::UniqueInstance instance;
 
     Internal(
-        GLFWInterface &interface,
+        const WindowInterface &interface,
         bool enableValidationLayers
     )
     {
@@ -93,11 +93,21 @@ struct Instance::Internal
 };
 
 Instance::Instance(
-    GLFWInterface &glfwInterface,
+    const WindowInterface &interface,
     bool enableValidationLayers
-) : internal(MakeInternalPtr<Internal>(glfwInterface, enableValidationLayers)) {}
+) : internal(MakeInternalPtr<Internal>(interface, enableValidationLayers)) {}
 
-vk::Instance &Instance::getInstance()
+const vk::Instance &Instance::getInstance() const
 {
     return *internal->instance;
+}
+
+std::vector<const char*> Instance::GetRequiredExtensions(const WindowInterface &interface, bool useValidationLayers)
+{
+    std::vector<const char*> extensions = interface.getRequiredInstanceExtensions();
+    if (useValidationLayers) {
+        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+    }
+
+    return extensions;
 }

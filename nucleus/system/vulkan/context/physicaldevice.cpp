@@ -2,6 +2,7 @@
 
 #include "../engine/engine.hpp"
 #include "swapchain.hpp"
+#include "device.hpp"
 
 #include <set>
 
@@ -11,7 +12,7 @@ namespace
 {
     static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device)
     {
-        std::vector<const char*> deviceExtensions = Context::GetRequiredDeviceExtensions();
+        std::vector<const char*> deviceExtensions = Device::GetRequiredDeviceExtensions();
         std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
         for (const auto &extension : device.enumerateDeviceExtensionProperties()) {
@@ -68,11 +69,11 @@ struct PhysicalDevice::Internal
     vk::PhysicalDevice physicalDevice;
 
     Internal(
-        const vk::Instance &instance,
-        vk::SurfaceKHR surface
+        const Instance &instance,
+        const Surface &surface
     )
     {
-        physicalDevice = ::PickPhysicalDevice(instance, surface); 
+        physicalDevice = ::PickPhysicalDevice(instance.getInstance(), surface.getSurface()); 
     }
     ~Internal()
     {
@@ -81,13 +82,31 @@ struct PhysicalDevice::Internal
 };
 
 PhysicalDevice::PhysicalDevice(
-    const vk::Instance &instance,
-    vk::SurfaceKHR surface
+    const Instance &instance,
+    const Surface &surface
 ) : internal(MakeInternalPtr<Internal>(instance, surface)) {}
 
-vk::PhysicalDevice PhysicalDevice::getPhysicalDevice()
+vk::PhysicalDevice PhysicalDevice::getPhysicalDevice() const
 {
     return internal->physicalDevice;
+}
+uint32_t PhysicalDevice::getMemoryTypeIndex(
+    const uint32_t &filter,
+    const vk::MemoryPropertyFlags &flags
+) const
+{
+    vk::PhysicalDeviceMemoryProperties memoryProperties {
+        internal->physicalDevice.getMemoryProperties()
+    };
+
+    for (uint32_t index = 0; index < memoryProperties.memoryTypeCount; index++) {
+        if ((filter & (1 << index)) && (memoryProperties.memoryTypes[index].propertyFlags & flags) == flags) {
+            return index;
+        }
+    }
+
+    Engine::Interrupt("Failed to find suitable memory type.");
+    throw std::runtime_error("Unknown error.");
 }
 
 QueueFamilyIndices PhysicalDevice::FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface)

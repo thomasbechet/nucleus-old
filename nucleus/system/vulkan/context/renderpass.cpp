@@ -6,7 +6,7 @@ using namespace nuvk;
 
 namespace
 {
-    vk::UniqueRenderPass CreateRenderPass(
+    static vk::UniqueRenderPass CreateRenderPass(
         const vk::Device &device,
         vk::Format swapChainFormat
     )
@@ -50,11 +50,11 @@ struct RenderPass::Internal
     vk::UniqueRenderPass renderPass;
 
     Internal(
-        const vk::Device &device,
-        vk::Format swapChainFormat
+        const Device &device,
+        const Swapchain &swapchain
     )
     {
-        renderPass = ::CreateRenderPass(device, swapChainFormat);    
+        renderPass = ::CreateRenderPass(device.getDevice(), swapchain.getFormat());    
     }
     ~Internal()
     {
@@ -63,11 +63,11 @@ struct RenderPass::Internal
 };
 
 RenderPass::RenderPass(
-    const vk::Device &device,
-    vk::Format swapChainFormat
-) : internal(MakeInternalPtr<Internal>(device, swapChainFormat)) {}
+    const Device &device,
+    const Swapchain &swapchain
+) : internal(MakeInternalPtr<Internal>(device, swapchain)) {}
 
-vk::RenderPass &RenderPass::getRenderPass()
+const vk::RenderPass &RenderPass::getRenderPass() const
 {
     return *internal->renderPass;
 }

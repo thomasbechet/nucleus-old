@@ -1,7 +1,6 @@
 #include "device.hpp"
 
 #include "../engine/engine.hpp"
-#include "context.hpp"
 
 #include <set>
 
@@ -41,11 +40,11 @@ namespace
         createInfo.pEnabledFeatures = &deviceFeatures;
         createInfo.enabledExtensionCount = 0;
 
-        auto deviceExtensions = Context::GetRequiredDeviceExtensions();
+        auto deviceExtensions = Device::GetRequiredDeviceExtensions();
         createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
         createInfo.ppEnabledExtensionNames =  deviceExtensions.data();
 
-        auto layers = Context::GetRequiredValidationLayers();
+        auto layers = Device::GetRequiredValidationLayers();
         if (useValidationLayers) {
             createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
             createInfo.ppEnabledLayerNames = layers.data();
@@ -70,13 +69,20 @@ struct Device::Internal
     uint32_t presentQueueIndex;
 
     Internal(
-        vk::PhysicalDevice physicalDevice,
-        VkSurfaceKHR &surface,
+        const PhysicalDevice &physicalDevice,
+        const Surface &surface,
         bool useValidationLayers
     )
     {
-        device = ::CreateDevice(physicalDevice, surface, useValidationLayers);
-        QueueFamilyIndices indices = PhysicalDevice::FindQueueFamilies(physicalDevice, surface);
+        device = ::CreateDevice(
+            physicalDevice.getPhysicalDevice(), 
+            surface.getSurface(), 
+            useValidationLayers
+        );
+        QueueFamilyIndices indices = PhysicalDevice::FindQueueFamilies(
+            physicalDevice.getPhysicalDevice(), 
+            surface.getSurface()
+        );
         graphicsQueue = device->getQueue(indices.graphicsFamily.value(), 0);
         presentQueue = device->getQueue(indices.presentFamily.value(), 0);
         graphicsQueueIndex = indices.graphicsFamily.value();
@@ -89,8 +95,8 @@ struct Device::Internal
 };
 
 Device::Device(
-    vk::PhysicalDevice physicalDevice,
-    VkSurfaceKHR surface,
+    const PhysicalDevice &physicalDevice,
+    const Surface &surface,
     bool useValidationLayers
 ) : internal(MakeInternalPtr<Internal>(physicalDevice, surface, useValidationLayers)) {}
 
@@ -113,4 +119,17 @@ const vk::Queue &Device::getPresentQueue() const
 uint32_t Device::getPresentQueueIndex() const
 {
     return internal->presentQueueIndex;
+}
+
+std::vector<const char*> Device::GetRequiredValidationLayers()
+{
+    return {
+        "VK_LAYER_KHRONOS_validation"
+    };
+}
+std::vector<const char*> Device::GetRequiredDeviceExtensions()
+{
+    return {
+        "VK_KHR_swapchain"
+    };
 }

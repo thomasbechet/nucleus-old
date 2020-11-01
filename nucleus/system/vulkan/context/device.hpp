@@ -2,6 +2,7 @@
 
 #include "../utility/internalptr.hpp"
 #include "physicaldevice.hpp"
+#include "surface.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -13,8 +14,8 @@ namespace nuvk
         static inline constexpr std::string_view Section = "DEVICE";
 
         Device(
-            vk::PhysicalDevice physicalDevice,
-            VkSurfaceKHR surface,
+            const PhysicalDevice &physicalDevice,
+            const Surface &surface,
             bool useValidationLayers
         );
 
@@ -23,6 +24,9 @@ namespace nuvk
         uint32_t getGraphicsQueueIndex() const;
         const vk::Queue &getPresentQueue() const;
         uint32_t getPresentQueueIndex() const;
+
+        static std::vector<const char*> GetRequiredValidationLayers();
+        static std::vector<const char*> GetRequiredDeviceExtensions();
 
     private:
         struct Internal;

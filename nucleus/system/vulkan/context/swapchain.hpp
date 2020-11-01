@@ -1,6 +1,9 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
+#include "device.hpp"
+#include "physicaldevice.hpp"
+#include "surface.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -21,15 +24,16 @@ namespace nuvk
         static inline constexpr std::string_view Section = "SWAPCHAIN";
 
         Swapchain(
-            const vk::Device &device,
-            vk::PhysicalDevice physicalDevice,
-            VkSurfaceKHR surface,
+            const Device &device,
+            const PhysicalDevice &physicalDevice,
+            const Surface &surface,
             uint32_t width, uint32_t height
         );
 
-        vk::Format getFormat();
-        vk::Extent2D getExtent();
+        vk::Format getFormat() const;
+        vk::Extent2D getExtent() const;
         std::vector<vk::ImageView> getImageViews() const;
+        const vk::SwapchainKHR &getSwapchain() const;
 
         static SwapChainSupportDetails QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface);        
     

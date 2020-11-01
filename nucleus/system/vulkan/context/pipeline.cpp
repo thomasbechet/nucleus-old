@@ -7,7 +7,7 @@ using namespace nuvk;
 
 namespace 
 {
-    vk::UniquePipelineLayout CreatePipelineLayout(
+    static vk::UniquePipelineLayout CreatePipelineLayout(
         const vk::Device &device
     )
     {
@@ -24,7 +24,7 @@ namespace
         throw std::runtime_error("Unknown error.");
     }
 
-    vk::UniquePipeline CreatePipeline(
+    static vk::UniquePipeline CreatePipeline(
         const vk::Device &device,
         const vk::PipelineLayout &pipelineLayout,
         const vk::RenderPass &renderPass,
@@ -50,8 +50,12 @@ namespace
         };
 
         vk::PipelineVertexInputStateCreateInfo vertexInputInfo = {};
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
+        auto bindingDescription = Vertex::GetBindingDescription();
+        auto attributeDescriptions = Vertex::GetAttributeDescriptions();
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         vk::PipelineInputAssemblyStateCreateInfo inputAssembly = {};
         inputAssembly.topology = vk::PrimitiveTopology::eTriangleList;
@@ -152,4 +156,9 @@ Pipeline::Pipeline(
     const vk::RenderPass &renderPass,
     vk::Extent2D extent
 ) : internal(MakeInternalPtr<Internal>(device, renderPass, extent)) {}
+
+const vk::Pipeline &Pipeline::getPipeline() const
+{
+    return *internal->pipeline;
+}
 

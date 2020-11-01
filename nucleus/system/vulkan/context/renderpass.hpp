@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
+#include "device.hpp"
+#include "swapchain.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -12,11 +14,11 @@ namespace nuvk
         static constexpr std::string_view Section = "RENDERPASS";
 
         RenderPass(
-            const vk::Device &device,
-            vk::Format swapChainFormat
+            const Device &device,
+            const Swapchain &swapchain
         );
 
-        vk::RenderPass &getRenderPass(); 
+        const vk::RenderPass &getRenderPass() const;
 
     private:
         struct Internal;

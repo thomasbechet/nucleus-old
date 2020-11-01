@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
+#include "instance.hpp"
+#include "surface.hpp"
 
 #include <vulkan/vulkan.hpp>
 
@@ -24,11 +26,15 @@ namespace nuvk
         static inline constexpr std::string_view Section = "PHYSICALDEVICE";
 
         PhysicalDevice(
-            const vk::Instance &instance,
-            vk::SurfaceKHR surface
+            const Instance &instance,
+            const Surface &surface
         );
 
-        vk::PhysicalDevice getPhysicalDevice();
+        vk::PhysicalDevice getPhysicalDevice() const;
+        uint32_t getMemoryTypeIndex(
+            const uint32_t &filter,
+            const vk::MemoryPropertyFlags &flags
+        ) const;
         
         static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface);
 
