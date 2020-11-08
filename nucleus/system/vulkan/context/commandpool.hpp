@@ -3,7 +3,7 @@
 #include "../utility/internalptr.hpp"
 #include "device.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace nuvk
 {
@@ -17,10 +17,11 @@ namespace nuvk
             uint32_t queueIndex
         );
 
-        vk::UniqueCommandBuffer beginCommandBuffer() const;
-        void endCommandBuffer(const vk::CommandBuffer &commandBuffer, const vk::Queue &queue) const;
+        VkCommandBuffer beginCommandBuffer() const;
+        void endCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const;
 
-        std::vector<vk::UniqueCommandBuffer> createCommandBuffers(const vk::Device &device, uint32_t count) const;
+        std::vector<VkCommandBuffer> createCommandBuffers(uint32_t count) const;
+        void destroyCommandBuffer(VkCommandBuffer commandBuffer) const;
 
     private:
         struct Internal;

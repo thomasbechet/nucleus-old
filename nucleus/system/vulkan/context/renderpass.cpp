@@ -6,59 +6,59 @@ using namespace nuvk;
 
 namespace
 {
-    static vk::UniqueRenderPass CreateRenderPass(
-        const vk::Device &device,
-        vk::Format swapChainFormat
+    static VkRenderPass CreateRenderPass(
+        VkDevice device,
+        VkFormat swapChainFormat
     )
     {
-        vk::AttachmentDescription colorAttachment = {};
-        colorAttachment.format = swapChainFormat;
-        colorAttachment.samples = vk::SampleCountFlagBits::e1;
-        colorAttachment.loadOp = vk::AttachmentLoadOp::eClear;
-        colorAttachment.stencilLoadOp = vk::AttachmentLoadOp::eDontCare;
-        colorAttachment.stencilStoreOp = vk::AttachmentStoreOp::eDontCare;
-        colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
-        colorAttachment.finalLayout = vk::ImageLayout::ePresentSrcKHR;
+        VkAttachmentDescription colorAttachment{};
+        colorAttachment.format         = swapChainFormat;
+        colorAttachment.samples        = VK_SAMPLE_COUNT_1_BIT;
+        colorAttachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        colorAttachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorAttachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorAttachment.finalLayout    = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
-        vk::AttachmentReference colorAttachmentRef = {};
+        VkAttachmentReference colorAttachmentRef{};
         colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = vk::ImageLayout::eColorAttachmentOptimal;
+        colorAttachmentRef.layout     = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-        vk::SubpassDescription subpass = {};
-        subpass.pipelineBindPoint = vk::PipelineBindPoint::eGraphics;
+        VkSubpassDescription subpass{};
+        subpass.pipelineBindPoint    = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
-        subpass.pColorAttachments = &colorAttachmentRef;
+        subpass.pColorAttachments    = &colorAttachmentRef;
 
-        vk::RenderPassCreateInfo renderPassInfo = {};
+        VkRenderPassCreateInfo renderPassInfo{};
+        renderPassInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.attachmentCount = 1;
-        renderPassInfo.pAttachments = &colorAttachment;
-        renderPassInfo.subpassCount = 1;
-        renderPassInfo.pSubpasses = &subpass;
+        renderPassInfo.pAttachments    = &colorAttachment;
+        renderPassInfo.subpassCount    = 1;
+        renderPassInfo.pSubpasses      = &subpass;
 
-        try {
-            return device.createRenderPassUnique(renderPassInfo);
-        } catch (vk::SystemError &err) {
-            Engine::Interrupt("Failed to create render pass.");
+        VkRenderPass renderPass;
+        if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+            Engine::Interrupt(RenderPass::Section, "Failed to create render pass.");
         }
-
-        throw std::runtime_error("Unknown error.");
+        return renderPass;
     }
 }
 
 struct RenderPass::Internal
 {
-    vk::UniqueRenderPass renderPass;
+    VkDevice device;
+    VkRenderPass renderPass;
 
     Internal(
         const Device &device,
         const Swapchain &swapchain
-    )
+    ) : device(device.getDevice())
     {
         renderPass = ::CreateRenderPass(device.getDevice(), swapchain.getFormat());    
     }
     ~Internal()
     {
-
+        vkDestroyRenderPass(device, renderPass, nullptr);
     }
 };
 
@@ -67,7 +67,7 @@ RenderPass::RenderPass(
     const Swapchain &swapchain
 ) : internal(MakeInternalPtr<Internal>(device, swapchain)) {}
 
-const vk::RenderPass &RenderPass::getRenderPass() const
+VkRenderPass RenderPass::getRenderPass() const
 {
-    return *internal->renderPass;
+    return internal->renderPass;
 }

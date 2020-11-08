@@ -6,13 +6,15 @@
 #include "physicaldevice.hpp"
 #include "surface.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace nuvk
 {
     class RenderContext
     {
     public:
+        static inline constexpr std::string_view Section = "RENDERCONTEXT";
+
         RenderContext(
             const Device &device,
             const PhysicalDevice &physicalDevice,
@@ -24,11 +26,11 @@ namespace nuvk
         bool beginRender();
         bool endRender();
 
-        const vk::Viewport &getViewport() const;
-        const vk::Rect2D &getScissor() const;
-        const vk::RenderPass &getRenderPass() const;
-        const vk::CommandBuffer &getActiveCommandBuffer() const;
-        vk::Extent2D getSwapchainExtent() const;
+        VkViewport getViewport() const;
+        VkRect2D getScissor() const;
+        VkRenderPass getRenderPass() const;
+        VkCommandBuffer getActiveCommandBuffer() const;
+        VkExtent2D getSwapchainExtent() const;
 
     private:
         struct Internal;

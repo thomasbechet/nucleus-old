@@ -59,16 +59,18 @@ struct DebugUtilsMessenger::Internal
         const Instance &instance
     ) : instance(instance)
     {
-        auto createInfo = vk::DebugUtilsMessengerCreateInfoEXT(
-            vk::DebugUtilsMessengerCreateFlagsEXT(),
-            vk::DebugUtilsMessageSeverityFlagBitsEXT::eWarning | vk::DebugUtilsMessageSeverityFlagBitsEXT::eError,
-            vk::DebugUtilsMessageTypeFlagBitsEXT::eGeneral | vk::DebugUtilsMessageTypeFlagBitsEXT::eValidation | vk::DebugUtilsMessageTypeFlagBitsEXT::ePerformance,
-            ::DebugCallback,
-            nullptr
-        );
+        VkDebugUtilsMessengerCreateInfoEXT createInfo{};
+        createInfo.sType           = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | 
+                                     VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        createInfo.messageType     = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+                                     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+                                     VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        createInfo.pfnUserCallback = ::DebugCallback;
+        createInfo.pUserData       = nullptr;
 
-        if (::CreateDebugUtilsMessengerEXT(instance.getInstance(), reinterpret_cast<const VkDebugUtilsMessengerCreateInfoEXT*>(&createInfo), nullptr, &callback) != VK_SUCCESS) {
-            Engine::Interrupt("Failed to setup debug callback.");
+        if (::CreateDebugUtilsMessengerEXT(instance.getInstance(), &createInfo, nullptr, &callback) != VK_SUCCESS) {
+            Engine::Interrupt(DebugUtilsMessenger::Section, "Failed to setup debug callback.");
         }
     }
     ~Internal()

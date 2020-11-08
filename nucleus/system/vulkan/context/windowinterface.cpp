@@ -19,16 +19,16 @@ struct WindowInterface::Internal
     {
         nu_module_handle_t window_module = nu_system_window_get_module_handle();
         if (nu_module_get_id(window_module) != NUGLFW_MODULE_ID) {
-            Engine::Interrupt("Vulkan requires GLFW module to work.");
+            Engine::Interrupt(WindowInterface::Section, "Vulkan requires GLFW module to work.");
         }
 
         nuglfw_window_interface_loader_pfn_t load_interface;
         if (nu_module_load_function(window_module, NUGLFW_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) != NU_SUCCESS) {
-            Engine::Interrupt("Vulkan failed to load glfw loader.");
+            Engine::Interrupt(WindowInterface::Section, "Vulkan failed to load glfw loader.");
         }
 
         if (load_interface(&m_interface) != NU_SUCCESS) {
-            Engine::Interrupt("Vulkan rasterizer failed to load glfw interface.");
+            Engine::Interrupt(WindowInterface::Section, "Vulkan rasterizer failed to load glfw interface.");
         }
     }
     ~Internal()
@@ -46,12 +46,11 @@ struct WindowInterface::Internal
         
         return extensions;
     }
-    VkSurfaceKHR createWindowSurface(const vk::Instance &instance) const
+    VkSurfaceKHR createWindowSurface(VkInstance instance) const
     {
         VkSurfaceKHR rawSurface;
-        VkInstance vkinstance = instance;
-        if (m_interface.create_window_surface(&vkinstance, &rawSurface) != NU_SUCCESS) {
-            Engine::Interrupt("Failed to create surface from GLFW.");
+        if (m_interface.create_window_surface(&instance, &rawSurface) != NU_SUCCESS) {
+            Engine::Interrupt(WindowInterface::Section, "Failed to create surface from GLFW.");
         }
         return rawSurface;
     }
@@ -63,7 +62,7 @@ std::vector<const char*> WindowInterface::getRequiredInstanceExtensions() const
 {
     return internal->getRequiredInstanceExtensions();
 }
-VkSurfaceKHR WindowInterface::createWindowSurface(const vk::Instance &instance) const
+VkSurfaceKHR WindowInterface::createWindowSurface(VkInstance instance) const
 {
     return internal->createWindowSurface(instance);
 }

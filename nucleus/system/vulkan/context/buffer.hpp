@@ -10,23 +10,25 @@ namespace nuvk
     class Buffer
     {
     public:
+        static inline constexpr std::string_view Section = "BUFFER";
+
         Buffer(
             const PhysicalDevice &physicalDevice,
             const Device &device,
-            const vk::BufferUsageFlags &bufferFlags,
-            const vk::MemoryPropertyFlags &memoryFlags,
-            const vk::DeviceSize &size,
+            VkBufferUsageFlags bufferFlags,
+            VkMemoryPropertyFlags memoryFlags,
+            VkDeviceSize size,
             const void *data
         );
 
-        const vk::Buffer &getBuffer() const;
+        VkBuffer getBuffer() const;
 
         static Buffer CreateDeviceLocalBuffer(
             const PhysicalDevice &physicalDevice,
             const Device &device,
             const CommandPool &commandPool,
-            const vk::BufferUsageFlags &bufferFlags,
-            const vk::DeviceSize &size,
+            VkBufferUsageFlags bufferFlags,
+            VkDeviceSize size,
             const void *data
         );
 

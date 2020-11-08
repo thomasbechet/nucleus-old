@@ -1,110 +1,120 @@
 #include "buffer.hpp"
 
+#include "../engine/engine.hpp"
+
+#include <cstring>
+
 using namespace nuvk;
 
 namespace
 {
-    static vk::UniqueBuffer CreateBuffer(
-        const vk::Device &device,
-        const vk::DeviceSize &size,
-        const vk::BufferUsageFlags &bufferFlags
+    static VkBuffer CreateBuffer(
+        VkDevice device,
+        VkDeviceSize size,
+        VkBufferUsageFlags bufferFlags
     )
     {
-        vk::BufferCreateInfo info {
-            vk::BufferCreateFlags(),
-            size,
-            bufferFlags,
-            vk::SharingMode::eExclusive,
-            0,
-            nullptr
-        };
+        VkBufferCreateInfo info{};
+        info.sType                 = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        info.size                  = size;
+        info.usage                 = bufferFlags;
+        info.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
+        info.queueFamilyIndexCount = 0;
+        info.pQueueFamilyIndices   = nullptr;
 
-        return device.createBufferUnique(info);
+        VkBuffer buffer;
+        if (vkCreateBuffer(device, &info, NULL, &buffer) != VK_SUCCESS) {
+            Engine::Interrupt(Buffer::Section, "Failed to create buffer.");
+        }
+        return buffer;
     }
 
-    vk::UniqueDeviceMemory AllocateMemory(
+    static VkDeviceMemory AllocateMemory(
         const PhysicalDevice &physicalDevice,
-        const vk::Device &device,
-        const vk::Buffer &buffer,
-        const vk::MemoryPropertyFlags &memoryFlags
+        VkDevice device,
+        VkBuffer buffer,
+        VkMemoryPropertyFlags memoryFlags
     )
     {
-        vk::MemoryRequirements memoryRequirements {
-            device.getBufferMemoryRequirements(buffer)
-        };
+        VkMemoryRequirements memoryRequirements;
+        vkGetBufferMemoryRequirements(device, buffer, &memoryRequirements);
 
-        uint32_t memoryTypeIndex {
-            physicalDevice.getMemoryTypeIndex(memoryRequirements.memoryTypeBits, memoryFlags)
-        };
+        VkMemoryAllocateInfo info{};
+        info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        info.allocationSize  = memoryRequirements.size;
+        info.memoryTypeIndex = physicalDevice.getMemoryTypeIndex(memoryRequirements.memoryTypeBits, memoryFlags);
 
-        vk::MemoryAllocateInfo info {
-            memoryRequirements.size,
-            memoryTypeIndex
-        };
-
-        return device.allocateMemoryUnique(info);
+        VkDeviceMemory deviceMemory;
+        if (vkAllocateMemory(device, &info, NULL, &deviceMemory) != VK_SUCCESS) {
+            Engine::Interrupt(Buffer::Section, "Failed to allocate memory.");
+        }
+        return deviceMemory;
     }
 }
 
 struct Buffer::Internal
 {
-    vk::UniqueBuffer buffer;
-    vk::UniqueDeviceMemory deviceMemory;
+    VkDevice device;
+    VkBuffer buffer;
+    VkDeviceMemory deviceMemory;
 
     Internal(
         const PhysicalDevice &physicalDevice,
         const Device &device,
-        const vk::BufferUsageFlags &bufferFlags,
-        const vk::MemoryPropertyFlags &memoryFlags,
-        const vk::DeviceSize &size,
+        VkBufferUsageFlags bufferFlags,
+        VkMemoryPropertyFlags memoryFlags,
+        VkDeviceSize size,
         const void *data
-    )
-    {
+    ) : device(device.getDevice())
+    {   
         buffer = ::CreateBuffer(device.getDevice(), size, bufferFlags);
-        deviceMemory = ::AllocateMemory(physicalDevice, device.getDevice(), *buffer, memoryFlags);
-        device.getDevice().bindBufferMemory(*buffer, *deviceMemory, 0);
+        deviceMemory = ::AllocateMemory(physicalDevice, device.getDevice(), buffer, memoryFlags);
+
+        vkBindBufferMemory(device.getDevice(), buffer, deviceMemory, 0);
 
         if (data) {
-            void *mappedMemory {device.getDevice().mapMemory(deviceMemory.get(), 0, size)};
+            void *mappedMemory;
+            vkMapMemory(device.getDevice(), deviceMemory, 0, size, 0, &mappedMemory);
             std::memcpy(mappedMemory, data, static_cast<size_t>(size));
-            device.getDevice().unmapMemory(deviceMemory.get());
+            vkUnmapMemory(device.getDevice(), deviceMemory);
         }
     }
     ~Internal()
     {
-
+        vkFreeMemory(device, deviceMemory, nullptr);
+        vkDestroyBuffer(device, buffer, nullptr);
     }
 };
 
 Buffer::Buffer(
     const PhysicalDevice &physicalDevice,
     const Device &device,
-    const vk::BufferUsageFlags &bufferFlags,
-    const vk::MemoryPropertyFlags &memoryFlags,
-    const vk::DeviceSize &size,
+    VkBufferUsageFlags bufferFlags,
+    VkMemoryPropertyFlags memoryFlags,
+    VkDeviceSize size,
     const void *data
 ) : internal(MakeInternalPtr<Internal>(physicalDevice, device, bufferFlags, memoryFlags, size, data)) {}
 
-const vk::Buffer &Buffer::getBuffer() const
+VkBuffer Buffer::getBuffer() const
 {
-    return *internal->buffer;
+    return internal->buffer;
 }
 
 Buffer Buffer::CreateDeviceLocalBuffer(
     const PhysicalDevice &physicalDevice,
     const Device &device,
     const CommandPool &commandPool,
-    const vk::BufferUsageFlags &bufferFlags,
-    const vk::DeviceSize &size,
+    VkBufferUsageFlags bufferFlags,
+    VkDeviceSize size,
     const void *data
 )
 {
     Buffer stagingBuffer(
         physicalDevice,
         device,
-        vk::BufferUsageFlagBits::eTransferSrc,
-        vk::MemoryPropertyFlagBits::eHostVisible |
-        vk::MemoryPropertyFlagBits::eHostCoherent,
+        VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
         size,
         data
     );
@@ -112,16 +122,21 @@ Buffer Buffer::CreateDeviceLocalBuffer(
     Buffer deviceLocalBuffer(
         physicalDevice,
         device,
-        vk::BufferUsageFlagBits::eTransferDst | bufferFlags,
-        vk::MemoryPropertyFlagBits::eDeviceLocal,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | bufferFlags,
+        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
         size,
         nullptr
     );
 
-    vk::UniqueCommandBuffer commandBuffer = commandPool.beginCommandBuffer();
-    vk::BufferCopy copyRegion(0, 0, size);
-    commandBuffer->copyBuffer(stagingBuffer.getBuffer(), deviceLocalBuffer.getBuffer(), 1, &copyRegion);
-    commandPool.endCommandBuffer(*commandBuffer, device.getGraphicsQueue());
+    VkCommandBuffer commandBuffer = commandPool.beginCommandBuffer();
+
+    VkBufferCopy copyRegion;
+    copyRegion.srcOffset = 0;
+    copyRegion.dstOffset = 0;
+    copyRegion.size      = size;
+    vkCmdCopyBuffer(commandBuffer, stagingBuffer.getBuffer(), deviceLocalBuffer.getBuffer(), 1, &copyRegion);
+
+    commandPool.endCommandBuffer(commandBuffer, device.getGraphicsQueue());
 
     return deviceLocalBuffer;
 }

@@ -4,7 +4,7 @@
 #include "physicaldevice.hpp"
 #include "surface.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace nuvk
 {
@@ -19,10 +19,10 @@ namespace nuvk
             bool useValidationLayers
         );
 
-        const vk::Device &getDevice() const;
-        const vk::Queue &getGraphicsQueue() const;
+        VkDevice getDevice() const;
+        VkQueue getGraphicsQueue() const;
         uint32_t getGraphicsQueueIndex() const;
-        const vk::Queue &getPresentQueue() const;
+        VkQueue getPresentQueue() const;
         uint32_t getPresentQueueIndex() const;
 
         static std::vector<const char*> GetRequiredValidationLayers();
