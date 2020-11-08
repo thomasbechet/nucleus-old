@@ -12,28 +12,6 @@ typedef struct {
 
 static nuvk_data_t _data;
 
-// static nu_result_t load_glfw_interface(void)
-// {
-//     nu_module_handle_t window_module = nu_system_window_get_module_handle();
-//     if (nu_module_get_id(window_module) != NUGLFW_MODULE_ID) {
-//         nu_fatal("Software rasterizer requires GLFW module to work.\n");
-//         return NU_FAILURE;
-//     }
-
-//     nuglfw_window_interface_loader_pfn_t load_interface;
-//     if (nu_module_load_function(window_module, NUGLFW_WINDOW_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) != NU_SUCCESS) {
-//         log_warning("Software rasterizer failed to load glfw loader.\n");
-//         return NU_FAILURE;
-//     }
-
-//     if (load_interface(&_data.glfw_interface) != NU_SUCCESS) {
-//         log_warning("Software rasterizer failed to load glfw interface.\n");
-//         return NU_FAILURE;
-//     }
-
-//     return NU_SUCCESS;
-// }
-
 nu_result_t nuvk::initialize(void)
 {
     _data.engine = std::make_unique<Engine>();

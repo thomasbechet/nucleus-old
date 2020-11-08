@@ -7,13 +7,35 @@ using namespace nuvk;
 
 namespace 
 {
-    static vk::UniquePipelineLayout CreatePipelineLayout(
+    static vk::UniqueDescriptorSetLayout CreateDescriptorSetLayout(
         const vk::Device &device
     )
     {
+        auto descriptorSetLayoutBinding = UniformBufferObject::GetDescriptorSetLayoutBinding();
+
+        vk::DescriptorSetLayoutCreateInfo layoutInfo{};
+        layoutInfo.bindingCount = 1;
+        layoutInfo.pBindings = &descriptorSetLayoutBinding;
+
+        try {
+            return device.createDescriptorSetLayoutUnique(layoutInfo);
+        } catch (vk::SystemError &err) {
+            Engine::Interrupt("Failed to create descriptor set layout.");
+        }
+
+        throw std::runtime_error("Unknown error.");
+    }
+
+    static vk::UniquePipelineLayout CreatePipelineLayout(
+        const vk::Device &device,
+        const vk::DescriptorSetLayout &descriptorSetLayout
+    )
+    {
         vk::PipelineLayoutCreateInfo pipelineLayoutInfo = {};
-        pipelineLayoutInfo.setLayoutCount = 0;
         pipelineLayoutInfo.pushConstantRangeCount = 0;
+
+        pipelineLayoutInfo.setLayoutCount = 0;
+        //pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
         try {
             return device.createPipelineLayoutUnique(pipelineLayoutInfo);
@@ -133,6 +155,7 @@ namespace
 
 struct Pipeline::Internal
 {
+    vk::UniqueDescriptorSetLayout descriptorSetLayout;
     vk::UniquePipelineLayout pipelineLayout;
     vk::UniquePipeline pipeline;
 
@@ -142,7 +165,8 @@ struct Pipeline::Internal
         vk::Extent2D extent
     )
     {
-        pipelineLayout = ::CreatePipelineLayout(device);
+        descriptorSetLayout = ::CreateDescriptorSetLayout(device);
+        pipelineLayout = ::CreatePipelineLayout(device, *descriptorSetLayout);
         pipeline = ::CreatePipeline(device, *pipelineLayout, renderPass, extent);
     }
     ~Internal()

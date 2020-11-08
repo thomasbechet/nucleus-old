@@ -8,6 +8,7 @@
 #include "../context/physicaldevice.hpp"
 #include "../context/device.hpp"
 #include "../context/surface.hpp"
+#include "../context/memoryallocator.hpp"
 #include "../context/rendercontext.hpp"
 #include "../context/pipeline.hpp"
 #include "../context/windowinterface.hpp"
@@ -29,9 +30,11 @@ struct Engine::Internal
     std::unique_ptr<PhysicalDevice> physicalDevice;
     std::unique_ptr<Device> device;
     std::unique_ptr<CommandPool> graphicsCommandPool;
+    std::unique_ptr<MemoryAllocator> memoryAllocator;
     std::unique_ptr<RenderContext> renderContext;
     std::unique_ptr<Pipeline> pipeline;
     std::unique_ptr<Buffer> vertexBuffer;
+    std::unique_ptr<Buffer> indiceBuffer;
 
     bool renderContextOutOfDate = false;
 
@@ -95,13 +98,22 @@ struct Engine::Internal
             *device,
             device->getGraphicsQueueIndex()
         );
+
+        // create memory allocator
+        Logger::Info(Engine::Section, "Create memory allocator...");
+        memoryAllocator = std::make_unique<MemoryAllocator>(
+            *instance,
+            *physicalDevice,
+            *device
+        );
     }
     void createAssets()
     {
         const std::vector<Vertex> vertices = {
-            {{0.0f, -0.5f}, {1.0f, 1.0f, 1.0f}},
-            {{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
         };
 
         // vertexBuffer = std::make_unique<Buffer>(
@@ -122,6 +134,21 @@ struct Engine::Internal
                 vk::BufferUsageFlagBits::eVertexBuffer,
                 sizeof(Vertex) * vertices.size(),
                 vertices.data()
+            )
+        );
+
+        const std::vector<uint32_t> indices = {
+            0, 1, 2, 2, 3, 0
+        };
+
+        indiceBuffer = std::make_unique<Buffer>(
+            Buffer::CreateDeviceLocalBuffer(
+                *physicalDevice,
+                *device,
+                *graphicsCommandPool,
+                vk::BufferUsageFlagBits::eIndexBuffer,
+                sizeof(uint32_t) * indices.size(),
+                indices.data()
             )
         );
     }
@@ -154,10 +181,12 @@ struct Engine::Internal
     }
     void destroyAssets()
     {
+        indiceBuffer.reset();
         vertexBuffer.reset();
     }
     void destroyContext()
     {
+        memoryAllocator.reset();
         graphicsCommandPool.reset();
         device.reset();
         physicalDevice.reset();
@@ -180,7 +209,9 @@ struct Engine::Internal
         const vk::Buffer vertexBuffers[] = {vertexBuffer->getBuffer()};
         const vk::DeviceSize offsets[] = {0};
         commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, offsets);
-        commandBuffer.draw(3, 1, 0, 0);
+        commandBuffer.bindIndexBuffer(indiceBuffer->getBuffer(), 0, vk::IndexType::eUint32);
+        commandBuffer.drawIndexed(6, 1, 0, 0, 0);
+        //commandBuffer.draw(3, 1, 0, 0);
 
         if (!renderContext->endRender()) {
             return false;

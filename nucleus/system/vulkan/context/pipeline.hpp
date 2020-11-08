@@ -38,6 +38,24 @@ namespace nuvk
         }
     };
 
+    struct UniformBufferObject
+    {
+        nu_mat4_t model;
+        nu_mat4_t view;
+        nu_mat4_t projection;
+
+        static vk::DescriptorSetLayoutBinding GetDescriptorSetLayoutBinding() {
+            vk::DescriptorSetLayoutBinding uboLayoutBinding{};
+
+            uboLayoutBinding.binding = 0;
+            uboLayoutBinding.descriptorType = vk::DescriptorType::eUniformBuffer;
+            uboLayoutBinding.descriptorCount = 1;
+            uboLayoutBinding.stageFlags = vk::ShaderStageFlagBits::eVertex;
+            
+            return uboLayoutBinding;
+        }
+    };
+
     class Pipeline
     {
     public:

@@ -12,6 +12,7 @@ FIND_PACKAGE(Vulkan REQUIRED FATAL_ERROR)
 
 INCLUDE_DIRECTORIES(
     ../../../
+    ../../../extlibs/VulkanMemoryAllocator/include/
     ${Vulkan_INCLUDE_DIRS}
 )
 
