@@ -10,19 +10,24 @@ using namespace nuvk;
 
 namespace
 {
-    static bool CheckDeviceExtensionSupport(vk::PhysicalDevice device)
+    static bool CheckDeviceExtensionSupport(VkPhysicalDevice device)
     {
         std::vector<const char*> deviceExtensions = Device::GetRequiredDeviceExtensions();
         std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
-        for (const auto &extension : device.enumerateDeviceExtensionProperties()) {
+        uint32_t extensionCount;
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+        std::vector<VkExtensionProperties> extensions(extensionCount);
+        vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, extensions.data());
+
+        for (const auto &extension : extensions) {
             requiredExtensions.erase(extension.extensionName);
         }
 
         return requiredExtensions.empty();
     }
 
-    static bool IsSuitable(vk::PhysicalDevice device, VkSurfaceKHR surface)
+    static bool IsSuitable(VkPhysicalDevice device, VkSurfaceKHR surface)
     {
         QueueFamilyIndices indices = PhysicalDevice::FindQueueFamilies(device, surface);
 
@@ -37,16 +42,20 @@ namespace
         return indices.isComplete() && extensionsSupported && swapChainAdequate;
     }
 
-    static vk::PhysicalDevice PickPhysicalDevice(
-        const vk::Instance &instance,
-        vk::SurfaceKHR surface
+    static VkPhysicalDevice PickPhysicalDevice(
+        VkInstance instance,
+        VkSurfaceKHR surface
     )
     {
-        vk::PhysicalDevice physicalDevice;
+        VkPhysicalDevice physicalDevice;
 
-        auto devices = instance.enumeratePhysicalDevices();
+        uint32_t physicalDeviceCount;
+        vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, nullptr);
+        std::vector<VkPhysicalDevice> devices(physicalDeviceCount);
+        vkEnumeratePhysicalDevices(instance, &physicalDeviceCount, devices.data());
+
         if (devices.size() == 0) {
-            Engine::Interrupt("Failed to find GPUs with Vulkan support.");
+            Engine::Interrupt(PhysicalDevice::Section, "Failed to find GPUs with Vulkan support.");
         }
 
         for (const auto &device : devices) {
@@ -57,7 +66,7 @@ namespace
         }
 
         if (!physicalDevice) {
-            Engine::Interrupt("Failed to find suitable GPU.");
+            Engine::Interrupt(PhysicalDevice::Section, "Failed to find suitable GPU.");
         }
 
         return physicalDevice;
@@ -66,7 +75,7 @@ namespace
 
 struct PhysicalDevice::Internal
 {
-    vk::PhysicalDevice physicalDevice;
+    VkPhysicalDevice physicalDevice;
 
     Internal(
         const Instance &instance,
@@ -86,18 +95,17 @@ PhysicalDevice::PhysicalDevice(
     const Surface &surface
 ) : internal(MakeInternalPtr<Internal>(instance, surface)) {}
 
-vk::PhysicalDevice PhysicalDevice::getPhysicalDevice() const
+VkPhysicalDevice PhysicalDevice::getPhysicalDevice() const
 {
     return internal->physicalDevice;
 }
 uint32_t PhysicalDevice::getMemoryTypeIndex(
-    const uint32_t &filter,
-    const vk::MemoryPropertyFlags &flags
+    uint32_t filter,
+    VkMemoryPropertyFlags flags
 ) const
 {
-    vk::PhysicalDeviceMemoryProperties memoryProperties {
-        internal->physicalDevice.getMemoryProperties()
-    };
+    VkPhysicalDeviceMemoryProperties memoryProperties;
+    vkGetPhysicalDeviceMemoryProperties(internal->physicalDevice, &memoryProperties);
 
     for (uint32_t index = 0; index < memoryProperties.memoryTypeCount; index++) {
         if ((filter & (1 << index)) && (memoryProperties.memoryTypes[index].propertyFlags & flags) == flags) {
@@ -105,21 +113,27 @@ uint32_t PhysicalDevice::getMemoryTypeIndex(
         }
     }
 
-    Engine::Interrupt("Failed to find suitable memory type.");
-    throw std::runtime_error("Unknown error.");
+    Engine::Interrupt(PhysicalDevice::Section, "Failed to find suitable memory type.");
+    return 0;
 }
 
-QueueFamilyIndices PhysicalDevice::FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface)
+QueueFamilyIndices PhysicalDevice::FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
 {
+    uint32_t queueFamilyCount;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
     QueueFamilyIndices indices;
-    auto queueFamilies = device.getQueueFamilyProperties();
     int i = 0;
     for (const auto &queueFamily : queueFamilies) {
-        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & vk::QueueFlagBits::eGraphics) {
+        if (queueFamily.queueCount > 0 && queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
             indices.graphicsFamily = i;
         }
 
-        if (queueFamily.queueCount > 0 && device.getSurfaceSupportKHR(i, surface)) {
+        VkBool32 supported;
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &supported);
+        if (queueFamily.queueCount > 0 && supported) {
             indices.presentFamily = i;
         }
 

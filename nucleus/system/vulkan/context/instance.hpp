@@ -3,7 +3,7 @@
 #include "../utility/internalptr.hpp"
 #include "windowinterface.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace nuvk
 {
@@ -17,7 +17,7 @@ namespace nuvk
             bool enableValidationLayers = true
         );
 
-        const vk::Instance &getInstance() const;
+        VkInstance getInstance() const;
 
         static std::vector<const char*> GetRequiredExtensions(const WindowInterface &interface, bool useValidationLayers);
 

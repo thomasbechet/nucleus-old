@@ -3,10 +3,11 @@
 #include "logger.hpp"
 
 #include <fstream>
+#include <vector>
 
 using namespace nuvk;
 
-vk::UniqueShaderModule ShaderHelper::CreateShaderModule(const vk::Device &device, const std::string &filename)
+VkShaderModule ShaderHelper::CreateShaderModule(VkDevice device, const std::string &filename)
 {
     std::ifstream file(filename, std::ios::ate | std::ios::binary);
     if (!file.is_open()) {
@@ -21,9 +22,12 @@ vk::UniqueShaderModule ShaderHelper::CreateShaderModule(const vk::Device &device
     file.read(buffer.data(), fileSize);
     file.close();
 
-    return device.createShaderModuleUnique({
-        vk::ShaderModuleCreateFlagBits(),
-        buffer.size(),
-        reinterpret_cast<const uint32_t*>(buffer.data())
-    });
+    VkShaderModuleCreateInfo info{};
+    info.sType    = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    info.codeSize = buffer.size();
+    info.pCode    = reinterpret_cast<const uint32_t*>(buffer.data());
+
+    VkShaderModule module;
+    vkCreateShaderModule(device, &info, nullptr, &module);
+    return module;
 }

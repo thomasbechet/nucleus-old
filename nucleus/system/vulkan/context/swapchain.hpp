@@ -5,7 +5,7 @@
 #include "physicaldevice.hpp"
 #include "surface.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 #include <vector>
 
@@ -13,9 +13,9 @@ namespace nuvk
 {
     struct SwapChainSupportDetails
     {
-        vk::SurfaceCapabilitiesKHR capabilities;
-        std::vector<vk::SurfaceFormatKHR> formats;
-        std::vector<vk::PresentModeKHR> presentModes;
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
     };
 
     class Swapchain
@@ -30,12 +30,12 @@ namespace nuvk
             uint32_t width, uint32_t height
         );
 
-        vk::Format getFormat() const;
-        vk::Extent2D getExtent() const;
-        std::vector<vk::ImageView> getImageViews() const;
-        const vk::SwapchainKHR &getSwapchain() const;
+        VkFormat getFormat() const;
+        VkExtent2D getExtent() const;
+        std::vector<VkImageView> getImageViews() const;
+        VkSwapchainKHR getSwapchain() const;
 
-        static SwapChainSupportDetails QuerySwapChainSupport(vk::PhysicalDevice device, VkSurfaceKHR surface);        
+        static SwapChainSupportDetails QuerySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);        
     
     private:
         struct Internal;

@@ -22,9 +22,9 @@ struct MemoryAllocator::Internal
     {
         VmaAllocatorCreateInfo allocatorInfo{};
         allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
-        allocatorInfo.instance = instance.getInstance();
-        allocatorInfo.physicalDevice = physicalDevice.getPhysicalDevice();
-        allocatorInfo.device = device.getDevice();
+        allocatorInfo.instance         = instance.getInstance();
+        allocatorInfo.physicalDevice   = physicalDevice.getPhysicalDevice();
+        allocatorInfo.device           = device.getDevice();
         vmaCreateAllocator(&allocatorInfo, &allocator);
     }
     ~Internal()

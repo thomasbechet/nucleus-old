@@ -10,62 +10,64 @@ using namespace nuvk;
 
 namespace
 {
-    static std::vector<vk::UniqueFramebuffer> CreateFramebuffers(
-        const vk::Device &device,
-        const std::vector<vk::ImageView> imageViews,
-        const vk::Extent2D extent,
-        const vk::RenderPass &renderpass
+    static std::vector<VkFramebuffer> CreateFramebuffers(
+        VkDevice device,
+        const std::vector<VkImageView> &imageViews,
+        VkExtent2D extent,
+        VkRenderPass renderpass
     )
     {
-        std::vector<vk::UniqueFramebuffer> framebuffers;
+        std::vector<VkFramebuffer> framebuffers;
 
         for (const auto &imageView : imageViews) {
-            std::array<vk::ImageView, 1> attachments{
+            std::array<VkImageView, 1> attachments{
                 imageView
             };
 
-            vk::FramebufferCreateInfo info(
-                vk::FramebufferCreateFlags(),
-                renderpass,
-                static_cast<uint32_t>(attachments.size()),
-                attachments.data(),
-                extent.width,
-                extent.height,
-                1
-            );
+            VkFramebufferCreateInfo info{};
+            info.sType           = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            info.renderPass      = renderpass;
+            info.attachmentCount = static_cast<uint32_t>(attachments.size());
+            info.pAttachments    = attachments.data();
+            info.width           = extent.width;
+            info.height          = extent.height;
+            info.layers          = 1;
 
-            framebuffers.push_back(device.createFramebufferUnique(info));
+            VkFramebuffer framebuffer;
+            if (vkCreateFramebuffer(device, &info, nullptr, &framebuffer) != VK_SUCCESS) {
+                Engine::Interrupt(RenderContext::Section, "Failed to create framebuffer.");
+            }
+            framebuffers.push_back(framebuffer);
         }
 
         return framebuffers;
     }
 
-    static vk::Rect2D CreateScissor(const Swapchain &swapchain)
+    static VkRect2D CreateScissor(const Swapchain &swapchain)
     {
-        vk::Offset2D offset{0, 0};
-        return vk::Rect2D {
-            offset,
-            swapchain.getExtent()
-        };
+        VkRect2D rect;
+        rect.offset.x = 0;
+        rect.offset.y = 0;
+        rect.extent   = swapchain.getExtent();
+        return rect;
     }
 
-    static vk::Viewport CreateViewport(const Swapchain &swapchain)
+    static VkViewport CreateViewport(const Swapchain &swapchain)
     {    
-        return vk::Viewport {
-            0.0f, 0.0f,
-            static_cast<float>(swapchain.getExtent().width),
-            static_cast<float>(swapchain.getExtent().height),
-            0.0, 1.0f
-        };
+        VkViewport viewport;
+        viewport.x        = 0.0f;
+        viewport.y        = 0.0f;
+        viewport.width    = static_cast<float>(swapchain.getExtent().width);
+        viewport.height   = static_cast<float>(swapchain.getExtent().height);
+        viewport.minDepth = 0.0f;
+        viewport.maxDepth = 1.0f;
+        return viewport;
     }
 
-    static std::array<vk::ClearValue, 1> CreateClearValues()
+    static std::array<VkClearValue, 1> CreateClearValues()
     {
-        vk::ClearValue color;
-        color.color = vk::ClearColorValue(std::array<float, 4>{
-            0.0f, 0.0f, 0.0f, 1.0f
-        });
-        return std::array<vk::ClearValue, 1>{color};
+        VkClearValue color = {0.0f, 0.0f, 0.0f, 1.0f};
+        return std::array<VkClearValue, 1>{color};
     }
 }
 
@@ -74,22 +76,23 @@ struct RenderContext::Internal
     std::unique_ptr<Swapchain> swapchain;
     std::unique_ptr<RenderPass> renderPass;
 
-    std::vector<vk::UniqueFramebuffer> framebuffers;
-    std::vector<vk::UniqueCommandBuffer> commandBuffers;
+    std::vector<VkFramebuffer> framebuffers;
+    std::vector<VkCommandBuffer> commandBuffers;
 
     const uint32_t maxInFlightFrames = 2;
-    std::vector<vk::UniqueSemaphore> imageAvailableSemaphores;
-    std::vector<vk::UniqueSemaphore> renderFinishedSemaphores;
-    std::vector<vk::UniqueFence> inFlightFences;
+    std::vector<VkSemaphore> imageAvailableSemaphores;
+    std::vector<VkSemaphore> renderFinishedSemaphores;
+    std::vector<VkFence> inFlightFences;
 
-    vk::Rect2D scissor;
-    vk::Viewport viewport;
-    std::array<vk::ClearValue, 1> clearValues;
+    VkRect2D scissor;
+    VkViewport viewport;
+    std::array<VkClearValue, 1> clearValues;
 
     uint32_t currentFrameIndex = 0;
     uint32_t currentSwapchainImageIndex = 0;
 
     const Device &device;
+    const CommandPool &commandPool;
     
     Internal(
         const Device &device,
@@ -97,7 +100,7 @@ struct RenderContext::Internal
         const Surface &surface,
         const CommandPool &commandPool,
         uint32_t width, uint32_t height
-    ) : device(device)
+    ) : device(device), commandPool(commandPool)
     {
         // create swapchain
         Logger::Info(RenderPass::Section, "Creating swapchain...");
@@ -124,11 +127,25 @@ struct RenderContext::Internal
             renderPass->getRenderPass()
         );
 
-        commandBuffers = commandPool.createCommandBuffers(device.getDevice(), framebuffers.size());
+        commandBuffers = commandPool.createCommandBuffers(framebuffers.size());
         for (uint32_t i = 0; i < maxInFlightFrames; i++) {
-            imageAvailableSemaphores.emplace_back(device.getDevice().createSemaphoreUnique({}));
-            renderFinishedSemaphores.emplace_back(device.getDevice().createSemaphoreUnique({}));
-            inFlightFences.emplace_back(device.getDevice().createFenceUnique({vk::FenceCreateFlagBits::eSignaled}));
+            VkSemaphore semaphore;
+            VkFence fence;
+
+            VkSemaphoreCreateInfo semaphoreInfo{};
+            semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+            vkCreateSemaphore(device.getDevice(), &semaphoreInfo, nullptr, &semaphore);
+            imageAvailableSemaphores.emplace_back(semaphore);
+            vkCreateSemaphore(device.getDevice(), &semaphoreInfo, nullptr, &semaphore);
+            renderFinishedSemaphores.emplace_back(semaphore);
+
+            VkFenceCreateInfo fenceInfo{};
+            fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+            fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+            vkCreateFence(device.getDevice(), &fenceInfo, nullptr, &fence);
+            inFlightFences.emplace_back(fence);
         }
         
         scissor = ::CreateScissor(*swapchain);
@@ -137,108 +154,134 @@ struct RenderContext::Internal
     }
     ~Internal()
     {
+        for (auto fence : inFlightFences) {
+            vkDestroyFence(device.getDevice(), fence, nullptr);
+        }
+        for (auto semaphore : renderFinishedSemaphores) {
+            vkDestroySemaphore(device.getDevice(), semaphore, nullptr);
+        }
+        for (auto semaphore : imageAvailableSemaphores) {
+            vkDestroySemaphore(device.getDevice(), semaphore, nullptr);
+        }
 
+        for (auto commandBuffer : commandBuffers) {
+            commandPool.destroyCommandBuffer(commandBuffer);
+        }
+        for (auto framebuffer : framebuffers) {
+            vkDestroyFramebuffer(device.getDevice(), framebuffer, nullptr);
+        }
+
+        renderPass.reset();
+        swapchain.reset();
     }
 
-    const vk::CommandBuffer &getActiveCommandBuffer() const
+    VkCommandBuffer getActiveCommandBuffer() const
     {
-        return *commandBuffers[currentSwapchainImageIndex];
+        return commandBuffers[currentSwapchainImageIndex];
     }
 
     bool beginRender()
     {
         // acquire next frame resource
-        const vk::Fence &inFlightFence{*inFlightFences[currentFrameIndex]};
-        const vk::Semaphore &imageAvailableSemaphore{*imageAvailableSemaphores[currentFrameIndex]};
+        VkFence inFlightFence = inFlightFences[currentFrameIndex];
+        VkSemaphore imageAvailableSemaphore = imageAvailableSemaphores[currentFrameIndex];
 
-        if (device.getDevice().waitForFences(1, &inFlightFence, VK_TRUE, std::numeric_limits<uint64_t>::max()) != vk::Result::eSuccess) {
-            Engine::Interrupt("Failed to wait fence.");
+        if (vkWaitForFences(device.getDevice(), 1, &inFlightFence, VK_TRUE, std::numeric_limits<uint64_t>::max()) != VK_SUCCESS) {
+            Engine::Interrupt(RenderContext::Section, "Failed to wait fence.");
         }
-        device.getDevice().resetFences(1, &inFlightFence);
+        vkResetFences(device.getDevice(), 1, &inFlightFence);
 
-        try {
-            currentSwapchainImageIndex = device.getDevice().acquireNextImageKHR(
-                swapchain->getSwapchain(),
-                std::numeric_limits<uint64_t>::max(),
-                imageAvailableSemaphore,
-                nullptr
-            ).value;
-        } catch (vk::OutOfDateKHRError &outOfDateError) {
-            return false;
+        VkResult result = vkAcquireNextImageKHR(
+            device.getDevice(),
+            swapchain->getSwapchain(),
+            std::numeric_limits<uint64_t>::max(),
+            imageAvailableSemaphore,
+            nullptr,
+            &currentSwapchainImageIndex
+        );
+        if (result != VK_SUCCESS) {
+            if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+                return false;
+            } else {
+                Engine::Interrupt(RenderContext::Section, "Failed to acquire next image KHR.");
+            }
         }
 
         // record beginning of command buffer
-        const vk::CommandBuffer &commandBuffer{getActiveCommandBuffer()};
-        commandBuffer.reset(vk::CommandBufferResetFlagBits::eReleaseResources);
+        VkCommandBuffer commandBuffer = getActiveCommandBuffer();
+        vkResetCommandBuffer(commandBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 
-        vk::CommandBufferBeginInfo commandBufferBeginInfo(
-            vk::CommandBufferUsageFlagBits::eOneTimeSubmit,
-            nullptr
-        );
-        if (commandBuffer.begin(&commandBufferBeginInfo) != vk::Result::eSuccess) {
-            Engine::Interrupt("Failed to begin command buffer.");
+        VkCommandBufferBeginInfo commandBufferBeginInfo{};
+        commandBufferBeginInfo.sType            = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        commandBufferBeginInfo.flags            = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+        commandBufferBeginInfo.pInheritanceInfo = nullptr;
+        if (vkBeginCommandBuffer(commandBuffer, &commandBufferBeginInfo) != VK_SUCCESS) {
+            Engine::Interrupt(RenderContext::Section, "Failed to begin command buffer.");
         }
 
-        commandBuffer.setScissor(0, 1, &scissor);
-        commandBuffer.setViewport(0, 1, &viewport);
+        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
-        vk::RenderPassBeginInfo renderPassBeginInfo(
-            renderPass->getRenderPass(),
-            framebuffers[currentSwapchainImageIndex].get(),
-            scissor,
-            1,
-            clearValues.data()
-        );
-        commandBuffer.beginRenderPass(&renderPassBeginInfo, vk::SubpassContents::eInline);
+        VkRenderPassBeginInfo renderPassBeginInfo{};
+        renderPassBeginInfo.sType           = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+        renderPassBeginInfo.renderPass      = renderPass->getRenderPass();
+        renderPassBeginInfo.framebuffer     = framebuffers[currentSwapchainImageIndex];
+        renderPassBeginInfo.renderArea      = scissor;
+        renderPassBeginInfo.clearValueCount = 1;
+        renderPassBeginInfo.pClearValues    = clearValues.data();
+        vkCmdBeginRenderPass(commandBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         return true;
     }
     bool endRender()
     {
         // record end command buffer
-        const vk::CommandBuffer &commandBuffer{getActiveCommandBuffer()};
-        commandBuffer.endRenderPass();
-        commandBuffer.end();
+        VkCommandBuffer commandBuffer = getActiveCommandBuffer();
+        vkCmdEndRenderPass(commandBuffer);
+        vkEndCommandBuffer(commandBuffer);
 
         // submit command buffer
-        const vk::Fence &inFlightFence{*inFlightFences[currentFrameIndex]};
-        const vk::Semaphore &imageAvailableSemaphore{*imageAvailableSemaphores[currentFrameIndex]};
-        const vk::Semaphore &renderFinishedSemaphore{*renderFinishedSemaphores[currentFrameIndex]};
+        VkFence inFlightFence = inFlightFences[currentFrameIndex];
+        VkSemaphore imageAvailableSemaphore = imageAvailableSemaphores[currentFrameIndex];
+        VkSemaphore renderFinishedSemaphore = renderFinishedSemaphores[currentFrameIndex];
 
-        vk::SubmitInfo submitInfo = {};
-        vk::PipelineStageFlags waitStages[] = {vk::PipelineStageFlagBits::eColorAttachmentOutput};
-        submitInfo.waitSemaphoreCount = 1;
-        submitInfo.pWaitSemaphores = &imageAvailableSemaphore;
-        submitInfo.pWaitDstStageMask = waitStages;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
+        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+
+        VkSubmitInfo submitInfo{};
+        submitInfo.sType                = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.waitSemaphoreCount   = 1;
+        submitInfo.pWaitSemaphores      = &imageAvailableSemaphore;
+        submitInfo.pWaitDstStageMask    = waitStages;
+        submitInfo.commandBufferCount   = 1;
+        submitInfo.pCommandBuffers      = &commandBuffer;
         submitInfo.signalSemaphoreCount = 1;
-        submitInfo.pSignalSemaphores = &renderFinishedSemaphore;
+        submitInfo.pSignalSemaphores    = &renderFinishedSemaphore;
 
-        try {
-            device.getGraphicsQueue().submit(submitInfo, inFlightFence);
-        } catch (vk::SystemError &error) {
-            Engine::Interrupt("Failed to submit draw command buffer.");
+        if (vkQueueSubmit(device.getGraphicsQueue(), 1, &submitInfo, inFlightFence) != VK_SUCCESS) {
+            Engine::Interrupt(RenderContext::Section, "Failed to submit draw command buffer.");
         }
 
-        vk::PresentInfoKHR presentInfo = {};
+        VkPresentInfoKHR presentInfo{};
+        presentInfo.sType              = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.waitSemaphoreCount = 1;
-        presentInfo.pWaitSemaphores = &renderFinishedSemaphore;
-        presentInfo.swapchainCount = 1;
-        presentInfo.pSwapchains = &swapchain->getSwapchain();
-        presentInfo.pImageIndices = &currentSwapchainImageIndex;
-        presentInfo.pResults = nullptr;
+        presentInfo.pWaitSemaphores    = &renderFinishedSemaphore;
+        presentInfo.swapchainCount     = 1;
+        VkSwapchainKHR swapchains[] = {swapchain->getSwapchain()};
+        presentInfo.pSwapchains        = swapchains;
+        presentInfo.pImageIndices      = &currentSwapchainImageIndex;
+        presentInfo.pResults           = nullptr;
 
-        try {
-            if (device.getPresentQueue().presentKHR(presentInfo) == vk::Result::eSuboptimalKHR) {
+        VkResult result = vkQueuePresentKHR(device.getPresentQueue(), &presentInfo);
+        if (result != VK_SUCCESS) {
+            if (result == VK_SUBOPTIMAL_KHR) {
+                return false;
+            } else {
                 return false;
             }
-        } catch (vk::OutOfDateKHRError &outOfDateError) {
-            return false;
         }
 
         currentFrameIndex = (currentFrameIndex + 1) % maxInFlightFrames;
-    
+
         return true;
     }
 };
@@ -260,23 +303,23 @@ bool RenderContext::endRender()
     return internal->endRender();
 }
 
-const vk::Viewport &RenderContext::getViewport() const
+VkViewport RenderContext::getViewport() const
 {
     return internal->viewport;
 }
-const vk::Rect2D &RenderContext::getScissor() const
+VkRect2D RenderContext::getScissor() const
 {
     return internal->scissor;
 }
-const vk::RenderPass &RenderContext::getRenderPass() const
+VkRenderPass RenderContext::getRenderPass() const
 {
     return internal->renderPass->getRenderPass();
 }
-const vk::CommandBuffer &RenderContext::getActiveCommandBuffer() const
+VkCommandBuffer RenderContext::getActiveCommandBuffer() const
 {
     return internal->getActiveCommandBuffer();
 }
-vk::Extent2D RenderContext::getSwapchainExtent() const
+VkExtent2D RenderContext::getSwapchainExtent() const
 {
     return internal->swapchain->getExtent();
 }

@@ -48,7 +48,8 @@ struct Engine::Internal
     }
     ~Internal()
     {
-        device->getDevice().waitIdle();
+        vkDeviceWaitIdle(device->getDevice());
+        
         destroyRenderContext();
         destroyAssets();
         destroyContext();
@@ -119,9 +120,9 @@ struct Engine::Internal
         // vertexBuffer = std::make_unique<Buffer>(
         //     *physicalDevice,
         //     *device,
-        //     vk::BufferUsageFlagBits::eVertexBuffer,
-        //     vk::MemoryPropertyFlagBits::eHostVisible |
-        //     vk::MemoryPropertyFlagBits::eHostCoherent,
+        //     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        //     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+        //     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
         //     sizeof(Vertex) * vertices.size(),
         //     vertices.data()
         // );
@@ -131,7 +132,7 @@ struct Engine::Internal
                 *physicalDevice,
                 *device,
                 *graphicsCommandPool,
-                vk::BufferUsageFlagBits::eVertexBuffer,
+                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 sizeof(Vertex) * vertices.size(),
                 vertices.data()
             )
@@ -146,7 +147,7 @@ struct Engine::Internal
                 *physicalDevice,
                 *device,
                 *graphicsCommandPool,
-                vk::BufferUsageFlagBits::eIndexBuffer,
+                VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                 sizeof(uint32_t) * indices.size(),
                 indices.data()
             )
@@ -204,14 +205,15 @@ struct Engine::Internal
             return false;
         }
 
-        const vk::CommandBuffer &commandBuffer {renderContext->getActiveCommandBuffer()};
-        commandBuffer.bindPipeline(vk::PipelineBindPoint::eGraphics, pipeline->getPipeline());
-        const vk::Buffer vertexBuffers[] = {vertexBuffer->getBuffer()};
-        const vk::DeviceSize offsets[] = {0};
-        commandBuffer.bindVertexBuffers(0, 1, vertexBuffers, offsets);
-        commandBuffer.bindIndexBuffer(indiceBuffer->getBuffer(), 0, vk::IndexType::eUint32);
-        commandBuffer.drawIndexed(6, 1, 0, 0, 0);
-        //commandBuffer.draw(3, 1, 0, 0);
+        VkCommandBuffer cmd = renderContext->getActiveCommandBuffer();
+
+        vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
+        VkBuffer vertexBuffers[] = {vertexBuffer->getBuffer()};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
+        vkCmdBindIndexBuffer(cmd, indiceBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+        // vkCmdDraw(cmd, 3, 1, 0, 0);
 
         if (!renderContext->endRender()) {
             return false;
@@ -224,7 +226,7 @@ struct Engine::Internal
         if (!renderContextOutOfDate) {
             renderContextOutOfDate = !tryRender();
         } else {
-            device->getDevice().waitIdle();
+            vkDeviceWaitIdle(device->getDevice());
             
             uint32_t width, height;
             nu_window_get_size(&width, &height);
@@ -244,7 +246,7 @@ void Engine::render()
     internal->render();
 }
 
-void Engine::Interrupt(std::string_view msg)
+void Engine::Interrupt(std::string_view section, std::string_view msg)
 {
-    nu_interrupt(("[NUVK] " + std::string(msg) + "\n").c_str());
+    nu_interrupt(("[NUVK][" + std::string(section) + "]" + std::string(msg) + "\n").c_str());
 }

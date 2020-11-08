@@ -4,7 +4,7 @@
 #include "instance.hpp"
 #include "surface.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 #include <optional>
 
@@ -30,13 +30,13 @@ namespace nuvk
             const Surface &surface
         );
 
-        vk::PhysicalDevice getPhysicalDevice() const;
+        VkPhysicalDevice getPhysicalDevice() const;
         uint32_t getMemoryTypeIndex(
-            const uint32_t &filter,
-            const vk::MemoryPropertyFlags &flags
+            uint32_t filter,
+            VkMemoryPropertyFlags flags
         ) const;
         
-        static QueueFamilyIndices FindQueueFamilies(vk::PhysicalDevice device, VkSurfaceKHR surface);
+        static QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
     private:
         struct Internal;

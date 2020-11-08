@@ -2,7 +2,7 @@
 
 #include "../utility/internalptr.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace nuvk
 {

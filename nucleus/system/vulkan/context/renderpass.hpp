@@ -4,7 +4,7 @@
 #include "device.hpp"
 #include "swapchain.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace nuvk
 {
@@ -18,7 +18,7 @@ namespace nuvk
             const Swapchain &swapchain
         );
 
-        const vk::RenderPass &getRenderPass() const;
+        VkRenderPass getRenderPass() const;
 
     private:
         struct Internal;

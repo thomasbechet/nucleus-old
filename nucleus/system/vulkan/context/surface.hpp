@@ -4,7 +4,7 @@
 #include "instance.hpp"
 #include "windowinterface.hpp"
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
 
 namespace nuvk
 {

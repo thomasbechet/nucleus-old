@@ -8,63 +8,61 @@ using namespace nuvk;
 
 namespace
 {
-    static vk::UniqueDevice CreateDevice(
-        vk::PhysicalDevice physicalDevice,
+    static VkDevice CreateDevice(
+        VkPhysicalDevice physicalDevice,
         VkSurfaceKHR surface,
         bool useValidationLayers
     )
     {
         QueueFamilyIndices indices = PhysicalDevice::FindQueueFamilies(physicalDevice, surface);
 
-        std::vector<vk::DeviceQueueCreateInfo> queueCreateInfos;
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         std::set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
 
         float queuePriority = 1.0f;
 
         for (uint32_t queueFamily : uniqueQueueFamilies) {
-            queueCreateInfos.push_back({
-                vk::DeviceQueueCreateFlags(),
-                queueFamily,
-                1, // queue count
-                &queuePriority
-            });
+            VkDeviceQueueCreateInfo info{};
+            info.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            info.queueFamilyIndex = queueFamily;
+            info.queueCount       = 1;
+            info.pQueuePriorities = &queuePriority;
+
+            queueCreateInfos.push_back(info);
         }
 
-        auto createInfo = vk::DeviceCreateInfo(
-            vk::DeviceCreateFlags(),
-            static_cast<uint32_t>(queueCreateInfos.size()),
-            queueCreateInfos.data()
-        );
+        VkDeviceCreateInfo createInfo{};
+        createInfo.sType                = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.queueCreateInfoCount = queueCreateInfos.size();
+        createInfo.pQueueCreateInfos    = queueCreateInfos.data();
 
-        auto deviceFeatures = vk::PhysicalDeviceFeatures();
+        VkPhysicalDeviceFeatures deviceFeatures{};
         createInfo.pEnabledFeatures = &deviceFeatures;
         createInfo.enabledExtensionCount = 0;
 
         auto deviceExtensions = Device::GetRequiredDeviceExtensions();
-        createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
-        createInfo.ppEnabledExtensionNames =  deviceExtensions.data();
+        createInfo.enabledExtensionCount   = static_cast<uint32_t>(deviceExtensions.size());
+        createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
         auto layers = Device::GetRequiredValidationLayers();
         if (useValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(layers.size());
+            createInfo.enabledLayerCount   = static_cast<uint32_t>(layers.size());
             createInfo.ppEnabledLayerNames = layers.data();
         }
 
-        try {
-            return physicalDevice.createDeviceUnique(createInfo);
-        } catch(vk::SystemError &err) {
-            Engine::Interrupt("Failed to create device.");
+        VkDevice device;
+        if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+            Engine::Interrupt(Device::Section, "Failed to create device.");
         }
-
-        throw std::runtime_error("Unknown error.");
+        return device;
     }
 }
 
 struct Device::Internal
 {
-    vk::UniqueDevice device;
-    vk::Queue graphicsQueue;
-    vk::Queue presentQueue;
+    VkDevice device;
+    VkQueue graphicsQueue;
+    VkQueue presentQueue;
     uint32_t graphicsQueueIndex;
     uint32_t presentQueueIndex;
 
@@ -83,14 +81,14 @@ struct Device::Internal
             physicalDevice.getPhysicalDevice(), 
             surface.getSurface()
         );
-        graphicsQueue = device->getQueue(indices.graphicsFamily.value(), 0);
-        presentQueue = device->getQueue(indices.presentFamily.value(), 0);
+        vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+        vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
         graphicsQueueIndex = indices.graphicsFamily.value();
         presentQueueIndex = indices.presentFamily.value();
     }
     ~Internal()
     {
-
+        vkDestroyDevice(device, nullptr);
     }
 };
 
@@ -100,11 +98,11 @@ Device::Device(
     bool useValidationLayers
 ) : internal(MakeInternalPtr<Internal>(physicalDevice, surface, useValidationLayers)) {}
 
-const vk::Device &Device::getDevice() const
+VkDevice Device::getDevice() const
 {
-    return *internal->device;
+    return internal->device;
 }
-const vk::Queue &Device::getGraphicsQueue() const
+VkQueue Device::getGraphicsQueue() const
 {
     return internal->graphicsQueue;
 }
@@ -112,7 +110,7 @@ uint32_t Device::getGraphicsQueueIndex() const
 {
     return internal->graphicsQueueIndex;
 }
-const vk::Queue &Device::getPresentQueue() const
+VkQueue Device::getPresentQueue() const
 {
     return internal->presentQueue;
 }

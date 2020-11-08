@@ -13,7 +13,7 @@ namespace
 
 struct Surface::Internal
 {
-    vk::SurfaceKHR surface;
+    VkSurfaceKHR surface;
     const Instance &instance;
 
     Internal(
@@ -25,7 +25,7 @@ struct Surface::Internal
     }
     ~Internal()
     {
-        instance.getInstance().destroySurfaceKHR(surface);
+        vkDestroySurfaceKHR(instance.getInstance(), surface, nullptr);
     }
 };
 

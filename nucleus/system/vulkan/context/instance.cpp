@@ -12,7 +12,10 @@ namespace
         const std::vector<const char*> &instanceLayers
     )
     {
-        auto availableLayers = vk::enumerateInstanceLayerProperties();
+        uint32_t layerCount;
+        vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+        std::vector<VkLayerProperties> availableLayers(layerCount);
+        vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
         for (const char *layerName : instanceLayers) {
             bool layerFound = false;
@@ -31,32 +34,33 @@ namespace
         return true;
     }
 
-    static vk::UniqueInstance CreateInstance(
+    static VkInstance CreateInstance(
         const WindowInterface &interface,
         bool enableValidationLayers
     )
     {
         auto requiredValidationLayers = Device::GetRequiredValidationLayers();
         if (enableValidationLayers && !CheckValidationLayerSupport(requiredValidationLayers)) {
-            Engine::Interrupt("Validation layers requested, but not available.");
+            Engine::Interrupt(Instance::Section, "Validation layers requested, but not available.");
         }
 
-        auto appInfo = vk::ApplicationInfo(
-            "Vulkan Renderer",
-            VK_MAKE_VERSION(1, 0, 0),
-            "Nucleus Engine",
-            VK_MAKE_VERSION(1, 0, 0),
-            VK_API_VERSION_1_0
-        );
+        VkApplicationInfo appInfo{};
+        appInfo.sType              = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+        appInfo.pApplicationName   = "Vulkan Renderer";
+        appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.pEngineName        = "Nucleus Engine";
+        appInfo.engineVersion      = VK_MAKE_VERSION(1, 0, 0);
+        appInfo.apiVersion         = VK_API_VERSION_1_0;
 
         auto requiredExtensions = Instance::GetRequiredExtensions(interface, enableValidationLayers);
 
-        auto createInfo = vk::InstanceCreateInfo(
-            vk::InstanceCreateFlags(),
-            &appInfo,
-            0, nullptr, // enabled layers
-            static_cast<uint32_t>(requiredExtensions.size()), requiredExtensions.data() // enabled extensions
-        );
+        VkInstanceCreateInfo createInfo{};
+        createInfo.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+        createInfo.pApplicationInfo        = &appInfo;
+        createInfo.enabledLayerCount       = 0;
+        createInfo.ppEnabledLayerNames     = nullptr;
+        createInfo.enabledExtensionCount   = requiredExtensions.size();
+        createInfo.ppEnabledExtensionNames = requiredExtensions.data();
 
         auto validationLayers = requiredValidationLayers;
         if (validationLayers.size() > 0) { // adding enabled layers
@@ -64,20 +68,17 @@ namespace
             createInfo.ppEnabledLayerNames = validationLayers.data();
         }
 
-        try {
-            return vk::createInstanceUnique(createInfo, nullptr);
-        } catch(vk::SystemError &err) {
-            Logger::Fatal(Instance::Section, err.what());
-            Engine::Interrupt("Failed to create instance.");
+        VkInstance instance;
+        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+            Engine::Interrupt(Instance::Section, "Failed to create instance.");
         }
-
-        throw std::runtime_error("Unknown error.");
+        return instance;
     }
 }
 
 struct Instance::Internal
 {
-    vk::UniqueInstance instance;
+    VkInstance instance;
 
     Internal(
         const WindowInterface &interface,
@@ -88,7 +89,7 @@ struct Instance::Internal
     }
     ~Internal()
     {
-
+        vkDestroyInstance(instance, nullptr);
     }
 };
 
@@ -97,9 +98,9 @@ Instance::Instance(
     bool enableValidationLayers
 ) : internal(MakeInternalPtr<Internal>(interface, enableValidationLayers)) {}
 
-const vk::Instance &Instance::getInstance() const
+VkInstance Instance::getInstance() const
 {
-    return *internal->instance;
+    return internal->instance;
 }
 
 std::vector<const char*> Instance::GetRequiredExtensions(const WindowInterface &interface, bool useValidationLayers)

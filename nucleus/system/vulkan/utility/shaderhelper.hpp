@@ -1,12 +1,14 @@
 #pragma once
 
-#include <vulkan/vulkan.hpp>
+#include <vulkan/vulkan.h>
+
+#include <string>
 
 namespace nuvk
 {
     class ShaderHelper
     {
     public:
-        static vk::UniqueShaderModule CreateShaderModule(const vk::Device &device, const std::string &filename);
+        static VkShaderModule CreateShaderModule(VkDevice device, const std::string &filename);
     };
 }
