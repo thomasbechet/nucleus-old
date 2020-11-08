@@ -50,7 +50,7 @@ namespace
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName        = "Nucleus Engine";
         appInfo.engineVersion      = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion         = VK_API_VERSION_1_0;
+        appInfo.apiVersion         = Instance::GetVulkanAPIVersion();
 
         auto requiredExtensions = Instance::GetRequiredExtensions(interface, enableValidationLayers);
 
@@ -111,4 +111,8 @@ std::vector<const char*> Instance::GetRequiredExtensions(const WindowInterface &
     }
 
     return extensions;
+}
+uint32_t Instance::GetVulkanAPIVersion()
+{
+    return VK_API_VERSION_1_0;
 }

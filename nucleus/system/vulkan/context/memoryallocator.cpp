@@ -1,5 +1,8 @@
 #include "memoryallocator.hpp"
 
+#include "instance.hpp"
+#include "../engine/engine.hpp"
+
 #define VMA_IMPLEMENTATION
 #include <vma/vk_mem_alloc.h>
 
@@ -21,11 +24,13 @@ struct MemoryAllocator::Internal
     )
     {
         VmaAllocatorCreateInfo allocatorInfo{};
-        allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_2;
+        allocatorInfo.vulkanApiVersion = Instance::GetVulkanAPIVersion();
         allocatorInfo.instance         = instance.getInstance();
         allocatorInfo.physicalDevice   = physicalDevice.getPhysicalDevice();
         allocatorInfo.device           = device.getDevice();
-        vmaCreateAllocator(&allocatorInfo, &allocator);
+        if (vmaCreateAllocator(&allocatorInfo, &allocator) != VK_SUCCESS) {
+            Engine::Interrupt(MemoryAllocator::Section, "Failed to create allocator.");
+        }
     }
     ~Internal()
     {
@@ -38,4 +43,9 @@ MemoryAllocator::MemoryAllocator(
     const PhysicalDevice &physicalDevice,
     const Device &device
 ) : internal(MakeInternalPtr<Internal>(instance, physicalDevice, device)) {}
+
+VmaAllocator MemoryAllocator::getAllocator() const
+{
+    return internal->allocator;
+}
 

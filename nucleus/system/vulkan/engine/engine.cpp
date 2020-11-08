@@ -117,21 +117,11 @@ struct Engine::Internal
             {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
         };
 
-        // vertexBuffer = std::make_unique<Buffer>(
-        //     *physicalDevice,
-        //     *device,
-        //     VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-        //     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-        //     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-        //     sizeof(Vertex) * vertices.size(),
-        //     vertices.data()
-        // );
-
         vertexBuffer = std::make_unique<Buffer>(
             Buffer::CreateDeviceLocalBuffer(
-                *physicalDevice,
-                *device,
+                *memoryAllocator,
                 *graphicsCommandPool,
+                device->getGraphicsQueue(),
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                 sizeof(Vertex) * vertices.size(),
                 vertices.data()
@@ -144,9 +134,9 @@ struct Engine::Internal
 
         indiceBuffer = std::make_unique<Buffer>(
             Buffer::CreateDeviceLocalBuffer(
-                *physicalDevice,
-                *device,
+                *memoryAllocator,
                 *graphicsCommandPool,
+                device->getGraphicsQueue(),
                 VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
                 sizeof(uint32_t) * indices.size(),
                 indices.data()

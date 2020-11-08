@@ -1,9 +1,8 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
-#include "physicaldevice.hpp"
-#include "device.hpp"
 #include "commandpool.hpp"
+#include "memoryallocator.hpp"
 
 namespace nuvk
 {
@@ -13,10 +12,9 @@ namespace nuvk
         static inline constexpr std::string_view Section = "BUFFER";
 
         Buffer(
-            const PhysicalDevice &physicalDevice,
-            const Device &device,
-            VkBufferUsageFlags bufferFlags,
-            VkMemoryPropertyFlags memoryFlags,
+            const MemoryAllocator &allocator,
+            VkBufferUsageFlags bufferUsage,
+            VmaMemoryUsage memoryUsage,
             VkDeviceSize size,
             const void *data
         );
@@ -24,10 +22,10 @@ namespace nuvk
         VkBuffer getBuffer() const;
 
         static Buffer CreateDeviceLocalBuffer(
-            const PhysicalDevice &physicalDevice,
-            const Device &device,
+            const MemoryAllocator &allocator,
             const CommandPool &commandPool,
-            VkBufferUsageFlags bufferFlags,
+            VkQueue queue,
+            VkBufferUsageFlags bufferUsage,
             VkDeviceSize size,
             const void *data
         );

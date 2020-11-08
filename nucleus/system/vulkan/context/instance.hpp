@@ -20,6 +20,7 @@ namespace nuvk
         VkInstance getInstance() const;
 
         static std::vector<const char*> GetRequiredExtensions(const WindowInterface &interface, bool useValidationLayers);
+        static uint32_t GetVulkanAPIVersion();
 
     private:
         struct Internal;

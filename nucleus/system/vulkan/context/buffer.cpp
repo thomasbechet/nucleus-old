@@ -8,92 +8,68 @@ using namespace nuvk;
 
 namespace
 {
-    static VkBuffer CreateBuffer(
-        VkDevice device,
+    static VkResult CreateBufferAndMemory(
+        VmaAllocator allocator,
         VkDeviceSize size,
-        VkBufferUsageFlags bufferFlags
+        VkBufferUsageFlags bufferUsage,
+        VmaMemoryUsage memoryUsage,
+        VkBuffer &buffer,
+        VmaAllocation &allocation
     )
     {
-        VkBufferCreateInfo info{};
-        info.sType                 = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        info.size                  = size;
-        info.usage                 = bufferFlags;
-        info.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
-        info.queueFamilyIndexCount = 0;
-        info.pQueueFamilyIndices   = nullptr;
+        VkBufferCreateInfo bufferInfo{};
+        bufferInfo.sType                 = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size                  = size;
+        bufferInfo.usage                 = bufferUsage;
+        bufferInfo.sharingMode           = VK_SHARING_MODE_EXCLUSIVE;
+        bufferInfo.queueFamilyIndexCount = 0;
+        bufferInfo.pQueueFamilyIndices   = nullptr;
 
-        VkBuffer buffer;
-        if (vkCreateBuffer(device, &info, NULL, &buffer) != VK_SUCCESS) {
-            Engine::Interrupt(Buffer::Section, "Failed to create buffer.");
-        }
-        return buffer;
-    }
+        VmaAllocationCreateInfo allocationInfo{};
+        allocationInfo.usage = memoryUsage;
 
-    static VkDeviceMemory AllocateMemory(
-        const PhysicalDevice &physicalDevice,
-        VkDevice device,
-        VkBuffer buffer,
-        VkMemoryPropertyFlags memoryFlags
-    )
-    {
-        VkMemoryRequirements memoryRequirements;
-        vkGetBufferMemoryRequirements(device, buffer, &memoryRequirements);
-
-        VkMemoryAllocateInfo info{};
-        info.sType           = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        info.allocationSize  = memoryRequirements.size;
-        info.memoryTypeIndex = physicalDevice.getMemoryTypeIndex(memoryRequirements.memoryTypeBits, memoryFlags);
-
-        VkDeviceMemory deviceMemory;
-        if (vkAllocateMemory(device, &info, NULL, &deviceMemory) != VK_SUCCESS) {
-            Engine::Interrupt(Buffer::Section, "Failed to allocate memory.");
-        }
-        return deviceMemory;
+        return vmaCreateBuffer(allocator, &bufferInfo, &allocationInfo, &buffer, &allocation, nullptr);
     }
 }
 
 struct Buffer::Internal
 {
-    VkDevice device;
+    VmaAllocator allocator;
     VkBuffer buffer;
-    VkDeviceMemory deviceMemory;
+    VmaAllocation allocation;
 
     Internal(
-        const PhysicalDevice &physicalDevice,
-        const Device &device,
-        VkBufferUsageFlags bufferFlags,
-        VkMemoryPropertyFlags memoryFlags,
+        const MemoryAllocator &allocator,
+        VkBufferUsageFlags bufferUsage,
+        VmaMemoryUsage memoryUsage,
         VkDeviceSize size,
         const void *data
-    ) : device(device.getDevice())
+    ) : allocator(allocator.getAllocator())
     {   
-        buffer = ::CreateBuffer(device.getDevice(), size, bufferFlags);
-        deviceMemory = ::AllocateMemory(physicalDevice, device.getDevice(), buffer, memoryFlags);
-
-        vkBindBufferMemory(device.getDevice(), buffer, deviceMemory, 0);
+        if (::CreateBufferAndMemory(allocator.getAllocator(), size, bufferUsage, memoryUsage, buffer, allocation) != VK_SUCCESS) {
+            Engine::Interrupt(Buffer::Section, "Failed to create buffer.");
+        }
 
         if (data) {
             void *mappedMemory;
-            vkMapMemory(device.getDevice(), deviceMemory, 0, size, 0, &mappedMemory);
+            vmaMapMemory(allocator.getAllocator(), allocation, &mappedMemory);
             std::memcpy(mappedMemory, data, static_cast<size_t>(size));
-            vkUnmapMemory(device.getDevice(), deviceMemory);
+            vmaUnmapMemory(allocator.getAllocator(), allocation);
         }
     }
     ~Internal()
     {
-        vkFreeMemory(device, deviceMemory, nullptr);
-        vkDestroyBuffer(device, buffer, nullptr);
+        vmaDestroyBuffer(allocator, buffer, allocation);
     }
 };
 
 Buffer::Buffer(
-    const PhysicalDevice &physicalDevice,
-    const Device &device,
-    VkBufferUsageFlags bufferFlags,
-    VkMemoryPropertyFlags memoryFlags,
+    const MemoryAllocator &allocator,
+    VkBufferUsageFlags bufferUsage,
+    VmaMemoryUsage memoryUsage,
     VkDeviceSize size,
     const void *data
-) : internal(MakeInternalPtr<Internal>(physicalDevice, device, bufferFlags, memoryFlags, size, data)) {}
+) : internal(MakeInternalPtr<Internal>(allocator, bufferUsage, memoryUsage, size, data)) {}
 
 VkBuffer Buffer::getBuffer() const
 {
@@ -101,29 +77,26 @@ VkBuffer Buffer::getBuffer() const
 }
 
 Buffer Buffer::CreateDeviceLocalBuffer(
-    const PhysicalDevice &physicalDevice,
-    const Device &device,
+    const MemoryAllocator &allocator,
     const CommandPool &commandPool,
-    VkBufferUsageFlags bufferFlags,
+    VkQueue queue,
+    VkBufferUsageFlags bufferUsage,
     VkDeviceSize size,
     const void *data
 )
 {
     Buffer stagingBuffer(
-        physicalDevice,
-        device,
+        allocator,
         VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-        VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-        VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+        VMA_MEMORY_USAGE_CPU_ONLY,
         size,
         data
     );
 
     Buffer deviceLocalBuffer(
-        physicalDevice,
-        device,
-        VK_BUFFER_USAGE_TRANSFER_DST_BIT | bufferFlags,
-        VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+        allocator,
+        VK_BUFFER_USAGE_TRANSFER_DST_BIT | bufferUsage,
+        VMA_MEMORY_USAGE_GPU_ONLY,
         size,
         nullptr
     );
@@ -136,7 +109,7 @@ Buffer Buffer::CreateDeviceLocalBuffer(
     copyRegion.size      = size;
     vkCmdCopyBuffer(commandBuffer, stagingBuffer.getBuffer(), deviceLocalBuffer.getBuffer(), 1, &copyRegion);
 
-    commandPool.endCommandBuffer(commandBuffer, device.getGraphicsQueue());
+    commandPool.endCommandBuffer(commandBuffer, queue);
 
     return deviceLocalBuffer;
 }
