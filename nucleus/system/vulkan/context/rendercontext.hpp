@@ -28,9 +28,12 @@ namespace nuvk
 
         VkViewport getViewport() const;
         VkRect2D getScissor() const;
+        VkExtent2D getExtent() const;
         VkRenderPass getRenderPass() const;
+
         VkCommandBuffer getActiveCommandBuffer() const;
-        VkExtent2D getSwapchainExtent() const;
+        uint32_t getActiveFrameResourceIndex() const;
+        uint32_t getFrameResourceCount() const;
 
     private:
         struct Internal;

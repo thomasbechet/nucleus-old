@@ -311,15 +311,24 @@ VkRect2D RenderContext::getScissor() const
 {
     return internal->scissor;
 }
+VkExtent2D RenderContext::getExtent() const
+{
+    return internal->swapchain->getExtent();
+}
 VkRenderPass RenderContext::getRenderPass() const
 {
     return internal->renderPass->getRenderPass();
 }
+
 VkCommandBuffer RenderContext::getActiveCommandBuffer() const
 {
     return internal->getActiveCommandBuffer();
 }
-VkExtent2D RenderContext::getSwapchainExtent() const
+uint32_t RenderContext::getActiveFrameResourceIndex() const
 {
-    return internal->swapchain->getExtent();
+    return internal->currentSwapchainImageIndex;
+}
+uint32_t RenderContext::getFrameResourceCount() const
+{
+    return internal->framebuffers.size();
 }

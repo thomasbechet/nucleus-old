@@ -1,11 +1,14 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
+#include "rendercontext.hpp"
+#include "device.hpp"
 
 #include <vulkan/vulkan.h>
 #include <nucleus/nucleus.h>
 
 #include <array>
+#include <string>
 
 namespace nuvk
 {   
@@ -62,9 +65,8 @@ namespace nuvk
         static inline constexpr std::string_view Section = "PIPELINE";
 
         Pipeline(
-            VkDevice device,
-            VkRenderPass renderPass,
-            VkExtent2D extent
+            const Device &device,
+            const RenderContext &renderContext
         );
 
         VkPipeline getPipeline() const;

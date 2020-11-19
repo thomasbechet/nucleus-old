@@ -37,6 +37,7 @@ struct Buffer::Internal
     VmaAllocator allocator;
     VkBuffer buffer;
     VmaAllocation allocation;
+    bool mapped = false;
 
     Internal(
         const MemoryAllocator &allocator,
@@ -59,7 +60,21 @@ struct Buffer::Internal
     }
     ~Internal()
     {
+        if (mapped) unmap();
         vmaDestroyBuffer(allocator, buffer, allocation);
+    }
+
+    void *map()
+    {
+        void *mappedMemory;
+        vmaMapMemory(allocator, allocation, &mappedMemory);
+        mapped = true;
+        return mappedMemory;
+    }
+    void unmap()
+    {
+        vmaUnmapMemory(allocator, allocation);
+        mapped = false;
     }
 };
 
@@ -74,6 +89,14 @@ Buffer::Buffer(
 VkBuffer Buffer::getBuffer() const
 {
     return internal->buffer;
+}
+void *Buffer::map()
+{
+    return internal->map();
+}
+void Buffer::unmap()
+{
+    internal->unmap();
 }
 
 Buffer Buffer::CreateDeviceLocalBuffer(

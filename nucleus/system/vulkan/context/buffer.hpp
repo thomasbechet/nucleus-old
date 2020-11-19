@@ -20,6 +20,8 @@ namespace nuvk
         );
 
         VkBuffer getBuffer() const;
+        void *map();
+        void unmap();
 
         static Buffer CreateDeviceLocalBuffer(
             const MemoryAllocator &allocator,

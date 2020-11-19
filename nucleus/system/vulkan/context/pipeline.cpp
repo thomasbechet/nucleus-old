@@ -32,10 +32,9 @@ namespace
     {
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
         pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        
         pipelineLayoutInfo.pushConstantRangeCount = 0;
-        pipelineLayoutInfo.setLayoutCount = 0;
-        //pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
+        pipelineLayoutInfo.setLayoutCount = 1;
+        pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout;
 
         VkPipelineLayout pipelineLayout;
         if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
@@ -166,14 +165,13 @@ struct Pipeline::Internal
     VkPipeline pipeline;
 
     Internal(
-        VkDevice device,
-        VkRenderPass renderPass,
-        VkExtent2D extent
-    ) : device(device)
+        const Device &device,
+        const RenderContext &renderContext
+    ) : device(device.getDevice())
     {
-        descriptorSetLayout = ::CreateDescriptorSetLayout(device);
-        pipelineLayout = ::CreatePipelineLayout(device, descriptorSetLayout);
-        pipeline = ::CreatePipeline(device, pipelineLayout, renderPass, extent);
+        descriptorSetLayout = ::CreateDescriptorSetLayout(device.getDevice());
+        pipelineLayout = ::CreatePipelineLayout(device.getDevice(), descriptorSetLayout);
+        pipeline = ::CreatePipeline(device.getDevice(), pipelineLayout, renderContext.getRenderPass(), renderContext.getExtent());
     }
     ~Internal()
     {
@@ -184,10 +182,9 @@ struct Pipeline::Internal
 };
 
 Pipeline::Pipeline(
-    VkDevice device,
-    VkRenderPass renderPass,
-    VkExtent2D extent
-) : internal(MakeInternalPtr<Internal>(device, renderPass, extent)) {}
+    const Device &device,
+    const RenderContext &renderContext
+) : internal(MakeInternalPtr<Internal>(device, renderContext)) {}
 
 VkPipeline Pipeline::getPipeline() const
 {
