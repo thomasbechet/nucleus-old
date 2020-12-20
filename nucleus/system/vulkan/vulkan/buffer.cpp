@@ -124,7 +124,7 @@ Buffer Buffer::CreateDeviceLocalBuffer(
         nullptr
     );
 
-    VkCommandBuffer commandBuffer = commandPool.beginCommandBuffer();
+    VkCommandBuffer commandBuffer = commandPool.beginSingleCommandBuffer();
 
     VkBufferCopy copyRegion;
     copyRegion.srcOffset = 0;
@@ -132,7 +132,7 @@ Buffer Buffer::CreateDeviceLocalBuffer(
     copyRegion.size      = size;
     vkCmdCopyBuffer(commandBuffer, stagingBuffer.getBuffer(), deviceLocalBuffer.getBuffer(), 1, &copyRegion);
 
-    commandPool.endCommandBuffer(commandBuffer, queue);
+    commandPool.endSingleCommandBuffer(commandBuffer, queue);
 
     return deviceLocalBuffer;
 }

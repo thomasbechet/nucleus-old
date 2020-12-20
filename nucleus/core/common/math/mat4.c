@@ -38,3 +38,7 @@ void nu_mat4_pick_mat3(const nu_mat4_t m, nu_mat3_t dest)
 {
     glm_mat4_pick3t((vec4*)m, dest);
 }
+void nu_mat4_inv(const nu_mat4_t m, nu_mat4_t dest)
+{
+    glm_mat4_inv((vec4*)m, dest);
+}

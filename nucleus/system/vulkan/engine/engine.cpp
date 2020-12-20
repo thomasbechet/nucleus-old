@@ -1,18 +1,17 @@
 #include "engine.hpp"
 
-#include <nucleus/nucleus.h>
 #include "../utility/logger.hpp"
-
-#include "../context/debugutilsmessenger.hpp"
-#include "../context/instance.hpp"
-#include "../context/physicaldevice.hpp"
-#include "../context/device.hpp"
-#include "../context/surface.hpp"
-#include "../context/memoryallocator.hpp"
-#include "../context/rendercontext.hpp"
-#include "../context/pipeline.hpp"
-#include "../context/windowinterface.hpp"
-#include "../context/buffer.hpp"
+#include "../vulkan/debugutilsmessenger.hpp"
+#include "../vulkan/instance.hpp"
+#include "../vulkan/physicaldevice.hpp"
+#include "../vulkan/device.hpp"
+#include "../vulkan/surface.hpp"
+#include "../vulkan/memoryallocator.hpp"
+#include "../vulkan/pipeline.hpp"
+#include "../vulkan/windowinterface.hpp"
+#include "../vulkan/buffer.hpp"
+#include "../asset/mesh.hpp"
+#include "rendercontext.hpp"
 
 #include <cstring>
 
@@ -26,7 +25,7 @@ namespace
 struct Engine::Internal
 {
     // Context
-    const bool enableValidationLayers = true; 
+    const bool enableValidationLayers = false; 
     std::unique_ptr<WindowInterface> windowInterface;
     std::unique_ptr<Instance> instance;
     std::unique_ptr<DebugUtilsMessenger> debugUtilsMessenger;
@@ -42,17 +41,10 @@ struct Engine::Internal
     std::unique_ptr<Pipeline> pipeline;
 
     // Static Resources
-    std::unique_ptr<Buffer> vertexBuffer;
-    std::unique_ptr<Buffer> indiceBuffer;
+    std::vector<std::unique_ptr<Mesh>> meshes;
 
     // Frame Resources
     uint32_t previousFrameCount = 0;
-    struct UBO 
-    {
-        std::unique_ptr<Buffer> buffer;
-        UniformBufferObject *ptr;
-    };
-    std::vector<UBO> uniformBuffers;
 
     Internal()
     {
@@ -126,38 +118,7 @@ struct Engine::Internal
     }
     void createStaticResources()
     {
-        const std::vector<Vertex> vertices = {
-            {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-            {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-            {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-        };
-
-        vertexBuffer = std::make_unique<Buffer>(
-            Buffer::CreateDeviceLocalBuffer(
-                *memoryAllocator,
-                *graphicsCommandPool,
-                device->getGraphicsQueue(),
-                VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                sizeof(Vertex) * vertices.size(),
-                vertices.data()
-            )
-        );
-
-        const std::vector<uint32_t> indices = {
-            0, 1, 2, 2, 3, 0
-        };
-
-        indiceBuffer = std::make_unique<Buffer>(
-            Buffer::CreateDeviceLocalBuffer(
-                *memoryAllocator,
-                *graphicsCommandPool,
-                device->getGraphicsQueue(),
-                VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
-                sizeof(uint32_t) * indices.size(),
-                indices.data()
-            )
-        );
+        
     }
     void createRenderContext()
     {
@@ -177,7 +138,10 @@ struct Engine::Internal
         Logger::Info(Engine::Section, "Creating pipeline...");
         pipeline = std::make_unique<Pipeline>(
             *device,
-            *renderContext
+            *memoryAllocator,
+            renderContext->getRenderPass(),
+            renderContext->getExtent(),
+            renderContext->getFrameResourceCount()
         );
     }
     void createFrameResources()
@@ -188,24 +152,11 @@ struct Engine::Internal
         } else {
             previousFrameCount = resourceCount;
         }
-
-        // Create resources
-        uniformBuffers.resize(resourceCount);
-        for (auto &ubo : uniformBuffers) {
-            ubo.buffer = std::make_unique<Buffer>(
-                *memoryAllocator,
-                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                VMA_MEMORY_USAGE_CPU_TO_GPU,
-                sizeof(UniformBufferObject),
-                nullptr
-            );
-            ubo.ptr = static_cast<UniformBufferObject*>(ubo.buffer->map());
-        }
     }
 
     void destroyFrameResources()
     {
-        uniformBuffers.clear();
+        
     }
     void destroyRenderContext()
     {
@@ -214,8 +165,9 @@ struct Engine::Internal
     }
     void destroyStaticResources()
     {
-        indiceBuffer.reset();
-        vertexBuffer.reset();
+        for (auto &mesh : meshes) {
+            mesh.reset();
+        }
     }
     void destroyContext()
     {
@@ -243,25 +195,32 @@ struct Engine::Internal
         nu_vec3_t pos = {0.0f, 0.0f, 0.0f};
         nu_vec3_t eye = {2.0f, 2.0f, 2.0f};
 
-        static float time = 0.0;
-        time += nu_context_get_delta_time();
-        UniformBufferObject ubo;
-        nu_mat4_identity(ubo.model);
-        nu_rotate(ubo.model, nu_radian(90.0) * time, up);
-        nu_mat4_identity(ubo.view);
-        nu_lookat(eye, pos, up, ubo.view);
-        nu_mat4_identity(ubo.projection);
-        VkExtent2D extent = renderContext->getExtent();
-        nu_perspective(nu_radian(90.0f), (float)extent.width / (float)extent.height, 0.1f, 100.0f, ubo.projection);
-        std::memcpy(uniformBuffers.at(frameResourceIndex).ptr, &ubo, sizeof(UniformBufferObject));
+        static int test = 0;
+        if (test < 2 || true) {
+            static float time = 0.0;
+            time += nu_context_get_delta_time();
+            UniformBufferObject ubo;
+            nu_mat4_identity(ubo.model);
+            nu_rotate(ubo.model, nu_radian(90.0) * time * 0.001, up);
+            nu_mat4_identity(ubo.view);
+            nu_lookat(eye, pos, up, ubo.view);
+            nu_mat4_identity(ubo.projection);
+            VkExtent2D extent = renderContext->getExtent();
+            nu_perspective(nu_radian(70.0f), (float)extent.width / (float)extent.height, 0.1f, 100.0f, ubo.projection);
+            pipeline->updateUBO(ubo, frameResourceIndex);
+            test += 1;
+        }
 
         // Record command buffer
+        VkDescriptorSet descriptorSet = pipeline->getDescriptorSet(frameResourceIndex);
+        vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipelineLayout(), 0, 1, &descriptorSet, 0, nullptr);
+
+        Mesh *mesh = meshes.at(1).get();
         vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->getPipeline());
-        VkBuffer vertexBuffers[] = {vertexBuffer->getBuffer()};
+        VkBuffer vertexBuffers[] = {mesh->getVertexBuffer().getBuffer()};
         VkDeviceSize offsets[] = {0};
         vkCmdBindVertexBuffers(cmd, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(cmd, indiceBuffer->getBuffer(), 0, VK_INDEX_TYPE_UINT32);
-        vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+        vkCmdDraw(cmd, mesh->getVertexCount(), 1, 0, 0);
 
         if (!renderContext->endRender()) return false;
         return true;
@@ -297,6 +256,18 @@ Engine::Engine() : internal(MakeInternalPtr<Internal>()) {}
 void Engine::render()
 {
     internal->render();
+}
+
+void Engine::createMesh(const nu_renderer_mesh_create_info_t &info)
+{
+    internal->meshes.emplace_back(
+        std::make_unique<Mesh>(
+            info, 
+            *internal->device, 
+            *internal->memoryAllocator, 
+            *internal->graphicsCommandPool
+        )
+    );
 }
 
 void Engine::Interrupt(std::string_view section, std::string_view msg)

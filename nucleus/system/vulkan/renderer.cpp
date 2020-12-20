@@ -30,6 +30,7 @@ nu_result_t nuvk::render(void)
 
 nu_result_t nuvk::mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
 {
+    _data.engine->createMesh(*info);
     return NU_SUCCESS;
 }
 nu_result_t nuvk::mesh_destroy(nu_renderer_mesh_handle_t handle)

@@ -27,6 +27,8 @@ namespace
     static VkPresentModeKHR ChooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes)
     {
         VkPresentModeKHR bestMode = VK_PRESENT_MODE_FIFO_KHR;
+        return VK_PRESENT_MODE_IMMEDIATE_KHR;
+        return VK_PRESENT_MODE_MAILBOX_KHR;
         
         for (const auto &availablePresentMode : availablePresentModes) {
             if (availablePresentMode == VK_PRESENT_MODE_MAILBOX_KHR) {

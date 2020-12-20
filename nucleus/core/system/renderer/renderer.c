@@ -2,6 +2,7 @@
 
 #include "../../context/config.h"
 #include "../../../system/softrast/module/interface.h"
+#include "../../../system/raytracer/module/interface.h"
 #include "../../../system/vulkan/module/interface.h"
 #include "../../../system/opengl/module/interface.h"
 
@@ -10,6 +11,7 @@
 static const char *nu_renderer_api_names[] = {
     "engine/system/nucleus-renderer-none",
     "engine/system/"NUSR_MODULE_NAME,
+    "engine/system/"NURT_MODULE_NAME,
     "engine/system/"NUVK_MODULE_NAME,
     "engine/system/"NUGL_MODULE_NAME
 };

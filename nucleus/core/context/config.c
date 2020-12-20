@@ -19,21 +19,21 @@ static nu_result_t load_ini_file(void)
     if (!_data.ini) return NU_FAILURE;
 
     /* context */
-    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, &_data.config.context.version_major, 0);
-    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MINOR, &_data.config.context.version_minor, 0);
-    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_PATCH, &_data.config.context.version_patch, 1);
-    nu_config_get_bool(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_LOG_CONFIG, &_data.config.context.log_config, true);
+    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, 0, &_data.config.context.version_major);
+    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MINOR, 0, &_data.config.context.version_minor);
+    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_PATCH, 1, &_data.config.context.version_patch);
+    nu_config_get_bool(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_LOG_CONFIG, true, &_data.config.context.log_config);
 
     /* window */
     const char *window_api;
-    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, &window_api, "");
+    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, "", &window_api);
     if (NU_MATCH(window_api, "glfw")) {
         _data.config.window.api = NU_WINDOW_API_GLFW;
     } else {
         _data.config.window.api = NU_WINDOW_API_NONE;
     }
     const char *window_mode;
-    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_MODE, &window_mode, "windowed");
+    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_MODE, "windowed", &window_mode);
     if (NU_MATCH(window_mode, "fullscreen")) {
         _data.config.window.mode = NU_WINDOW_MODE_FULLSCREEN;
     } else if (NU_MATCH(window_mode, "windowed")) {
@@ -41,20 +41,20 @@ static nu_result_t load_ini_file(void)
     } else if (NU_MATCH(window_mode, "borderless")) {
         _data.config.window.mode = NU_WINDOW_MODE_BORDERLESS;
     }
-    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_WIDTH, &_data.config.window.width, 1600);
-    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_HEIGHT, &_data.config.window.height, 900);
-    nu_config_get_bool(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_VSYNC, &_data.config.window.vsync, true);
+    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_WIDTH, 1600, &_data.config.window.width);
+    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_HEIGHT, 900, &_data.config.window.height);
+    nu_config_get_bool(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_VSYNC, true, &_data.config.window.vsync);
 
     /* input */
     const char *input_api;
-    nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_API, &input_api, "");
+    nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_API, "", &input_api);
     if (NU_MATCH(input_api, "glfw")) {
         _data.config.input.api = NU_INPUT_API_GLFW;
     } else {
         _data.config.input.api = NU_INPUT_API_NONE;
     }
     const char *input_cursor_mode;
-    nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_CURSOR_MODE, &input_cursor_mode, "normal");
+    nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_CURSOR_MODE, "normal", &input_cursor_mode);
     if (NU_MATCH(input_cursor_mode, "normal")) {
         _data.config.input.cursor_mode = NU_CURSOR_MODE_NORMAL;
     } else if (NU_MATCH(input_cursor_mode, "hidden")) {
@@ -65,9 +65,11 @@ static nu_result_t load_ini_file(void)
 
     /* renderer */
     const char *renderer_api;
-    nu_config_get_string(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, &renderer_api, "");
+    nu_config_get_string(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, "", &renderer_api);
     if (NU_MATCH(renderer_api, "softrast")) {
         _data.config.renderer.api = NU_RENDERER_API_SOFTRAST;
+    } else if (NU_MATCH(renderer_api, "raytracer")) {
+        _data.config.renderer.api = NU_RENDERER_API_RAYTRACER;
     } else if (NU_MATCH(renderer_api, "vulkan")) {
         _data.config.renderer.api = NU_RENDERER_API_VULKAN;
     } else if (NU_MATCH(renderer_api, "opengl")) {
@@ -143,13 +145,14 @@ nu_result_t nu_config_log(void)
     case NU_RENDERER_API_OPENGL: nu_info("- api: opengl\n"); break;
     case NU_RENDERER_API_SOFTRAST: nu_info("- api: software rasterizer\n"); break;
     case NU_RENDERER_API_VULKAN: nu_info("- api: vulkan\n"); break;
+    case NU_RENDERER_API_RAYTRACER: nu_info("- api: raytracer\n"); break;
     }
     nu_info("+-------------------------+\n");
 
     return NU_SUCCESS;
 }
 
-nu_result_t nu_config_get_int(const char *section, const char *name, int32_t *value, int32_t default_value)
+nu_result_t nu_config_get_int(const char *section, const char *name, int32_t default_value, int32_t *value)
 {
     const char *str = ini_get(_data.ini, section, name);
     if (str) {
@@ -162,7 +165,7 @@ nu_result_t nu_config_get_int(const char *section, const char *name, int32_t *va
 
     return NU_SUCCESS;
 }
-nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t *value, uint32_t default_value)
+nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t default_value, uint32_t *value)
 {
     const char *str = ini_get(_data.ini, section, name);
     if (str) {
@@ -175,18 +178,31 @@ nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t *
 
     return NU_SUCCESS;
 }
-nu_result_t nu_config_get_string(const char *section, const char *name, const char **value, const char *default_value)
+nu_result_t nu_config_get_string(const char *section, const char *name, const char *default_value, const char **value)
 {
     const char *str = ini_get(_data.ini, section, name);
     *value = str ? str : default_value;
 
     return NU_SUCCESS;
 }
-nu_result_t nu_config_get_bool(const char *section, const char *name, bool *value, bool default_value)
+nu_result_t nu_config_get_bool(const char *section, const char *name, bool default_value, bool *value)
 {
     const char *str = ini_get(_data.ini, section, name);
     if (str) {
         *value = (NU_MATCH(str, "true") || NU_MATCH(str, "True") || NU_MATCH(str, "1"));
+    } else {
+        *value = default_value;
+    }
+
+    return NU_SUCCESS;
+}
+nu_result_t nu_config_get_float(const char *section, const char *name, float default_value, float *value)
+{
+    const char *str = ini_get(_data.ini, section, name);
+    if (str) {
+        char *t;
+        *value = strtof(str, &t);
+        if (*t != '\0') return EXIT_FAILURE;
     } else {
         *value = default_value;
     }

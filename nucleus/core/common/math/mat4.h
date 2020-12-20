@@ -13,5 +13,6 @@ NU_API void nu_translate(nu_mat4_t m, const nu_vec3_t translate);
 NU_API void nu_rotate(nu_mat4_t m, float angle, const nu_vec3_t axis);
 NU_API void nu_scale(nu_mat4_t m, const nu_vec3_t scale);
 NU_API void nu_mat4_pick_mat3(const nu_mat4_t m, nu_mat3_t dest);
+NU_API void nu_mat4_inv(const nu_mat4_t m, nu_mat4_t dest);
 
 #endif

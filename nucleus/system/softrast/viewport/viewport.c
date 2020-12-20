@@ -12,8 +12,8 @@ nu_result_t nusr_viewport_initialize(void)
 {
     /* creating renderbuffer */
     uint32_t default_width, default_height;
-    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_WIDTH, &default_width, 640);
-    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_HEIGHT, &default_height, 360);
+    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_WIDTH, 640, &default_width);
+    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_HEIGHT, 360, &default_height);
     nusr_renderbuffer_create(&_data.renderbuffer, default_width, default_height);
 
     return NU_SUCCESS;

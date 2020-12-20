@@ -22,7 +22,7 @@ static const char *quad_vertex = " \
     layout(location = 1) in vec2 uv; \n\
     out vec2 tex_coord; \n\
     void main() { \n\
-        tex_coord = uv; \n\
+        tex_coord = vec2(uv.x, 1.0 - uv.y); \n\
         gl_Position = vec4(vertex, 0, 1); \n\
     }  \
 ";

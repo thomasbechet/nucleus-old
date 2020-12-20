@@ -1,10 +1,10 @@
 #pragma once
 
 #include "../utility/internalptr.hpp"
-#include "commandpool.hpp"
-#include "device.hpp"
-#include "physicaldevice.hpp"
-#include "surface.hpp"
+#include "../vulkan/commandpool.hpp"
+#include "../vulkan/device.hpp"
+#include "../vulkan/physicaldevice.hpp"
+#include "../vulkan/surface.hpp"
 
 #include <vulkan/vulkan.h>
 

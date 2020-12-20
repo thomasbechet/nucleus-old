@@ -37,19 +37,19 @@ nu_result_t nusr_framebuffer_set_rgb(nusr_framebuffer_t *self,
 }
 nu_result_t nusr_framebuffer_set_uint(nusr_framebuffer_t *self, uint32_t x, uint32_t y, uint32_t value)
 {
-    self->pixels[(self->height - y - 1) * self->width + x].as_uint = value;
+    self->pixels[y * self->width + x].as_uint = value;
 
     return NU_SUCCESS;
 }
 nu_result_t nusr_framebuffer_set_float(nusr_framebuffer_t *self, uint32_t x, uint32_t y, float value)
 {
-    self->pixels[(self->height - y - 1) * self->width + x].as_float = value;
+    self->pixels[y * self->width + x].as_float = value;
 
     return NU_SUCCESS;
 }
 nu_result_t nusr_framebuffer_blend_uint(nusr_framebuffer_t *self, uint32_t x, uint32_t y, uint32_t value)
 {
-    uint32_t bvalue = self->pixels[(self->height - y - 1) * self->width + x].as_uint;
+    uint32_t bvalue = self->pixels[y * self->width + x].as_uint;
 
     uint32_t alpha = (value & 0xFF);
     uint32_t inv_alpha = 255 - alpha;
@@ -59,7 +59,7 @@ nu_result_t nusr_framebuffer_blend_uint(nusr_framebuffer_t *self, uint32_t x, ui
     uint32_t rb = ((value & 0x00FF00FF) * alpha + (bvalue & 0x00FF00FF) * inv_alpha) & 0xFF00FF00;
     uint32_t g = ((value & 0x0000FF00) * alpha + (bvalue & 0x0000FF00) * inv_alpha) & 0x00FF0000;
 
-    self->pixels[(self->height - y - 1) * self->width + x].as_uint = rb | g | 0xFF;
+    self->pixels[y * self->width + x].as_uint = rb | g | 0xFF;
 
     return NU_SUCCESS;
 }

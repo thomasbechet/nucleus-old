@@ -2,6 +2,8 @@
 
 #include "../utility/internalptr.hpp"
 
+#include <nucleus/nucleus.h>
+
 namespace nuvk
 {
     class Engine
@@ -10,8 +12,9 @@ namespace nuvk
         Engine();
 
         void render();
-        void initialize();
-        void terminate();
+
+    public:
+        void createMesh(const nu_renderer_mesh_create_info_t &info);
 
     public:
         static inline constexpr std::string_view Section = "ENGINE";

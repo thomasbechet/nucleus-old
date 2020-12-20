@@ -8,13 +8,13 @@ namespace
 {
     static VkCommandPool CreateCommandPool(
         VkDevice device, 
-        uint32_t queueIndex
+        uint32_t queueFamilyIndex
     )
     {
         VkCommandPoolCreateInfo info{};
         info.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         info.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        info.queueFamilyIndex = queueIndex;
+        info.queueFamilyIndex = queueFamilyIndex;
 
         VkCommandPool commandPool;
         if (vkCreateCommandPool(device, &info, nullptr, &commandPool) != VK_SUCCESS) {
@@ -23,7 +23,7 @@ namespace
         return commandPool;
     }
 
-    static VkCommandBuffer BeginCommandBuffer(
+    static VkCommandBuffer BeginSingleCommandBuffer(
         VkCommandPool commandPool,
         VkDevice device
     )
@@ -51,7 +51,7 @@ namespace
         return commandBuffer;
     }
 
-    static void EndCommandBuffer(
+    static void EndSingleCommandBuffer(
         VkCommandBuffer commandBuffer, 
         VkQueue queue
     )
@@ -95,15 +95,15 @@ namespace
 struct CommandPool::Internal
 {
     VkCommandPool commandPool;
-    uint32_t queueIndex;
+    uint32_t queueFamilyIndex;
     const Device &device;
 
     Internal(
         const Device &device,
-        uint32_t queueIndex
-    ) : queueIndex(queueIndex), device(device)
+        uint32_t queueFamilyIndex
+    ) : queueFamilyIndex(queueFamilyIndex), device(device)
     {
-        commandPool = ::CreateCommandPool(device.getDevice(), queueIndex);
+        commandPool = ::CreateCommandPool(device.getDevice(), queueFamilyIndex);
     }
     ~Internal()
     {
@@ -113,16 +113,16 @@ struct CommandPool::Internal
 
 CommandPool::CommandPool(
     const Device &device,
-    uint32_t queueIndex
-) : internal(MakeInternalPtr<Internal>(device, queueIndex)) {}
+    uint32_t queueFamilyIndex
+) : internal(MakeInternalPtr<Internal>(device, queueFamilyIndex)) {}
 
-VkCommandBuffer CommandPool::beginCommandBuffer() const
+VkCommandBuffer CommandPool::beginSingleCommandBuffer() const
 {
-    return ::BeginCommandBuffer(internal->commandPool, internal->device.getDevice());
+    return ::BeginSingleCommandBuffer(internal->commandPool, internal->device.getDevice());
 }
-void CommandPool::endCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const
+void CommandPool::endSingleCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const
 {
-    ::EndCommandBuffer(commandBuffer, queue);
+    ::EndSingleCommandBuffer(commandBuffer, queue);
 }
 
 std::vector<VkCommandBuffer> CommandPool::createCommandBuffers(uint32_t count) const

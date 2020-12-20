@@ -1,6 +1,7 @@
 #include "physicaldevice.hpp"
 
 #include "../engine/engine.hpp"
+#include "../utility/logger.hpp"
 #include "swapchain.hpp"
 #include "device.hpp"
 

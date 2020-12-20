@@ -8,8 +8,9 @@
 typedef enum {
     NU_RENDERER_API_NONE       = 0,
     NU_RENDERER_API_SOFTRAST   = 1,
-    NU_RENDERER_API_VULKAN     = 2,
-    NU_RENDERER_API_OPENGL     = 3
+    NU_RENDERER_API_RAYTRACER  = 2,
+    NU_RENDERER_API_VULKAN     = 3,
+    NU_RENDERER_API_OPENGL     = 4
 } nu_renderer_api_t;
 
 typedef struct {

@@ -14,11 +14,11 @@ namespace nuvk
 
         CommandPool(
             const Device &device,
-            uint32_t queueIndex
+            uint32_t queueFamilyIndex
         );
 
-        VkCommandBuffer beginCommandBuffer() const;
-        void endCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const;
+        VkCommandBuffer beginSingleCommandBuffer() const;
+        void endSingleCommandBuffer(VkCommandBuffer commandBuffer, VkQueue queue) const;
 
         std::vector<VkCommandBuffer> createCommandBuffers(uint32_t count) const;
         void destroyCommandBuffer(VkCommandBuffer commandBuffer) const;

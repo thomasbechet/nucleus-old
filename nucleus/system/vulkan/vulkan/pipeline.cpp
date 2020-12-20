@@ -2,6 +2,10 @@
 
 #include "../engine/engine.hpp"
 #include "../utility/shaderhelper.hpp"
+#include "../asset/mesh.hpp"
+#include "buffer.hpp"
+
+#include <cstring>
 
 using namespace nuvk;
 
@@ -63,8 +67,8 @@ namespace
         shaderStages[1].module = fragShaderModule;
         shaderStages[1].pName  = "main";
 
-        auto bindingDescription = Vertex::GetBindingDescription();
-        auto attributeDescriptions = Vertex::GetAttributeDescriptions();
+        auto bindingDescription = Mesh::GetVertexInputBindingDescription();
+        auto attributeDescriptions = Mesh::GetVertexAttributeDescriptions();
         VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
         vertexInputInfo.sType                           = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
         vertexInputInfo.vertexBindingDescriptionCount   = 1;
@@ -79,9 +83,9 @@ namespace
 
         VkViewport viewport;
         viewport.x        = 0.0f;
-        viewport.y        = 0.0f;
+        viewport.y        = (float)extent.height;
         viewport.width    = (float)extent.width;
-        viewport.height   = (float)extent.height;
+        viewport.height   = -(float)extent.height;
         viewport.minDepth = 0.0f;
         viewport.maxDepth = 1.0f;
 
@@ -103,7 +107,8 @@ namespace
         rasterizer.rasterizerDiscardEnable = VK_FALSE;
         rasterizer.polygonMode             = VK_POLYGON_MODE_FILL;
         rasterizer.lineWidth               = 1.0f;
-        rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
+        //rasterizer.cullMode                = VK_CULL_MODE_BACK_BIT;
+        rasterizer.cullMode                = VK_CULL_MODE_NONE;
         rasterizer.frontFace               = VK_FRONT_FACE_CLOCKWISE;
         rasterizer.depthBiasEnable         = VK_FALSE;
 
@@ -155,6 +160,71 @@ namespace
 
         return pipeline;
     }
+
+    static std::vector<std::pair<UniformBufferObject*, std::unique_ptr<Buffer>>> CreateUniformBuffers(
+        const MemoryAllocator &memoryAllocator,
+        uint32_t count
+    )
+    {
+        std::vector<std::pair<UniformBufferObject*, std::unique_ptr<Buffer>>> uniformBuffers;
+        uniformBuffers.resize(count);
+
+        for (auto &ubo : uniformBuffers) {
+            ubo.second = std::make_unique<Buffer>(
+                memoryAllocator,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VMA_MEMORY_USAGE_CPU_TO_GPU,
+                sizeof(UniformBufferObject),
+                nullptr
+            );
+            ubo.first = static_cast<UniformBufferObject*>(ubo.second->map());
+        }
+
+        return uniformBuffers;
+    }
+
+    static VkDescriptorPool CreateDescriptorPool(VkDevice device, uint32_t size)
+    {
+        VkDescriptorPoolSize poolSize{};
+        poolSize.type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        poolSize.descriptorCount = size;
+
+        VkDescriptorPoolCreateInfo info{};
+        info.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+        info.poolSizeCount = 1;
+        info.pPoolSizes    = &poolSize;
+        info.maxSets       = size;
+
+        VkDescriptorPool pool;
+        if (vkCreateDescriptorPool(device, &info, nullptr, &pool) != VK_SUCCESS) {
+            Engine::Interrupt(Pipeline::Section, "Failed to create descriptor pool.");
+        }
+
+        return pool;
+    }
+
+    static std::vector<VkDescriptorSet> CreateDescriptorSets(
+        VkDevice device, 
+        VkDescriptorSetLayout layout, 
+        VkDescriptorPool pool, 
+        uint32_t count 
+    )
+    {
+        std::vector<VkDescriptorSetLayout> layouts(count, layout);
+        VkDescriptorSetAllocateInfo allocInfo{};
+        allocInfo.sType              = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        allocInfo.descriptorPool     = pool;
+        allocInfo.descriptorSetCount = count;
+        allocInfo.pSetLayouts        = layouts.data();
+        
+        std::vector<VkDescriptorSet> descriptorSets;
+        descriptorSets.resize(count);
+        if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+            Engine::Interrupt(Pipeline::Section, "Failed to create descriptor sets.");
+        }
+        
+        return descriptorSets;
+    }
 }
 
 struct Pipeline::Internal
@@ -164,17 +234,51 @@ struct Pipeline::Internal
     VkPipelineLayout pipelineLayout;
     VkPipeline pipeline;
 
+    std::vector<std::pair<UniformBufferObject*, std::unique_ptr<Buffer>>> uniformBuffers;
+    VkDescriptorPool descriptorPool;
+    std::vector<VkDescriptorSet> descriptorSets;
+
     Internal(
         const Device &device,
-        const RenderContext &renderContext
+        const MemoryAllocator &memoryAllocator,
+        VkRenderPass renderPass,
+        VkExtent2D extent,
+        uint32_t frameResourceCount
     ) : device(device.getDevice())
     {
         descriptorSetLayout = ::CreateDescriptorSetLayout(device.getDevice());
         pipelineLayout = ::CreatePipelineLayout(device.getDevice(), descriptorSetLayout);
-        pipeline = ::CreatePipeline(device.getDevice(), pipelineLayout, renderContext.getRenderPass(), renderContext.getExtent());
+        pipeline = ::CreatePipeline(device.getDevice(), pipelineLayout, renderPass, extent);
+
+        uniformBuffers = ::CreateUniformBuffers(memoryAllocator, frameResourceCount);
+        descriptorPool = ::CreateDescriptorPool(device.getDevice(), frameResourceCount);
+        descriptorSets = ::CreateDescriptorSets(device.getDevice(), descriptorSetLayout, descriptorPool, frameResourceCount);
+    
+        // Write descriptor sets
+        for (uint32_t i = 0; i < frameResourceCount; i++) {
+            VkDescriptorBufferInfo bufferInfo{};
+            bufferInfo.buffer = uniformBuffers.at(i).second->getBuffer();
+            bufferInfo.offset = 0;
+            bufferInfo.range  = sizeof(UniformBufferObject);
+
+            VkWriteDescriptorSet descriptorWrite{};
+            descriptorWrite.sType            = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            descriptorWrite.dstSet           = descriptorSets.at(i);
+            descriptorWrite.dstBinding       = 0;
+            descriptorWrite.dstArrayElement  = 0;
+            descriptorWrite.descriptorType   = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+            descriptorWrite.descriptorCount  = 1;
+            descriptorWrite.pBufferInfo      = &bufferInfo;
+            descriptorWrite.pImageInfo       = nullptr;
+            descriptorWrite.pTexelBufferView = nullptr;
+
+            vkUpdateDescriptorSets(device.getDevice(), 1, &descriptorWrite, 0, nullptr);
+        }
     }
     ~Internal()
     {
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+
         vkDestroyPipeline(device, pipeline, nullptr);
         vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
         vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
@@ -183,11 +287,25 @@ struct Pipeline::Internal
 
 Pipeline::Pipeline(
     const Device &device,
-    const RenderContext &renderContext
-) : internal(MakeInternalPtr<Internal>(device, renderContext)) {}
+    const MemoryAllocator &memoryAllocator,
+    VkRenderPass renderPass,
+    VkExtent2D extent,
+    uint32_t frameResourceCount
+) : internal(MakeInternalPtr<Internal>(device, memoryAllocator, renderPass, extent, frameResourceCount)) {}
 
 VkPipeline Pipeline::getPipeline() const
 {
     return internal->pipeline;
 }
-
+void Pipeline::updateUBO(const UniformBufferObject &ubo, uint32_t frameIndex)
+{
+    std::memcpy(internal->uniformBuffers.at(frameIndex).first, &ubo, sizeof(UniformBufferObject));
+}
+VkDescriptorSet Pipeline::getDescriptorSet(uint32_t frameIndex) const
+{
+    return internal->descriptorSets.at(frameIndex);
+}
+VkPipelineLayout Pipeline::getPipelineLayout() const
+{
+    return internal->pipelineLayout;
+}

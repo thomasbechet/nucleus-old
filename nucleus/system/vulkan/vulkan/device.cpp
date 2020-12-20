@@ -128,6 +128,7 @@ std::vector<const char*> Device::GetRequiredValidationLayers()
 std::vector<const char*> Device::GetRequiredDeviceExtensions()
 {
     return {
-        "VK_KHR_swapchain"
+        "VK_KHR_swapchain",
+        "VK_KHR_maintenance1"
     };
 }

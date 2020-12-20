@@ -1,10 +1,10 @@
 #include "rendercontext.hpp"
 
 #include "../utility/logger.hpp"
-#include "swapchain.hpp"
-#include "renderpass.hpp"
+#include "../vulkan/swapchain.hpp"
+#include "../vulkan/renderpass.hpp"
 
-#include "../engine/engine.hpp"
+#include "engine.hpp"
 
 using namespace nuvk;
 
@@ -127,7 +127,7 @@ struct RenderContext::Internal
             renderPass->getRenderPass()
         );
 
-        commandBuffers = commandPool.createCommandBuffers(framebuffers.size());
+        commandBuffers = commandPool.createCommandBuffers(maxInFlightFrames);
         for (uint32_t i = 0; i < maxInFlightFrames; i++) {
             VkSemaphore semaphore;
             VkFence fence;
@@ -177,7 +177,7 @@ struct RenderContext::Internal
 
     VkCommandBuffer getActiveCommandBuffer() const
     {
-        return commandBuffers[currentSwapchainImageIndex];
+        return commandBuffers[currentFrameIndex];
     }
 
     bool beginRender()
@@ -326,9 +326,9 @@ VkCommandBuffer RenderContext::getActiveCommandBuffer() const
 }
 uint32_t RenderContext::getActiveFrameResourceIndex() const
 {
-    return internal->currentSwapchainImageIndex;
+    return internal->currentFrameIndex;
 }
 uint32_t RenderContext::getFrameResourceCount() const
 {
-    return internal->framebuffers.size();
+    return internal->maxInFlightFrames;
 }
