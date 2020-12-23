@@ -25,8 +25,7 @@ static nu_result_t load_monkey(nu_renderer_mesh_handle_t *mesh)
         return NU_FAILURE;
     }
 
-    if (interface.load_mesh_from_obj(mesh, "engine/model/sniper/Sniper.obj") != NU_SUCCESS) {
-        nu_warning("Failed 3\n");
+    if (interface.load_mesh_from_obj(mesh, "engine/model/alfred/alfred.obj") != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
@@ -83,6 +82,18 @@ static nu_result_t on_start(void)
     }
     stbi_image_free(ima_data);
 
+    ima_data = stbi_load("engine/model/alfred/alfred.jpg", &width, &height, &channel, STBI_rgb);
+    if (!ima_data) nu_interrupt("Failed to load alfred texture.\n");
+    texture_info.width = (uint32_t)width;
+    texture_info.height = (uint32_t)height;
+    texture_info.channel = (uint32_t)channel;
+    texture_info.data = ima_data;
+    nu_renderer_texture_handle_t alfred_texture;
+    if (nu_renderer_texture_create(&alfred_texture, &texture_info) != NU_SUCCESS) {
+        nu_warning("Failed to create texture.\n");
+    }
+    stbi_image_free(ima_data);
+
     /* create materials */
     nu_renderer_material_create_info_t material_info;
     material_info.diffuse_texture      = rdr2_texture_id;
@@ -101,6 +112,12 @@ static nu_result_t on_start(void)
     material_info.diffuse_texture = brick_texture_id;
     if (nu_renderer_material_create(&material1, &material_info) != NU_SUCCESS) {
         nu_interrupt("Failed to create material1.\n");
+    }
+
+    nu_renderer_material_handle_t alfred_material = {0};
+    material_info.diffuse_texture = alfred_texture;
+    if (nu_renderer_material_create(&alfred_material, &material_info) != NU_SUCCESS) {
+        nu_interrupt("Failed to create alfred_material.\n");
     }
 
     /* load cube mesh */
@@ -157,7 +174,7 @@ static nu_result_t on_start(void)
 
     /* create static meshes */
     nu_renderer_staticmesh_handle_t staticmesh_id;
-    nu_renderer_staticmesh_create_info_t staticmesh_info = {};
+    nu_renderer_staticmesh_create_info_t staticmesh_info = {0};
     staticmesh_info.mesh = mesh_id;
     staticmesh_info.material = material0;
 
@@ -183,7 +200,7 @@ static nu_result_t on_start(void)
     nu_renderer_mesh_handle_t mesh_handle;
     if (load_monkey(&mesh_handle) == NU_SUCCESS) {
         staticmesh_info.mesh = mesh_handle;
-        staticmesh_info.material = material1;
+        staticmesh_info.material = alfred_material;
         nu_mat4_identity(staticmesh_info.transform);
         nu_translate(staticmesh_info.transform, (nu_vec3_t){0, 30, 0});
         nu_scale(staticmesh_info.transform, (nu_vec3_t){4, 4, 4});

@@ -170,6 +170,7 @@ nu_result_t nusr_scene_render_global(
                 nu_vec3_muls(tv[i], 1.0f / tv[i][3], tv[i]);
             }
             
+            /* iterate over triangles */
             for (uint32_t idx = 0; idx < indice_count; idx += 3) {
                 nu_vec4_t v0, v1, v2;
                 nu_vec2_t uv0, uv1, uv2;
@@ -217,20 +218,23 @@ nu_result_t nusr_scene_render_global(
                 float inv_vw1 = 1.0f / v1[3];
                 float inv_vw2 = 1.0f / v2[3];
 
+                /* iterate over pixels */
                 for (uint32_t j = tvp[1]; j < tvp[3]; j++) {
                     for (uint32_t i = tvp[0]; i < tvp[2]; i++) {
                         nu_vec2_t sample = {i + 0.5, j + 0.5};
 
+                        /* compute pixel coverage */
                         float w0 = pixel_coverage(v1, v2, sample);
                         float w1 = pixel_coverage(v2, v0, sample);
                         float w2 = pixel_coverage(v0, v1, sample);
                         
                         /* check sample with top left rule */
                         bool included = true;
-                        included &= (w0 == 0) ? t0 : (w0 > 0);
-                        included &= (w1 == 0) ? t1 : (w1 > 0);
-                        included &= (w2 == 0) ? t2 : (w2 > 0);
+                        included &= (w0 == 0.0f) ? t0 : (w0 > 0.0f);
+                        included &= (w1 == 0.0f) ? t1 : (w1 > 0.0f);
+                        included &= (w2 == 0.0f) ? t2 : (w2 > 0.0f);
 
+                        /* compute pixel */
                         if (included) {
                             const float area_inv = 1.0f / area;
                             w0 *= area_inv;
@@ -259,11 +263,11 @@ nu_result_t nusr_scene_render_global(
                                 float px = (a * uv0[0] + b * uv1[0] + c * uv2[0]) * texture->width;
                                 float py = (a * uv0[1] + b * uv1[1] + c * uv2[1]) * texture->height;
 
-                                // float px = (w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]) * texture->width;
-                                // float py = (w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]) * texture->height;
+                                //float px = (w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]) * texture->width;
+                                //float py = (w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]) * texture->height;
 
                                 uint32_t uvx = NU_MAX(0, NU_MIN(texture->width, (uint32_t)px));
-                                uint32_t uvy = NU_MAX(0, NU_MIN(texture->height, (uint32_t)py));
+                                uint32_t uvy = NU_MAX(0, NU_MIN(texture->height, texture->height - 1 - (uint32_t)py));
 
                                 uint32_t color = texture->data[uvy * texture->width + uvx];
                                 nusr_framebuffer_set_uint(&renderbuffer->color_buffer, i, height - j - 1, color);

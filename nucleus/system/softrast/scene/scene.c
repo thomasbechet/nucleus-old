@@ -19,9 +19,9 @@ nu_result_t nusr_scene_initialize(void)
     nu_vec3_zero(_data.camera.eye);
     nu_vec3_copy(_data.camera.center, (nu_vec3_t){0, 0, -1});
     nu_vec3_copy(_data.camera.up, (nu_vec3_t){0, 1, 0});
-    _data.camera.fov = 90.0f;
+    _data.camera.fov = nu_radian(80.0f);
     _data.camera.near = 0.1f;
-    _data.camera.far = 1000.0f;
+    _data.camera.far = 100.0f;
 
     /* staticmesh */
     _data.staticmesh_count = 0;
