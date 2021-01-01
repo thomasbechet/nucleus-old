@@ -162,17 +162,17 @@ nu_result_t nu_renderer_camera_set_center(nu_renderer_camera_handle_t handle, co
     return _system.interface.camera_set_center(handle, center);
 }
 
-nu_result_t nu_renderer_staticmesh_create(nu_renderer_staticmesh_handle_t *handle, const nu_renderer_staticmesh_create_info_t *info)
+nu_result_t nu_renderer_model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info)
 {
-    return _system.interface.staticmesh_create(handle, info);
+    return _system.interface.model_create(handle, info);
 }
-nu_result_t nu_renderer_staticmesh_destroy(nu_renderer_staticmesh_handle_t handle)
+nu_result_t nu_renderer_model_destroy(nu_renderer_model_handle_t handle)
 {
-    return _system.interface.staticmesh_destroy(handle);
+    return _system.interface.model_destroy(handle);
 }
-nu_result_t nu_renderer_staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t transform)
+nu_result_t nu_renderer_model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4_t transform)
 {
-    return _system.interface.staticmesh_set_transform(handle, transform);
+    return _system.interface.model_set_transform(handle, transform);
 }
 
 nu_result_t nu_renderer_label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info)

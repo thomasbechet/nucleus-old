@@ -1,17 +1,16 @@
 #include "module.hpp"
 
-#include "interface.h"
 #include "../renderer.hpp"
 
-using namespace nugl;
+using namespace nusr;
 
 static const uint32_t plugin_count = 0;
 static const char *plugins[] = {};
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
-    info->name         = NUGL_MODULE_NAME;
-    info->id           = NUGL_MODULE_ID;
+    info->name         = NUSR_MODULE_NAME;
+    info->id           = NUSR_MODULE_ID;
     info->flags        = NU_MODULE_FLAG_TYPE_RENDERER;
     info->plugin_count = plugin_count;
     info->plugins      = plugins;
@@ -61,5 +60,9 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->viewport_set_size = viewport_set_size;
     interface->viewport_get_size = viewport_get_size;
 
+    return NU_SUCCESS;
+}
+nu_result_t nusr_renderer_get_interface(nusr_renderer_interface_t *interface)
+{
     return NU_SUCCESS;
 }

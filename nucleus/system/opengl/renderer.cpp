@@ -32,6 +32,7 @@ struct content_t
     std::unordered_map<uint32_t, std::unique_ptr<texture_t>> textures;
     std::unordered_map<uint32_t, std::unique_ptr<shader_t>> shaders;
     std::unordered_map<uint32_t, std::unique_ptr<staticmesh_t>> staticmeshes;
+    std::unordered_map<uint32_t, std::vector<uint32_t>> models;
     std::unordered_map<uint32_t, std::pair<std::unique_ptr<material_t>, std::vector<uint32_t>>> materials;
 };
 
@@ -245,23 +246,37 @@ nu_result_t nugl::camera_set_active(nu_renderer_camera_handle_t handle)
     return NU_SUCCESS;
 }
 
-nu_result_t nugl::staticmesh_create(nu_renderer_staticmesh_handle_t *handle, const nu_renderer_staticmesh_create_info_t *info)
+nu_result_t nugl::model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info)
 {
+    /* add model */
     uint32_t id = _data.content->next_id++;
-    _data.content->staticmeshes.emplace(id, std::make_unique<staticmesh_t>(*info, id));
+    std::vector<uint32_t> staticmeshes;
     NU_HANDLE_SET_ID(*handle, id);
 
-    /* add to materials */
-    auto &staticmesh = *_data.content->staticmeshes.at(id).get();
-    _data.content->materials.at(staticmesh.get_material()).second.emplace_back(id);
+    for (uint32_t i = 0; i < info->mesh_count; i++) {
+        /* add staticmeshes */
+        uint32_t staticmesh_id = _data.content->next_id++;
+        uint32_t test = NU_HANDLE_GET_ID(info->meshes[i]);
+        _data.content->staticmeshes.emplace(staticmesh_id, std::make_unique<staticmesh_t>(
+            staticmesh_id,
+            NU_HANDLE_GET_ID(info->meshes[i]),
+            NU_HANDLE_GET_ID(info->materials[i]),
+            info->transform
+        ));
+        staticmeshes.push_back(staticmesh_id);
+    
+        /* add to materials */
+        _data.content->materials.at(NU_HANDLE_GET_ID(info->materials[i])).second.emplace_back(staticmesh_id);
+    }
+    _data.content->models.emplace(id, staticmeshes);
 
     return NU_SUCCESS;
 }
-nu_result_t nugl::staticmesh_destroy(nu_renderer_staticmesh_handle_t handle)
+nu_result_t nugl::model_destroy(nu_renderer_model_handle_t handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nugl::staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t transform)
+nu_result_t nugl::model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4_t transform)
 {
     return NU_SUCCESS;
 }

@@ -54,7 +54,7 @@ static nu_result_t on_start(void)
     nu_plugin_require(module, "nuutils_loader_plugin");
 
     /* load texture */
-    nu_renderer_texture_create_info_t texture_info = {};
+    nu_renderer_texture_create_info_t texture_info = {0};
     int width, height, channel;
     unsigned char *ima_data;
 
@@ -95,13 +95,11 @@ static nu_result_t on_start(void)
     stbi_image_free(ima_data);
 
     /* create materials */
-    nu_renderer_material_create_info_t material_info;
+    nu_renderer_material_create_info_t material_info = {0};
     material_info.diffuse_texture      = rdr2_texture_id;
-    material_info.use_diffuse_uniform  = false;
     material_info.normal_texture       = NU_NULL_HANDLE;
-    material_info.use_normal_uniform   = false;
     material_info.specular_texture     = NU_NULL_HANDLE;
-    material_info.use_specular_uniform = false;
+    material_info.specular_uniform     = 1.0f;
 
     nu_renderer_material_handle_t material0 = {0};
     if (nu_renderer_material_create(&material0, &material_info) != NU_SUCCESS) {
@@ -159,39 +157,41 @@ static nu_result_t on_start(void)
     };
     uint32_t indice_count = 6 * 6;
 
-    nu_renderer_mesh_create_info_t mesh_info;
-    memset(&mesh_info, 0, sizeof(nu_renderer_mesh_create_info_t));
-    mesh_info.indice_count     = indice_count;
-    mesh_info.positions        = positions;
-    mesh_info.uvs              = uvs;
-    mesh_info.position_indices = position_indices;
-    mesh_info.uv_indices       = uv_indices;
-
+    nu_renderer_submesh_info_t submesh_info = {0};
+    submesh_info.indice_count     = indice_count;
+    submesh_info.positions        = positions;
+    submesh_info.uvs              = uvs;
+    submesh_info.position_indices = position_indices;
+    submesh_info.uv_indices       = uv_indices;
+    nu_renderer_mesh_create_info_t mesh_info = {0};
+    mesh_info.submeshes     = &submesh_info;
+    mesh_info.submesh_count = 1;
     nu_renderer_mesh_handle_t mesh_id;
     if (nu_renderer_mesh_create(&mesh_id, &mesh_info) != NU_SUCCESS) {
         nu_warning("Failed to create cube mesh.\n");
     }
 
     /* create static meshes */
-    nu_renderer_staticmesh_handle_t staticmesh_id;
-    nu_renderer_staticmesh_create_info_t staticmesh_info = {0};
-    staticmesh_info.mesh = mesh_id;
-    staticmesh_info.material = material0;
+    nu_renderer_model_handle_t model_id;
+    nu_renderer_model_create_info_t model_info = {0};
+    model_info.mesh           = mesh_id;
+    model_info.materials      = &material0;
+    model_info.material_count = 1;
 
-    nu_mat4_identity(staticmesh_info.transform);
-    nu_translate(staticmesh_info.transform, (nu_vec3_t){0, -4, 0});
-    nu_scale(staticmesh_info.transform, (nu_vec3_t){100.0, 0.1, 100.0});
-    nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
+    nu_mat4_identity(model_info.transform);
+    nu_translate(model_info.transform, (nu_vec3_t){0, -4, 0});
+    nu_scale(model_info.transform, (nu_vec3_t){100.0, 0.1, 100.0});
+    nu_renderer_model_create(&model_id, &model_info);
 
-    staticmesh_info.material = material1;
+    model_info.materials = &material1;
 
     for (uint32_t i = 0; i < 5; i++) {
         for (uint32_t j = 0; j < 5; j++) {
             for (uint32_t k = 0; k < 5; k++) {
-                nu_mat4_identity(staticmesh_info.transform);
-                nu_translate(staticmesh_info.transform, (nu_vec3_t){i * 2, k * 2, j * 2});
-                nu_scale(staticmesh_info.transform, (nu_vec3_t){0.5, 0.5, 0.5});
-                nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
+                nu_mat4_identity(model_info.transform);
+                nu_translate(model_info.transform, (nu_vec3_t){i * 2, k * 2, j * 2});
+                nu_scale(model_info.transform, (nu_vec3_t){0.5, 0.5, 0.5});
+                nu_renderer_model_create(&model_id, &model_info);
             }
         }
     }
@@ -199,19 +199,23 @@ static nu_result_t on_start(void)
     /* create monkey */
     nu_renderer_mesh_handle_t mesh_handle;
     if (load_monkey(&mesh_handle) == NU_SUCCESS) {
-        staticmesh_info.mesh = mesh_handle;
-        staticmesh_info.material = alfred_material;
-        nu_mat4_identity(staticmesh_info.transform);
-        nu_translate(staticmesh_info.transform, (nu_vec3_t){0, 30, 0});
-        nu_scale(staticmesh_info.transform, (nu_vec3_t){4, 4, 4});
-        nu_renderer_staticmesh_create(&staticmesh_id, &staticmesh_info);
+        model_info.mesh           = mesh_handle;
+        model_info.materials      = &alfred_material;
+        model_info.material_count = 1;
+        nu_mat4_identity(model_info.transform);
+        nu_translate(model_info.transform, (nu_vec3_t){0, 30, 0});
+        nu_scale(model_info.transform, (nu_vec3_t){4, 4, 4});
+        nu_renderer_model_create(&model_id, &model_info);
     } else {
         nu_warning("Failed to load monkey\n");
     }
 }
+NU_DECLARE_HANDLE(test_handle_t);
 static nu_result_t on_stop(void)
 {
-
+    test_handle_t handle;
+    NU_HANDLE_SET_ID(handle, 123);
+    uint32_t t = NU_HANDLE_GET_ID(handle);
 }
 static nu_result_t on_update(void)
 {

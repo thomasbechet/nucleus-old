@@ -44,9 +44,9 @@ nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
     interface->camera_set_center = camera_set_center;
     interface->camera_set_active = NULL;
 
-    interface->staticmesh_create        = staticmesh_create;
-    interface->staticmesh_destroy       = staticmesh_destroy;
-    interface->staticmesh_set_transform = staticmesh_set_transform;
+    interface->model_create        = model_create;
+    interface->model_destroy       = model_destroy;
+    interface->model_set_transform = model_set_transform;
 
     interface->label_create       = label_create;
     interface->label_destroy      = label_destroy;

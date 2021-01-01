@@ -12,7 +12,7 @@ NU_DECLARE_HANDLE(nu_renderer_font_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_texture_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_material_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_camera_handle_t);
-NU_DECLARE_HANDLE(nu_renderer_staticmesh_handle_t);
+NU_DECLARE_HANDLE(nu_renderer_model_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_label_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_rectangle_handle_t);
 
@@ -30,6 +30,11 @@ typedef struct {
     uint32_t *normal_indices;
     uint32_t *tangent_indices;
     uint32_t *color_indices;
+} nu_renderer_submesh_info_t;
+
+typedef struct {
+    nu_renderer_submesh_info_t *submeshes;
+    uint32_t submesh_count;
 } nu_renderer_mesh_create_info_t;
 
 typedef struct {
@@ -40,9 +45,6 @@ typedef struct {
 } nu_renderer_texture_create_info_t;
 
 typedef struct {
-    bool use_diffuse_uniform;
-    bool use_normal_uniform;
-    bool use_specular_uniform;
     nu_renderer_texture_handle_t diffuse_texture;
     nu_renderer_texture_handle_t normal_texture;
     nu_renderer_texture_handle_t specular_texture;
@@ -64,9 +66,10 @@ typedef struct {
 
 typedef struct {
     nu_renderer_mesh_handle_t mesh;
-    nu_renderer_material_handle_t material;
+    nu_renderer_material_handle_t *materials;
+    uint32_t material_count;
     nu_mat4_t transform;
-} nu_renderer_staticmesh_create_info_t;
+} nu_renderer_model_create_info_t;
 
 typedef struct {
     uint32_t x;
@@ -105,9 +108,9 @@ typedef struct {
     nu_result_t (*camera_set_center)(nu_renderer_camera_handle_t, const nu_vec3_t);
     nu_result_t (*camera_set_active)(nu_renderer_camera_handle_t);
 
-    nu_result_t (*staticmesh_create)(nu_renderer_staticmesh_handle_t*, const nu_renderer_staticmesh_create_info_t*);
-    nu_result_t (*staticmesh_destroy)(nu_renderer_staticmesh_handle_t);
-    nu_result_t (*staticmesh_set_transform)(nu_renderer_staticmesh_handle_t, const nu_mat4_t);
+    nu_result_t (*model_create)(nu_renderer_model_handle_t*, const nu_renderer_model_create_info_t*);
+    nu_result_t (*model_destroy)(nu_renderer_model_handle_t);
+    nu_result_t (*model_set_transform)(nu_renderer_model_handle_t, const nu_mat4_t);
 
     nu_result_t (*label_create)(nu_renderer_label_handle_t*, const nu_renderer_label_create_info_t*);
     nu_result_t (*label_destroy)(nu_renderer_label_handle_t);

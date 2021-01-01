@@ -28,9 +28,9 @@ namespace nurt
     nu_result_t camera_set_center(nu_renderer_camera_handle_t handle, const nu_vec3_t center);
     nu_result_t camera_set_active(nu_renderer_camera_handle_t handle);
 
-    nu_result_t staticmesh_create(nu_renderer_staticmesh_handle_t *handle, const nu_renderer_staticmesh_create_info_t *info);
-    nu_result_t staticmesh_destroy(nu_renderer_staticmesh_handle_t handle);
-    nu_result_t staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t transform);
+    nu_result_t model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info);
+    nu_result_t model_destroy(nu_renderer_model_handle_t handle);
+    nu_result_t model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4_t transform);
 
     nu_result_t label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info);
     nu_result_t label_destroy(nu_renderer_label_handle_t handle);

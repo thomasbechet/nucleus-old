@@ -93,15 +93,15 @@ nu_result_t nurt::camera_set_active(nu_renderer_camera_handle_t handle)
     return NU_SUCCESS;
 }
 
-nu_result_t nurt::staticmesh_create(nu_renderer_staticmesh_handle_t *handle, const nu_renderer_staticmesh_create_info_t *info)
+nu_result_t nurt::model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info)
 {
     return NU_SUCCESS;
 }
-nu_result_t nurt::staticmesh_destroy(nu_renderer_staticmesh_handle_t handle)
+nu_result_t nurt::model_destroy(nu_renderer_model_handle_t handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nurt::staticmesh_set_transform(nu_renderer_staticmesh_handle_t handle, const nu_mat4_t transform)
+nu_result_t nurt::model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4_t transform)
 {
     return NU_SUCCESS;
 }

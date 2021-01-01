@@ -2,11 +2,11 @@
 
 #include "../../core/nucleus.h"
 
-namespace nugl
+namespace nusr
 {
-    nu_result_t initialize(void);
-    nu_result_t terminate(void);
-    nu_result_t render(void);
+    nu_result_t initialize();
+    nu_result_t terminate();
+    nu_result_t render();
 
     nu_result_t mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info);
     nu_result_t mesh_destroy(nu_renderer_mesh_handle_t handle);

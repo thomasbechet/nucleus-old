@@ -2,12 +2,17 @@
 
 using namespace nugl;
 
-staticmesh_t::staticmesh_t(const nu_renderer_staticmesh_create_info_t &info, uint32_t id)
+staticmesh_t::staticmesh_t(
+    uint32_t id, 
+    uint32_t mesh, 
+    uint32_t material, 
+    const nu_mat4_t transform
+)
 {
     m_id = id;
-    m_mesh = NU_HANDLE_GET_ID(info.mesh);
-    m_material = NU_HANDLE_GET_ID(info.material);
-    nu_mat4_copy(info.transform, m_transform);
+    m_mesh = mesh;
+    m_material = material;
+    nu_mat4_copy(transform, m_transform);
 }
 staticmesh_t::~staticmesh_t()
 {

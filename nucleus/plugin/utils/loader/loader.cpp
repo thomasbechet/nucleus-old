@@ -74,15 +74,17 @@ nu_result_t load_mesh_from_obj(nu_renderer_mesh_handle_t *handle, const char *fi
         }
     }
 
-    auto first = meshes.begin();
+    auto first = meshes.begin(); //TODO : load multi mesh
 
-    nu_renderer_mesh_create_info_t info;
-    memset(&info, 0, sizeof(nu_renderer_mesh_create_info_t));
-    info.vertex_count     = first->second.positions.size();
-    info.positions        = (nu_vec3_t*)first->second.positions.data();
-    info.uvs              = (nu_vec2_t*)first->second.uvs.data();
-    info.colors           = (nu_vec3_t*)first->second.colors.data();
-    info.indice_count     = 0;
+    nu_renderer_submesh_info_t submeshInfo = {0};
+    submeshInfo.vertex_count     = first->second.positions.size();
+    submeshInfo.positions        = (nu_vec3_t*)first->second.positions.data();
+    submeshInfo.uvs              = (nu_vec2_t*)first->second.uvs.data();
+    submeshInfo.colors           = (nu_vec3_t*)first->second.colors.data();
+    submeshInfo.indice_count     = 0;
+    nu_renderer_mesh_create_info_t info = {0};
+    info.submeshes     = &submeshInfo;
+    info.submesh_count = 1;
 
     if (nu_renderer_mesh_create(handle, &info) != NU_SUCCESS) {
         nu_warning(NUUTILS_LOGGER_NAME"Failed to load mesh.\n");
