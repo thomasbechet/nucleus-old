@@ -91,7 +91,7 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
     nu_plugin_interface_loader_pfn_t load_interface;
     result = nu_module_load_function(module, NU_PLUGIN_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load plugin loader.\n");
+        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load plugin loader for plugin: %s.\n", plugin);
         return result;
     }
 
@@ -99,7 +99,7 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
     memset(&_data.plugins[id].interface, 0, sizeof(nu_plugin_interface_t));
     result = load_interface(&_data.plugins[id].interface, plugin);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load interface.\n");
+        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load plugin interface: %s.\n", plugin);
         return result;
     }
 
@@ -111,7 +111,7 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
     if (_data.plugins[id].interface.initialize) {
         result = _data.plugins[id].interface.initialize();
         if (result != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to initialize plugin.\n");
+            nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to initialize plugin: %s.\n", plugin);
             return result;
         }
     }

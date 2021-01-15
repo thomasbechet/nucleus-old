@@ -1,19 +1,20 @@
 #include "renderer.h"
 
 #include "../../context/config.h"
-#include "../../../system/softrast/module/interface.h"
-#include "../../../system/raytracer/module/interface.h"
-#include "../../../system/vulkan/module/interface.h"
-#include "../../../system/opengl/module/interface.h"
+
+#include <nucleus/module/softrast.h>
+#include <nucleus/module/raytracer.h>
+#include <nucleus/module/vulkan.h>
+#include <nucleus/module/opengl.h>
 
 #define NU_LOGGER_RENDERER_NAME "[RENDERER] "
 
 static const char *nu_renderer_api_names[] = {
-    "engine/system/nucleus-renderer-none",
-    "engine/system/"NUSR_MODULE_NAME,
-    "engine/system/"NURT_MODULE_NAME,
-    "engine/system/"NUVK_MODULE_NAME,
-    "engine/system/"NUGL_MODULE_NAME
+    "engine/module/nucleus-renderer-none",
+    "engine/module/"NUSR_MODULE_NAME,
+    "engine/module/"NURT_MODULE_NAME,
+    "engine/module/"NUVK_MODULE_NAME,
+    "engine/module/"NUGL_MODULE_NAME
 };
 
 typedef struct {
@@ -32,7 +33,8 @@ static nu_result_t initialize_event(void)
     info.terminate  = NULL;
     info.size       = sizeof(nu_renderer_viewport_resize_event_t);
     if (nu_event_register(&_system.viewport_resize_event_id, &info) != NU_SUCCESS) {
-        return NU_SUCCESS;
+        nu_warning(NU_LOGGER_RENDERER_NAME"Failed to register viewport resize event.\n");
+        return NU_FAILURE;
     }
 
     return NU_SUCCESS;
@@ -153,13 +155,9 @@ nu_result_t nu_renderer_camera_set_fov(nu_renderer_camera_handle_t handle, float
 {
     return _system.interface.camera_set_fov(handle, fov);
 }
-nu_result_t nu_renderer_camera_set_eye(nu_renderer_camera_handle_t handle, const nu_vec3_t eye)
+nu_result_t nu_renderer_camera_set_view(nu_renderer_camera_handle_t handle, const nu_vec3f_t eye, const nu_vec3f_t forward, const nu_vec3f_t up)
 {
-    return _system.interface.camera_set_eye(handle, eye);
-}
-nu_result_t nu_renderer_camera_set_center(nu_renderer_camera_handle_t handle, const nu_vec3_t center)
-{
-    return _system.interface.camera_set_center(handle, center);
+    return _system.interface.camera_set_view(handle, eye, forward, up);
 }
 
 nu_result_t nu_renderer_model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info)
@@ -170,7 +168,7 @@ nu_result_t nu_renderer_model_destroy(nu_renderer_model_handle_t handle)
 {
     return _system.interface.model_destroy(handle);
 }
-nu_result_t nu_renderer_model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4_t transform)
+nu_result_t nu_renderer_model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4f_t transform)
 {
     return _system.interface.model_set_transform(handle, transform);
 }

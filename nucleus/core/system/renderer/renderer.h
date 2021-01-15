@@ -42,12 +42,11 @@ NU_API nu_result_t nu_renderer_font_get_text_size(nu_renderer_font_handle_t hand
 NU_API nu_result_t nu_renderer_camera_create(nu_renderer_camera_handle_t *handle, const nu_renderer_camera_create_info_t *info);
 NU_API nu_result_t nu_renderer_camera_destroy(nu_renderer_camera_handle_t handle);
 NU_API nu_result_t nu_renderer_camera_set_fov(nu_renderer_camera_handle_t handle, float fov);
-NU_API nu_result_t nu_renderer_camera_set_eye(nu_renderer_camera_handle_t handle, const nu_vec3_t eye);
-NU_API nu_result_t nu_renderer_camera_set_center(nu_renderer_camera_handle_t handle, const nu_vec3_t center);
+NU_API nu_result_t nu_renderer_camera_set_view(nu_renderer_camera_handle_t handle, const nu_vec3f_t eye, const nu_vec3f_t forward, const nu_vec3f_t up);
 
 NU_API nu_result_t nu_renderer_model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info);
 NU_API nu_result_t nu_renderer_model_destroy(nu_renderer_model_handle_t handle);
-NU_API nu_result_t nu_renderer_model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4_t transform);
+NU_API nu_result_t nu_renderer_model_set_transform(nu_renderer_model_handle_t handle, const nu_mat4f_t transform);
 
 NU_API nu_result_t nu_renderer_label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info);
 NU_API nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle);
