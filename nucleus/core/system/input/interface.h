@@ -14,7 +14,8 @@ typedef struct {
     nu_result_t (*get_keyboard_state)(nu_button_state_t*, nu_keyboard_t);
     nu_result_t (*get_keyboard_text)(const char **text, uint32_t *length);
     nu_result_t (*get_mouse_state)(nu_button_state_t*, nu_mouse_t);
-    nu_result_t (*get_mouse_motion)(nu_vec2_t);
+    nu_result_t (*get_mouse_motion)(nu_vec2f_t);
+    nu_result_t (*get_mouse_scroll)(nu_vec2f_t);
     nu_result_t (*get_cursor_mode)(nu_cursor_mode_t*);
     nu_result_t (*set_cursor_mode)(nu_cursor_mode_t);
 } nu_input_interface_t;

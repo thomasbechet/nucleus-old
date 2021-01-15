@@ -15,10 +15,12 @@
                                 typedef struct name##__ *name
 #ifdef NU_CXX
     #define NU_NULL_HANDLE nullptr
+    #define NU_HANDLE_SET_ID(handle, id) handle = static_cast<decltype(handle)>((void*)(uintptr_t)(id + 1))
+    #define NU_HANDLE_GET_ID(handle) ({uint32_t id; id = (uintptr_t)(handle); (id - 1);})
 #else
     #define NU_NULL_HANDLE NULL
+    #define NU_HANDLE_SET_ID(handle, id) handle = (void*)(uintptr_t)(id + 1)
+    #define NU_HANDLE_GET_ID(handle) ({uint32_t id; id = (uintptr_t)(handle); (id - 1);})
 #endif
-#define NU_HANDLE_SET_ID(handle, id) *((uintptr_t*)(&(handle))) = (uintptr_t)(id + 1)
-#define NU_HANDLE_GET_ID(handle) ({uint32_t id; id = (uintptr_t)(handle); (id - 1);})
 
 #endif

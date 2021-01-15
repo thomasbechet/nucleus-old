@@ -17,6 +17,7 @@ endif()
 INCLUDE_DIRECTORIES(
     ../../extlibs/cglm/include/
     ../../extlibs/ini/include/
+    ../../
 )
 
 FILE(GLOB_RECURSE sources_ini ${CMAKE_CURRENT_SOURCE_DIR}/../../extlibs/ini/include/*.c)

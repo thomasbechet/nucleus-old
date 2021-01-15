@@ -1,13 +1,14 @@
 #include "window.h"
 
 #include "../../context/config.h"
-#include "../../../system/glfw/module/interface.h"
+
+#include <nucleus/module/glfw.h>
 
 #define NU_LOGGER_WINDOW_NAME "[WINDOW] "
 
 static const char *nu_window_api_names[] = {
-    "engine/system/nucleus-window-none",
-    "engine/system/"NUGLFW_MODULE_NAME
+    "engine/module/nucleus-window-none",
+    "engine/module/"NUGLFW_MODULE_NAME
 };
 
 typedef struct {
