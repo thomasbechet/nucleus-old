@@ -1,6 +1,6 @@
 #include "model.hpp"
 
-using namespace nusr;
+using namespace nu::softrast;
 
 Model::Model(const nu_renderer_model_create_info_t &info)
 {
@@ -9,5 +9,5 @@ Model::Model(const nu_renderer_model_create_info_t &info)
     for (uint32_t i = 0; i < info.material_count; i++) {
         materials.emplace_back(info.materials[i]);
     }
-    nu_mat4f_copy(info.transform, transform);    
+    transform = nu::Matrix4f(info.transform);
 }

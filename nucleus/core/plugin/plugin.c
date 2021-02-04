@@ -1,6 +1,7 @@
 #include "plugin.h"
 
 #include "../module/interface.h"
+#include "../logger/logger.h"
 
 #define NU_LOGGER_PLUGIN_NAME "[PLUGIN] "
 #define MAX_PLUGIN_COUNT 32
@@ -105,7 +106,7 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
 
     /* save plugin name and module*/
     _data.plugins[id].module = module;
-    _data.plugins[id].name = plugin;
+    _data.plugins[id].name   = plugin;
 
     /* initialize plugin */
     if (_data.plugins[id].interface.initialize) {

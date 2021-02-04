@@ -114,3 +114,59 @@ void nu_vec2i_divs(const nu_vec2i_t v, int32_t s, nu_vec2i_t dest)
     dest[0] = v[0] / s;
     dest[1] = v[1] / s;
 }
+
+void nu_vec2u_copy(const nu_vec2u_t v, nu_vec2u_t dest)
+{
+    dest[0] = v[0];
+    dest[1] = v[1];   
+}
+void nu_vec2u_one(nu_vec2u_t v)
+{
+    v[0] = 1;
+    v[1] = 1;
+}
+void nu_vec2u_zero(nu_vec2u_t v)
+{
+    v[0] = 0;
+    v[1] = 0;
+}
+void nu_vec2u_add(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest)
+{
+    dest[0] = a[0] + b[0];
+    dest[1] = a[1] + b[1];
+}
+void nu_vec2u_adds(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest)
+{
+    dest[0] = v[0] + s;
+    dest[1] = v[1] + s;
+}
+void nu_vec2u_sub(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest)
+{
+    dest[0] = a[0] - b[0];
+    dest[1] = a[1] - b[1];
+}
+void nu_vec2u_subs(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest)
+{
+    dest[0] = v[0] - s;
+    dest[1] = v[1] - s;
+}
+void nu_vec2u_mul(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest)
+{
+    dest[0] = a[0] * b[0];
+    dest[1] = a[1] * b[1];
+}
+void nu_vec2u_muls(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest)
+{
+    dest[0] = v[0] * s;
+    dest[1] = v[1] * s;
+}
+void nu_vec2u_div(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest)
+{
+    dest[0] = a[0] / b[0];
+    dest[1] = a[1] / b[1];
+}
+void nu_vec2u_divs(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest)
+{
+    dest[0] = v[0] / s;
+    dest[1] = v[1] / s;
+}

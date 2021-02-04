@@ -6,11 +6,16 @@
 #include "../system/window/window.h"
 #include "../system/renderer/renderer.h"
 #include "../system/input/input.h"
+#include "../logger/logger.h"
+#include "../memory/memory.h"
 
-#define NU_CONTEXT_LOGGER_NAME "[CONTEXT] "
+#define NU_CONTEXT_LOGGER_NAME "[SYSTEM] "
 
 typedef struct {
     bool config;
+    bool memory;
+    bool logger;
+    bool module;
     bool event;
     bool plugin;
     bool task;
@@ -24,9 +29,9 @@ typedef struct {
     nu_context_loaded_state_t loaded;
     float delta_time;
     bool should_stop;
-} nu_context_t;
+} nu_context_data_t;
 
-static nu_context_t _context;
+static nu_context_data_t _context;
 
 static nu_result_t nu_context_initialize(const nu_context_init_info_t *info);
 static nu_result_t nu_context_terminate(void);
@@ -36,31 +41,61 @@ static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
     nu_result_t result;
     result = NU_SUCCESS;
 
-    memset(&_context, 0, sizeof(nu_context_t));
+    memset(&_context, 0, sizeof(nu_context_data_t));
     _context.should_stop     = false;
+
     _context.loaded.config   = false;
-    _context.loaded.event    = false;
+    _context.loaded.memory   = false;
+    _context.loaded.logger   = false;
+    _context.loaded.module   = false;
     _context.loaded.plugin   = false;
+    _context.loaded.event    = false;
     _context.loaded.task     = false;
     _context.loaded.window   = false;
     _context.loaded.renderer = false;
 
-    /* engine configuration */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Loading configuration...\n");
+    /* load configuration */
     if (info) {
         _context.callback = info->callback;
     }
-    
     if (nu_config_load(_context.callback.config) != NU_SUCCESS) {
-        nu_fatal(NU_CONTEXT_LOGGER_NAME"Failed to configure the engine.\n");
+        nu_context_terminate();
+        return NU_FAILURE;
     }
     _context.loaded.config = true;
+
+    /* initialize memory system */
+    result = nu_memory_initialize();
+    if (result != NU_SUCCESS) {
+        nu_context_terminate();
+        return NU_FAILURE;
+    }
+    _context.loaded.memory = true;
+
+    /* initialize logger system */
+    result = nu_logger_initialize();
+    if (result != NU_SUCCESS) {
+        nu_context_terminate();
+        return result;
+    }
+    _context.loaded.logger = true;
+    
+    /* log core configuration */
     if (nu_config_get().context.log_config) {
         nu_config_log();
     }
 
-    /* start event system */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Initializing event...\n");
+    /* initialize module system */
+    nu_info(NU_CONTEXT_LOGGER_NAME"Starting module...\n");
+    result = nu_module_initialize();
+    if (result != NU_SUCCESS) {
+        nu_context_terminate();
+        return result;
+    }
+    _context.loaded.module = true;
+
+    /* initialize event system */
+    nu_info(NU_CONTEXT_LOGGER_NAME"Starting event...\n");
     result = nu_event_initialize();
     if (result != NU_SUCCESS) {
         nu_context_terminate();
@@ -105,7 +140,7 @@ static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
     _context.loaded.renderer = true;
 
     /* start plugin system */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Initializing plugin...\n");
+    nu_info(NU_CONTEXT_LOGGER_NAME"Starting plugins...\n");
     result = nu_plugin_initialize();
     if (result != NU_SUCCESS) {
         nu_context_terminate();
@@ -117,38 +152,69 @@ static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
 }
 static nu_result_t nu_context_terminate(void)
 {
+    /* terminate plugin system */
     if (_context.loaded.plugin) {
-        nu_info(NU_CONTEXT_LOGGER_NAME"Terminating plugin...\n");
+        nu_info(NU_CONTEXT_LOGGER_NAME"Stopping plugins...\n");
         nu_plugin_terminate();
         _context.loaded.plugin = false;
     }
+
+    /* terminate renderer system */
     if (_context.loaded.renderer) {
         nu_info(NU_CONTEXT_LOGGER_NAME"Stopping renderer system...\n");
         nu_system_renderer_terminate();
         _context.loaded.renderer = false;
     }
+
+    /* terminate input system */
     if (_context.loaded.input) {
         nu_info(NU_CONTEXT_LOGGER_NAME"Stopping input system...\n");
         nu_system_input_terminate();
         _context.loaded.input = false;
     }
+
+    /* terminate window system */
     if (_context.loaded.window) {
         nu_info(NU_CONTEXT_LOGGER_NAME"Stopping window system...\n");
         nu_system_window_terminate();
         _context.loaded.window = false;
     }
+
+    /* terminate task system */
     if (_context.loaded.task) {
         nu_info(NU_CONTEXT_LOGGER_NAME"Stopping task system...\n");
         nu_system_task_terminate();
         _context.loaded.task = false;
     }
+
+    /* terminate event system */
     if (_context.loaded.event) {
-        nu_info(NU_CONTEXT_LOGGER_NAME"Terminating event...\n");
+        nu_info(NU_CONTEXT_LOGGER_NAME"Stopping event...\n");
         nu_event_terminate();
         _context.loaded.event = false;
     }
+
+    /* terminate module system */
+    if (_context.loaded.module) {
+        nu_info(NU_CONTEXT_LOGGER_NAME"Stopping module...\n");
+        nu_module_terminate();
+        _context.loaded.module = false;
+    }
+
+    /* terminate logger system */
+    if (_context.loaded.logger) {
+        nu_logger_terminate();
+        _context.loaded.logger = false;
+    }
+
+    /* terminate memory system */
+    if (_context.loaded.memory) {
+        nu_memory_terminate();
+        _context.loaded.memory = false;
+    }
+
+    /* unload configuration */
     if (_context.loaded.config) {
-        nu_info(NU_CONTEXT_LOGGER_NAME"Unloading configuration...\n");
         nu_config_unload();
         _context.loaded.config = false;
     }
@@ -162,11 +228,15 @@ static nu_result_t nu_context_run(void)
     const float MAXIMUM_TIMESTEP = 1.0f / 10.0f * 1000.0f;
     float delta, accumulator;
 
+    delta = accumulator = 0.0f;
+
     nu_timer_t timer;
     nu_timer_start(&timer);
 
-    if (_context.callback.start) 
+    if (_context.callback.start)
         _context.callback.start();
+
+    nu_module_log();
 
     while (!_context.should_stop) {
         /* compute delta */
@@ -260,4 +330,12 @@ nu_result_t nu_context_request_stop(void)
 float nu_context_get_delta_time(void)
 {
     return _context.delta_time;
+}
+void nu_interrupt(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    nu_vlog(NU_FATAL, format, args);
+    va_end(args);
+    exit(NU_FAILURE);
 }

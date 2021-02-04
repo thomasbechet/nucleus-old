@@ -4,10 +4,11 @@
 #include "../asset/assetmanager.hpp"
 #include "../memory/colorframebuffer.hpp"
 #include "../scene/scene.hpp"
+#include "../gui/gui.hpp"
 
 #include <unordered_map>
 
-namespace nusr
+namespace nu::softrast
 {
     class Engine
     {
@@ -27,14 +28,22 @@ namespace nusr
 
         nu_renderer_font_handle_t createFont(const nu_renderer_font_create_info_t &info);
         void destroyFont(nu_renderer_font_handle_t handle);
-        void getFontTextSize(nu_renderer_font_handle_t handle, const std::string &text, uint32_t &width, uint32_t &height);
+        Vector2u getFontTextSize(nu_renderer_font_handle_t handle, const std::string &text);
 
         nu_renderer_model_handle_t createModel(const nu_renderer_model_create_info_t &info);
         void destroyModel(nu_renderer_model_handle_t handle);
-        void setModelTransform(nu_renderer_model_handle_t handle, const nu_mat4f_t transform);
+        void setModelTransform(nu_renderer_model_handle_t handle, const Matrix4f &transform);
 
         void setCameraFov(float fov);
-        void setCameraView(const nu_vec3f_t eye, const nu_vec3f_t forward, const nu_vec3f_t up);
+        void setCameraView(const Vector3f &eye, const Vector3f &forward, const Vector3f &up);
+
+        nu_renderer_label_handle_t createLabel(const nu_renderer_label_create_info_t &info);
+        void destroyLabel(nu_renderer_label_handle_t handle);
+        void setLabelPosition(nu_renderer_label_handle_t handle, const Vector2i &position);
+        void setLabelText(nu_renderer_label_handle_t handle, const std::string &text);
+
+        void setViewportSize(const Vector2u &size);
+        Vector2u getViewportSize() const;
 
     private:
         AssetManager m_assetManager;
@@ -42,5 +51,6 @@ namespace nusr
         ColorFramebuffer m_colorBuffer;
         Framebuffer<float> m_depthBuffer;
         Scene m_scene;
+        GUI m_gui;
     };
 }

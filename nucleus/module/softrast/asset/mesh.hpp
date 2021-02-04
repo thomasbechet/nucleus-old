@@ -1,15 +1,15 @@
 #pragma once
 
-#include "../module/interface.h"
+#include <nucleus/nucleus.hpp>
 
 #include <vector>
 
-namespace nusr
+namespace nu::softrast
 {
     struct Vertex
     {
-        nu_vec3f_t position;
-        nu_vec2f_t uv;
+        Vector3f position;
+        Vector2f uv;
     };
 
     struct Mesh

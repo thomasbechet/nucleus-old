@@ -73,13 +73,13 @@ nu_module_handle_t nu_system_window_get_module_handle(void)
     return _system.module;
 }
 
-nu_result_t nu_window_set_size(uint32_t width, uint32_t height)
+nu_result_t nu_window_set_size(const nu_vec2u_t size)
 {
-    return _system.interface.set_size(width, height);
+    return _system.interface.set_size(size);
 }
-nu_result_t nu_window_get_size(uint32_t *width, uint32_t *height)
+nu_result_t nu_window_get_size(nu_vec2u_t size)
 {
-    return _system.interface.get_size(width, height);
+    return _system.interface.get_size(size);
 }
 nu_result_t nu_window_set_title(const char *title)
 {

@@ -15,6 +15,8 @@ extern "C" {
 #include "system/window/window.h"
 #include "system/task/task.h"
 #include "system/input/input.h"
+#include "logger/logger.h"
+#include "memory/memory.h"
 
 #ifdef __cplusplus
 }

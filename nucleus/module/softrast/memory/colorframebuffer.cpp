@@ -3,21 +3,21 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
 
-using namespace nusr;
+using namespace nu::softrast;
 
-ColorFramebuffer::ColorFramebuffer(uint32_t width, uint32_t height)
-    : Framebuffer<uint32_t>(width, height)
+ColorFramebuffer::ColorFramebuffer(const Vector2u &size)
+    : Framebuffer<uint32_t>(size)
 {
 
 }
 
 void ColorFramebuffer::display(const WindowInterface &interface)
 {
-    interface.presentSurface(m_width, m_height, m_data.data());
+    interface.presentSurface(m_size, m_data.data());
 }
 void ColorFramebuffer::save(const std::string &filename) const
 {
-    stbi_write_jpg(filename.c_str(), m_width, m_height, 4, m_data.data(), 100);
+    stbi_write_jpg(filename.c_str(), m_size.x, m_size.y, 4, m_data.data(), 100);
 }
 void ColorFramebuffer::blend(uint32_t x, uint32_t y, uint32_t value)
 {

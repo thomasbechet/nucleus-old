@@ -2,14 +2,13 @@
 
 #include "framebuffer.hpp"
 
-namespace nusr
+namespace nu::softrast
 {
     template<typename T>
-    Framebuffer<T>::Framebuffer(uint32_t width, uint32_t height)
+    Framebuffer<T>::Framebuffer(const Vector2u &size)
     {
-        m_width = width;
-        m_height = height;
-        m_data.resize(width * height);
+        m_size = size;
+        m_data.resize(m_size.x * m_size.y);
     }
     
     template<typename T>
@@ -20,21 +19,16 @@ namespace nusr
     template<typename T>
     void Framebuffer<T>::set(uint32_t x, uint32_t y, const T &element)
     {
-        m_data[y * m_width + x] = element;
+        m_data[y * m_size.x + x] = element;
     }
     template<typename T>
     T Framebuffer<T>::get(uint32_t x, uint32_t y) const
     {
-        return m_data[y * m_width + x];
+        return m_data[y * m_size.x + x];
     }
     template<typename T>
-    uint32_t Framebuffer<T>::getWidth() const
+    Vector2u Framebuffer<T>::getSize() const
     {
-        return m_width;
-    }
-    template<typename T>
-    uint32_t Framebuffer<T>::getHeight() const
-    {
-        return m_height;
+        return m_size;
     }
 }

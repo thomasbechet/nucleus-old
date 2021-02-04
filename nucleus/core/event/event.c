@@ -1,5 +1,7 @@
 #include "event.h"
 
+#include "../memory/memory.h"
+
 #define MAX_EVENT_COUNT 128
 #define MAX_SUBSCRIBE_COUNT 128
 #define MAX_MESSAGE_PER_EVENT_COUNT 64 

@@ -1,23 +1,17 @@
 #pragma once
 
-#include "../module/interface.h"
 #include "../memory/colorframebuffer.hpp"
 
 #include <unordered_map>
 #include <vector>
 
-namespace nusr
+namespace nu::softrast
 {
     struct Glyph
     {
-        uint32_t advance_x;
-        uint32_t advance_y;
-
-        uint32_t bitmap_width;
-        uint32_t bitmap_height;
-
-        uint32_t bearing_x;
-        uint32_t bearing_y;
+        Vector2u advance;
+        Vector2u bitmapSize;
+        Vector2u bearing;
 
         uint32_t ty;
     };
@@ -29,6 +23,6 @@ namespace nusr
         std::unordered_map<char, Glyph> glyphs;
         ColorFramebuffer atlas;
 
-        void getTextSize(const std::string &text, uint32_t &width, uint32_t &height) const;
+        Vector2u getTextSize(const std::string &text) const;
     };
 }

@@ -2,28 +2,24 @@
 
 #include <array>
 
-using namespace nusr;
+using namespace nu::softrast;
 
 Scene::Scene()
 {
     // Initialize camera
-    nu_mat4f_identity(m_camera.view);
-    m_camera.fov = nu_radian(80.0f);
+    m_camera.view = Matrix4f::identity();
+    m_camera.fov  = nu_radian(80.0f);
     m_camera.near = 0.1f;
-    m_camera.far = 100.0f;
+    m_camera.far  = 100.0f;
 }
 
 void Scene::setCameraFov(float fov)
 {
     m_camera.fov = fov;
 }
-void Scene::setCameraView(const nu_vec3f_t eye, const nu_vec3f_t forward, const nu_vec3f_t up)
+void Scene::setCameraView(const Vector3f &eye, const Vector3f &forward, const Vector3f &up)
 {
-    nu_vec3f_t center;
-    nu_mat4f_t view;
-    nu_vec3f_add(eye, forward, center);
-    nu_lookat(eye, center, up, view);
-    nu_mat4f_copy(view, m_camera.view);
+    m_camera.view = Matrix4f::lookAt(eye, eye + forward, up);
 }
 
 nu_renderer_model_handle_t Scene::createModel(const nu_renderer_model_create_info_t &info)
@@ -38,9 +34,9 @@ void Scene::destroyModel(nu_renderer_model_handle_t handle)
 {
     m_models.erase(NU_HANDLE_GET_ID(handle));
 }
-void Scene::setModelTransform(nu_renderer_model_handle_t handle, const nu_mat4f_t transform)
+void Scene::setModelTransform(nu_renderer_model_handle_t handle, const Matrix4f &transform)
 {
-    nu_mat4f_copy(transform, m_models.at(NU_HANDLE_GET_ID(handle)).transform);
+    m_models.at(NU_HANDLE_GET_ID(handle)).transform = transform;
 }
 
 static void vertexShader(
@@ -147,14 +143,12 @@ static float pixelCoverage(const nu_vec2f_t a, const nu_vec2f_t b, const nu_vec2
 {
     return (c[0] - a[0]) * (b[1] - a[1]) - (c[1] - a[1]) * (b[0] - a[0]);
 }
-#include <iostream>
-#include <nucleus/utility/nucleus.hpp>
 void Scene::draw(ColorFramebuffer &colorBuffer, Framebuffer<float> &depthBuffer, const AssetManager &assetManager) const
 {
     // Get buffer size
     uint32_t width, height;
-    width = colorBuffer.getWidth();
-    height = colorBuffer.getHeight();
+    width = colorBuffer.getSize().x;
+    height = colorBuffer.getSize().y;
     const nu_vec4f_t viewport = {0, 0, (float)width, (float)height};
 
     // Compute VP matrix
@@ -292,8 +286,8 @@ void Scene::draw(ColorFramebuffer &colorBuffer, Framebuffer<float> &depthBuffer,
                                     * f=-----------------------------------------------------   *
                                     *        a / w_a      +      b / w_b      +     c / w_c     */
 
-                                    uint32_t textureWidth = texture.getWidth();
-                                    uint32_t textureHeight = texture.getHeight();
+                                    uint32_t textureWidth = texture.getSize().x;
+                                    uint32_t textureHeight = texture.getSize().y;
                                     
                                     float px = (a * uv0[0] + b * uv1[0] + c * uv2[0]) * textureWidth;
                                     float py = (a * uv0[1] + b * uv1[1] + c * uv2[1]) * textureHeight;

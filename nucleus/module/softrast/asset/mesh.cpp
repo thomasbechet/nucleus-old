@@ -1,8 +1,6 @@
 #include "mesh.hpp"
 
-#include "../common/logger.h"
-
-using namespace nusr;
+using namespace nu::softrast;
 
 Mesh::Mesh(const nu_renderer_mesh_create_info_t &info)
 {
@@ -22,16 +20,16 @@ Mesh::Mesh(const nu_renderer_mesh_create_info_t &info)
             for (uint32_t i = 0; i < meshInfo.indice_count; i++) {
                 Vertex vertex;
                 uint32_t position_indice = meshInfo.position_indices[i];
-                uint32_t uv_indice = meshInfo.uv_indices[i];
-                nu_vec3f_copy(meshInfo.positions[position_indice], vertex.position);
-                nu_vec2f_copy(meshInfo.uvs[uv_indice], vertex.uv);
+                uint32_t uv_indice       = meshInfo.uv_indices[i];
+                vertex.position = Vector3f(meshInfo.positions[position_indice]);
+                vertex.uv       = Vector2f(meshInfo.uvs[uv_indice]);
                 vertices.emplace_back(vertex);
             }
         } else {
             for (uint32_t i = 0; i < meshInfo.vertex_count; i++) {
                 Vertex vertex;
-                nu_vec3f_copy(meshInfo.positions[i], vertex.position);
-                nu_vec2f_copy(meshInfo.uvs[i], vertex.uv);
+                vertex.position = Vector3f(meshInfo.positions[i]);
+                vertex.uv       = Vector2f(meshInfo.uvs[i]);
                 vertices.emplace_back(vertex);
             }
         }
@@ -39,9 +37,9 @@ Mesh::Mesh(const nu_renderer_mesh_create_info_t &info)
         // Compute min/max coordinates
         for (Vertex v : vertices) {
             float x, y, z;
-            x = v.position[0];
-            y = v.position[1];
-            z = v.position[2];
+            x = v.position.x;
+            y = v.position.y;
+            z = v.position.z;
             xmin = x < xmin ? x : xmin;
             xmax = x > xmax ? x : xmax;
             ymin = y < ymin ? y : ymin;

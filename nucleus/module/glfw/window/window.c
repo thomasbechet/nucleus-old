@@ -13,8 +13,7 @@
 
 typedef struct {
     GLFWwindow *window;
-    uint32_t width;
-    uint32_t height;
+    nu_vec2u_t size;
 } nuglfw_window_data_t;
 
 static nuglfw_window_data_t _data;
@@ -45,9 +44,9 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* create window */
-    _data.width = nu_config_get().window.width;
-    _data.height = nu_config_get().window.height;
-    _data.window = glfwCreateWindow(_data.width, _data.height, "Window", NULL, NULL);
+    _data.size[0] = nu_config_get().window.width;
+    _data.size[1] = nu_config_get().window.height;
+    _data.window = glfwCreateWindow(_data.size[0], _data.size[1], "Window", NULL, NULL);
     nuglfw_window_set_mode(nu_config_get().window.mode);
 
     if (!_data.window) {
@@ -100,16 +99,15 @@ nu_result_t nuglfw_window_update(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nuglfw_window_set_size(uint32_t width, uint32_t height)
+nu_result_t nuglfw_window_set_size(const nu_vec2u_t size)
 {
-    _data.width = width;
-    _data.height = height;
-    glfwSetWindowSize(_data.window, width, height);
+    nu_vec2u_copy(size, _data.size);
+    glfwSetWindowSize(_data.window, size[0], size[1]);
     return NU_SUCCESS;
 }
-nu_result_t nuglfw_window_get_size(uint32_t *width, uint32_t *height)
+nu_result_t nuglfw_window_get_size(nu_vec2u_t size)
 {
-    glfwGetWindowSize(_data.window, (int*)width, (int*)height);
+    glfwGetWindowSize(_data.window, (int*)&size[0], (int*)&size[1]);
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_window_set_title(const char *title)
@@ -123,7 +121,7 @@ nu_result_t nuglfw_window_set_mode(nu_window_mode_t mode)
         const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
             glfwSetWindowMonitor(_data.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
     } else if (mode == NU_WINDOW_MODE_WINDOWED) {
-        glfwSetWindowMonitor(_data.window, NULL, 10, 10, _data.width, _data.height, 0);
+        glfwSetWindowMonitor(_data.window, NULL, 10, 10, _data.size[0], _data.size[1], 0);
     } else if (mode == NU_WINDOW_MODE_BORDERLESS) {
         const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
             glfwWindowHint(GLFW_RED_BITS, mode->redBits);
@@ -158,15 +156,14 @@ nu_result_t nuglfw_create_window_surface(nu_ptr_t instance_ptr, nu_ptr_t surface
 #endif
 }
 nu_result_t nuglfw_present_surface(
-    uint32_t width,
-    uint32_t height,
+    const nu_vec2u_t size,
     void *pixels
 )
 {
     int32_t w, h;
     glfwGetWindowSize(_data.window, &w, &h);
     glViewport(0, 0, w, h);
-    nuglfw_surface_draw(width, height, pixels);
+    nuglfw_surface_draw(size[0], size[1], pixels);
     glfwSwapBuffers(_data.window);
 
     return NU_SUCCESS;

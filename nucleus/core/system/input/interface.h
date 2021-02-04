@@ -4,7 +4,6 @@
 #include "../../common/common.h"
 
 /* input system interface */
-#define NU_INPUT_INTERFACE_NAME        "nu_input_interface"
 #define NU_INPUT_INTERFACE_LOADER_NAME "nu_input_get_interface"
 
 typedef struct {

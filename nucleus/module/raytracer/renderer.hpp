@@ -33,7 +33,7 @@ namespace nurt
 
     nu_result_t label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info);
     nu_result_t label_destroy(nu_renderer_label_handle_t handle);
-    nu_result_t label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y);
+    nu_result_t label_set_position(nu_renderer_label_handle_t handle, const nu_vec2i_t position);
     nu_result_t label_set_text(nu_renderer_label_handle_t handle, const char *text);
 
     nu_result_t rectangle_create(nu_renderer_rectangle_handle_t *handle, const nu_renderer_rectangle_create_info_t *info);

@@ -14,10 +14,12 @@ typedef struct {
     nu_event_terminate_pfn_t terminate;
 } nu_event_register_info_t;
 
+/* private functions */
 nu_result_t nu_event_initialize(void);
 nu_result_t nu_event_terminate(void);
 nu_result_t nu_event_dispatch_all(void);
 
+/* public functions */
 NU_API nu_result_t nu_event_register(nu_event_id_t *id, const nu_event_register_info_t *info);
 NU_API nu_result_t nu_event_post(nu_event_id_t id, void *data);
 NU_API nu_result_t nu_event_subscribe(nu_event_id_t id, nu_event_callback_pfn_t callback);

@@ -1,7 +1,9 @@
 #include "module.h"
 
-#define NU_LOGGER_MODULE_NAME "[MODULE] "
+#include "../memory/memory.h"
+#include "../logger/logger.h"
 
+#define NU_LOGGER_MODULE_NAME "[MODULE] "
 #define NU_MODULE_GET_INFO_NAME "nu_module_get_info"
 
 #if defined(NU_PLATFORM_WINDOWS)
@@ -58,32 +60,31 @@ static nu_result_t unload_module(const nu_module_t *module)
 }
 static nu_result_t load_module(nu_module_t *module, const char *filename)
 {
-    char *path;
-
     /* reset memory */
     memset(module, 0, sizeof(nu_module_t));
 
     /* loading module */
 #if defined(NU_PLATFORM_WINDOWS)
-    char dir[256];
+    char dir[MAX_MODULE_PATH_SIZE];
     char fname[128];
+    char path[MAX_MODULE_PATH_SIZE];
     _splitpath_s(filename, NULL, 0, dir, sizeof(dir), fname, sizeof(fname), NULL, 0);
     #if defined(__MINGW32__)
-        path = nu_sprintf("%slib%s.dll", dir, fname);
+        nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%slib%s.dll", dir, fname);
     #else
-        path = nu_sprintf("%s%s.dll", dir, fname);
+        nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%s%s.dll", dir, fname);
     #endif
     module->handle = LoadLibraryA(path);
 #elif defined(NU_PLATFORM_UNIX)
     char *dir, *fname;
+    char path[MAX_MODULE_PATH_SIZE];
     dir = dirname(filename);
     fname = basename(filename);
-    path = nu_sprintf("%slib%s.so", dir, fname);
+    nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%slib%s.so", dir, fname);
     module->handle = dlopen(path, RTLD_LAZY);
     free(dir);
     free(fname);
 #endif
-    nu_free(path);
 
     if (!module->handle) {
         nu_warning(NU_LOGGER_MODULE_NAME"Failed to load module '%s'.\n", filename);

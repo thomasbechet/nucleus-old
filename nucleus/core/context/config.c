@@ -1,22 +1,54 @@
 #include "config.h"
 
-#include <stdlib.h>
+#include "../logger/logger.h"
 
+#include <stdlib.h>
 #include <ini/ini.h>
 
 #define NU_CONFIG_LOG_NAME "[CONFIG] "
+#define MAX_PARAMETER_COUNT 128
 
 typedef struct {
-    ini_t *ini;
-    nu_config_t config;
-} config_data_t;
+    char *section;
+    char *name;
+    char *value;
+} nu_config_parameter_t;
 
-static config_data_t _data;
+typedef struct {
+    nu_config_t config;
+    nu_config_parameter_t parameters[MAX_PARAMETER_COUNT];
+    uint32_t parameter_count;
+} nu_config_data_t;
+
+static nu_config_data_t _data;
+
+static void new_parameter(const char *section, const char *name, const char *value)
+{
+    nu_config_parameter_t *param = &_data.parameters[_data.parameter_count++];
+    param->section = strdup(section);
+    param->name    = strdup(name);
+    param->value   = strdup(value);
+}
+static void delete_parameter(nu_config_parameter_t *param)
+{
+    free(param->section);
+    free(param->name);
+    free(param->value);
+}
+
+static int handler(void *user, const char *section, const char *name, const char *value)
+{
+    new_parameter(section, name, value);
+    return 1;
+}
 
 static nu_result_t load_ini_file(void)
 {
-    _data.ini = ini_load("engine/nucleus.ini");
-    if (!_data.ini) return NU_FAILURE;
+    _data.parameter_count = 0;
+
+    if (ini_parse("engine/nucleus.ini", handler, NULL) < 0) {
+        return NU_FAILURE;
+    }
 
     /* context */
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, 0, &_data.config.context.version_major);
@@ -26,12 +58,13 @@ static nu_result_t load_ini_file(void)
 
     /* window */
     const char *window_api;
-    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, "", &window_api);
+    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, NULL, &window_api);
     if (NU_MATCH(window_api, "glfw")) {
         _data.config.window.api = NU_WINDOW_API_GLFW;
     } else {
         _data.config.window.api = NU_WINDOW_API_NONE;
     }
+
     const char *window_mode;
     nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_MODE, "windowed", &window_mode);
     if (NU_MATCH(window_mode, "fullscreen")) {
@@ -41,6 +74,7 @@ static nu_result_t load_ini_file(void)
     } else if (NU_MATCH(window_mode, "borderless")) {
         _data.config.window.mode = NU_WINDOW_MODE_BORDERLESS;
     }
+
     nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_WIDTH, 1600, &_data.config.window.width);
     nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_HEIGHT, 900, &_data.config.window.height);
     nu_config_get_bool(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_VSYNC, true, &_data.config.window.vsync);
@@ -53,6 +87,7 @@ static nu_result_t load_ini_file(void)
     } else {
         _data.config.input.api = NU_INPUT_API_NONE;
     }
+
     const char *input_cursor_mode;
     nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_CURSOR_MODE, "normal", &input_cursor_mode);
     if (NU_MATCH(input_cursor_mode, "normal")) {
@@ -93,7 +128,7 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
     if (callback) {
         if (callback(&_data.config) != NU_SUCCESS) {
             nu_warning(NU_CONFIG_LOG_NAME"Error during configuration check.\n");
-            ini_free(_data.ini);
+            nu_config_unload();
             return NU_FAILURE;
         }
     }
@@ -102,8 +137,9 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
 }
 nu_result_t nu_config_unload(void)
 {
-    if (_data.ini) {
-        ini_free(_data.ini);
+    /* free memory from parameters */
+    for (uint32_t i = 0; i < _data.parameter_count; i++) {
+        delete_parameter(&_data.parameters[i]);
     }
 
     return NU_SUCCESS;
@@ -113,48 +149,23 @@ nu_config_t nu_config_get(void)
 {
     return _data.config;
 }
-nu_result_t nu_config_log(void)
+nu_result_t nu_config_get_string(const char *section, const char *name, const char *default_value, const char **value)
 {
-    nu_info("+-------------------------+\n");
-    nu_info("|      CONFIGURATION      |\n");
-    nu_info("+-------------------------+\n");
-    /* context */
-    nu_info("[%s]\n", NU_CONFIG_CONTEXT_SECTION);
-    nu_info("- version_major: %d\n", _data.config.context.version_major);
-    nu_info("- version_minor: %d\n", _data.config.context.version_minor);
-    nu_info("- version_patch: %d\n", _data.config.context.version_patch);
-    /* window */
-    nu_info("[%s]\n", NU_CONFIG_WINDOW_SECTION);
-    switch (_data.config.window.api)
-    {
-    case NU_WINDOW_API_NONE: nu_info("- api: none\n"); break;
-    case NU_WINDOW_API_GLFW: nu_info("- api: glfw\n"); break;
+    const char *str = NULL;
+    for (uint32_t i = 0; i < _data.parameter_count; i++) {
+        if (NU_MATCH(section, _data.parameters[i].section) && NU_MATCH(name, _data.parameters[i].name)) {
+            str = _data.parameters[i].value;
+            break;
+        }
     }
-    /* input */
-    nu_info("[%s]\n", NU_CONFIG_INPUT_SECTION);
-    switch (_data.config.input.api)
-    {
-    case NU_INPUT_API_NONE: nu_info("- api: none\n"); break;
-    case NU_INPUT_API_GLFW: nu_info("- api: glfw\n"); break;
-    }
-    /* renderer */
-    nu_info("[%s]\n", NU_CONFIG_RENDERER_SECTION);
-    switch (_data.config.renderer.api)
-    {
-    case NU_RENDERER_API_NONE: nu_info("- api: none\n"); break;
-    case NU_RENDERER_API_OPENGL: nu_info("- api: opengl\n"); break;
-    case NU_RENDERER_API_SOFTRAST: nu_info("- api: software rasterizer\n"); break;
-    case NU_RENDERER_API_VULKAN: nu_info("- api: vulkan\n"); break;
-    case NU_RENDERER_API_RAYTRACER: nu_info("- api: raytracer\n"); break;
-    }
-    nu_info("+-------------------------+\n");
+    *value = str ? str : default_value;
 
     return NU_SUCCESS;
 }
-
 nu_result_t nu_config_get_int(const char *section, const char *name, int32_t default_value, int32_t *value)
 {
-    const char *str = ini_get(_data.ini, section, name);
+    const char *str;
+    nu_config_get_string(section, name, NULL, &str);
     if (str) {
         char *t;
         *value = strtol(str, &t, 10);
@@ -167,7 +178,8 @@ nu_result_t nu_config_get_int(const char *section, const char *name, int32_t def
 }
 nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t default_value, uint32_t *value)
 {
-    const char *str = ini_get(_data.ini, section, name);
+    const char *str;
+    nu_config_get_string(section, name, NULL, &str);
     if (str) {
         char *t;
         *value = strtoul(str, &t, 10);
@@ -178,16 +190,10 @@ nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t d
 
     return NU_SUCCESS;
 }
-nu_result_t nu_config_get_string(const char *section, const char *name, const char *default_value, const char **value)
-{
-    const char *str = ini_get(_data.ini, section, name);
-    *value = str ? str : default_value;
-
-    return NU_SUCCESS;
-}
 nu_result_t nu_config_get_bool(const char *section, const char *name, bool default_value, bool *value)
 {
-    const char *str = ini_get(_data.ini, section, name);
+    const char *str;
+    nu_config_get_string(section, name, NULL, &str);
     if (str) {
         *value = (NU_MATCH(str, "true") || NU_MATCH(str, "True") || NU_MATCH(str, "1"));
     } else {
@@ -198,7 +204,8 @@ nu_result_t nu_config_get_bool(const char *section, const char *name, bool defau
 }
 nu_result_t nu_config_get_float(const char *section, const char *name, float default_value, float *value)
 {
-    const char *str = ini_get(_data.ini, section, name);
+    const char *str;
+    nu_config_get_string(section, name, NULL, &str);
     if (str) {
         char *t;
         *value = strtof(str, &t);
@@ -206,6 +213,73 @@ nu_result_t nu_config_get_float(const char *section, const char *name, float def
     } else {
         *value = default_value;
     }
+
+    return NU_SUCCESS;
+}
+
+static void log_transition_line(uint32_t max_section, uint32_t max_name, uint32_t max_value)
+{
+    nu_info("+");
+    for (uint32_t i = 0; i < max_section + 2; i++) nu_info("-");
+    nu_info("+");
+    for (uint32_t i = 0; i < max_name + 2; i++)    nu_info("-");
+    nu_info("+");
+    for (uint32_t i = 0; i < max_value + 2; i++)   nu_info("-");
+    nu_info("+\n");
+}
+static void log_line(
+    uint32_t max_section, uint32_t max_name, uint32_t max_value,
+    const char *section, const char *name, const char *value
+)
+{
+    uint32_t section_len = 0;
+    uint32_t name_len = strlen(name);
+    uint32_t value_len = strlen(value);
+    if (section) {
+        section_len = strlen(section);
+        nu_info("| %s", section);
+    } else {
+        nu_info("| ");
+    }
+    for (uint32_t i = 0; i < (max_section - section_len + 1); i++) nu_info(" ");
+    nu_info("| %s", name);
+    for (uint32_t i = 0; i < (max_name - name_len + 1); i++) nu_info(" ");
+    nu_info("| %s", value);
+    for (uint32_t i = 0; i < (max_value - value_len + 1); i++) nu_info(" ");
+    nu_info("|\n");
+}
+
+nu_result_t nu_config_log(void)
+{
+    const char *section_header = "SECTION";
+    const char *name_header    = "NAME";
+    const char *value_header   = "VALUE";
+
+    /* compute maximal length */
+    uint32_t max_section = strlen(section_header);
+    uint32_t max_name    = strlen(name_header);
+    uint32_t max_value   = strlen(value_header);
+    for (uint32_t i = 0; i < _data.parameter_count; i++) {
+        max_section = NU_MAX(max_section, strlen(_data.parameters[i].section));
+        max_name = NU_MAX(max_name, strlen(_data.parameters[i].name));
+        max_value = NU_MAX(max_value, strlen(_data.parameters[i].value));
+    }
+
+    log_transition_line(max_section, max_name, max_value);
+    log_line(max_section, max_name, max_value, section_header, name_header, value_header);
+
+    char *current_section = "";
+    for (uint32_t i = 0; i < _data.parameter_count; i++) {
+        nu_config_parameter_t *param = &_data.parameters[i];
+        if (NU_MATCH(current_section, param->section)) {
+            log_line(max_section, max_name, max_value, NULL, param->name, param->value);
+        } else {
+            log_transition_line(max_section, max_name, max_value);
+            log_line(max_section, max_name, max_value, param->section, param->name, param->value);
+            current_section = param->section;
+        }
+    }
+    log_transition_line(max_section, max_name, max_value);
 
     return NU_SUCCESS;
 }

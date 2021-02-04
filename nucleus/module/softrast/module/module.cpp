@@ -2,7 +2,7 @@
 
 #include "../renderer.hpp"
 
-using namespace nusr;
+using namespace nu::softrast;
 
 static const uint32_t plugin_count = 0;
 static const char *plugins[] = {};

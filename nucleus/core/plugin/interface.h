@@ -4,7 +4,6 @@
 #include "../common/common.h"
 
 /* plugin interface */
-#define NU_PLUGIN_INTERFACE_NAME        "nu_plugin_interface"
 #define NU_PLUGIN_INTERFACE_LOADER_NAME "nu_plugin_get_interface"
 
 typedef struct {

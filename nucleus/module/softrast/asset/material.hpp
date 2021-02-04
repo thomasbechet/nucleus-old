@@ -1,8 +1,8 @@
 #pragma once
 
-#include <nucleus/nucleus.h>
+#include <nucleus/nucleus.hpp>
 
-namespace nusr
+namespace nu::softrast
 {
     struct Material
     {

@@ -18,8 +18,8 @@ nu_result_t nu_system_window_update(void);
 NU_API nu_module_handle_t nu_system_window_get_module_handle(void);
 
 /* public window interface functions */
-NU_API nu_result_t nu_window_set_size(uint32_t width, uint32_t height);
-NU_API nu_result_t nu_window_get_size(uint32_t *width, uint32_t *height);
+NU_API nu_result_t nu_window_set_size(const nu_vec2u_t size);
+NU_API nu_result_t nu_window_get_size(nu_vec2u_t size);
 NU_API nu_result_t nu_window_set_title(const char *title);
 NU_API nu_result_t nu_window_set_mode(nu_window_mode_t mode);
 

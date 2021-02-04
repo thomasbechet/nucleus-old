@@ -7,7 +7,8 @@
 #define MIN_CHAR_CODE 32
 #define MAX_CHAR_CODE 128
 
-using namespace nusr;
+using namespace nu;
+using namespace nu::softrast;
 
 static FT_Library initializeFTLibrary()
 {
@@ -44,66 +45,63 @@ Font::Font(const nu_renderer_font_create_info_t &info)
     }
 
     // Find altas texture size
-    uint32_t w = 0;
-    uint32_t h = 0;
+    Vector2u atlasSize = {0, 0};
     for (uint32_t c = MIN_CHAR_CODE; c < MAX_CHAR_CODE; c++) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
             throw std::runtime_error("Failed to load character " + c);
         }
 
-        w = NU_MAX(glyph->bitmap.width, w);
-        h += glyph->bitmap.rows;
+        atlasSize.x = NU_MAX(glyph->bitmap.width, atlasSize.x);
+        atlasSize.y += glyph->bitmap.rows;
     }
 
     // Allocate memory for atlas
-    atlas = ColorFramebuffer(w, h);
+    atlas = ColorFramebuffer(atlasSize);
 
     // Load glyphs
-    h = 0;
+    uint32_t h = 0;
     for (uint32_t c = MIN_CHAR_CODE; c < MAX_CHAR_CODE; c++) {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER)) continue;
 
         if (glyph->bitmap.pixel_mode != FT_PIXEL_MODE_GRAY) continue;
 
         Glyph g;
-        g.advance_x = glyph->advance.x >> 6;
-        g.advance_y = glyph->advance.y >> 6;
-        g.bitmap_width = glyph->bitmap.width;
-        g.bitmap_height = glyph->bitmap.rows;
-        g.bearing_x = (glyph->metrics.horiBearingX >> 6);
-        g.bearing_y = (glyph->metrics.horiBearingY >> 6);
-        g.ty = h;
+        g.advance.x    = glyph->advance.x >> 6;
+        g.advance.y    = glyph->advance.y >> 6;
+        g.bitmapSize.x = glyph->bitmap.width;
+        g.bitmapSize.y = glyph->bitmap.rows;
+        g.bearing.x    = (glyph->metrics.horiBearingX >> 6);
+        g.bearing.y    = (glyph->metrics.horiBearingY >> 6);
+        g.ty           = h;
 
         // Fill atlas
-        for (uint32_t y = 0; y < g.bitmap_height; y++) {
-            for (uint32_t x = 0; x < g.bitmap_width; x++) {
+        for (uint32_t y = 0; y < g.bitmapSize.y; y++) {
+            for (uint32_t x = 0; x < g.bitmapSize.x; x++) {
                 unsigned char byte = (uint32_t)glyph->bitmap.buffer[y * glyph->bitmap.width + x];
                 atlas.set(x, h + y, 0xFFFFFF00 | byte);
             }
         }
 
-        h += g.bitmap_height;
+        h += g.bitmapSize.y;
     
         glyphs.emplace(c, g);
     }
 }
 
-void Font::getTextSize(const std::string &text, uint32_t &width, uint32_t &height) const
+Vector2u Font::getTextSize(const std::string &text) const
 {
-    uint32_t maxWidth = 0;
-    uint32_t maxHeight = 0;
+    Vector2u maxSize = {0, 0};
 
     for (char c : text) {
         try {
             Glyph g = glyphs.at(c);
             /* compute max height and width */
-            maxHeight = NU_MAX(maxHeight, g.bitmap_height);
-            maxWidth += g.advance_x;
+            maxSize.y = NU_MAX(maxSize.y, g.bitmapSize.y);
+            maxSize.x += g.advance.x;
         } catch(std::out_of_range &e) {
             continue;
         }
     }
 
-    width = maxWidth;
-    height = maxHeight;
+    return maxSize;
 }

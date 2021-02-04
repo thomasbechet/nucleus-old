@@ -3,7 +3,7 @@
 #include "../module/interface.h"
 #include "../memory/colorframebuffer.hpp"
 
-namespace nusr
+namespace nu::softrast
 {
     struct Texture : public ColorFramebuffer
     {

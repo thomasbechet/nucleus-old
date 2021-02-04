@@ -4,7 +4,6 @@
 #include "../../common/common.h"
 
 /* renderer system interface */
-#define NU_RENDERER_INTERFACE_NAME        "nu_renderer_interface"
 #define NU_RENDERER_INTERFACE_LOADER_NAME "nu_renderer_get_interface"
 
 NU_DECLARE_HANDLE(nu_renderer_mesh_handle_t);
@@ -70,8 +69,7 @@ typedef struct {
 } nu_renderer_model_create_info_t;
 
 typedef struct {
-    uint32_t x;
-    uint32_t y;
+    nu_vec2i_t position;
     const char *text;
     nu_renderer_font_handle_t font;
 } nu_renderer_label_create_info_t;
@@ -97,7 +95,7 @@ typedef struct {
 
     nu_result_t (*font_create)(nu_renderer_font_handle_t*, const nu_renderer_font_create_info_t*);
     nu_result_t (*font_destroy)(nu_renderer_font_handle_t);
-    nu_result_t (*font_get_text_size)(nu_renderer_font_handle_t, const char*, uint32_t*, uint32_t*);
+    nu_result_t (*font_get_text_size)(nu_renderer_font_handle_t, const char*, nu_vec2u_t);
 
     nu_result_t (*camera_create)(nu_renderer_camera_handle_t*, const nu_renderer_camera_create_info_t*);
     nu_result_t (*camera_destroy)(nu_renderer_camera_handle_t);
@@ -111,25 +109,23 @@ typedef struct {
 
     nu_result_t (*label_create)(nu_renderer_label_handle_t*, const nu_renderer_label_create_info_t*);
     nu_result_t (*label_destroy)(nu_renderer_label_handle_t);
-    nu_result_t (*label_set_position)(nu_renderer_label_handle_t, int32_t, int32_t);
+    nu_result_t (*label_set_position)(nu_renderer_label_handle_t, const nu_vec2i_t);
     nu_result_t (*label_set_text)(nu_renderer_label_handle_t, const char*);
 
     nu_result_t (*rectangle_create)(nu_renderer_rectangle_handle_t*, const nu_renderer_rectangle_create_info_t*);
     nu_result_t (*rectangle_destroy)(nu_renderer_rectangle_handle_t);
     nu_result_t (*rectangle_set_rect)(nu_renderer_rectangle_handle_t, nu_rect_t);
 
-    nu_result_t (*viewport_set_size)(uint32_t, uint32_t);
-    nu_result_t (*viewport_get_size)(uint32_t*, uint32_t*);
+    nu_result_t (*viewport_set_size)(const nu_vec2u_t);
+    nu_result_t (*viewport_get_size)(nu_vec2u_t);
 } nu_renderer_interface_t;
 
 typedef nu_result_t (*nu_renderer_interface_loader_pfn_t)(nu_renderer_interface_t*);
 
 /* system renderer event */
 typedef struct {
-    uint32_t width;
-    uint32_t height;
-    uint32_t old_width;
-    uint32_t old_height;
+    nu_vec2u_t size;
+    nu_vec2u_t old_size;
 } nu_renderer_viewport_resize_event_t;
 
 #endif

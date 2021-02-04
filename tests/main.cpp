@@ -2,9 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 
-#include <nucleus/nucleus.h>
+#include <nucleus/nucleus.hpp>
 #include <nucleus/module/utils.h>
-#include <nucleus/utility/nucleus.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -222,13 +221,8 @@ static nu_result_t on_start(void)
 
     return NU_SUCCESS;
 }
-NU_DECLARE_HANDLE(test_handle_t);
 static nu_result_t on_stop(void)
 {
-    test_handle_t handle;
-    NU_HANDLE_SET_ID(handle, 123);
-    uint32_t t = NU_HANDLE_GET_ID(handle);
-
     return NU_SUCCESS;
 }
 static nu_result_t on_update(void)
@@ -239,58 +233,6 @@ static nu_result_t on_update(void)
     if (escape_state & NU_BUTTON_PRESSED) {
         nu_context_request_stop();
     }
-
-    // nu_cursor_mode_t cursor_mode;
-    // nu_input_get_cursor_mode(&cursor_mode);
-    // if (cursor_mode & NU_CURSOR_MODE_DISABLE) {
-    //     /* camera update */
-    //     nu_vec2f_t motion;
-    //     nu_input_get_mouse_motion(motion);
-    //     static float yaw = 0.0f;
-    //     static float pitch = 0.0f;
-    //     yaw += motion[0] * 0.3f;
-    //     pitch -= motion[1] * 0.3f;
-    //     if (pitch <= -90.0f) pitch = -89.999f;
-    //     if (pitch >= 90.0f) pitch = 89.999f;
-    //     static nu_mat4f_t camera;
-    //     nu_mat4f_identity(camera);
-    //     const nu_vec3f_t up = {0, 1, 0};
-    //     const nu_vec3f_t right = {1, 0, 0};
-    //     const nu_vec3f_t forwardv = {0, 0, -1};
-    //     nu_rotate(camera, -nu_radian(yaw), up);
-    //     nu_rotate(camera, nu_radian(pitch), right);
-    //     nu_vec3f_t forward;
-    //     nu_mat4f_mulv3(camera, forwardv, 0, forward);
-    //     nu_vec3f_normalize(forward);
-
-    //     static nu_vec3f_t eye = {0, 0, 5};
-    //     nu_vec3f_t move;
-    //     nu_vec3f_zero(move);
-    //     nu_button_state_t z_state, s_state, q_state, d_state, shift_state;
-    //     nu_input_get_keyboard_state(&z_state, NU_KEYBOARD_W);
-    //     nu_input_get_keyboard_state(&s_state, NU_KEYBOARD_S);
-    //     nu_input_get_keyboard_state(&q_state, NU_KEYBOARD_A);
-    //     nu_input_get_keyboard_state(&d_state, NU_KEYBOARD_D);
-    //     nu_input_get_keyboard_state(&shift_state, NU_KEYBOARD_LSHIT);
-    //     if (z_state & NU_BUTTON_PRESSED) move[2] -= 1;
-    //     if (s_state & NU_BUTTON_PRESSED) move[2] += 1;
-    //     if (q_state & NU_BUTTON_PRESSED) move[0] -= 1;
-    //     if (d_state & NU_BUTTON_PRESSED) move[0] += 1;
-    //     nu_mat4f_mulv3(camera, move, 0, move);
-    //     nu_vec3f_normalize(move);
-    //     if (shift_state & NU_BUTTON_PRESSED) {
-    //         nu_vec3f_muls(move, 0.04 * nu_context_get_delta_time(), move);
-    //     } else {
-    //         nu_vec3f_muls(move, 0.01 * nu_context_get_delta_time(), move);
-    //     }
-    //     nu_vec3f_add(eye, move, eye);
-        
-    //     nu_vec3f_t center;
-    //     nu_vec3f_add(eye, forward, center);
-    //     nu_renderer_camera_set_eye(NULL, eye);
-    //     nu_renderer_camera_set_center(NULL, center);
-    //     //nu_renderer_camera_set_fov(NULL, nu_radian(90.0));
-    // }
 
     return NU_SUCCESS;
 }

@@ -1,19 +1,20 @@
 #include "engine.hpp"
 
-#include "../common/config.h"
+#include "../common/config.hpp"
 
 #include <limits>
 
-using namespace nusr;
+using namespace nu;
+using namespace nu::softrast;
 
 Engine::Engine()
 {
-    uint32_t default_width, default_height;
-    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_WIDTH, 640, &default_width);
-    nu_config_get_uint(NUSR_CONFIG_SOFTRAST_SECTION, NUSR_CONFIG_SOFTRAST_FRAMEBUFFER_HEIGHT, 360, &default_height);
+    Vector2u defaultSize;
+    nu_config_get_uint(Config::Section.c_str(), Config::FramebufferWidth.c_str(), 640, &defaultSize.x);
+    nu_config_get_uint(Config::Section.c_str(), Config::FramebufferHeight.c_str(), 360, &defaultSize.y);
 
-    m_colorBuffer = ColorFramebuffer(default_width, default_height);
-    m_depthBuffer = Framebuffer<float>(default_width, default_height);
+    m_colorBuffer = ColorFramebuffer(defaultSize);
+    m_depthBuffer = Framebuffer<float>(defaultSize);
 }
 
 void Engine::render()
@@ -24,6 +25,8 @@ void Engine::render()
 
     // Draw scene
     m_scene.draw(m_colorBuffer, m_depthBuffer, m_assetManager);
+    // Draw GUI
+    m_gui.draw(m_colorBuffer, m_assetManager);
 
     // Present
     m_colorBuffer.display(m_windowInterface);
@@ -64,10 +67,10 @@ void Engine::destroyFont(nu_renderer_font_handle_t handle)
 {
     m_assetManager.destroyFont(handle);
 }
-void Engine::getFontTextSize(nu_renderer_font_handle_t handle, const std::string &text, uint32_t &width, uint32_t &height)
+Vector2u Engine::getFontTextSize(nu_renderer_font_handle_t handle, const std::string &text)
 {
     const Font &font = m_assetManager.getFont(handle);
-    font.getTextSize(text, width, height);
+    return font.getTextSize(text);
 }
 
 nu_renderer_model_handle_t Engine::createModel(const nu_renderer_model_create_info_t &info)
@@ -78,7 +81,7 @@ void Engine::destroyModel(nu_renderer_model_handle_t handle)
 {
     m_scene.destroyModel(handle);
 }
-void Engine::setModelTransform(nu_renderer_model_handle_t handle, const nu_mat4f_t transform)
+void Engine::setModelTransform(nu_renderer_model_handle_t handle, const Matrix4f &transform)
 {
     m_scene.setModelTransform(handle, transform);
 }
@@ -87,7 +90,34 @@ void Engine::setCameraFov(float fov)
 {
     m_scene.setCameraFov(fov);
 }
-void Engine::setCameraView(const nu_vec3f_t eye, const nu_vec3f_t forward, const nu_vec3f_t up)
+void Engine::setCameraView(const Vector3f &eye, const Vector3f &forward, const Vector3f &up)
 {
     m_scene.setCameraView(eye, forward, up);
+}
+
+nu_renderer_label_handle_t Engine::createLabel(const nu_renderer_label_create_info_t &info)
+{
+    return m_gui.createLabel(info);
+}
+void Engine::destroyLabel(nu_renderer_label_handle_t handle)
+{
+    m_gui.destroyLabel(handle);
+}
+void Engine::setLabelPosition(nu_renderer_label_handle_t handle, const Vector2i &position)
+{
+    m_gui.setLabelPosition(handle, position);
+}
+void Engine::setLabelText(nu_renderer_label_handle_t handle, const std::string &text)
+{
+    m_gui.setLabelText(handle, text);
+}
+
+void Engine::setViewportSize(const Vector2u &size)
+{
+    m_colorBuffer = ColorFramebuffer(size);
+    m_depthBuffer = Framebuffer<float>(size);
+}
+Vector2u Engine::getViewportSize() const
+{
+    return m_colorBuffer.getSize();
 }

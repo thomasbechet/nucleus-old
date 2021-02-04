@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 
-using namespace nusr;
+using namespace nu::softrast;
 
 WindowInterface::WindowInterface()
 {
@@ -21,9 +21,9 @@ WindowInterface::WindowInterface()
     }
 }
 
-void WindowInterface::presentSurface(uint32_t width, uint32_t height, uint32_t *data) const
+void WindowInterface::presentSurface(const Vector2u &size, uint32_t *data) const
 {
-    m_glfwInterface.present_surface(width, height, data);
+    m_glfwInterface.present_surface(size.data, data);
 }
 void WindowInterface::swapBuffers() const
 {

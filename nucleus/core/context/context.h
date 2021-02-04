@@ -2,7 +2,6 @@
 #define NU_CONTEXT_H
 
 #include "config.h"
-#include "../module/module.h"
 
 typedef struct {
     nu_config_callback_pfn_t config;
@@ -20,5 +19,6 @@ typedef struct {
 NU_API nu_result_t nu_context_init(const nu_context_init_info_t *info);
 NU_API nu_result_t nu_context_request_stop(void);
 NU_API float nu_context_get_delta_time(void);
+NU_API void nu_interrupt(const char *format, ...);
 
 #endif

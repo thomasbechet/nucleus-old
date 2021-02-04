@@ -11,7 +11,7 @@
 using namespace nu::utility;
 
 typedef struct {
-    std::unique_ptr<console_t> console;
+    std::unique_ptr<Console> console;
     nuutils_command_interface_t command_interface;
     bool command_interface_loaded;
 } nu_console_data_t;
@@ -38,7 +38,7 @@ static nu_result_t load_command_interface(void)
 }
 static nu_result_t on_event(nu_event_id_t id, void *data)
 {
-    return _data.console->on_event(id, data);
+    return _data.console->onEvent(id, data);
 }
 
 nu_result_t nuutils_console_plugin_initialize(void)
@@ -51,11 +51,11 @@ nu_result_t nuutils_console_plugin_initialize(void)
         nu_warning(NUUTILS_LOGGER_NAME"Using console without command plugin.\n");
     }
 
-    /* subscribe event */
+    // Subscribe event
     nu_event_subscribe(nu_renderer_viewport_resize_event_get_id(), on_event);
 
-    /* create console */
-    _data.console = std::make_unique<console_t>();
+    // Create console
+    _data.console = std::make_unique<Console>();
     
     return NU_SUCCESS;
 }
@@ -70,123 +70,123 @@ nu_result_t nuutils_console_plugin_update(void)
     return NU_SUCCESS;
 }
 
-console_t::console_t()
+Console::Console()
 {
-    /* create font */
-    nu_renderer_font_create_info_t font_info;
-    font_info.filename = "engine/font/Coder's Crux.ttf";
-    font_info.font_size = FONT_SIZE;
-    if (nu_renderer_font_create(&m_font, &font_info) != NU_SUCCESS) {
+    // Create font
+    nu_renderer_font_create_info_t fontInfo;
+    fontInfo.filename = "engine/font/Coder's Crux.ttf";
+    fontInfo.font_size = FONT_SIZE;
+    if (nu_renderer_font_create(&m_font, &fontInfo) != NU_SUCCESS) {
         nu_fatal(NUUTILS_LOGGER_NAME"Failed to create font.\n");
     }
 
-    /* create cursor */
-    m_cursor = std::make_unique<cursor_t>(500.0f);
-    m_cursor->set_visible(false);
-    m_selected_character = 0;
+    // Create cursor
+    m_cursor = std::make_unique<Cursor>(500.0f);
+    m_cursor->setVisible(false);
+    m_selectedCharacter = 0;
 
-    /* create command */
-    m_command_line = std::make_unique<command_line_t>(m_font);
-    m_selected_old_command = 0;
+    // Create command
+    m_commandLine = std::make_unique<CommandLine>(m_font);
+    m_selectedOldCommand = 0;
 
-    /* set component position */
-    update_position();
+    // Set component position
+    updatePosition();
 }
-console_t::~console_t()
+Console::~Console()
 {
-    /* destroy command line */
-    m_command_line.reset();
+    // destroy command line
+    m_commandLine.reset();
 
-    /* destroy cursor */
+    // Destroy cursor
     m_cursor.reset();
 
-    /* destroy font */
+    // Destroy font
     nu_renderer_font_destroy(m_font);
 }
 
-void console_t::update()
+void Console::update()
 {
-    /* get cursor mode */
-    nu_cursor_mode_t cursor_mode;
-    nu_input_get_cursor_mode(&cursor_mode);
+    // Get cursor mode
+    nu_cursor_mode_t cursorMode;
+    nu_input_get_cursor_mode(&cursorMode);
 
-    /* enable or disable console */
-    nu_button_state_t button_state;
-    nu_input_get_keyboard_state(&button_state, NU_KEYBOARD_F1);
-    if (button_state & NU_BUTTON_JUST_PRESSED) {
-        if (cursor_mode == NU_CURSOR_MODE_NORMAL) {
+    // Enable or disable console
+    nu_button_state_t buttonState;
+    nu_input_get_keyboard_state(&buttonState, NU_KEYBOARD_F1);
+    if (buttonState & NU_BUTTON_JUST_PRESSED) {
+        if (cursorMode == NU_CURSOR_MODE_NORMAL) {
             nu_input_set_cursor_mode(NU_CURSOR_MODE_DISABLE);
-            m_cursor->set_visible(false);
-            m_command_line->set_visible(false);
+            m_cursor->setVisible(false);
+            m_commandLine->setVisible(false);
         } else {
             nu_input_set_cursor_mode(NU_CURSOR_MODE_NORMAL);
-            m_cursor->set_visible(true);
-            m_command_line->set_visible(true);
+            m_cursor->setVisible(true);
+            m_commandLine->setVisible(true);
         }
     }
 
-    if (cursor_mode == NU_CURSOR_MODE_NORMAL) {
+    if (cursorMode == NU_CURSOR_MODE_NORMAL) {
 
-        /* append command line */
+        // append command line
         const char *str;
         uint32_t str_len;
         nu_input_get_keyboard_text(&str, &str_len);
         if (str_len) {
-            std::string append_text(str);
-            uint32_t command_size = m_command_line->size();
-            m_command_line->append_at(m_selected_character, append_text);
-            if (m_selected_character == command_size) {
-                m_selected_character = m_command_line->size();
+            std::string appendText(str);
+            uint32_t commandSize = m_commandLine->size();
+            m_commandLine->appendAt(m_selectedCharacter, appendText);
+            if (m_selectedCharacter == commandSize) {
+                m_selectedCharacter = m_commandLine->size();
             } else {
-                m_selected_character += append_text.size();
+                m_selectedCharacter += appendText.size();
             }
-            update_cursor_advance();
+            updateCursorAdvance();
         }
 
-        /* backspace key */
-        nu_button_state_t backspace_state;
-        nu_input_get_keyboard_state(&backspace_state, NU_KEYBOARD_BACKSPACE);
-        if (backspace_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
-            if (m_command_line->size() > 0) {
-                if (m_selected_character > 0) {
-                    m_selected_character--;
-                    m_command_line->remove_at(m_selected_character);
-                    update_cursor_advance();
+        // Backspace key
+        nu_button_state_t backspaceState;
+        nu_input_get_keyboard_state(&backspaceState, NU_KEYBOARD_BACKSPACE);
+        if (backspaceState & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            if (m_commandLine->size() > 0) {
+                if (m_selectedCharacter > 0) {
+                    m_selectedCharacter--;
+                    m_commandLine->removeAt(m_selectedCharacter);
+                    updateCursorAdvance();
                 }
             }
         }
 
-        /* arrow keys */
-        nu_button_state_t up_state, down_state, left_state, right_state;
-        nu_input_get_keyboard_state(&up_state, NU_KEYBOARD_UP);
-        nu_input_get_keyboard_state(&down_state, NU_KEYBOARD_DOWN);
-        nu_input_get_keyboard_state(&left_state, NU_KEYBOARD_LEFT);
-        nu_input_get_keyboard_state(&right_state, NU_KEYBOARD_RIGHT);
-        if (up_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
-            if (m_selected_old_command > 0) {
-                m_selected_old_command--;
-                set_command_line(m_old_commands.at(m_selected_old_command));
+        // arrow keys
+        nu_button_state_t upState, downState, leftState, rightState;
+        nu_input_get_keyboard_state(&upState, NU_KEYBOARD_UP);
+        nu_input_get_keyboard_state(&downState, NU_KEYBOARD_DOWN);
+        nu_input_get_keyboard_state(&leftState, NU_KEYBOARD_LEFT);
+        nu_input_get_keyboard_state(&rightState, NU_KEYBOARD_RIGHT);
+        if (upState & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            if (m_selectedOldCommand > 0) {
+                m_selectedOldCommand--;
+                setCommandLine(m_oldCommands.at(m_selectedOldCommand));
             }
-        } else if (down_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
-            if (m_selected_old_command < m_old_commands.size()) {
-                m_selected_old_command++;
-                if (m_selected_old_command == m_old_commands.size()) {
-                    set_command_line("");
+        } else if (downState & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            if (m_selectedOldCommand < m_oldCommands.size()) {
+                m_selectedOldCommand++;
+                if (m_selectedOldCommand == m_oldCommands.size()) {
+                    setCommandLine("");
                 } else {
-                    set_command_line(m_old_commands.at(m_selected_old_command));
+                    setCommandLine(m_oldCommands.at(m_selectedOldCommand));
                 }
             } else {
-                set_command_line("");
+                setCommandLine("");
             }
-        } else if (left_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
-            if (m_selected_character > 0) {
-                m_selected_character--;
-                update_cursor_advance();
+        } else if (leftState & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            if (m_selectedCharacter > 0) {
+                m_selectedCharacter--;
+                updateCursorAdvance();
             }
-        } else if (right_state & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
-            if (m_selected_character < m_command_line->size()) {
-                m_selected_character++;
-                update_cursor_advance();
+        } else if (rightState & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
+            if (m_selectedCharacter < m_commandLine->size()) {
+                m_selectedCharacter++;
+                updateCursorAdvance();
             }
         }
 
@@ -194,51 +194,52 @@ void console_t::update()
         nu_button_state_t enter_state;
         nu_input_get_keyboard_state(&enter_state, NU_KEYBOARD_ENTER);
         if (enter_state & NU_BUTTON_JUST_PRESSED) {
-            if (m_command_line->size() > 0) {
-                /* add command to old commands */
-                m_old_commands.push_back(m_command_line->get_command());
-                m_selected_old_command = m_old_commands.size();
+            if (m_commandLine->size() > 0) {
+                // Add command to old commands
+                m_oldCommands.push_back(m_commandLine->getCommand());
+                m_selectedOldCommand = m_oldCommands.size();
 
-                /* execute command */
+                // Execute command
                 if (_data.command_interface_loaded) {
-                    _data.command_interface.execute(m_command_line->get_command().c_str());
+                    _data.command_interface.execute(m_commandLine->getCommand().c_str());
                 }
                 
-                /* clear command line */
-                set_command_line("");
+                // Clear command line
+                setCommandLine("");
             }
         }
 
-        /* udpate cursor */
+        // Udpate cursor
         m_cursor->update(nu_context_get_delta_time());
     }
 }
-nu_result_t console_t::on_event(nu_event_id_t id, void *data)
+nu_result_t Console::onEvent(nu_event_id_t id, void *data)
 {
     if (id == nu_renderer_viewport_resize_event_get_id()) {
-        update_position();
+        updatePosition();
     }
 
     return NU_SUCCESS;
 }
 
-void console_t::update_cursor_advance()
+void Console::updateCursorAdvance()
 {
-    uint32_t width, height;
-    std::string sub_string = m_command_line->get_command().substr(0, m_selected_character);
-    nu_renderer_font_get_text_size(m_font, sub_string.c_str(), &width, &height);
-    m_cursor->set_advance(width);
+    std::string sub_string = m_commandLine->getCommand().substr(0, m_selectedCharacter);
+    nu_vec2u_t size;
+    nu_renderer_font_get_text_size(m_font, sub_string.c_str(), size);
+    m_cursor->setAdvance(size[0]);
 }
-void console_t::set_command_line(std::string command)
+void Console::setCommandLine(std::string command)
 {
-    m_command_line->set_command(command);
-    m_selected_character = command.size();
-    update_cursor_advance();
+    m_commandLine->setCommand(command);
+    m_selectedCharacter = command.size();
+    updateCursorAdvance();
 }
-void console_t::update_position()
+void Console::updatePosition()
 {
-    uint32_t w, h, vw, vh;
-    nu_renderer_viewport_get_size(&vw, &vh);
-    m_cursor->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
-    m_command_line->set_position(FONT_SIZE / 2, vh - FONT_SIZE / 2);
+    nu_vec2u_t size;
+    nu_renderer_viewport_get_size(size);
+    nu_vec2i_t position = {FONT_SIZE / 2, (int32_t)size[1] - FONT_SIZE / 2};
+    m_cursor->setPosition(position);
+    m_commandLine->setPosition(position);
 }

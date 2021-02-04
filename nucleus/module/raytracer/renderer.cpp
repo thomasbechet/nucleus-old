@@ -110,7 +110,7 @@ nu_result_t nurt::label_destroy(nu_renderer_label_handle_t handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nurt::label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y)
+nu_result_t nurt::label_set_position(nu_renderer_label_handle_t handle, const nu_vec2i_t position)
 {
     return NU_SUCCESS;
 }

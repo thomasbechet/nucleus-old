@@ -4,7 +4,6 @@
 #include "../../common/common.h"
 
 /* task system interface */
-#define NU_TASK_INTERFACE_NAME        "nu_task_interface"
 #define NU_TASK_INTERFACE_LOADER_NAME "nu_task_get_interface"
 
 NU_DECLARE_HANDLE(nu_task_handle_t);

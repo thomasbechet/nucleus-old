@@ -1,15 +1,17 @@
 #pragma once
 
+#include <nucleus/nucleus.hpp>
+
 #include "../../glfw/module/interface.h"
 
-namespace nusr
+namespace nu::softrast
 {
     class WindowInterface
     {
     public:
         WindowInterface();
 
-        void presentSurface(uint32_t width, uint32_t height, uint32_t *data) const;
+        void presentSurface(const Vector2u &size, uint32_t *data) const;
         void swapBuffers() const;
 
     private:

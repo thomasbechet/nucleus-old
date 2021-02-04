@@ -1,26 +1,24 @@
 #pragma once
 
-#include <nucleus/nucleus.h>
+#include <nucleus/nucleus.hpp>
 
 #include <vector>
 
-namespace nusr
+namespace nu::softrast
 {
     template<typename T>
     class Framebuffer
     {
     public:
-        Framebuffer(uint32_t width = 0, uint32_t height = 0);
+        Framebuffer(const Vector2u &size = Vector2u());
         
         void clear(const T &element);
         void set(uint32_t x, uint32_t y, const T &element);
         T get(uint32_t x, uint32_t y) const;
-        uint32_t getWidth() const;
-        uint32_t getHeight() const;
+        Vector2u getSize() const;
 
     protected:
-        uint32_t m_width;
-        uint32_t m_height;
+        Vector2u m_size;
         std::vector<T> m_data;
     };
 }

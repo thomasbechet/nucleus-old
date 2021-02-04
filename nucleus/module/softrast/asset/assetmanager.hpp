@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <memory>
 
-namespace nusr
+namespace nu::softrast
 {
     class AssetManager
     {

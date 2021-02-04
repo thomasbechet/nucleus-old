@@ -1,6 +1,6 @@
 #include "assetmanager.hpp"
 
-using namespace nusr;
+using namespace nu::softrast;
 
 nu_renderer_mesh_handle_t AssetManager::createMesh(const nu_renderer_mesh_create_info_t &info)
 {

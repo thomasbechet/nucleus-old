@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nucleus/utility/nucleus.hpp>
+#include <nucleus/nucleus.hpp>
 
 /* plugin interface */
 nu_result_t nuutils_spectator_plugin_initialize(void);

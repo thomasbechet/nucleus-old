@@ -138,9 +138,9 @@ nu_result_t nu_renderer_font_destroy(nu_renderer_font_handle_t handle)
 {
     return _system.interface.font_destroy(handle);
 }
-nu_result_t nu_renderer_font_get_text_size(nu_renderer_font_handle_t handle, const char *text, uint32_t *width, uint32_t *height)
+nu_result_t nu_renderer_font_get_text_size(nu_renderer_font_handle_t handle, const char *text, nu_vec2u_t size)
 {
-    return _system.interface.font_get_text_size(handle, text, width, height);
+    return _system.interface.font_get_text_size(handle, text, size);
 }
 
 nu_result_t nu_renderer_camera_create(nu_renderer_camera_handle_t *handle, const nu_renderer_camera_create_info_t *info)
@@ -181,9 +181,9 @@ nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle)
 {
     return _system.interface.label_destroy(handle);
 }
-nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y)
+nu_result_t nu_renderer_label_set_position(nu_renderer_label_handle_t handle, const nu_vec2i_t position)
 {
-    return _system.interface.label_set_position(handle, x, y);
+    return _system.interface.label_set_position(handle, position);
 }
 nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const char *text)
 {
@@ -203,23 +203,22 @@ nu_result_t nu_renderer_rectangle_set_rect(nu_renderer_rectangle_handle_t handle
     return _system.interface.rectangle_set_rect(handle, rect);
 }
 
-nu_result_t nu_renderer_viewport_set_size(uint32_t width, uint32_t height)
+nu_result_t nu_renderer_viewport_set_size(const nu_vec2u_t size)
 {
     nu_renderer_viewport_resize_event_t event;
-    event.width  = width;
-    event.height = height;
-    nu_renderer_viewport_get_size(&event.old_width, &event.old_height);
+    nu_vec2u_copy(size, event.size);
+    nu_renderer_viewport_get_size(event.old_size);
 
     nu_result_t result;
-    result = _system.interface.viewport_set_size(width, height);
+    result = _system.interface.viewport_set_size(size);
     if (result == NU_SUCCESS) {
         nu_event_post(_system.viewport_resize_event_id, &event);
     }
     return result;
 }
-nu_result_t nu_renderer_viewport_get_size(uint32_t *width, uint32_t *height)
+nu_result_t nu_renderer_viewport_get_size(nu_vec2u_t size)
 {
-    return _system.interface.viewport_get_size(width, height);
+    return _system.interface.viewport_get_size(size);
 }
 
 nu_event_id_t nu_renderer_viewport_resize_event_get_id(void)

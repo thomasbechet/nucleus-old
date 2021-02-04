@@ -2,7 +2,7 @@
 
 #include <nucleus/nucleus.h>
 
-namespace nusr
+namespace nu::softrast
 {
     nu_result_t initialize();
     nu_result_t terminate();
@@ -19,7 +19,7 @@ namespace nusr
 
     nu_result_t font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info);
     nu_result_t font_destroy(nu_renderer_font_handle_t handle);
-    nu_result_t font_get_text_size(nu_renderer_font_handle_t handle, const char *text, uint32_t *width, uint32_t *height);
+    nu_result_t font_get_text_size(nu_renderer_font_handle_t handle, const char *text, nu_vec2u_t size);
 
     nu_result_t camera_create(nu_renderer_camera_handle_t *handle, const nu_renderer_camera_create_info_t *info);
     nu_result_t camera_destroy(nu_renderer_camera_handle_t handle);
@@ -33,13 +33,13 @@ namespace nusr
 
     nu_result_t label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info);
     nu_result_t label_destroy(nu_renderer_label_handle_t handle);
-    nu_result_t label_set_position(nu_renderer_label_handle_t handle, int32_t x, int32_t y);
+    nu_result_t label_set_position(nu_renderer_label_handle_t handle, const nu_vec2i_t position);
     nu_result_t label_set_text(nu_renderer_label_handle_t handle, const char *text);
 
     nu_result_t rectangle_create(nu_renderer_rectangle_handle_t *handle, const nu_renderer_rectangle_create_info_t *info);
     nu_result_t rectangle_destroy(nu_renderer_rectangle_handle_t handle);
-    nu_result_t rectangle_set_rect(nu_renderer_rectangle_handle_t handle, nu_rect_t rect);
+    nu_result_t rectangle_set_rect(nu_renderer_rectangle_handle_t handle, const nu_rect_t rect);
 
-    nu_result_t viewport_set_size(uint32_t width, uint32_t height);
-    nu_result_t viewport_get_size(uint32_t *width, uint32_t *height);
+    nu_result_t viewport_set_size(const nu_vec2u_t size);
+    nu_result_t viewport_get_size(nu_vec2u_t size);
 }

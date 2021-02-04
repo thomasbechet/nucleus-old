@@ -105,7 +105,8 @@ nu_result_t nuutils_command_execute(const char *cstr_command)
     }
 
     if (tokens.size() == 3 && tokens.at(0) == "viewport") {
-        nu_renderer_viewport_set_size(std::atoi(tokens.at(1).c_str()), std::atoi(tokens.at(2).c_str()));
+        nu_vec2u_t size = {(uint32_t)std::atoi(tokens.at(1).c_str()), (uint32_t)std::atoi(tokens.at(2).c_str())};
+        nu_renderer_viewport_set_size(size);
     }
 
     if (tokens.size() == 2 && tokens.at(0) == "window") {

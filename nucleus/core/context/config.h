@@ -62,12 +62,12 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback);
 nu_result_t nu_config_unload(void);
 
 NU_API nu_config_t nu_config_get(void);
-NU_API nu_result_t nu_config_log(void);
-
+NU_API nu_result_t nu_config_get_string(const char *section, const char *name, const char *default_value, const char **value);
 NU_API nu_result_t nu_config_get_int(const char *section, const char *name, int32_t default_value, int32_t *value);
 NU_API nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t default_value, uint32_t *value);
-NU_API nu_result_t nu_config_get_string(const char *section, const char *name, const char *default_value, const char **value);
 NU_API nu_result_t nu_config_get_bool(const char *section, const char *name, bool default_value, bool *value);
 NU_API nu_result_t nu_config_get_float(const char *section, const char *name, float default_value, float *value);
+
+NU_API nu_result_t nu_config_log(void);
 
 #endif

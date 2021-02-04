@@ -1,5 +1,8 @@
 #include "task.h"
 
+#include "../../memory/memory.h"
+#include "../../logger/logger.h"
+
 #include <nucleus/module/task.h>
 
 #define NU_LOGGER_TASK_NAME "[TASK] "

@@ -9,8 +9,16 @@
     #define NU_ALIGN_MAT NU_ALIGN(16)
 #endif
 
+typedef struct {
+    int32_t left;
+    int32_t top;
+    uint32_t width;
+    uint32_t height;
+} nu_rect_t;
+
 typedef float nu_vec2f_t[2];
 typedef int32_t nu_vec2i_t[2];
+typedef uint32_t nu_vec2u_t[2];
 typedef float nu_vec3f_t[3];
 typedef NU_ALIGN(16) float nu_vec4f_t[4];
 typedef NU_ALIGN(16) int32_t nu_vec4i_t[4];

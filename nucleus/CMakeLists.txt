@@ -2,18 +2,26 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
 
 PROJECT(nucleus-package VERSION 0.0.1)
 
+OPTION(NU_DEBUG                  "Debug"                   ON)
+OPTION(NU_DEBUG_MEMORY           "Debug memory"            ON)
+
 OPTION(NU_BUILD_CORE             "Build nucleus-core"      ON)
 
 OPTION(NU_BUILD_MODULE_TASK      "Build nucleus-task"      ON)
 OPTION(NU_BUILD_MODULE_GLFW      "Build nucleus-glfw"      ON)
 OPTION(NU_BUILD_MODULE_SOFTRAST  "Build nucleus-softrast"  ON)
-OPTION(NU_BUILD_MODULE_RAYTRACER "Build nucleus-raytracer" ON)
+OPTION(NU_BUILD_MODULE_RAYTRACER "Build nucleus-raytracer" OFF)
 OPTION(NU_BUILD_MODULE_OPENGL    "Build nucleus-opengl"    OFF)
 OPTION(NU_BUILD_MODULE_VULKAN    "Build nucleus-vulkan"    OFF)
 OPTION(NU_BUILD_MODULE_UTILS     "Build nucleus-utils"     ON)
 
-OPTION(NU_DEBUG                  "Debug"                   ON)
-OPTION(NU_DEBUG_MEMORY           "Debug memory"            ON)
+# Add compile definitions
+IF (NU_DEBUG)
+    ADD_COMPILE_DEFINITIONS(NU_DEBUG)
+ENDIF()
+IF (NU_DEBUG_MEMORY)
+    ADD_COMPILE_DEFINITIONS(NU_DEBUG_MEMORY)
+ENDIF()
 
 # Add subdirectories
 IF (NU_BUILD_CORE)
@@ -49,12 +57,4 @@ ENDIF()
 IF (NU_BUILD_MODULE_UTILS)
     ADD_SUBDIRECTORY(module/utils)
     ADD_COMPILE_DEFINITIONS(NU_BUILD_MODULE_UTILS)
-ENDIF()
-
-# Add compile definitions
-IF (NU_DEBUG)
-    ADD_COMPILE_DEFINITIONS(NU_DEBUG)
-ENDIF()
-IF (NU_DEBUG_MEMORY)
-    ADD_COMPILE_DEFINITIONS(NU_DEBUG_MEMORY)
 ENDIF()

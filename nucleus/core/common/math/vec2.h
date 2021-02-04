@@ -30,4 +30,16 @@ NU_API void nu_vec2i_muls(const nu_vec2i_t v, int32_t s, nu_vec2i_t dest);
 NU_API void nu_vec2i_div(const nu_vec2i_t a, const nu_vec2i_t b, nu_vec2i_t dest);
 NU_API void nu_vec2i_divs(const nu_vec2i_t v, int32_t s, nu_vec2i_t dest);
 
+NU_API void nu_vec2u_copy(const nu_vec2u_t v, nu_vec2u_t dest);
+NU_API void nu_vec2u_one(nu_vec2u_t v);
+NU_API void nu_vec2u_zero(nu_vec2u_t v);
+NU_API void nu_vec2u_add(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest);
+NU_API void nu_vec2u_adds(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest);
+NU_API void nu_vec2u_sub(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest);
+NU_API void nu_vec2u_subs(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest);
+NU_API void nu_vec2u_mul(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest);
+NU_API void nu_vec2u_muls(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest);
+NU_API void nu_vec2u_div(const nu_vec2u_t a, const nu_vec2u_t b, nu_vec2u_t dest);
+NU_API void nu_vec2u_divs(const nu_vec2u_t v, uint32_t s, nu_vec2u_t dest);
+
 #endif

@@ -1,13 +1,12 @@
 #pragma once
 
-#include <nucleus/nucleus.h>
+#include <nucleus/nucleus.hpp>
 
-namespace nusr
+namespace nu::softrast
 {
-    class Camera
+    struct Camera
     {
-    public:
-        nu_mat4f_t view;
+        Matrix4f view;
         float fov;
         float near;
         float far;

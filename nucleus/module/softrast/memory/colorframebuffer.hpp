@@ -5,12 +5,12 @@
 
 #include <string>
 
-namespace nusr
+namespace nu::softrast
 {
     class ColorFramebuffer : public Framebuffer<uint32_t>
     {
     public:
-        ColorFramebuffer(uint32_t width = 0, uint32_t height = 0);
+        ColorFramebuffer(const Vector2u &size = Vector2u());
         
         void display(const WindowInterface &interface);
         void save(const std::string &filename) const;

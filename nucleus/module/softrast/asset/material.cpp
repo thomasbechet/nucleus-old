@@ -1,6 +1,6 @@
 #include "material.hpp"
 
-using namespace nusr;
+using namespace nu::softrast;
 
 Material::Material(const nu_renderer_material_create_info_t &info)
 {
