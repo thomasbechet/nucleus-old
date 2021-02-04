@@ -5,7 +5,7 @@
 
 /* module */
 #define NUGLFW_MODULE_NAME "nucleus-glfw"
-#define NUGLFW_MODULE_ID 0x4
+#define NUGLFW_MODULE_ID 0x1
 
 /* glfw system */
 #define NUGLFW_WINDOW_INTERFACE_NAME        "nuglfw_window_interface"

@@ -3,6 +3,6 @@
 
 /* module */
 #define NUGL_MODULE_NAME "nucleus-opengl"
-#define NUGL_MODULE_ID 0x7
+#define NUGL_MODULE_ID 0x2
 
 #endif

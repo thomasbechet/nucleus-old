@@ -180,17 +180,138 @@ nu_id_t nu_module_get_id(nu_module_handle_t handle)
     uint32_t id = NU_HANDLE_GET_ID(handle);
     return _data.modules[id].info.id;
 }
+
+#define MAX_MODULE_FLAG_COUNT 5
+#define HEADER_NAME    "NAME"
+#define HEADER_ID      "ID"
+#define HEADER_FLAGS   "FLAGS"
+#define HEADER_PLUGINS "PLUGINS"
+
+static void module_get_line_count_with_flags(
+    const nu_module_t *module, char flags[MAX_MODULE_FLAG_COUNT][128], uint32_t n, uint32_t *flag_count, uint32_t *count
+)
+{
+    *flag_count = 0;
+    if (module->info.flags & NU_MODULE_FLAG_TYPE_TASK)     {strncpy(flags[(*flag_count)], "task",     n); (*flag_count)++;}
+    if (module->info.flags & NU_MODULE_FLAG_TYPE_WINDOW)   {strncpy(flags[(*flag_count)], "window",   n); (*flag_count)++;}
+    if (module->info.flags & NU_MODULE_FLAG_TYPE_INPUT)    {strncpy(flags[(*flag_count)], "input",    n); (*flag_count)++;}
+    if (module->info.flags & NU_MODULE_FLAG_TYPE_RENDERER) {strncpy(flags[(*flag_count)], "renderer", n); (*flag_count)++;}
+    if (module->info.flags & NU_MODULE_FLAG_TYPE_PLUGIN)   {strncpy(flags[(*flag_count)], "plugin",   n); (*flag_count)++;}
+    *count = NU_MAX(1, NU_MAX(module->info.plugin_count, *flag_count));
+}
+static void print_module_line_at_index(
+    const nu_module_t *module, char flags[MAX_MODULE_FLAG_COUNT][128], uint32_t flag_count, uint32_t index,
+    char *name, char *id, char *flag, char *plugin, uint32_t n
+)
+{
+    /* set default value */
+    strncpy(name,   "", n);
+    strncpy(id,     "", n);
+    strncpy(flag,   "", n);
+    strncpy(plugin, "", n);
+
+    /* name + id */
+    if (index == 0) {
+        strncpy(name, module->info.name, n);
+        nu_snprintf(id, n, "0x%x", module->info.id);
+    }
+
+    /* flag */
+    if (index < flag_count) strncpy(flag, flags[index], n);
+
+    /* plugin */
+    if (index == 0 && module->info.plugin_count == 0) {
+        strncpy(plugin, "none", n);
+    } else if (index < module->info.plugin_count) {
+        strncpy(plugin, module->info.plugins[index], n);
+    }
+}
+static void compute_max(
+    const nu_module_t *modules, uint32_t module_count,
+    uint32_t *max_name, uint32_t *max_id, uint32_t *max_flag, uint32_t *max_plugin
+)
+{
+    *max_name   = strlen(HEADER_NAME);
+    *max_id     = strlen(HEADER_ID);
+    *max_flag   = strlen(HEADER_FLAGS);
+    *max_plugin = strlen(HEADER_PLUGINS);
+    for (uint32_t m = 0; m < module_count; m++) {
+        char flags[MAX_MODULE_FLAG_COUNT][128];
+        uint32_t flag_count, count;
+        module_get_line_count_with_flags(&modules[m], flags, 128, &flag_count, &count);
+        for (uint32_t i = 0; i < count; i++) {
+            char name[128];
+            char id[128];
+            char flag[128];
+            char plugin[128];
+            print_module_line_at_index(&modules[m], flags, flag_count, i, name, id, flag, plugin, 128);
+            *max_name   = NU_MAX(*max_name, strlen(name));
+            *max_id     = NU_MAX(*max_id, strlen(id));
+            *max_flag   = NU_MAX(*max_flag, strlen(flag));
+            *max_plugin = NU_MAX(*max_plugin, strlen(plugin));
+        }
+    }
+}
+static void log_transition_line(uint32_t max_name, uint32_t max_id, uint32_t max_flag, uint32_t max_plugin)
+{
+    nu_info("+");
+    for (uint32_t i = 0; i < max_name + 2; i++)   nu_info("-");
+    nu_info("+");
+    for (uint32_t i = 0; i < max_id + 2; i++)     nu_info("-");
+    nu_info("+");
+    for (uint32_t i = 0; i < max_flag + 2; i++)   nu_info("-");
+    nu_info("+");
+    for (uint32_t i = 0; i < max_plugin + 2; i++) nu_info("-");
+    nu_info("+\n");
+}
+static void log_line(
+    uint32_t max_name, uint32_t max_id, uint32_t max_flag, uint32_t max_plugin,
+    const char *name, const char *id, const char *flag, const char *plugin
+)
+{
+    uint32_t name_len = strlen(name);
+    uint32_t id_len = strlen(id);
+    uint32_t flag_len = strlen(flag);
+    uint32_t plugin_len = strlen(plugin);
+    nu_info("| %s", name);
+    for (uint32_t i = 0; i < (max_name - name_len + 1); i++) nu_info(" ");
+    nu_info("| %s", id);
+    for (uint32_t i = 0; i < (max_id - id_len + 1); i++) nu_info(" ");
+    nu_info("| %s", flag);
+    for (uint32_t i = 0; i < (max_flag - flag_len + 1); i++) nu_info(" ");
+    nu_info("| %s", plugin);
+    for (uint32_t i = 0; i < (max_plugin - plugin_len + 1); i++) nu_info(" ");
+    nu_info("|\n");
+}
 nu_result_t nu_module_log(void)
 {
-    nu_info("===========================\n");
-    nu_info("          MODULES          \n");
-    nu_info("===========================\n");
+    /* compute max */
+    uint32_t max_name, max_id, max_flag, max_plugin;
+    compute_max(_data.modules, _data.module_count, &max_name, &max_id, &max_flag, &max_plugin);
 
+    /* display header */
+    log_transition_line(max_name, max_id, max_flag, max_plugin);
+    log_line(max_name, max_id, max_flag, max_plugin, HEADER_NAME, HEADER_ID, HEADER_FLAGS, HEADER_PLUGINS);
+
+    /* display */
+    log_transition_line(max_name, max_id, max_flag, max_plugin);
     for (uint32_t i = 0; i < _data.module_count; i++) {
-        nu_info("- %s\n", _data.modules[i].info.name);
-        for (uint32_t pi = 0; pi < _data.modules[i].info.plugin_count; pi++) {
-            nu_info("   - %s\n", _data.modules[i].info.plugins[pi]);
+        const nu_module_t *module = &_data.modules[i];
+        char flags[MAX_MODULE_FLAG_COUNT][128];
+        uint32_t flag_count, count;
+        module_get_line_count_with_flags(module, flags, 128, &flag_count, &count);
+
+        /* show line */
+        for (uint32_t l = 0; l < count; l++) {
+            char name[128];
+            char id[128];
+            char flag[128];
+            char plugin[128];
+            print_module_line_at_index(module, flags, flag_count, l, name, id, flag, plugin, 128);
+            log_line(max_name, max_id, max_flag, max_plugin, name, id, flag, plugin);
         }
+
+        log_transition_line(max_name, max_id, max_flag, max_plugin);
     }
 
     return NU_SUCCESS;

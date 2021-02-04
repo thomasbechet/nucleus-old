@@ -270,7 +270,7 @@ nu_result_t nu_config_log(void)
 
     char *current_section = "";
     for (uint32_t i = 0; i < _data.parameter_count; i++) {
-        nu_config_parameter_t *param = &_data.parameters[i];
+        const nu_config_parameter_t *param = &_data.parameters[i];
         if (NU_MATCH(current_section, param->section)) {
             log_line(max_section, max_name, max_value, NULL, param->name, param->value);
         } else {

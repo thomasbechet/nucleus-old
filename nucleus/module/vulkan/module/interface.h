@@ -3,6 +3,6 @@
 
 /* module */
 #define NUVK_MODULE_NAME "nucleus-vulkan"
-#define NUVK_MODULE_ID 0x5
+#define NUVK_MODULE_ID 0x7
 
 #endif

@@ -3,6 +3,6 @@
 
 /* module */
 #define NUTK_MODULE_NAME "nucleus-task"
-#define NUTK_MODULE_ID 0x6
+#define NUTK_MODULE_ID 0x5
 
 #endif

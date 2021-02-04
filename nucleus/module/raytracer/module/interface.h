@@ -5,6 +5,6 @@
 
 /* module */
 #define NURT_MODULE_NAME "nucleus-raytracer"
-#define NURT_MODULE_ID 0x8
+#define NURT_MODULE_ID 0x3
 
 #endif
