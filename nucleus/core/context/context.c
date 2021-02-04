@@ -148,6 +148,8 @@ static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
     }
     _context.loaded.plugin = true;
 
+    nu_info(NU_CONTEXT_LOGGER_NAME"Running context...\n");
+
     return result;
 }
 static nu_result_t nu_context_terminate(void)
