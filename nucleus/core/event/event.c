@@ -32,6 +32,15 @@ nu_result_t nu_event_initialize(void)
 }
 nu_result_t nu_event_terminate(void)
 {
+    /* terminate all messages */
+    for (uint32_t ei = 0; ei < _data.event_count; ei++) {
+        for (uint32_t mi = 0; mi < _data.events[ei].message_count; mi++) {
+            void *data = (void*)(_data.events[ei].messages + mi * _data.events[ei].message_size);
+            if (_data.events[ei].terminate) _data.events[ei].terminate(data);
+        }
+        _data.events[ei].message_count = 0;
+    }
+
     /* free message buffers */
     for (uint32_t i = 0; i < _data.event_count; i++) {
         nu_free(_data.events[i].messages);
@@ -44,10 +53,10 @@ nu_result_t nu_event_dispatch_all(void)
     for (uint32_t ei = 0; ei < _data.event_count; ei++) {
         for (uint32_t mi = 0; mi < _data.events[ei].message_count; mi++) {
             void *data = (void*)(_data.events[ei].messages + mi * _data.events[ei].message_size);
-            if (_data.events[ei].initialize) _data.events[ei].initialize(data);
             for (uint32_t si = 0; si < _data.events[ei].subscriber_count; si++) {
                 _data.events[ei].subscribers[si](ei, data);
             }
+            /* terminate message */
             if (_data.events[ei].terminate) _data.events[ei].terminate(data);
         }
         _data.events[ei].message_count = 0;
@@ -75,6 +84,9 @@ nu_result_t nu_event_post(nu_event_id_t id, void *data)
     void *dest = (void*)(_data.events[id].messages + _data.events[id].message_count * _data.events[id].message_size);
     memcpy(dest, data, _data.events[id].message_size);
     _data.events[id].message_count++;
+
+    /* initialize message */
+    if (_data.events[id].initialize) _data.events[id].initialize(data);
 
     return NU_SUCCESS;
 }
