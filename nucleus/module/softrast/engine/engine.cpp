@@ -112,6 +112,19 @@ void Engine::setLabelText(nu_renderer_label_handle_t handle, const std::string &
     m_gui.setLabelText(handle, text);
 }
 
+nu_renderer_rectangle_handle_t Engine::createRectangle(const nu_renderer_rectangle_create_info_t &info)
+{
+    return m_gui.createRectangle(info);
+}
+void Engine::destroyRectangle(nu_renderer_rectangle_handle_t handle)
+{
+    m_gui.destroyRectangle(handle);
+}
+void Engine::setRectangleRect(nu_renderer_rectangle_handle_t handle, const Rect &rect)
+{
+    m_gui.setRectangleRect(handle, rect);
+}
+
 void Engine::setViewportSize(const Vector2u &size)
 {
     m_colorBuffer = ColorFramebuffer(size);

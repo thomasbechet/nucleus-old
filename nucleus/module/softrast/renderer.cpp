@@ -140,14 +140,17 @@ nu_result_t nu::softrast::label_set_text(nu_renderer_label_handle_t handle, cons
 
 nu_result_t nu::softrast::rectangle_create(nu_renderer_rectangle_handle_t *handle, const nu_renderer_rectangle_create_info_t *info)
 {
+    *handle = _data.engine->createRectangle(*info);
     return NU_SUCCESS;
 }
 nu_result_t nu::softrast::rectangle_destroy(nu_renderer_rectangle_handle_t handle)
 {
+    _data.engine->destroyRectangle(handle);
     return NU_SUCCESS;
 }
 nu_result_t nu::softrast::rectangle_set_rect(nu_renderer_rectangle_handle_t handle, const nu_rect_t rect)
 {
+    _data.engine->setRectangleRect(handle, Rect(rect));
     return NU_SUCCESS;
 }
 

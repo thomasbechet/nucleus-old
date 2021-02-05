@@ -23,6 +23,23 @@ void GUI::setLabelText(nu_renderer_label_handle_t handle, const std::string &tex
     m_labels.at(NU_HANDLE_GET_ID(handle)).text = text;
 }
 
+nu_renderer_rectangle_handle_t GUI::createRectangle(const nu_renderer_rectangle_create_info_t &info)
+{
+    uint32_t id = m_nextId++;
+    m_rectangles.emplace(id, Rectangle(info));
+    nu_renderer_rectangle_handle_t handle;
+    NU_HANDLE_SET_ID(handle, id);
+    return handle;
+}
+void GUI::destroyRectangle(nu_renderer_rectangle_handle_t handle)
+{
+    m_rectangles.erase(NU_HANDLE_GET_ID(handle));
+}
+void GUI::setRectangleRect(nu_renderer_rectangle_handle_t handle, const Rect &rect)
+{
+    m_rectangles.at(NU_HANDLE_GET_ID(handle)).rect = rect;
+}
+
 void GUI::renderLabel(ColorFramebuffer &colorBuffer, const Font &font, const Vector2i &position, const std::string &text) const
 {
     int32_t currentX = position.x;
@@ -65,11 +82,28 @@ void GUI::renderLabel(ColorFramebuffer &colorBuffer, const Font &font, const Vec
         currentX += g.advance.x;
     }
 }
+void GUI::renderRectangle(ColorFramebuffer &colorBuffer, const Rectangle &rectangle) const
+{
+    // Compute visibility bound
+    Rect windowBound = {0, 0, colorBuffer.getSize().x, colorBuffer.getSize().y};
+    Rect rect = rectangle.rect;
+    rect.clip(windowBound);
+
+    // Draw
+    for (uint32_t y = rect.top; y < rect.top + rect.height; y++) {
+        for (uint32_t x = rect.left; x < rect.left + rect.width; x++) {
+            colorBuffer.blend(x, y, rectangle.color);
+        }
+    }
+}
 
 void GUI::draw(ColorFramebuffer &colorBuffer, const AssetManager &assetManager) const
 {
     for (const auto &[key, value] : m_labels) {
         const Font &font = assetManager.getFont(value.font);
         renderLabel(colorBuffer, font, value.position, value.text);
+    }
+    for (const auto &[key, value] : m_rectangles) {
+        renderRectangle(colorBuffer, value);
     }
 }

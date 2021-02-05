@@ -42,6 +42,10 @@ namespace nu::softrast
         void setLabelPosition(nu_renderer_label_handle_t handle, const Vector2i &position);
         void setLabelText(nu_renderer_label_handle_t handle, const std::string &text);
 
+        nu_renderer_rectangle_handle_t createRectangle(const nu_renderer_rectangle_create_info_t &info);
+        void destroyRectangle(nu_renderer_rectangle_handle_t handle);
+        void setRectangleRect(nu_renderer_rectangle_handle_t handle, const Rect &rect);
+
         void setViewportSize(const Vector2u &size);
         Vector2u getViewportSize() const;
 
