@@ -13,7 +13,7 @@ typedef struct {
 
 static nuutils_command_data_t _data;
 
-/* std::string utility fonctions */
+// String utility functions
 static inline std::string &ltrim(std::string &s) {
     s.erase(s.begin(), std::find_if(s.begin(), s.end(),
             std::not1(std::ptr_fun<int, int>(std::isspace))));
@@ -117,6 +117,10 @@ nu_result_t nuutils_command_execute(const char *cstr_command)
         } else if (tokens.at(1) == "borderless") {
             nu_window_set_mode(NU_WINDOW_MODE_BORDERLESS);
         }
+    }
+
+    if (tokens.size() == 1 && tokens.at(0) == "shutdown") {
+        nu_context_request_stop();
     }
 
     return NU_SUCCESS;
