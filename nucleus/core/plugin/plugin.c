@@ -5,6 +5,9 @@
 
 #define NU_LOGGER_PLUGIN_NAME "[PLUGIN] "
 #define MAX_PLUGIN_COUNT 32
+#define NU_MODULE_GET_PLUGIN_NAME "nu_module_get_plugin"
+
+typedef nu_result_t (*nu_module_plugin_loader_pfn_t)(const char*, nu_plugin_interface_t*);
 
 typedef struct {
     nu_module_handle_t module;
@@ -88,17 +91,17 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
     /* choose id */
     uint32_t id = _data.plugin_count;
 
-    /* load plugin interface accessor */
-    nu_plugin_interface_loader_pfn_t load_interface;
-    result = nu_module_load_function(module, NU_PLUGIN_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
+    /* load plugin loader interface */
+    nu_module_plugin_loader_pfn_t plugin_loader;
+    result = nu_module_load_function(module, NU_MODULE_GET_PLUGIN_NAME, (nu_pfn_t*)&plugin_loader);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load plugin loader for plugin: %s.\n", plugin);
+        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load '%s' function for plugin: %s.\n", NU_MODULE_GET_PLUGIN_NAME, plugin);
         return result;
     }
 
     /* load plugin interface */
     memset(&_data.plugins[id].interface, 0, sizeof(nu_plugin_interface_t));
-    result = load_interface(&_data.plugins[id].interface, plugin);
+    result = plugin_loader(plugin, &_data.plugins[id].interface);
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load plugin interface: %s.\n", plugin);
         return result;

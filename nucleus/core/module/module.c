@@ -3,14 +3,20 @@
 #include "../memory/memory.h"
 #include "../logger/logger.h"
 
-#define NU_LOGGER_MODULE_NAME "[MODULE] "
-#define NU_MODULE_GET_INFO_NAME "nu_module_get_info"
+#define NU_LOGGER_MODULE_NAME        "[MODULE] "
+#define NU_MODULE_GET_INFO_NAME      "nu_module_get_info"
+#define NU_MODULE_GET_INTERFACE_NAME "nu_module_get_interface"
+
+typedef nu_result_t (*nu_module_info_loader_pfn_t)(nu_module_info_t*);
+typedef nu_result_t (*nu_module_interface_loader_pfn_t)(const char*, void*);
 
 #if defined(NU_PLATFORM_WINDOWS)
     #include <windows.h>
 #elif defined(NU_PLATFORM_UNIX)
     #include <libgen.h>
 #endif
+
+#undef interface
 
 #define MAX_MODULE_COUNT 64
 #define MAX_MODULE_PATH_SIZE 256
@@ -19,6 +25,7 @@ typedef struct {
     nu_module_info_t info;
     char path[MAX_MODULE_PATH_SIZE];
     void *handle;
+    nu_module_interface_loader_pfn_t interface_loader;
 } nu_module_t;
 
 typedef struct {
@@ -95,7 +102,7 @@ static nu_result_t load_module(nu_module_t *module, const char *filename)
     strncpy(module->path, filename, MAX_MODULE_PATH_SIZE);
 
     /* load module info */
-    nu_result_t (*module_get_info)(nu_module_info_t*);
+    nu_module_info_loader_pfn_t module_get_info;
     if (load_function(module, NU_MODULE_GET_INFO_NAME, (nu_pfn_t*)&module_get_info) != NU_SUCCESS) {
         nu_warning(NU_LOGGER_MODULE_NAME"'%s' function is required to load the module '%s'.\n", NU_MODULE_GET_INFO_NAME, filename);
         unload_module(module);
@@ -106,6 +113,15 @@ static nu_result_t load_module(nu_module_t *module, const char *filename)
         nu_warning(NU_LOGGER_MODULE_NAME"Failed to retrieve info from module '%s'.\n", filename);
         unload_module(module);
         return NU_FAILURE;
+    }
+
+    /* load interface loader */
+    if (module->info.interface_count > 0) {
+        if (load_function(module, NU_MODULE_GET_INTERFACE_NAME, (nu_pfn_t*)&module->interface_loader) != NU_SUCCESS) {
+            nu_warning(NU_LOGGER_MODULE_NAME"Module '%s' has interfaces but no interface loader.\n", module->info.name);
+            unload_module(module);
+            return NU_FAILURE;
+        }
     }
 
     return NU_SUCCESS;
@@ -153,6 +169,11 @@ nu_result_t nu_module_load_function(nu_module_handle_t handle, const char *funct
     uint32_t id = NU_HANDLE_GET_ID(handle);
     return load_function(&_data.modules[id], function_name, function);
 }
+nu_result_t nu_module_load_interface(nu_module_handle_t handle, const char *interface_name, void *interface)
+{
+    uint32_t id = NU_HANDLE_GET_ID(handle);
+    return _data.modules[id].interface_loader(interface_name, interface);
+}
 nu_result_t nu_module_get_by_name(nu_module_handle_t *handle, const char *name)
 {
     for (uint32_t i = 0; i < _data.module_count; i++) {
@@ -182,33 +203,31 @@ nu_id_t nu_module_get_id(nu_module_handle_t handle)
 }
 
 #define MAX_MODULE_FLAG_COUNT 5
-#define HEADER_NAME    "NAME"
-#define HEADER_ID      "ID"
-#define HEADER_FLAGS   "FLAGS"
-#define HEADER_PLUGINS "PLUGINS"
+#define HEADER_NAME       "NAME"
+#define HEADER_ID         "ID"
+#define HEADER_FLAGS      "FLAGS"
+#define HEADER_INTERFACES "INTERFACES"
+#define HEADER_PLUGINS    "PLUGINS"
 
 static void module_get_line_count_with_flags(
     const nu_module_t *module, char flags[MAX_MODULE_FLAG_COUNT][128], uint32_t n, uint32_t *flag_count, uint32_t *count
 )
 {
     *flag_count = 0;
-    if (module->info.flags & NU_MODULE_FLAG_TYPE_TASK)     {strncpy(flags[(*flag_count)], "task",     n); (*flag_count)++;}
-    if (module->info.flags & NU_MODULE_FLAG_TYPE_WINDOW)   {strncpy(flags[(*flag_count)], "window",   n); (*flag_count)++;}
-    if (module->info.flags & NU_MODULE_FLAG_TYPE_INPUT)    {strncpy(flags[(*flag_count)], "input",    n); (*flag_count)++;}
-    if (module->info.flags & NU_MODULE_FLAG_TYPE_RENDERER) {strncpy(flags[(*flag_count)], "renderer", n); (*flag_count)++;}
-    if (module->info.flags & NU_MODULE_FLAG_TYPE_PLUGIN)   {strncpy(flags[(*flag_count)], "plugin",   n); (*flag_count)++;}
-    *count = NU_MAX(1, NU_MAX(module->info.plugin_count, *flag_count));
+    if (module->info.flags & NU_MODULE_FLAG_NONE) {strncpy(flags[(*flag_count)], "none", n); (*flag_count)++;}
+    *count = NU_MAX(1, NU_MAX(NU_MAX(module->info.interface_count, module->info.plugin_count), *flag_count));
 }
 static void print_module_line_at_index(
     const nu_module_t *module, char flags[MAX_MODULE_FLAG_COUNT][128], uint32_t flag_count, uint32_t index,
-    char *name, char *id, char *flag, char *plugin, uint32_t n
+    char *name, char *id, char *flag, char *interface, char *plugin, uint32_t n
 )
 {
     /* set default value */
-    strncpy(name,   "", n);
-    strncpy(id,     "", n);
-    strncpy(flag,   "", n);
-    strncpy(plugin, "", n);
+    strncpy(name,      "", n);
+    strncpy(id,        "", n);
+    strncpy(flag,      "", n);
+    strncpy(interface, "", n);
+    strncpy(plugin,    "", n);
 
     /* name + id */
     if (index == 0) {
@@ -219,6 +238,13 @@ static void print_module_line_at_index(
     /* flag */
     if (index < flag_count) strncpy(flag, flags[index], n);
 
+    /* interface */
+    if (index == 0 && module->info.interface_count == 0) {
+        strncpy(interface, "none", n);
+    } else if (index < module->info.interface_count) {
+        strncpy(interface, module->info.interfaces[index], n);
+    }
+
     /* plugin */
     if (index == 0 && module->info.plugin_count == 0) {
         strncpy(plugin, "none", n);
@@ -228,13 +254,14 @@ static void print_module_line_at_index(
 }
 static void compute_max(
     const nu_module_t *modules, uint32_t module_count,
-    uint32_t *max_name, uint32_t *max_id, uint32_t *max_flag, uint32_t *max_plugin
+    uint32_t *max_name, uint32_t *max_id, uint32_t *max_flag, uint32_t *max_interface, uint32_t *max_plugin
 )
 {
-    *max_name   = strlen(HEADER_NAME);
-    *max_id     = strlen(HEADER_ID);
-    *max_flag   = strlen(HEADER_FLAGS);
-    *max_plugin = strlen(HEADER_PLUGINS);
+    *max_name      = strlen(HEADER_NAME);
+    *max_id        = strlen(HEADER_ID);
+    *max_flag      = strlen(HEADER_FLAGS);
+    *max_interface = strlen(HEADER_INTERFACES);
+    *max_plugin    = strlen(HEADER_PLUGINS);
     for (uint32_t m = 0; m < module_count; m++) {
         char flags[MAX_MODULE_FLAG_COUNT][128];
         uint32_t flag_count, count;
@@ -243,16 +270,18 @@ static void compute_max(
             char name[128];
             char id[128];
             char flag[128];
+            char interface[128];
             char plugin[128];
-            print_module_line_at_index(&modules[m], flags, flag_count, i, name, id, flag, plugin, 128);
-            *max_name   = NU_MAX(*max_name, strlen(name));
-            *max_id     = NU_MAX(*max_id, strlen(id));
-            *max_flag   = NU_MAX(*max_flag, strlen(flag));
-            *max_plugin = NU_MAX(*max_plugin, strlen(plugin));
+            print_module_line_at_index(&modules[m], flags, flag_count, i, name, id, flag, interface, plugin, 128);
+            *max_name      = NU_MAX(*max_name, strlen(name));
+            *max_id        = NU_MAX(*max_id, strlen(id));
+            *max_flag      = NU_MAX(*max_flag, strlen(flag));
+            *max_interface = NU_MAX(*max_interface, strlen(interface));
+            *max_plugin    = NU_MAX(*max_plugin, strlen(plugin));
         }
     }
 }
-static void log_transition_line(uint32_t max_name, uint32_t max_id, uint32_t max_flag, uint32_t max_plugin)
+static void log_transition_line(uint32_t max_name, uint32_t max_id, uint32_t max_flag, uint32_t max_interface, uint32_t max_plugin)
 {
     nu_info("+");
     for (uint32_t i = 0; i < max_name + 2; i++)   nu_info("-");
@@ -261,24 +290,29 @@ static void log_transition_line(uint32_t max_name, uint32_t max_id, uint32_t max
     nu_info("+");
     for (uint32_t i = 0; i < max_flag + 2; i++)   nu_info("-");
     nu_info("+");
+    for (uint32_t i = 0; i < max_interface + 2; i++)   nu_info("-");
+    nu_info("+");
     for (uint32_t i = 0; i < max_plugin + 2; i++) nu_info("-");
     nu_info("+\n");
 }
 static void log_line(
-    uint32_t max_name, uint32_t max_id, uint32_t max_flag, uint32_t max_plugin,
-    const char *name, const char *id, const char *flag, const char *plugin
+    uint32_t max_name, uint32_t max_id, uint32_t max_flag, uint32_t max_interface, uint32_t max_plugin,
+    const char *name, const char *id, const char *flag, const char *interface, const char *plugin
 )
 {
-    uint32_t name_len = strlen(name);
-    uint32_t id_len = strlen(id);
-    uint32_t flag_len = strlen(flag);
-    uint32_t plugin_len = strlen(plugin);
+    uint32_t name_len      = strlen(name);
+    uint32_t id_len        = strlen(id);
+    uint32_t flag_len      = strlen(flag);
+    uint32_t interface_len = strlen(interface);
+    uint32_t plugin_len    = strlen(plugin);
     nu_info("| %s", name);
     for (uint32_t i = 0; i < (max_name - name_len + 1); i++) nu_info(" ");
     nu_info("| %s", id);
     for (uint32_t i = 0; i < (max_id - id_len + 1); i++) nu_info(" ");
     nu_info("| %s", flag);
     for (uint32_t i = 0; i < (max_flag - flag_len + 1); i++) nu_info(" ");
+    nu_info("| %s", interface);
+    for (uint32_t i = 0; i < (max_interface - interface_len + 1); i++) nu_info(" ");
     nu_info("| %s", plugin);
     for (uint32_t i = 0; i < (max_plugin - plugin_len + 1); i++) nu_info(" ");
     nu_info("|\n");
@@ -286,15 +320,15 @@ static void log_line(
 nu_result_t nu_module_log(void)
 {
     /* compute max */
-    uint32_t max_name, max_id, max_flag, max_plugin;
-    compute_max(_data.modules, _data.module_count, &max_name, &max_id, &max_flag, &max_plugin);
+    uint32_t max_name, max_id, max_flag, max_interface, max_plugin;
+    compute_max(_data.modules, _data.module_count, &max_name, &max_id, &max_flag, &max_interface, &max_plugin);
 
     /* display header */
-    log_transition_line(max_name, max_id, max_flag, max_plugin);
-    log_line(max_name, max_id, max_flag, max_plugin, HEADER_NAME, HEADER_ID, HEADER_FLAGS, HEADER_PLUGINS);
+    log_transition_line(max_name, max_id, max_flag, max_interface, max_plugin);
+    log_line(max_name, max_id, max_flag, max_interface, max_plugin, HEADER_NAME, HEADER_ID, HEADER_FLAGS, HEADER_INTERFACES, HEADER_PLUGINS);
 
     /* display */
-    log_transition_line(max_name, max_id, max_flag, max_plugin);
+    log_transition_line(max_name, max_id, max_flag, max_interface, max_plugin);
     for (uint32_t i = 0; i < _data.module_count; i++) {
         const nu_module_t *module = &_data.modules[i];
         char flags[MAX_MODULE_FLAG_COUNT][128];
@@ -306,12 +340,13 @@ nu_result_t nu_module_log(void)
             char name[128];
             char id[128];
             char flag[128];
+            char interface[128];
             char plugin[128];
-            print_module_line_at_index(module, flags, flag_count, l, name, id, flag, plugin, 128);
-            log_line(max_name, max_id, max_flag, max_plugin, name, id, flag, plugin);
+            print_module_line_at_index(module, flags, flag_count, l, name, id, flag, interface, plugin, 128);
+            log_line(max_name, max_id, max_flag, max_interface, max_plugin, name, id, flag, interface, plugin);
         }
 
-        log_transition_line(max_name, max_id, max_flag, max_plugin);
+        log_transition_line(max_name, max_id, max_flag, max_interface, max_plugin);
     }
 
     return NU_SUCCESS;

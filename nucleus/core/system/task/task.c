@@ -27,16 +27,8 @@ nu_result_t nu_system_task_initialize(void)
         return result;
     }
 
-    /* load task interface accessor */
-    nu_task_interface_loader_pfn_t load_interface;
-    result = nu_module_load_function(_system.module, NU_TASK_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_TASK_NAME"Failed to load task loader.\n");
-        return result;
-    }
-
     /* load task interface */
-    result = load_interface(&_system.interface);
+    result = nu_module_load_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_TASK_NAME"Failed to load interface.\n");
         return result;

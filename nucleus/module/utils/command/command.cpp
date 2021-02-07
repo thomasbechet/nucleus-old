@@ -128,11 +128,3 @@ nu_result_t nuutils_command_execute(const char *cstr_command)
 
     return NU_SUCCESS;
 }
-
-nu_result_t nuutils_command_get_interface(nuutils_command_interface_t *interface)
-{
-    interface->get_evend_id = nuutils_command_get_event_id;
-    interface->execute      = nuutils_command_execute;
-
-    return NU_SUCCESS;
-}

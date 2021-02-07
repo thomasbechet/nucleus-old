@@ -4,7 +4,7 @@
 #include "../../common/common.h"
 
 /* renderer system interface */
-#define NU_RENDERER_INTERFACE_LOADER_NAME "nu_renderer_get_interface"
+#define NU_RENDERER_INTERFACE_NAME "nu_renderer_interface"
 
 NU_DECLARE_HANDLE(nu_renderer_mesh_handle_t);
 NU_DECLARE_HANDLE(nu_renderer_font_handle_t);
@@ -119,8 +119,6 @@ typedef struct {
     nu_result_t (*viewport_set_size)(const nu_vec2u_t);
     nu_result_t (*viewport_get_size)(nu_vec2u_t);
 } nu_renderer_interface_t;
-
-typedef nu_result_t (*nu_renderer_interface_loader_pfn_t)(nu_renderer_interface_t*);
 
 /* system renderer event */
 typedef struct {

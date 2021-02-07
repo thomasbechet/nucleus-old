@@ -4,7 +4,7 @@
 #include "../../common/common.h"
 
 /* window system interface */
-#define NU_WINDOW_INTERFACE_LOADER_NAME "nu_window_get_interface"
+#define NU_WINDOW_INTERFACE_NAME "nu_window_interface"
 
 typedef enum {
     NU_WINDOW_MODE_FULLSCREEN,
@@ -21,7 +21,5 @@ typedef struct {
     nu_result_t (*set_title)(const char*);
     nu_result_t (*set_mode)(nu_window_mode_t);
 } nu_window_interface_t;
-
-typedef nu_result_t (*nu_window_interface_loader_pfn_t)(nu_window_interface_t*);
 
 #endif

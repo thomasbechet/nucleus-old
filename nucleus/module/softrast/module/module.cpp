@@ -4,64 +4,74 @@
 
 using namespace nu::softrast;
 
+static const uint32_t interface_count = 2;
+static const char *interfaces[] = {
+    NU_RENDERER_INTERFACE_NAME,
+    NUSR_RENDERER_INTERFACE_NAME
+};
 static const uint32_t plugin_count = 0;
 static const char *plugins[] = {};
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
-    info->name         = NUSR_MODULE_NAME;
-    info->id           = NUSR_MODULE_ID;
-    info->flags        = NU_MODULE_FLAG_TYPE_RENDERER;
-    info->plugin_count = plugin_count;
-    info->plugins      = plugins;
+    info->name            = NUSR_MODULE_NAME;
+    info->id              = NUSR_MODULE_ID;
+    info->flags           = NU_MODULE_FLAG_NONE;
+    info->interface_count = interface_count;
+    info->interfaces      = interfaces;
+    info->plugin_count    = plugin_count;
+    info->plugins         = plugins;
 
     return NU_SUCCESS;
 }
-
-nu_result_t nu_renderer_get_interface(nu_renderer_interface_t *interface)
+nu_result_t nu_module_get_interface(const char *name, void *interface)
 {
-    interface->initialize = initialize;
-    interface->terminate  = terminate;
-    interface->render     = render;
+    if (NU_MATCH(name, NU_RENDERER_INTERFACE_NAME)) {
+        nu_renderer_interface_t *i = (nu_renderer_interface_t*)interface;
 
-    interface->mesh_create  = mesh_create;
-    interface->mesh_destroy = mesh_destroy;
+        i->initialize = initialize;
+        i->terminate  = terminate;
+        i->render     = render;
 
-    interface->texture_create  = texture_create;
-    interface->texture_destroy = texture_destroy;
+        i->mesh_create  = mesh_create;
+        i->mesh_destroy = mesh_destroy;
 
-    interface->material_create  = material_create;
-    interface->material_destroy = material_destroy;
+        i->texture_create  = texture_create;
+        i->texture_destroy = texture_destroy;
 
-    interface->font_create        = font_create;
-    interface->font_destroy       = font_destroy;
-    interface->font_get_text_size = font_get_text_size;
+        i->material_create  = material_create;
+        i->material_destroy = material_destroy;
 
-    interface->camera_create     = NULL;
-    interface->camera_destroy    = NULL;
-    interface->camera_set_fov    = camera_set_fov;
-    interface->camera_set_view   = camera_set_view;
-    interface->camera_set_active = NULL;
+        i->font_create        = font_create;
+        i->font_destroy       = font_destroy;
+        i->font_get_text_size = font_get_text_size;
 
-    interface->model_create        = model_create;
-    interface->model_destroy       = model_destroy;
-    interface->model_set_transform = model_set_transform;
+        i->camera_create     = NULL;
+        i->camera_destroy    = NULL;
+        i->camera_set_fov    = camera_set_fov;
+        i->camera_set_view   = camera_set_view;
+        i->camera_set_active = NULL;
 
-    interface->label_create       = label_create;
-    interface->label_destroy      = label_destroy;
-    interface->label_set_position = label_set_position;
-    interface->label_set_text     = label_set_text;
+        i->model_create        = model_create;
+        i->model_destroy       = model_destroy;
+        i->model_set_transform = model_set_transform;
 
-    interface->rectangle_create   = rectangle_create;
-    interface->rectangle_destroy  = rectangle_destroy;
-    interface->rectangle_set_rect = rectangle_set_rect;
+        i->label_create       = label_create;
+        i->label_destroy      = label_destroy;
+        i->label_set_position = label_set_position;
+        i->label_set_text     = label_set_text;
 
-    interface->viewport_set_size = viewport_set_size;
-    interface->viewport_get_size = viewport_get_size;
+        i->rectangle_create   = rectangle_create;
+        i->rectangle_destroy  = rectangle_destroy;
+        i->rectangle_set_rect = rectangle_set_rect;
 
-    return NU_SUCCESS;
-}
-nu_result_t nusr_renderer_get_interface(nusr_renderer_interface_t *interface)
-{
-    return NU_SUCCESS;
+        i->viewport_set_size = viewport_set_size;
+        i->viewport_get_size = viewport_get_size;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUSR_RENDERER_INTERFACE_NAME)) {
+        return NU_SUCCESS;
+    }
+
+    return NU_FAILURE;
 }

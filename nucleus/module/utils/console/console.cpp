@@ -18,24 +18,6 @@ typedef struct {
 
 static nu_console_data_t _data;
 
-static nu_result_t load_command_interface(void)
-{
-    nu_module_handle_t module;
-    if (nu_module_get_by_name(&module, NUUTILS_MODULE_NAME) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-
-    nuutils_command_interface_loader_pfn_t load_interface;
-    if (nu_module_load_function(module, NUUTILS_COMMAND_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-
-    if (load_interface(&_data.command_interface) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-
-    return NU_SUCCESS;
-}
 static nu_result_t on_event(nu_event_id_t id, void *data)
 {
     return _data.console->onEvent(id, data);
@@ -45,7 +27,7 @@ nu_result_t nuutils_console_plugin_initialize(void)
 {
     /* load command interface */
     _data.command_interface_loaded = false;
-    if (load_command_interface() == NU_SUCCESS) {
+    if (NU_MODULE_LOAD_INTERFACE(NUUTILS_MODULE_NAME, NUUTILS_COMMAND_INTERFACE_NAME, &_data.command_interface) == NU_SUCCESS) {
         _data.command_interface_loaded = true; 
     } else {
         nu_warning(NUUTILS_LOGGER_NAME"Using console without command plugin.\n");

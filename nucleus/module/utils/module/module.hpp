@@ -6,7 +6,6 @@ extern "C"
 {
     /* module */
     NU_API nu_result_t nu_module_get_info(nu_module_info_t *info);
-
-    /* interface */
-    NU_API nu_result_t nu_plugin_get_interface(nu_plugin_interface_t *interface, const char *name);
+    NU_API nu_result_t nu_module_get_interface(const char *name, void *interface);
+    NU_API nu_result_t nu_module_get_plugin(const char *name, nu_plugin_interface_t *plugin);
 }

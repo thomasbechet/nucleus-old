@@ -28,16 +28,8 @@ nu_result_t nu_system_input_initialize(void)
         return NU_FAILURE;
     }
 
-    /* load input interface accessor */
-    nu_input_interface_loader_pfn_t load_interface;
-    result = nu_module_load_function(_system.module, NU_INPUT_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface);
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_INPUT_NAME"Failed to load input loader.\n");
-        return result;
-    }
-
     /* load input interface */
-    result = load_interface(&_system.interface);
+    result = nu_module_load_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_INPUT_NAME"Failed to load interface.\n");
         return result;

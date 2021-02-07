@@ -8,44 +8,14 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-#define NU_MODULE_LOAD_INTERFACE(MODULE_NAME, INTERFACE_LOADER_NAME, INTERFACE_LOADER, INTERFACE) ({\
-        nu_module_handle_t module; \
-        nu_result_t status = NU_FAILURE; \
-        if (nu_module_get_by_name(&module, MODULE_NAME) == NU_SUCCESS) { \
-            INTERFACE_LOADER load_interface; \
-            if (nu_module_load_function(module, INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) == NU_SUCCESS) { \
-                if (load_interface(&INTERFACE) == NU_SUCCESS) { \
-                    status = NU_SUCCESS; \
-                } \
-            } \
-        } \
-        status; \
-    })
-
 static nu_result_t load_monkey(nu_renderer_mesh_handle_t *mesh)
 {
-    // nu_module_handle_t module;
-    // if (nu_module_get_by_name(&module, NUUTILS_MODULE_NAME) != NU_SUCCESS) {
-    //     nu_warning("Failed 0\n");
-    //     return NU_SUCCESS;
-    // }
-    // nuutils_loader_interface_loader_pfn_t load_interface;
-    // if (nu_module_load_function(module, NUUTILS_LOADER_INTERFACE_LOADER_NAME, (nu_pfn_t*)&load_interface) != NU_SUCCESS) {
-    //     nu_warning("Failed 1\n");
-    //     return NU_FAILURE;
-    // }
-    // nuutils_loader_interface_t interface;
-    // if (load_interface(&interface) != NU_SUCCESS) {
-    //     nu_warning("Failed 2\n");
-    //     return NU_FAILURE;
-    // }
-
-    nuutils_loader_interface_t interface;
-    if (NU_MODULE_LOAD_INTERFACE(NUUTILS_MODULE_NAME, NUUTILS_LOADER_INTERFACE_LOADER_NAME, nuutils_loader_interface_loader_pfn_t, interface) != NU_SUCCESS) {
+    nuutils_loader_interface_t loader;
+    if (NU_MODULE_LOAD_INTERFACE(NUUTILS_MODULE_NAME, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
-    if (interface.load_mesh_from_obj(mesh, "engine/model/alfred/alfred.obj") != NU_SUCCESS) {
+    if (loader.load_mesh_from_obj(mesh, "engine/model/alfred/alfred.obj") != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
@@ -69,10 +39,9 @@ static nu_result_t on_start(void)
 {
     nu_module_handle_t module;
     nu_module_load(&module, "engine/module/nucleus-utils");
-    nu_plugin_require(module, "nuutils_command_plugin");
-    nu_plugin_require(module, "nuutils_console_plugin");
-    nu_plugin_require(module, "nuutils_loader_plugin");
-    nu_plugin_require(module, "nuutils_spectator_plugin");
+    nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
+    nu_plugin_require(module, NUUTILS_CONSOLE_PLUGIN_NAME);
+    nu_plugin_require(module, NUUTILS_SPECTATOR_PLUGIN_NAME);
 
     /* load texture */
     nu_renderer_texture_create_info_t texture_info = {0};
