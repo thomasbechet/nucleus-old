@@ -214,7 +214,7 @@ static void module_get_line_count_with_flags(
 )
 {
     *flag_count = 0;
-    if (module->info.flags & NU_MODULE_FLAG_NONE) {strncpy(flags[(*flag_count)], "none", n); (*flag_count)++;}
+    if (module->info.flags == 0x0) {strncpy(flags[(*flag_count)], "none", n); (*flag_count)++;}
     *count = NU_MAX(1, NU_MAX(NU_MAX(module->info.interface_count, module->info.plugin_count), *flag_count));
 }
 static void print_module_line_at_index(

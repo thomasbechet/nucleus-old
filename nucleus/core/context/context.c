@@ -36,6 +36,15 @@ static nu_context_data_t _context;
 static nu_result_t nu_context_initialize(const nu_context_init_info_t *info);
 static nu_result_t nu_context_terminate(void);
 
+static nu_result_t nu_context_initialize_core(void)
+{
+
+}
+static nu_result_t nu_context_initialize_system(void)
+{
+    
+}
+
 static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
 {
     nu_result_t result;
@@ -46,12 +55,15 @@ static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
 
     _context.loaded.config   = false;
     _context.loaded.memory   = false;
-    _context.loaded.logger   = false;
     _context.loaded.module   = false;
     _context.loaded.plugin   = false;
     _context.loaded.event    = false;
+
+    _context.loaded.logger   = false;
+    
     _context.loaded.task     = false;
     _context.loaded.window   = false;
+    _context.loaded.input    = false;
     _context.loaded.renderer = false;
 
     /* load configuration */

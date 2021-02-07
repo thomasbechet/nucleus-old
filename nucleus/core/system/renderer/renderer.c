@@ -90,7 +90,7 @@ nu_result_t nu_system_renderer_render(void)
     return NU_SUCCESS;
 }
 
-nu_module_handle_t nu_system_renderer_get_module_id(void)
+nu_module_handle_t nu_system_renderer_get_module_handle(void)
 {
     return _system.module;
 }
