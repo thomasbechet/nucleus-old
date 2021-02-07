@@ -46,40 +46,44 @@ void GUI::renderLabel(ColorFramebuffer &colorBuffer, const Font &font, const Vec
 
     // Iterate over characers
     for (char c : text) {
-        const Glyph &g = font.glyphs.at(c);
+        try {
 
-        // Compute visibility bound
-        Rect windowBound(0, 0, colorBuffer.getSize().x, colorBuffer.getSize().y);
-        Rect characterBound(0, 0, g.bitmapSize.x, g.bitmapSize.y);
+            const Glyph &g = font.glyphs.at(c);
 
-        // Translate character bound
-        characterBound.left += (currentX + g.bearing.x);
-        characterBound.top  += (position.y - g.bearing.y);
+            // Compute visibility bound
+            Rect windowBound(0, 0, colorBuffer.getSize().x, colorBuffer.getSize().y);
+            Rect characterBound(0, 0, g.bitmapSize.x, g.bitmapSize.y);
 
-        // Clip and translate back character
-        characterBound.clip(windowBound);
-        characterBound.left -= (currentX + g.bearing.x);
-        characterBound.top  -= (position.y - g.bearing.y);
+            // Translate character bound
+            characterBound.left += (currentX + g.bearing.x);
+            characterBound.top  += (position.y - g.bearing.y + font.lineHeight);
 
-        // Draw character
-        const uint32_t startX = characterBound.left;
-        const uint32_t stopX  = startX + characterBound.width;
-        const uint32_t startY = characterBound.top;
-        const uint32_t stopY  = startY + characterBound.height;
-        for (uint32_t y = startY; y < stopY; y++) {
-            for (uint32_t x = startX; x < stopX; x++) {
-                const uint32_t bufX = x + (currentX + g.bearing.x);
-                const uint32_t bufY = y + position.y - g.bearing.y;
+            // Clip and translate back character
+            characterBound.clip(windowBound);
+            characterBound.left -= (currentX + g.bearing.x);
+            characterBound.top  -= (position.y - g.bearing.y + font.lineHeight);
 
-                //uint32_t color = font.atlas[(g->ty + y) * font->width + x];
-                //nusr_framebuffer_blend_uint(color_buffer, x_buf, y_buf, color);
-                uint32_t color = font.atlas.get(x, g.ty + y);
-                colorBuffer.blend(bufX, bufY, color);
+            // Draw character
+            const uint32_t startX = characterBound.left;
+            const uint32_t stopX  = startX + characterBound.width;
+            const uint32_t startY = characterBound.top;
+            const uint32_t stopY  = startY + characterBound.height;
+            for (uint32_t y = startY; y < stopY; y++) {
+                for (uint32_t x = startX; x < stopX; x++) {
+                    const uint32_t bufX = x + (currentX + g.bearing.x);
+                    const uint32_t bufY = y + (position.y - g.bearing.y + font.lineHeight);
+
+                    uint32_t color = font.atlas.get(x, g.ty + y);
+                    colorBuffer.blend(bufX, bufY, color);
+                }
             }
-        }
 
-        // Goto next character
-        currentX += g.advance.x;
+            // Goto next character
+            currentX += g.advance.x;
+
+        } catch(const std::out_of_range &e) {
+            continue;
+        }
     }
 }
 void GUI::renderRectangle(ColorFramebuffer &colorBuffer, const Rectangle &rectangle) const

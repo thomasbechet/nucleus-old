@@ -87,14 +87,28 @@ Console::Console()
 
     // Create command
     m_commandLine = std::make_unique<CommandLine>(m_font);
+    m_commandLine->setVisible(false);
     m_selectedOldCommand = 0;
+
+    // Create line buffer
+    m_lineBuffer = std::make_unique<LineBuffer>(m_font, 15);
+
+    // Create rectangle
+    nu_renderer_rectangle_create_info_t info;
+    info.color = 0xFFFFFF33;
+    info.rect  = {0, 0, 0, 0};
+    nu_renderer_rectangle_create(&m_rectangle, &info);
 
     // Set component position
     updatePosition();
+    updateCursorAdvance();
 }
 Console::~Console()
 {
-    // destroy command line
+    // Destroy linebuffer
+    m_lineBuffer.reset();
+
+    // Destroy command line
     m_commandLine.reset();
 
     // Destroy cursor
@@ -118,10 +132,12 @@ void Console::update()
             nu_input_set_cursor_mode(NU_CURSOR_MODE_DISABLE);
             m_cursor->setVisible(false);
             m_commandLine->setVisible(false);
+            m_lineBuffer->setVisible(false);
         } else {
             nu_input_set_cursor_mode(NU_CURSOR_MODE_NORMAL);
             m_cursor->setVisible(true);
             m_commandLine->setVisible(true);
+            m_lineBuffer->setVisible(true);
         }
     }
 
@@ -199,6 +215,9 @@ void Console::update()
                 m_oldCommands.push_back(m_commandLine->getCommand());
                 m_selectedOldCommand = m_oldCommands.size();
 
+                // Add command to the line buffer
+                m_lineBuffer->add(m_commandLine->getCommand());
+
                 // Execute command
                 if (_data.command_interface_loaded) {
                     _data.command_interface.execute(m_commandLine->getCommand().c_str());
@@ -224,7 +243,7 @@ nu_result_t Console::onEvent(nu_event_id_t id, void *data)
 
 void Console::updateCursorAdvance()
 {
-    std::string sub_string = m_commandLine->getCommand().substr(0, m_selectedCharacter);
+    std::string sub_string = m_commandLine->getText().substr(0, 1 + m_selectedCharacter);
     nu_vec2u_t size;
     nu_renderer_font_get_text_size(m_font, sub_string.c_str(), size);
     m_cursor->setAdvance(size[0]);
@@ -237,9 +256,20 @@ void Console::setCommandLine(std::string command)
 }
 void Console::updatePosition()
 {
-    nu_vec2u_t size;
-    nu_renderer_viewport_get_size(size);
-    nu_vec2i_t position = {FONT_SIZE / 2, (int32_t)size[1] - FONT_SIZE / 2};
-    m_cursor->setPosition(position);
-    m_commandLine->setPosition(position);
+    Vector2u size;
+    nu_renderer_viewport_get_size(size.data);
+
+    // Get line height
+    Vector2u lineSize;
+    nu_renderer_font_get_text_size(m_font, "A", lineSize.data);
+    lineSize.x = FONT_SIZE;
+    
+    // Cursor + Command Line
+    m_commandLine->setPosition({(int32_t)lineSize.x, (int32_t)(size.y - lineSize.y * 2)});
+    Rect rect = {(int32_t)lineSize.x - 1, (int32_t)(size.y - lineSize.y * 2) + 1, 200, lineSize.y};
+    nu_renderer_rectangle_set_rect(m_rectangle, rect.data);
+    m_cursor->setPosition({(int32_t)lineSize.x, (int32_t)(size.y - lineSize.y * 1)});
+
+    // Line buffer
+    m_lineBuffer->setPosition({(int32_t)lineSize.x, (int32_t)(size.y - lineSize.y * 3)});
 }

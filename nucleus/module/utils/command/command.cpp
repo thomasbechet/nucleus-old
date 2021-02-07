@@ -87,9 +87,11 @@ nu_result_t nuutils_command_get_event_id(nu_event_id_t *id)
 }
 nu_result_t nuutils_command_execute(const char *cstr_command)
 {
+    // Split command
     std::string command(cstr_command);
     std::vector<std::string> tokens = split(trim(command), " ");
 
+    // Post event
     nuutils_command_event_t event;
     event.argc = tokens.size();
     event.args = (char**)nu_malloc(sizeof(char*) * event.argc);
@@ -100,6 +102,7 @@ nu_result_t nuutils_command_execute(const char *cstr_command)
     }
     nu_event_post(_data.event_id, &event);
 
+    //Handle builtin commands
     if (tokens.size() == 2 && tokens.at(0) == "fov") {
         nu_renderer_camera_set_fov(0, nu_radian(std::atof(tokens.at(1).c_str())));
     }

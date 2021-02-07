@@ -1,6 +1,6 @@
 #pragma once
 
-#include <nucleus/nucleus.h>
+#include <nucleus/nucleus.hpp>
 
 namespace nu::utility
 {
@@ -10,7 +10,7 @@ namespace nu::utility
         Cursor(float frequency);
         ~Cursor();
 
-        void setPosition(const nu_vec2i_t position);
+        void setPosition(const Vector2i &position);
         void setVisible(bool visible);
         void setAdvance(uint32_t advance);
 
@@ -20,7 +20,7 @@ namespace nu::utility
         void updateRectangle();
 
         nu_renderer_rectangle_handle_t m_handle;
-        nu_rect_t m_rect;
+        Rect m_rect;
         float m_delta;
         float m_frequency;
         bool m_visible;

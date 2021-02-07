@@ -22,6 +22,7 @@ namespace nu::softrast
 
         std::unordered_map<char, Glyph> glyphs;
         ColorFramebuffer atlas;
+        uint32_t lineHeight;
 
         Vector2u getTextSize(const std::string &text) const;
     };

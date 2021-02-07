@@ -1,6 +1,7 @@
 #include "cursor.hpp"
 
 using namespace nu::utility;
+using namespace nu;
 
 Cursor::Cursor(float frequency)
 {
@@ -16,7 +17,7 @@ Cursor::Cursor(float frequency)
 
     nu_renderer_rectangle_create_info_t rectangleInfo;
     rectangleInfo.color = 0xFFFFFFFF;
-    rectangleInfo.rect = m_rect;
+    rectangleInfo.rect = m_rect.data;
     nu_renderer_rectangle_create(&m_handle, &rectangleInfo);
 
     updateRectangle();
@@ -26,10 +27,10 @@ Cursor::~Cursor()
     nu_renderer_rectangle_destroy(m_handle);
 }
 
-void Cursor::setPosition(const nu_vec2i_t position)
+void Cursor::setPosition(const Vector2i &position)
 {
-    m_rect.left = position[0];
-    m_rect.top = position[1];
+    m_rect.left = position.x;
+    m_rect.top  = position.y;
     updateRectangle();
 }
 void Cursor::setVisible(bool visible)
@@ -58,8 +59,8 @@ void Cursor::update(float delta)
 
 void Cursor::updateRectangle()
 {
-    nu_rect_t rect = m_rect;
+    Rect rect = m_rect;
     rect.left += m_advance;
     if (!m_visible) rect.height = 0;
-    nu_renderer_rectangle_set_rect(m_handle, rect);
+    nu_renderer_rectangle_set_rect(m_handle, rect.data);
 }

@@ -86,17 +86,19 @@ Font::Font(const nu_renderer_font_create_info_t &info)
     
         glyphs.emplace(c, g);
     }
+
+    // Save optimal line height
+    lineHeight = face->size->metrics.height >> 6;
 }
 
 Vector2u Font::getTextSize(const std::string &text) const
 {
-    Vector2u maxSize = {0, 0};
+    Vector2u maxSize = {0, lineHeight};
 
     for (char c : text) {
         try {
             Glyph g = glyphs.at(c);
             /* compute max height and width */
-            maxSize.y = NU_MAX(maxSize.y, g.bitmapSize.y);
             maxSize.x += g.advance.x;
         } catch(std::out_of_range &e) {
             continue;
