@@ -1,5 +1,5 @@
-#ifndef NU_UTILS_H
-#define NU_UTILS_H
+#ifndef NUUTILS_HEADER_H
+#define NUUTILS_HEADER_H
 
 #include "utils/module/interface.h"
 

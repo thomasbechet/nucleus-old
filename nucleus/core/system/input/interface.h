@@ -1,9 +1,8 @@
-#ifndef NU_SYSTEM_INPUT_INTERFACE_H
-#define NU_SYSTEM_INPUT_INTERFACE_H
+#ifndef NU_INPUT_INTERFACE_H
+#define NU_INPUT_INTERFACE_H
 
-#include "../../common/common.h"
+#include "../../module/interface.h"
 
-/* input system interface */
 #define NU_INPUT_INTERFACE_NAME "nu_input_interface"
 
 typedef struct {
@@ -18,5 +17,20 @@ typedef struct {
     nu_result_t (*get_cursor_mode)(nu_cursor_mode_t*);
     nu_result_t (*set_cursor_mode)(nu_cursor_mode_t);
 } nu_input_interface_t;
+
+typedef enum {
+    NU_INPUT_API_NONE = 0,
+    NU_INPUT_API_GLFW = 1
+} nu_input_api_t;
+
+NU_API nu_module_handle_t nu_input_get_module_handle(void);
+
+NU_API nu_result_t nu_input_get_keyboard_state(nu_button_state_t *state, nu_keyboard_t button);
+NU_API nu_result_t nu_input_get_keyboard_text(const char **text, uint32_t *length);
+NU_API nu_result_t nu_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t button);
+NU_API nu_result_t nu_input_get_mouse_motion(nu_vec2f_t motion);
+NU_API nu_result_t nu_input_get_mouse_scroll(nu_vec2f_t scroll);
+NU_API nu_result_t nu_input_get_cursor_mode(nu_cursor_mode_t *mode);
+NU_API nu_result_t nu_input_set_cursor_mode(nu_cursor_mode_t mode);
 
 #endif

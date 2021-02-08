@@ -1,13 +1,15 @@
 #include "context.h"
 
+#include "../config/config.h"
 #include "../event/event.h"
-#include "../plugin/plugin.h"
-#include "../system/task/task.h"
-#include "../system/window/window.h"
-#include "../system/renderer/renderer.h"
-#include "../system/input/input.h"
 #include "../logger/logger.h"
 #include "../memory/memory.h"
+#include "../module/module.h"
+#include "../plugin/plugin.h"
+#include "../system/input/input.h"
+#include "../system/renderer/renderer.h"
+#include "../system/task/task.h"
+#include "../system/window/window.h"
 
 #define NU_CONTEXT_LOGGER_NAME "[SYSTEM] "
 
@@ -35,15 +37,6 @@ static nu_context_data_t _context;
 
 static nu_result_t nu_context_initialize(const nu_context_init_info_t *info);
 static nu_result_t nu_context_terminate(void);
-
-static nu_result_t nu_context_initialize_core(void)
-{
-
-}
-static nu_result_t nu_context_initialize_system(void)
-{
-    
-}
 
 static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
 {

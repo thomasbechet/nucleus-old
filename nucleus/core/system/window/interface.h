@@ -1,9 +1,8 @@
-#ifndef NU_SYSTEM_WINDOW_INTERFACE_H
-#define NU_SYSTEM_WINDOW_INTERFACE_H
+#ifndef NU_WINDOW_INTERFACE_H
+#define NU_WINDOW_INTERFACE_H
 
-#include "../../common/common.h"
+#include "../../module/interface.h"
 
-/* window system interface */
 #define NU_WINDOW_INTERFACE_NAME "nu_window_interface"
 
 typedef enum {
@@ -21,5 +20,17 @@ typedef struct {
     nu_result_t (*set_title)(const char*);
     nu_result_t (*set_mode)(nu_window_mode_t);
 } nu_window_interface_t;
+
+typedef enum {
+    NU_WINDOW_API_NONE = 0,
+    NU_WINDOW_API_GLFW = 1
+} nu_window_api_t;
+
+NU_API nu_module_handle_t nu_window_get_module_handle(void);
+
+NU_API nu_result_t nu_window_set_size(const nu_vec2u_t size);
+NU_API nu_result_t nu_window_get_size(nu_vec2u_t size);
+NU_API nu_result_t nu_window_set_title(const char *title);
+NU_API nu_result_t nu_window_set_mode(nu_window_mode_t mode);
 
 #endif

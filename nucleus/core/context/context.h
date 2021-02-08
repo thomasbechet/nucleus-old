@@ -1,7 +1,7 @@
 #ifndef NU_CONTEXT_H
 #define NU_CONTEXT_H
 
-#include "config.h"
+#include "../config/interface.h"
 
 typedef struct {
     nu_config_callback_pfn_t config;

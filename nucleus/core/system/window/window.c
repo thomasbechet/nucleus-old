@@ -1,6 +1,6 @@
 #include "window.h"
 
-#include "../../context/config.h"
+#include "../../config/interface.h"
 
 #include <nucleus/module/glfw.h>
 
@@ -60,7 +60,7 @@ nu_result_t nu_system_window_update(void)
     return NU_SUCCESS;
 }
 
-nu_module_handle_t nu_system_window_get_module_handle(void)
+nu_module_handle_t nu_window_get_module_handle(void)
 {
     return _system.module;
 }

@@ -6,17 +6,17 @@ extern "C" {
 #endif
 
 #include "common/common.h"
-#include "module/interface.h"
-#include "module/module.h"
+#include "config/interface.h"
 #include "context/context.h"
-#include "event/event.h"
-#include "plugin/plugin.h"
-#include "system/renderer/renderer.h"
-#include "system/window/window.h"
-#include "system/task/task.h"
-#include "system/input/input.h"
-#include "logger/logger.h"
-#include "memory/memory.h"
+#include "event/interface.h"
+#include "logger/interface.h"
+#include "memory/interface.h"
+#include "module/interface.h"
+#include "plugin/interface.h"
+#include "system/input/interface.h"
+#include "system/renderer/interface.h"
+#include "system/task/interface.h"
+#include "system/window/interface.h"
 
 #ifdef __cplusplus
 }

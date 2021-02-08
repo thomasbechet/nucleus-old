@@ -1,8 +1,8 @@
 #include "input.h"
 
-#include "../../context/config.h"
-#include "../../memory/memory.h"
-#include "../../logger/logger.h"
+#include "../../config/interface.h"
+#include "../../memory/interface.h"
+#include "../../logger/interface.h"
 
 #define NU_LOGGER_INPUT_NAME "[INPUT] "
 
@@ -22,7 +22,7 @@ nu_result_t nu_system_input_initialize(void)
 
     /* load module */
     if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
-        _system.module = nu_system_window_get_module_handle(); /* copy module handle */
+        _system.module = nu_window_get_module_handle(); /* copy module handle */
     } else {
         nu_warning(NU_LOGGER_INPUT_NAME"Unsupported api.\n");
         return NU_FAILURE;
@@ -57,7 +57,7 @@ nu_result_t nu_system_input_update(void)
     return NU_SUCCESS;
 }
 
-nu_module_handle_t nu_system_input_get_module_handle(void)
+nu_module_handle_t nu_input_get_module_handle(void)
 {
     return _system.module;
 }

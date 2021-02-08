@@ -1,5 +1,5 @@
-#ifndef NU_OPENGL_H
-#define NU_OPENGL_H
+#ifndef NUGL_HEADER_H
+#define NUGL_HEADER_H
 
 #include "opengl/module/interface.h"
 

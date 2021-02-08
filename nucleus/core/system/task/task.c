@@ -1,7 +1,7 @@
 #include "task.h"
 
-#include "../../memory/memory.h"
-#include "../../logger/logger.h"
+#include "../../memory/interface.h"
+#include "../../logger/interface.h"
 
 #include <nucleus/module/task.h>
 
@@ -51,7 +51,7 @@ nu_result_t nu_system_task_terminate(void)
     return NU_SUCCESS;
 }
 
-nu_module_handle_t nu_system_task_get_module_handle(void)
+nu_module_handle_t nu_task_get_module_handle(void)
 {
     return _system.module;
 }

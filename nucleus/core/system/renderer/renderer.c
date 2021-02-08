@@ -1,6 +1,6 @@
 #include "renderer.h"
 
-#include "../../context/config.h"
+#include "../../config/interface.h"
 
 #include <nucleus/module/softrast.h>
 #include <nucleus/module/raytracer.h>
@@ -90,7 +90,7 @@ nu_result_t nu_system_renderer_render(void)
     return NU_SUCCESS;
 }
 
-nu_module_handle_t nu_system_renderer_get_module_handle(void)
+nu_module_handle_t nu_renderer_get_module_handle(void)
 {
     return _system.module;
 }

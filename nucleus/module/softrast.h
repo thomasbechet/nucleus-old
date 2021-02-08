@@ -1,5 +1,5 @@
-#ifndef NU_SOFTRAST_H
-#define NU_SOFTRAST_H
+#ifndef NUSR_HEADER_H
+#define NUSR_HEADER_H
 
 #include "softrast/module/interface.h"
 

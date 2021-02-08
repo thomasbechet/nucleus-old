@@ -1,5 +1,5 @@
-#ifndef NU_VULKAN_H
-#define NU_VULKAN_H
+#ifndef NUVK_HEADER_H
+#define NUVK_HEADER_H
 
 #include "vulkan/module/interface.h"
 
