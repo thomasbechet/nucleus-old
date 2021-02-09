@@ -148,6 +148,14 @@ nu_result_t nu_module_terminate(void)
 
     return NU_SUCCESS;
 }
+nu_result_t nu_module_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu_module_stop(void)
+{
+    return NU_SUCCESS;
+}
 
 nu_result_t nu_module_load(nu_module_handle_t *handle, const char *path)
 {

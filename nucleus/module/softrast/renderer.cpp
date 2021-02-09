@@ -22,6 +22,14 @@ nu_result_t nu::softrast::terminate()
     _data.engine.reset();
     return NU_SUCCESS;
 }
+nu_result_t nu::softrast::start()
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu::softrast::stop()
+{
+    return NU_SUCCESS;
+}
 nu_result_t nu::softrast::render()
 {
     _data.engine->render();

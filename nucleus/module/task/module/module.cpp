@@ -26,6 +26,14 @@ static nu_result_t nutk_task_terminate(void)
 
     return NU_SUCCESS;
 }
+static nu_result_t nutk_task_start(void)
+{
+    return NU_SUCCESS;
+}
+static nu_result_t nutk_task_stop(void)
+{
+    return NU_SUCCESS;
+}
 static nu_result_t nutk_task_create(nu_task_handle_t *task)
 {
     *task = (nu_task_handle_t)_thread_pool->create_task();
@@ -61,6 +69,8 @@ nu_result_t nu_module_get_interface(const char *name, void *interface)
 
         i->initialize  = nutk_task_initialize;
         i->terminate   = nutk_task_terminate;
+        i->start       = nutk_task_start;
+        i->stop        = nutk_task_stop;
         i->create      = nutk_task_create;
         i->perform     = nutk_task_perform;
         i->wait        = nutk_task_wait;

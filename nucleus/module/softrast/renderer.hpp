@@ -6,6 +6,8 @@ namespace nu::softrast
 {
     nu_result_t initialize();
     nu_result_t terminate();
+    nu_result_t start();
+    nu_result_t stop();
     nu_result_t render();
 
     nu_result_t mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info);

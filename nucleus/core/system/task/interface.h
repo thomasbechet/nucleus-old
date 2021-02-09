@@ -15,6 +15,8 @@ typedef struct {
 typedef struct {
     nu_result_t (*initialize)(void);
     nu_result_t (*terminate)(void);
+    nu_result_t (*start)(void);
+    nu_result_t (*stop)(void);
     nu_result_t (*create)(nu_task_handle_t *task);
     nu_result_t (*perform)(nu_task_handle_t task, nu_task_job_t *jobs, uint32_t count);
     nu_result_t (*wait)(nu_task_handle_t task);

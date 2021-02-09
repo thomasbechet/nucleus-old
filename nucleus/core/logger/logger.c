@@ -12,6 +12,14 @@ nu_result_t nu_logger_terminate(void)
 {
     return NU_SUCCESS;
 }
+nu_result_t nu_logger_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu_logger_stop(void)
+{
+    return NU_SUCCESS;
+}
 
 void nu_log(nu_severity_t severity, const char *format, ...)
 {

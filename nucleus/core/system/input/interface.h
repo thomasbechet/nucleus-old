@@ -8,6 +8,8 @@
 typedef struct {
     nu_result_t (*initialize)(void);
     nu_result_t (*terminate)(void);
+    nu_result_t (*start)(void);
+    nu_result_t (*stop)(void);
     nu_result_t (*update)(void);
     nu_result_t (*get_keyboard_state)(nu_button_state_t*, nu_keyboard_t);
     nu_result_t (*get_keyboard_text)(const char **text, uint32_t *length);

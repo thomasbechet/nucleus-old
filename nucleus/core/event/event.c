@@ -48,6 +48,14 @@ nu_result_t nu_event_terminate(void)
 
     return NU_SUCCESS;
 }
+nu_result_t nu_event_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu_event_stop(void)
+{
+    return NU_SUCCESS;
+}
 nu_result_t nu_event_dispatch_all(void)
 {
     for (uint32_t ei = 0; ei < _data.event_count; ei++) {

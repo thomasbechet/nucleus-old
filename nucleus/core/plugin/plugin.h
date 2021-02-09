@@ -5,6 +5,8 @@
 
 nu_result_t nu_plugin_initialize(void);
 nu_result_t nu_plugin_terminate(void);
+nu_result_t nu_plugin_start(void);
+nu_result_t nu_plugin_stop(void);
 nu_result_t nu_plugin_update(void);
 nu_result_t nu_plugin_fixed_update(void);
 nu_result_t nu_plugin_late_update(void);

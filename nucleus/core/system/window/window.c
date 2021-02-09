@@ -14,11 +14,11 @@ static const char *nu_window_api_names[] = {
 typedef struct {
     nu_module_handle_t module;
     nu_window_interface_t interface;
-} nu_system_window_t;
+} nu_window_data_t;
 
-static nu_system_window_t _system;
+static nu_window_data_t _data;
 
-nu_result_t nu_system_window_initialize(void)
+nu_result_t nu_window_initialize(void)
 {
     nu_result_t result;
     result = NU_SUCCESS;
@@ -26,20 +26,20 @@ nu_result_t nu_system_window_initialize(void)
     nu_window_api_t api = nu_config_get().window.api;
 
     /* get module */
-    result = nu_module_load(&_system.module, nu_window_api_names[api]);
+    result = nu_module_load(&_data.module, nu_window_api_names[api]);
     if (result != NU_SUCCESS) {
         return result;
     }
 
     /* load window interface */
-    result = nu_module_load_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
+    result = nu_module_load_interface(_data.module, NU_WINDOW_INTERFACE_NAME, &_data.interface);
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_WINDOW_NAME"Failed to load interface.\n");
         return result;
     }
 
     /* initialize window system */
-    result = _system.interface.initialize();
+    result = _data.interface.initialize();
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_WINDOW_NAME"Failed to initialize window system.\n");
         return result;
@@ -47,37 +47,41 @@ nu_result_t nu_system_window_initialize(void)
 
     return result;
 }
-nu_result_t nu_system_window_terminate(void)
+nu_result_t nu_window_terminate(void)
 {
-    /* terminate window system */
-    _system.interface.terminate();
-    
-    return NU_SUCCESS;
+    return _data.interface.terminate();
 }
-nu_result_t nu_system_window_update(void)
+nu_result_t nu_window_start(void)
 {
-    _system.interface.update();
-    return NU_SUCCESS;
+    return _data.interface.start();
+}
+nu_result_t nu_window_stop(void)
+{
+    return _data.interface.stop();
+}
+nu_result_t nu_window_update(void)
+{
+    return _data.interface.update();
 }
 
 nu_module_handle_t nu_window_get_module_handle(void)
 {
-    return _system.module;
+    return _data.module;
 }
 
 nu_result_t nu_window_set_size(const nu_vec2u_t size)
 {
-    return _system.interface.set_size(size);
+    return _data.interface.set_size(size);
 }
 nu_result_t nu_window_get_size(nu_vec2u_t size)
 {
-    return _system.interface.get_size(size);
+    return _data.interface.get_size(size);
 }
 nu_result_t nu_window_set_title(const char *title)
 {
-    return _system.interface.set_title(title);
+    return _data.interface.set_title(title);
 }
 nu_result_t nu_window_set_mode(nu_window_mode_t mode)
 {
-    return _system.interface.set_mode(mode);
+    return _data.interface.set_mode(mode);
 }

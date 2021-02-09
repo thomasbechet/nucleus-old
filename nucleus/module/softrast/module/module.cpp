@@ -31,6 +31,8 @@ nu_result_t nu_module_get_interface(const char *name, void *interface)
 
         i->initialize = initialize;
         i->terminate  = terminate;
+        i->start      = start;
+        i->stop       = stop;
         i->render     = render;
 
         i->mesh_create  = mesh_create;

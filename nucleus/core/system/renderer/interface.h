@@ -95,6 +95,8 @@ typedef struct {
 typedef struct {
     nu_result_t (*initialize)(void);
     nu_result_t (*terminate)(void);
+    nu_result_t (*start)(void);
+    nu_result_t (*stop)(void);
     nu_result_t (*render)(void);
 
     nu_result_t (*mesh_create)(nu_renderer_mesh_handle_t*, const nu_renderer_mesh_create_info_t*);

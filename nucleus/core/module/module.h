@@ -5,5 +5,7 @@
 
 nu_result_t nu_module_initialize(void);
 nu_result_t nu_module_terminate(void);
+nu_result_t nu_module_start(void);
+nu_result_t nu_module_stop(void);
 
 #endif

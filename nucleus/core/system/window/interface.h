@@ -14,6 +14,8 @@ typedef enum {
 typedef struct {
     nu_result_t (*initialize)(void);
     nu_result_t (*terminate)(void);
+    nu_result_t (*start)(void);
+    nu_result_t (*stop)(void);
     nu_result_t (*update)(void);
     nu_result_t (*set_size)(const nu_vec2u_t);
     nu_result_t (*get_size)(nu_vec2u_t);

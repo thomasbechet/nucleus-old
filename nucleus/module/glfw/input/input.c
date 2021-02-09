@@ -182,6 +182,14 @@ nu_result_t nuglfw_input_terminate(void)
 {
     return NU_SUCCESS;
 }
+nu_result_t nuglfw_input_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuglfw_input_stop(void)
+{
+    return NU_SUCCESS;
+}
 nu_result_t nuglfw_input_update(void)
 {
     /* update mouse motion */

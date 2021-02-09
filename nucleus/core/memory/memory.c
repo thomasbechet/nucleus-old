@@ -23,6 +23,14 @@ nu_result_t nu_memory_terminate(void)
 {
     return NU_SUCCESS;
 }
+nu_result_t nu_memory_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu_memory_stop(void)
+{
+    return NU_SUCCESS;
+}
 
 void *nu_malloc(size_t s)
 {

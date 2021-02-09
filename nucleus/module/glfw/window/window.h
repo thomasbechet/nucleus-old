@@ -6,6 +6,8 @@
 /* window interface */
 nu_result_t nuglfw_window_initialize(void);
 nu_result_t nuglfw_window_terminate(void);
+nu_result_t nuglfw_window_start(void);
+nu_result_t nuglfw_window_stop(void);
 nu_result_t nuglfw_window_update(void);
 
 nu_result_t nuglfw_window_set_size(const nu_vec2u_t size);

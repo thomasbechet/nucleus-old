@@ -83,6 +83,14 @@ nu_result_t nuglfw_window_terminate(void)
 
     return NU_SUCCESS;
 }
+nu_result_t nuglfw_window_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuglfw_window_stop(void)
+{
+    return NU_SUCCESS;
+}
 nu_result_t nuglfw_window_update(void)
 {
     /* check window exit */

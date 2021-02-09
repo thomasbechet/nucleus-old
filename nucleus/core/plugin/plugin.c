@@ -34,6 +34,14 @@ nu_result_t nu_plugin_initialize(void)
 }
 nu_result_t nu_plugin_terminate(void)
 {
+    return NU_SUCCESS;
+}
+nu_result_t nu_plugin_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu_plugin_stop(void)
+{
     for (uint32_t i = 0; i < _data.plugin_count; i++) {
         if (_data.plugins[i].interface.terminate) {
             _data.plugins[i].interface.terminate();

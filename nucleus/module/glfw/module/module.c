@@ -31,6 +31,8 @@ nu_result_t nu_module_get_interface(const char *name, void *interface)
 
         i->initialize = nuglfw_window_initialize;
         i->terminate  = nuglfw_window_terminate;
+        i->start      = nuglfw_window_start;
+        i->stop       = nuglfw_window_stop;
         i->update     = nuglfw_window_update;
 
         i->set_size   = nuglfw_window_set_size;
@@ -44,6 +46,8 @@ nu_result_t nu_module_get_interface(const char *name, void *interface)
 
         i->initialize         = nuglfw_input_initialize;
         i->terminate          = nuglfw_input_terminate;
+        i->start              = nuglfw_input_start;
+        i->stop               = nuglfw_input_stop;
         i->update             = nuglfw_input_update;
         i->get_keyboard_state = nuglfw_input_get_keyboard_state;
         i->get_keyboard_text  = nuglfw_input_get_keyboard_text;
