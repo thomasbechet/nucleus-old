@@ -5,18 +5,18 @@
 extern "C" {
 #endif
 
-#include "common/common.h"
-#include "config/interface.h"
-#include "context/context.h"
-#include "event/interface.h"
-#include "logger/interface.h"
-#include "memory/interface.h"
-#include "module/interface.h"
-#include "plugin/interface.h"
-#include "system/input/interface.h"
-#include "system/renderer/interface.h"
-#include "system/task/interface.h"
-#include "system/window/interface.h"
+#include <nucleus/core/common/common.h>
+#include <nucleus/core/config/interface.h>
+#include <nucleus/core/context/context.h>
+#include <nucleus/core/event/interface.h>
+#include <nucleus/core/logger/interface.h>
+#include <nucleus/core/memory/interface.h>
+#include <nucleus/core/module/interface.h>
+#include <nucleus/core/plugin/interface.h>
+#include <nucleus/core/system/input/interface.h>
+#include <nucleus/core/system/renderer/interface.h>
+#include <nucleus/core/system/task/interface.h>
+#include <nucleus/core/system/window/interface.h>
 
 #ifdef __cplusplus
 }

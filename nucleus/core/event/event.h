@@ -1,7 +1,7 @@
 #ifndef NU_EVENT_H
 #define NU_EVENT_H
 
-#include "interface.h"
+#include <nucleus/core/event/interface.h>
 
 nu_result_t nu_event_initialize(void);
 nu_result_t nu_event_terminate(void);

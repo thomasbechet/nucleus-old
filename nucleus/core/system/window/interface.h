@@ -1,7 +1,7 @@
 #ifndef NU_WINDOW_INTERFACE_H
 #define NU_WINDOW_INTERFACE_H
 
-#include "../../module/interface.h"
+#include <nucleus/core/module/interface.h>
 
 #define NU_WINDOW_INTERFACE_NAME "nu_window_interface"
 

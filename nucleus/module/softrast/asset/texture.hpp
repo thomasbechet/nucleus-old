@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../module/interface.h"
-#include "../memory/colorframebuffer.hpp"
+#include <nucleus/module/softrast/module/interface.h>
+#include <nucleus/module/softrast/memory/colorframebuffer.hpp>
 
 namespace nu::softrast
 {

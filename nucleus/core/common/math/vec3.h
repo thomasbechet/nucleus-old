@@ -1,7 +1,7 @@
 #ifndef NU_VEC3_H
 #define NU_VEC3_H
 
-#include "types.h"
+#include <nucleus/core/common/math/types.h>
 
 NU_API void nu_vec3f_copy(const nu_vec3f_t v, nu_vec3f_t dest);
 NU_API void nu_vec3f_one(nu_vec3f_t v);

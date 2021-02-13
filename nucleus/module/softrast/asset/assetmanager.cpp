@@ -1,4 +1,4 @@
-#include "assetmanager.hpp"
+#include <nucleus/module/softrast/asset/assetmanager.hpp>
 
 using namespace nu::softrast;
 
@@ -12,11 +12,13 @@ nu_renderer_mesh_handle_t AssetManager::createMesh(const nu_renderer_mesh_create
 }
 void AssetManager::destroyMesh(nu_renderer_mesh_handle_t handle)
 {
-    m_meshes.erase(NU_HANDLE_GET_ID(handle));
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_meshes.erase(id);
 }
 const Mesh &AssetManager::getMesh(nu_renderer_mesh_handle_t handle) const
 {
-    return *m_meshes.at(NU_HANDLE_GET_ID(handle)).get();
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    return *m_meshes.at(id).get();
 }
 
 nu_renderer_texture_handle_t AssetManager::createTexture(const nu_renderer_texture_create_info_t &info)
@@ -29,11 +31,13 @@ nu_renderer_texture_handle_t AssetManager::createTexture(const nu_renderer_textu
 }
 void AssetManager::destroyTexture(nu_renderer_texture_handle_t handle)
 {
-    m_textures.erase(NU_HANDLE_GET_ID(handle));
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_textures.erase(id);
 }
 const Texture &AssetManager::getTexture(nu_renderer_texture_handle_t handle) const
 {
-    return *m_textures.at(NU_HANDLE_GET_ID(handle)).get();
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    return *m_textures.at(id).get();
 }
 
 nu_renderer_material_handle_t AssetManager::createMaterial(const nu_renderer_material_create_info_t &info)
@@ -46,11 +50,13 @@ nu_renderer_material_handle_t AssetManager::createMaterial(const nu_renderer_mat
 }
 void AssetManager::destroyMaterial(nu_renderer_material_handle_t handle)
 {
-    m_materials.erase(NU_HANDLE_GET_ID(handle));
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_materials.erase(id);
 }
 const Material &AssetManager::getMaterial(nu_renderer_material_handle_t handle) const
 {
-    return *m_materials.at(NU_HANDLE_GET_ID(handle)).get();
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    return *m_materials.at(id).get();
 }
 
 nu_renderer_font_handle_t AssetManager::createFont(const nu_renderer_font_create_info_t &info)
@@ -63,9 +69,11 @@ nu_renderer_font_handle_t AssetManager::createFont(const nu_renderer_font_create
 }
 void AssetManager::destroyFont(nu_renderer_font_handle_t handle)
 {
-    m_fonts.erase(NU_HANDLE_GET_ID(handle));
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_fonts.erase(id);
 }
 const Font &AssetManager::getFont(nu_renderer_font_handle_t handle) const
 {
-    return *m_fonts.at(NU_HANDLE_GET_ID(handle)).get();
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    return *m_fonts.at(id).get();
 }

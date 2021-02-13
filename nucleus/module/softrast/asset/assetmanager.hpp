@@ -1,9 +1,9 @@
 #pragma once
 
-#include "mesh.hpp"
-#include "texture.hpp"
-#include "material.hpp"
-#include "font.hpp"
+#include <nucleus/module/softrast/asset/mesh.hpp>
+#include <nucleus/module/softrast/asset/texture.hpp>
+#include <nucleus/module/softrast/asset/material.hpp>
+#include <nucleus/module/softrast/asset/font.hpp>
 
 #include <unordered_map>
 #include <memory>

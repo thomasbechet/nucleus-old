@@ -1,4 +1,4 @@
-#include "model.hpp"
+#include <nucleus/module/softrast/scene/model.hpp>
 
 using namespace nu::softrast;
 

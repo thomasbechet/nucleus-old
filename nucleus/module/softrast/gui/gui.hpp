@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../memory/colorframebuffer.hpp"
-#include "../asset/assetmanager.hpp"
-#include "label.hpp"
-#include "rectangle.hpp"
+#include <nucleus/module/softrast/memory/colorframebuffer.hpp>
+#include <nucleus/module/softrast/asset/assetmanager.hpp>
+#include <nucleus/module/softrast/gui/label.hpp>
+#include <nucleus/module/softrast/gui/rectangle.hpp>
 
 #include <unordered_map>
 

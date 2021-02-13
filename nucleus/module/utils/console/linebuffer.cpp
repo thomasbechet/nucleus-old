@@ -1,4 +1,4 @@
-#include "linebuffer.hpp"
+#include <nucleus/module/utils/console/linebuffer.hpp>
 
 using namespace nu::utility;
 using namespace nu;

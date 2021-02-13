@@ -1,4 +1,4 @@
-#include "thread_pool.hpp"
+#include <nucleus/module/task/thread_pool.hpp>
 
 using namespace nucleus;
 
@@ -23,7 +23,7 @@ void thread_pool_t::start(unsigned workerCount) noexcept
             m_queues.emplace_back(std::make_unique<rigtorp::MPMCQueue<nu_task_job_t>>(25));
         /* create workers */
         for (uint32_t i = 0; i < proc_count; i++)
-            m_workers.emplace_back(std::make_unique<std::thread>(thread_pool_t::worker_main, this, i));
+            m_workers.emplace_back(std::make_unique<std::thread>(&thread_pool_t::worker_main, this, i));
 
         nu_info(("[THREADPOOL] " + std::to_string(proc_count) + " workers created.\n").c_str());
     }

@@ -1,4 +1,4 @@
-#include "mat3.h"
+#include <nucleus/core/common/math/mat3.h>
 
 #include <cglm/cglm.h>
 

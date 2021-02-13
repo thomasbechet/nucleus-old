@@ -1,15 +1,15 @@
-#include "context.h"
+#include <nucleus/core/context/context.h>
 
-#include "../config/config.h"
-#include "../event/event.h"
-#include "../logger/logger.h"
-#include "../memory/memory.h"
-#include "../module/module.h"
-#include "../plugin/plugin.h"
-#include "../system/input/input.h"
-#include "../system/renderer/renderer.h"
-#include "../system/task/task.h"
-#include "../system/window/window.h"
+#include <nucleus/core/config/config.h>
+#include <nucleus/core/event/event.h>
+#include <nucleus/core/logger/logger.h>
+#include <nucleus/core/memory/memory.h>
+#include <nucleus/core/module/module.h>
+#include <nucleus/core/plugin/plugin.h>
+#include <nucleus/core/system/input/input.h>
+#include <nucleus/core/system/renderer/renderer.h>
+#include <nucleus/core/system/task/task.h>
+#include <nucleus/core/system/window/window.h>
 
 #define NU_CONTEXT_LOGGER_NAME "[SYSTEM] "
 

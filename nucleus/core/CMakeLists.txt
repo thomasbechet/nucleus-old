@@ -5,8 +5,11 @@ PROJECT(nucleus LANGUAGES C VERSION 0.0.1)
 SET(CMAKE_BUILD_TYPE Debug)
 #SET(CMAKE_BUILD_TYPE Release)
 
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
-SET(CMAKE_EXE_LINKER_FLAGS " -static")
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    ADD_COMPILE_OPTIONS(/W2 /WX)
+else(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    ADD_COMPILE_OPTIONS(-Wall)
+endif()
 
 FIND_PACKAGE(OpenMP)
 if (OPENMP_FOUND)
@@ -29,13 +32,17 @@ ADD_LIBRARY(
     ${sources}
 )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}
-    -static
-    -static-libgcc
-    -static-libstdc++
-    pthread
-    mingw32
-)
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    
+else(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+        -static
+        -static-libgcc
+        -static-libstdc++
+        pthread
+        mingw32
+    )
+endif()
 
 INSTALL(
     TARGETS ${PROJECT_NAME}

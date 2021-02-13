@@ -1,7 +1,7 @@
-#include "module.h"
+#include <nucleus/module/glfw/module/module.h>
 
-#include "../window/window.h"
-#include "../input/input.h"
+#include <nucleus/module/glfw/window/window.h>
+#include <nucleus/module/glfw/input/input.h>
 
 static const uint32_t interface_count = 3;
 static const char *interfaces[] = {
@@ -9,8 +9,6 @@ static const char *interfaces[] = {
     NU_INPUT_INTERFACE_NAME,
     NUGLFW_WINDOW_INTERFACE_NAME
 };
-static const uint32_t plugin_count = 0;
-static const char *plugins[] = {};
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
@@ -19,8 +17,8 @@ nu_result_t nu_module_get_info(nu_module_info_t *info)
     info->flags           = NU_MODULE_FLAG_NONE;
     info->interface_count = interface_count;
     info->interfaces      = interfaces;
-    info->plugin_count    = plugin_count;
-    info->plugins         = plugins;
+    info->plugin_count    = 0;
+    info->plugins         = NULL;
 
     return NU_SUCCESS;
 }

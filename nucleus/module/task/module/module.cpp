@@ -1,14 +1,12 @@
-#include "module.hpp"
+#include <nucleus/module/task/module/module.hpp>
 
-#include "interface.h"
-#include "../thread_pool.hpp"
+#include <nucleus/module/task/module/interface.h>
+#include <nucleus/module/task/thread_pool.hpp>
 
 static const uint32_t interface_count = 1;
 static const char *interfaces[] = {
     NU_TASK_INTERFACE_NAME
 };
-static const uint32_t plugin_count = 0;
-static const char *plugins[] = {};
 
 static nucleus::thread_pool_t *_thread_pool;
 
@@ -57,8 +55,8 @@ nu_result_t nu_module_get_info(nu_module_info_t *info)
     info->flags           = NU_MODULE_FLAG_NONE;
     info->interface_count = interface_count;
     info->interfaces      = interfaces;
-    info->plugin_count    = plugin_count;
-    info->plugins         = plugins;
+    info->plugin_count    = 0;
+    info->plugins         = NULL;
 
     return NU_SUCCESS;
 }

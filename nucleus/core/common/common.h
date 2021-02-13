@@ -1,14 +1,13 @@
 #ifndef NU_COMMON_H
 #define NU_COMMON_H
 
-#include "input.h"
-#include "macro.h"
-#include "memory.h"
-#include "platform.h"
-#include "result.h"
-#include "timer.h"
-#include "utility.h"
-#include "math/math.h"
-#include "type.h"
+#include <nucleus/core/common/input.h>
+#include <nucleus/core/common/macro.h>
+#include <nucleus/core/common/platform.h>
+#include <nucleus/core/common/result.h>
+#include <nucleus/core/common/timer.h>
+#include <nucleus/core/common/utility.h>
+#include <nucleus/core/common/math/math.h>
+#include <nucleus/core/common/type.h>
 
 #endif

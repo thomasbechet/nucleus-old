@@ -1,6 +1,6 @@
-#include "renderer.hpp"
+#include <nucleus/module/softrast/renderer.hpp>
 
-#include "engine/engine.hpp"
+#include <nucleus/module/softrast/engine/engine.hpp>
 
 #include <memory>
 

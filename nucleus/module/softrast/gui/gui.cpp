@@ -1,4 +1,6 @@
-#include "gui.hpp"
+#include <nucleus/module/softrast/gui/gui.hpp>
+
+#include <stdexcept>
 
 using namespace nu::softrast;
 
@@ -12,15 +14,18 @@ nu_renderer_label_handle_t GUI::createLabel(const nu_renderer_label_create_info_
 }
 void GUI::destroyLabel(nu_renderer_label_handle_t handle)
 {
-    m_labels.erase(NU_HANDLE_GET_ID(handle));
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_labels.erase(id);
 }
 void GUI::setLabelPosition(nu_renderer_label_handle_t handle, const Vector2i &position)
 {
-    m_labels.at(NU_HANDLE_GET_ID(handle)).position = position;
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_labels.at(id).position = position;
 }
 void GUI::setLabelText(nu_renderer_label_handle_t handle, const std::string &text)
 {
-    m_labels.at(NU_HANDLE_GET_ID(handle)).text = text;
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_labels.at(id).text = text;
 }
 
 nu_renderer_rectangle_handle_t GUI::createRectangle(const nu_renderer_rectangle_create_info_t &info)
@@ -33,11 +38,13 @@ nu_renderer_rectangle_handle_t GUI::createRectangle(const nu_renderer_rectangle_
 }
 void GUI::destroyRectangle(nu_renderer_rectangle_handle_t handle)
 {
-    m_rectangles.erase(NU_HANDLE_GET_ID(handle));
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_rectangles.erase(id);
 }
 void GUI::setRectangleRect(nu_renderer_rectangle_handle_t handle, const Rect &rect)
 {
-    m_rectangles.at(NU_HANDLE_GET_ID(handle)).rect = rect;
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_rectangles.at(id).rect = rect;
 }
 
 void GUI::renderLabel(ColorFramebuffer &colorBuffer, const Font &font, const Vector2i &position, const std::string &text) const

@@ -1,7 +1,7 @@
 #ifndef NU_MATH_TYPES_H
 #define NU_MATH_TYPES_H
 
-#include "../platform.h"
+#include <nucleus/core/common/platform.h>
 
 #ifdef __AVX__
     #define NU_ALIGN_MAT NU_ALIGN(32)

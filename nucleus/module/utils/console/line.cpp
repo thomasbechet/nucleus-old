@@ -1,6 +1,6 @@
-#include "line.hpp"
+#include <nucleus/module/utils/console/line.hpp>
 
-#include "logger.hpp"
+#include <nucleus/module/utils/console/logger.hpp>
 
 using namespace nu::utility;
 using namespace nu;

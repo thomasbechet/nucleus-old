@@ -1,4 +1,4 @@
-#include "vec4.h"
+#include <nucleus/core/common/math/vec4.h>
 
 #include <cglm/cglm.h>
 

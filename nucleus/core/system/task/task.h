@@ -1,7 +1,7 @@
 #ifndef NU_TASK_H
 #define NU_TASK_H
 
-#include "interface.h"
+#include <nucleus/core/system/task/interface.h>
 
 nu_result_t nu_task_initialize(void);
 nu_result_t nu_task_terminate(void);

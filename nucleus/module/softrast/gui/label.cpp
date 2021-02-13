@@ -1,4 +1,4 @@
-#include "label.hpp"
+#include <nucleus/module/softrast/gui/label.hpp>
 
 using namespace nu::softrast;
 

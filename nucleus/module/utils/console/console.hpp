@@ -1,8 +1,8 @@
 #pragma once
 
-#include "linebuffer.hpp"
-#include "commandline.hpp"
-#include "cursor.hpp"
+#include <nucleus/module/utils/console/linebuffer.hpp>
+#include <nucleus/module/utils/console/commandline.hpp>
+#include <nucleus/module/utils/console/cursor.hpp>
 
 nu_result_t nuutils_console_plugin_initialize(void);
 nu_result_t nuutils_console_plugin_terminate(void);

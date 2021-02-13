@@ -1,6 +1,6 @@
 #pragma once
 
-#include "interface.h"
+#include <nucleus/module/softrast/module/interface.h>
 
 extern "C"
 {

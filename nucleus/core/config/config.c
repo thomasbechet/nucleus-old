@@ -1,6 +1,6 @@
-#include "config.h"
+#include <nucleus/core/config/config.h>
 
-#include "../logger/logger.h"
+#include <nucleus/core/logger/logger.h>
 
 #include <stdlib.h>
 #include <ini/ini.h>

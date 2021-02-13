@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../module/interface.h"
+#include <nucleus/module/utils/module/interface.h>
 
 /* plugin interface */
 nu_result_t nuutils_command_plugin_initialize(void);

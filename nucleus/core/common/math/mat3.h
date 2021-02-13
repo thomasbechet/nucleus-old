@@ -1,7 +1,7 @@
 #ifndef NU_MAT3_H
 #define NU_MAT3_H
 
-#include "types.h"
+#include <nucleus/core/common/math/types.h>
 
 NU_API void nu_mat3f_copy(const nu_mat3f_t m, nu_mat3f_t dest);
 NU_API void nu_mat3f_mul(const nu_mat3f_t m0, const nu_mat3f_t m1, nu_mat3f_t dest);

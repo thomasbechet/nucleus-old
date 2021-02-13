@@ -1,6 +1,6 @@
-#include "surface.h"
+#include <nucleus/module/glfw/window/surface.h>
 
-#include "../common/logger.h"
+#include <nucleus/module/glfw/common/logger.h>
 
 #include <GL/glew.h>
 

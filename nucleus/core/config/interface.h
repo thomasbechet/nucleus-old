@@ -1,10 +1,10 @@
 #ifndef NU_CONFIG_INTERFACE_H
 #define NU_CONFIG_INTERFACE_H
 
-#include "../system/input/interface.h"
-#include "../system/renderer/interface.h"
-#include "../system/task/interface.h"
-#include "../system/window/interface.h"
+#include <nucleus/core/system/input/interface.h>
+#include <nucleus/core/system/renderer/interface.h>
+#include <nucleus/core/system/task/interface.h>
+#include <nucleus/core/system/window/interface.h>
 
 #define NU_CONFIG_CONTEXT_SECTION       "context"
 #define NU_CONFIG_CONTEXT_VERSION_MAJOR "version_major"

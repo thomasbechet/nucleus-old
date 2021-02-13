@@ -1,6 +1,6 @@
-#include "rect.h"
+#include <nucleus/core/common/math/rect.h>
 
-#include "../macro.h"
+#include <nucleus/core/common/macro.h>
 
 void nu_rect_clip(nu_rect_t *rect, const nu_rect_t *bound)
 {

@@ -1,7 +1,7 @@
-#include "plugin.h"
+#include <nucleus/core/plugin/plugin.h>
 
-#include "../module/interface.h"
-#include "../logger/logger.h"
+#include <nucleus/core/module/interface.h>
+#include <nucleus/core/logger/logger.h>
 
 #define NU_LOGGER_PLUGIN_NAME "[PLUGIN] "
 #define MAX_PLUGIN_COUNT 32

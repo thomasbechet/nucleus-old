@@ -1,7 +1,7 @@
-#include "task.h"
+#include <nucleus/core/system/task/task.h>
 
-#include "../../memory/interface.h"
-#include "../../logger/interface.h"
+#include <nucleus/core/memory/interface.h>
+#include <nucleus/core/logger/interface.h>
 
 #include <nucleus/module/task.h>
 

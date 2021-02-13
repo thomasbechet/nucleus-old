@@ -1,4 +1,4 @@
-#include "rectangle.hpp"
+#include <nucleus/module/softrast/gui/rectangle.hpp>
 
 using namespace nu;
 using namespace nu::softrast;

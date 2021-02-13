@@ -1,7 +1,7 @@
-#include "input.h"
+#include <nucleus/module/glfw/input/input.h>
 
-#include "../common/logger.h"
-#include "../window/window.h"
+#include <nucleus/module/glfw/common/logger.h>
+#include <nucleus/module/glfw/window/window.h>
 
 #include <GLFW/glfw3.h>
 

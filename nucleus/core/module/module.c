@@ -1,7 +1,7 @@
-#include "module.h"
+#include <nucleus/core/module/module.h>
 
-#include "../memory/memory.h"
-#include "../logger/logger.h"
+#include <nucleus/core/memory/memory.h>
+#include <nucleus/core/logger/logger.h>
 
 #define NU_LOGGER_MODULE_NAME        "[MODULE] "
 #define NU_MODULE_GET_INFO_NAME      "nu_module_get_info"
@@ -174,12 +174,12 @@ nu_result_t nu_module_load(nu_module_handle_t *handle, const char *path)
 }
 nu_result_t nu_module_load_function(nu_module_handle_t handle, const char *function_name, nu_pfn_t *function)
 {
-    uint32_t id = NU_HANDLE_GET_ID(handle);
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
     return load_function(&_data.modules[id], function_name, function);
 }
 nu_result_t nu_module_load_interface(nu_module_handle_t handle, const char *interface_name, void *interface)
 {
-    uint32_t id = NU_HANDLE_GET_ID(handle);
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
     return _data.modules[id].interface_loader(interface_name, interface);
 }
 nu_result_t nu_module_get_by_name(nu_module_handle_t *handle, const char *name)
@@ -206,7 +206,7 @@ nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, nu_id_t id)
 }
 nu_id_t nu_module_get_id(nu_module_handle_t handle)
 {
-    uint32_t id = NU_HANDLE_GET_ID(handle);
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
     return _data.modules[id].info.id;
 }
 

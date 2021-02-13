@@ -1,4 +1,4 @@
-#include "cam.h"
+#include <nucleus/core/common/math/cam.h>
 
 #include <cglm/cglm.h>
 

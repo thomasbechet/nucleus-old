@@ -1,4 +1,4 @@
-#include "font.hpp"
+#include <nucleus/module/softrast/asset/font.hpp>
 
 #include <stdexcept>
 #include <ft2build.h>

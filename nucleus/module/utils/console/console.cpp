@@ -1,8 +1,8 @@
-#include "console.hpp"
+#include <nucleus/module/utils/console/console.hpp>
 
-#include "logger.hpp"
+#include <nucleus/module/utils/console/logger.hpp>
 
-#include "../module/interface.h"
+#include <nucleus/module/utils/module/interface.h>
 
 #include <memory>
 
@@ -27,8 +27,11 @@ nu_result_t nuutils_console_plugin_initialize(void)
 {
     /* load command interface */
     _data.command_interface_loaded = false;
-    if (NU_MODULE_LOAD_INTERFACE(NUUTILS_MODULE_NAME, NUUTILS_COMMAND_INTERFACE_NAME, &_data.command_interface) == NU_SUCCESS) {
-        _data.command_interface_loaded = true; 
+    nu_result_t result;
+    nu_module_handle_t module;
+    result = nu_module_get_by_name(&module, NUUTILS_MODULE_NAME);
+    if (result == NU_SUCCESS && nu_module_load_interface(module, NUUTILS_COMMAND_INTERFACE_NAME, &_data.command_interface) == NU_SUCCESS) {
+        _data.command_interface_loaded = true;
     } else {
         nu_warning(NUUTILS_LOGGER_NAME"Using console without command plugin.\n");
     }

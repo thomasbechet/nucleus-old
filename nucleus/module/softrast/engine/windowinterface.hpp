@@ -2,7 +2,7 @@
 
 #include <nucleus/nucleus.hpp>
 
-#include "../../glfw/module/interface.h"
+#include <nucleus/module/glfw/module/interface.h>
 
 namespace nu::softrast
 {

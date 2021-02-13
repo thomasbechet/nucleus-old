@@ -1,6 +1,6 @@
 #include "engine.hpp"
 
-#include "../common/config.hpp"
+#include <nucleus/module/softrast/common/config.hpp>
 
 #include <limits>
 

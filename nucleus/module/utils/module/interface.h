@@ -5,9 +5,9 @@
 #define NUUTILS_MODULE_NAME "nucleus-utils"
 #define NUUTILS_MODULE_ID 0x6
 
-#include "../console/interface.h"
-#include "../command/interface.h"
-#include "../loader/interface.h"
-#include "../spectator/interface.h"
+#include <nucleus/module/utils/console/interface.h>
+#include <nucleus/module/utils/command/interface.h>
+#include <nucleus/module/utils/loader/interface.h>
+#include <nucleus/module/utils/spectator/interface.h>
 
 #endif

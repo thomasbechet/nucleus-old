@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vector.hpp"
-#include "matrix.hpp"
+#include <nucleus/utility/math/vector.hpp>
+#include <nucleus/utility/math/matrix.hpp>
 
 namespace nu
 {

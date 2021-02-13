@@ -1,7 +1,7 @@
 #ifndef NU_TASK_INTERFACE_H
 #define NU_TASK_INTERFACE_H
 
-#include "../../module/interface.h"
+#include <nucleus/core/module/interface.h>
 
 #define NU_TASK_INTERFACE_NAME "nu_task_interface"
 

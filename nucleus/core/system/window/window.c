@@ -1,6 +1,6 @@
-#include "window.h"
+#include <nucleus/core/system/window/window.h>
 
-#include "../../config/interface.h"
+#include <nucleus/core/config/interface.h>
 
 #include <nucleus/module/glfw.h>
 

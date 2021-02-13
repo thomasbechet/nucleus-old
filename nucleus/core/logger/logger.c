@@ -1,4 +1,4 @@
-#include "logger.h"
+#include <nucleus/core/logger/logger.h>
 
 #ifdef NU_PLATFORM_WINDOWS
 #include <windows.h>

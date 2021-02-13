@@ -1,4 +1,4 @@
-#include "windowinterface.hpp"
+#include <nucleus/module/softrast/engine/windowinterface.hpp>
 
 #include <stdexcept>
 
@@ -6,9 +6,9 @@ using namespace nu::softrast;
 
 WindowInterface::WindowInterface()
 {
-    if (NU_MODULE_LOAD_INTERFACE(NUGLFW_MODULE_NAME, NUGLFW_WINDOW_INTERFACE_NAME, &m_glfwInterface) != NU_SUCCESS) {
-        throw new std::runtime_error("Softrast failed to load glfw interface.");
-    }
+    nu_module_handle_t module;
+    if (nu_module_get_by_name(&module, NUGLFW_MODULE_NAME) != NU_SUCCESS) throw new std::runtime_error("Softrast failed to load glfw interface.");
+    if (nu_module_load_interface(module, NUGLFW_WINDOW_INTERFACE_NAME, &m_glfwInterface) != NU_SUCCESS) throw new std::runtime_error("Softrast failed to load glfw interface.");
 }
 
 void WindowInterface::presentSurface(const Vector2u &size, uint32_t *data) const

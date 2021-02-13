@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vector.hpp"
+#include <nucleus/utility/math/vector.hpp>
 
 namespace nu
 {

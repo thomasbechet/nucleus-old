@@ -1,10 +1,10 @@
-#include "module.hpp"
+#include <nucleus/module/utils/module/module.hpp>
 
-#include "interface.h"
-#include "../console/console.hpp"
-#include "../command/command.hpp"
-#include "../loader/loader.hpp"
-#include "../spectator/spectator.hpp"
+#include <nucleus/module/utils/module/interface.h>
+#include <nucleus/module/utils/console/console.hpp>
+#include <nucleus/module/utils/command/command.hpp>
+#include <nucleus/module/utils/loader/loader.hpp>
+#include <nucleus/module/utils/spectator/spectator.hpp>
 
 static const uint32_t interface_count = 2;
 static const char *interfaces[] = {

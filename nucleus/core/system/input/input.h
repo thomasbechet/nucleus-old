@@ -1,7 +1,7 @@
 #ifndef NU_INPUT_H
 #define NU_INPUT_H
 
-#include "interface.h"
+#include <nucleus/core/system/input/interface.h>
 
 nu_result_t nu_input_initialize(void);
 nu_result_t nu_input_terminate(void);

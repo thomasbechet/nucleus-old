@@ -1,20 +1,17 @@
-#include "renderer.h"
+#include <nucleus/core/system/renderer/renderer.h>
 
-#include "../../config/interface.h"
+#include <nucleus/core/config/interface.h>
 
 #include <nucleus/module/softrast.h>
-#include <nucleus/module/raytracer.h>
-#include <nucleus/module/vulkan.h>
-#include <nucleus/module/opengl.h>
 
 #define NU_LOGGER_RENDERER_NAME "[RENDERER] "
 
 static const char *nu_renderer_api_names[] = {
     "engine/module/nucleus-renderer-none",
     "engine/module/"NUSR_MODULE_NAME,
-    "engine/module/"NURT_MODULE_NAME,
-    "engine/module/"NUVK_MODULE_NAME,
-    "engine/module/"NUGL_MODULE_NAME
+    "engine/module/nucleus-renderer-none",
+    "engine/module/nucleus-renderer-none",
+    "engine/module/nucleus-renderer-none"
 };
 
 typedef struct {
@@ -91,8 +88,7 @@ nu_result_t nu_renderer_stop(void)
 }
 nu_result_t nu_renderer_render(void)
 {
-    _data.interface.render();
-    return NU_SUCCESS;
+    return _data.interface.render();
 }
 
 nu_module_handle_t nu_renderer_get_module_handle(void)

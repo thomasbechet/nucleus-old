@@ -1,4 +1,4 @@
-#include "material.hpp"
+#include <nucleus/module/softrast/asset/material.hpp>
 
 using namespace nu::softrast;
 

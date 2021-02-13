@@ -1,7 +1,7 @@
 #ifndef NU_TIMER_H
 #define NU_TIMER_H
 
-#include "platform.h"
+#include <nucleus/core/common/platform.h>
 
 typedef uint64_t nu_timer_t;
 

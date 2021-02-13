@@ -1,7 +1,7 @@
 #ifndef NU_PLUGIN_H
 #define NU_PLUGIN_H
 
-#include "interface.h"
+#include <nucleus/core/plugin/interface.h>
 
 nu_result_t nu_plugin_initialize(void);
 nu_result_t nu_plugin_terminate(void);

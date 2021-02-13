@@ -1,4 +1,4 @@
-#include "scene.hpp"
+#include <nucleus/module/softrast/scene/scene.hpp>
 
 #include <array>
 
@@ -32,11 +32,13 @@ nu_renderer_model_handle_t Scene::createModel(const nu_renderer_model_create_inf
 }
 void Scene::destroyModel(nu_renderer_model_handle_t handle)
 {
-    m_models.erase(NU_HANDLE_GET_ID(handle));
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_models.erase(id);
 }
 void Scene::setModelTransform(nu_renderer_model_handle_t handle, const Matrix4f &transform)
 {
-    m_models.at(NU_HANDLE_GET_ID(handle)).transform = transform;
+    uint32_t id; NU_HANDLE_GET_ID(handle, id);
+    m_models.at(id).transform = transform;
 }
 
 static void vertexShader(
@@ -219,15 +221,15 @@ void Scene::draw(ColorFramebuffer &colorBuffer, Framebuffer<float> &depthBuffer,
                     if (area <= 0) continue;
 
                     // Compute triangle viewport
-                    nu_vec4f_t tvp;
-                    float xmin = NU_MIN(v0[0], NU_MIN(v1[0], v2[0]));
-                    float xmax = NU_MAX(v0[0], NU_MAX(v1[0], v2[0]));
-                    float ymin = NU_MIN(v0[1], NU_MIN(v1[1], v2[1]));
-                    float ymax = NU_MAX(v0[1], NU_MAX(v1[1], v2[1]));
+                    nu_vec4i_t tvp;
+                    int32_t xmin = (int32_t)NU_MIN(v0[0], NU_MIN(v1[0], v2[0]));
+                    int32_t xmax = (int32_t)NU_MAX(v0[0], NU_MAX(v1[0], v2[0]));
+                    int32_t ymin = (int32_t)NU_MIN(v0[1], NU_MIN(v1[1], v2[1]));
+                    int32_t ymax = (int32_t)NU_MAX(v0[1], NU_MAX(v1[1], v2[1]));
                     tvp[0] = NU_MAX(0, xmin);
                     tvp[1] = NU_MAX(0, ymin);
-                    tvp[2] = NU_MIN(viewport[2], xmax);
-                    tvp[3] = NU_MIN(viewport[3], ymax);
+                    tvp[2] = NU_MIN((int32_t)viewport[2], xmax);
+                    tvp[3] = NU_MIN((int32_t)viewport[3], ymax);
 
                     // Compute edges
                     nu_vec2f_t edge0, edge1, edge2;
@@ -245,8 +247,8 @@ void Scene::draw(ColorFramebuffer &colorBuffer, Framebuffer<float> &depthBuffer,
                     float inv_vw2 = 1.0f / v2[3];
 
                     // Iterate over pixels
-                    for (uint32_t j = tvp[1]; j < tvp[3]; j++) {
-                        for (uint32_t i = tvp[0]; i < tvp[2]; i++) {
+                    for (int32_t j = tvp[1]; j < tvp[3]; j++) {
+                        for (int32_t i = tvp[0]; i < tvp[2]; i++) {
                             nu_vec2f_t sample = {i + 0.5f, j + 0.5f};
 
                             // Compute weights
@@ -295,8 +297,8 @@ void Scene::draw(ColorFramebuffer &colorBuffer, Framebuffer<float> &depthBuffer,
                                     //float px = (w0 * uv0[0] + w1 * uv1[0] + w2 * uv2[0]) * textureWidth;
                                     //float py = (w0 * uv0[1] + w1 * uv1[1] + w2 * uv2[1]) * textureHeight;
 
-                                    uint32_t uvx = NU_MAX(0, NU_MIN(textureWidth, (uint32_t)px));
-                                    uint32_t uvy = NU_MAX(0, NU_MIN(textureHeight, textureHeight - 1 - (uint32_t)py));
+                                    uint32_t uvx = NU_MAX(0, NU_MIN(textureWidth - 1, (uint32_t)px));
+                                    uint32_t uvy = NU_MAX(0, NU_MIN(textureHeight - 1, textureHeight - 1 - (uint32_t)py));
 
                                     uint32_t color = texture.get(uvx, uvy);
                                     colorBuffer.set(i, height - j - 1, color);

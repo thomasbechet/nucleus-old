@@ -1,4 +1,4 @@
-#include "mesh.hpp"
+#include <nucleus/module/softrast/asset/mesh.hpp>
 
 using namespace nu::softrast;
 

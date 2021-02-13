@@ -1,7 +1,7 @@
-#include "memory.h"
+#include <nucleus/core/memory/memory.h>
 
-#include "../context/context.h"
-#include "../logger/logger.h"
+#include <nucleus/core/context/context.h>
+#include <nucleus/core/logger/logger.h>
 
 #define NU_MEMORY_LOG_NAME "[MEMORY] "
 

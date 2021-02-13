@@ -1,8 +1,9 @@
-#include "loader.hpp"
+#include <nucleus/module/utils/loader/loader.hpp>
 
-#include "logger.hpp"
+#include <nucleus/module/utils/loader/logger.hpp>
 
 #include <unordered_map>
+#include <array>
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tinyobjloader/tiny_obj_loader.h>
 
@@ -34,7 +35,7 @@ nu_result_t load_mesh_from_obj(nu_renderer_mesh_handle_t *handle, const char *fi
         size_t index_offset = 0;
         for(size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++)
         {
-            int fv = shapes[s].mesh.num_face_vertices[f];
+            size_t fv = shapes[s].mesh.num_face_vertices[f];
             int material_id =  shapes[s].mesh.material_ids[f];
 
             for(size_t v = 0; v < fv; v++)

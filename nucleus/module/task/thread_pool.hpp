@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 #include <vector>
 #include <mutex>
 #include <condition_variable>
@@ -10,7 +11,7 @@
 
 #include <MPMCQueue/MPMCQueue.h>
 
-#include <nucleus/nucleus.h>
+#include <nucleus/nucleus.hpp>
 
 namespace nucleus
 {

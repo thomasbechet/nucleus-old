@@ -1,7 +1,7 @@
 #ifndef NU_MACRO_H
 #define NU_MACRO_H
 
-#include "platform.h"
+#include <nucleus/core/common/platform.h>
 
 #include <stdint.h>
 
@@ -16,21 +16,11 @@
 #ifdef NU_CXX
     #define NU_NULL_HANDLE nullptr
     #define NU_HANDLE_SET_ID(handle, id) handle = static_cast<decltype(handle)>((void*)(uintptr_t)(id + 1))
-    #define NU_HANDLE_GET_ID(handle) ({uint32_t id; id = (uintptr_t)(handle); (id - 1);})
+    #define NU_HANDLE_GET_ID(handle, id) id = ((uintptr_t)(handle) - 1)
 #else
     #define NU_NULL_HANDLE NULL
     #define NU_HANDLE_SET_ID(handle, id) handle = (void*)(uintptr_t)(id + 1)
-    #define NU_HANDLE_GET_ID(handle) ({uint32_t id; id = (uintptr_t)(handle); (id - 1);})
+    #define NU_HANDLE_GET_ID(handle, id) id = ((uintptr_t)(handle) - 1)
 #endif
-
-/* module */
-#define NU_MODULE_LOAD_INTERFACE(MODULE_NAME, INTERFACE_NAME, INTERFACE) ({\
-    nu_module_handle_t module; \
-    nu_result_t status = NU_FAILURE; \
-    if (nu_module_get_by_name(&module, MODULE_NAME) == NU_SUCCESS) { \
-        status = nu_module_load_interface(module, INTERFACE_NAME, INTERFACE); \
-    } \
-    status; \
-})
 
 #endif

@@ -4,8 +4,11 @@ PROJECT(nucleus-glfw LANGUAGES C VERSION 0.0.1)
 
 SET(CMAKE_BUILD_TYPE Debug)
 #SET(CMAKE_BUILD_TYPE Release)
-
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -Wall")
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	ADD_COMPILE_OPTIONS(/W2 /WX)
+else(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    ADD_COMPILE_OPTIONS(-Wall)
+endif()
 
 ADD_DEFINITIONS(-DGLEW_STATIC)
 
@@ -31,12 +34,21 @@ ADD_LIBRARY(
 )
 
 FIND_PACKAGE(OpenGL)
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}
-    mingw32
-    nucleus
-    "${OPENGL_gl_LIBRARY}"
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/libglfw3.a
-)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
+        nucleus
+        "${OPENGL_gl_LIBRARY}"
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-vc2019/glfw3.lib
+    )
+else(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
+        nucleus
+        "${OPENGL_gl_LIBRARY}" 
+        mingw32
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-mingw-w64/libglfw3.a
+    )
+endif()
 
 INSTALL(
     TARGETS ${PROJECT_NAME}

@@ -1,8 +1,8 @@
 #ifndef NU_MAT4_H
 #define NU_MAT4_H
 
-#include "types.h"
-#include "mat3.h"
+#include <nucleus/core/common/math/types.h>
+#include <nucleus/core/common/math/mat3.h>
 
 NU_API void nu_mat4f_copy(const nu_mat4f_t m, nu_mat4f_t dest);
 NU_API void nu_mat4f_mul(const nu_mat4f_t m0, const nu_mat4f_t m1, nu_mat4f_t dest);

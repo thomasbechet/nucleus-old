@@ -1,4 +1,4 @@
-#include "utility.h"
+#include <nucleus/core/common/math/utility.h>
 
 #include <cglm/cglm.h>
 

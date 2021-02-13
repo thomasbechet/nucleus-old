@@ -1,7 +1,7 @@
 #pragma once
 
-#include "framebuffer.ipp"
-#include "../engine/windowinterface.hpp"
+#include <nucleus/module/softrast/memory/framebuffer.ipp>
+#include <nucleus/module/softrast/engine/windowinterface.hpp>
 
 #include <string>
 

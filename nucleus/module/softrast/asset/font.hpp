@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../memory/colorframebuffer.hpp"
+#include <nucleus/module/softrast/memory/colorframebuffer.hpp>
 
 #include <unordered_map>
 #include <vector>

@@ -10,7 +10,4 @@
 /* renderer system */
 #define NUSR_RENDERER_INTERFACE_NAME "nusr_renderer_interface"
 
-typedef struct {
-} nusr_renderer_interface_t;
-
 #endif

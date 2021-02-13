@@ -1,6 +1,6 @@
 #pragma once
 
-#include "framebuffer.hpp"
+#include <nucleus/module/softrast/memory/framebuffer.hpp>
 
 namespace nu::softrast
 {

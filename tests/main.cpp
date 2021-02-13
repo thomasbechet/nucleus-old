@@ -10,14 +10,11 @@
 
 static nu_result_t load_monkey(nu_renderer_mesh_handle_t *mesh)
 {
+    nu_module_handle_t module;
     nuutils_loader_interface_t loader;
-    if (NU_MODULE_LOAD_INTERFACE(NUUTILS_MODULE_NAME, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-
-    if (loader.load_mesh_from_obj(mesh, "engine/model/alfred/alfred.obj") != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
+    if (nu_module_get_by_name(&module, NUUTILS_MODULE_NAME) != NU_SUCCESS) return NU_FAILURE;
+    if (nu_module_load_interface(module, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) return NU_FAILURE;
+    if (loader.load_mesh_from_obj(mesh, "engine/model/alfred/alfred.obj") != NU_SUCCESS) return NU_FAILURE;
 
     return NU_SUCCESS;
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "line.hpp"
+#include <nucleus/module/utils/console/line.hpp>
 
 namespace nu::utility
 {

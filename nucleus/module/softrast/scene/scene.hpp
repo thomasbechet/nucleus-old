@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../memory/colorframebuffer.hpp"
-#include "../asset/assetmanager.hpp"
-#include "camera.hpp"
-#include "model.hpp"
+#include <nucleus/module/softrast/memory/colorframebuffer.hpp>
+#include <nucleus/module/softrast/asset/assetmanager.hpp>
+#include <nucleus/module/softrast/scene/camera.hpp>
+#include <nucleus/module/softrast/scene/model.hpp>
 
 #include <unordered_map>
 

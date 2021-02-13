@@ -1,9 +1,8 @@
-#include "window.h"
+#include <nucleus/module/glfw/window/window.h>
 
-#include "surface.h"
-#include "../common/logger.h"
-#include "../input/input.h"
-#include "../../vulkan/module/interface.h"
+#include <nucleus/module/glfw/window/surface.h>
+#include <nucleus/module/glfw/common/logger.h>
+#include <nucleus/module/glfw/input/input.h>
 
 #include <GL/glew.h>
 #ifdef NU_BUILD_MODULE_VULKAN

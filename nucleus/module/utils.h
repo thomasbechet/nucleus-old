@@ -1,6 +1,6 @@
 #ifndef NUUTILS_HEADER_H
 #define NUUTILS_HEADER_H
 
-#include "utils/module/interface.h"
+#include <nucleus/module/utils/module/interface.h>
 
 #endif

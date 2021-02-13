@@ -1,10 +1,10 @@
 #pragma once
 
-#include "windowinterface.hpp"
-#include "../asset/assetmanager.hpp"
-#include "../memory/colorframebuffer.hpp"
-#include "../scene/scene.hpp"
-#include "../gui/gui.hpp"
+#include <nucleus/module/softrast/engine/windowinterface.hpp>
+#include <nucleus/module/softrast/asset/assetmanager.hpp>
+#include <nucleus/module/softrast/memory/colorframebuffer.hpp>
+#include <nucleus/module/softrast/scene/scene.hpp>
+#include <nucleus/module/softrast/gui/gui.hpp>
 
 #include <unordered_map>
 

@@ -1,7 +1,7 @@
 #ifndef NU_RENDERER_H
 #define NU_RENDERER_H
 
-#include "interface.h"
+#include <nucleus/core/system/renderer/interface.h>
 
 nu_result_t nu_renderer_initialize(void);
 nu_result_t nu_renderer_terminate(void);

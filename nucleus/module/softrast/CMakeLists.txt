@@ -5,10 +5,14 @@ PROJECT(nucleus-softrast LANGUAGES CXX VERSION 0.0.1)
 #SET(CMAKE_BUILD_TYPE Debug)
 SET(CMAKE_BUILD_TYPE Release)
 
-SET(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall")
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_DEBUG} -O2")
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	ADD_COMPILE_OPTIONS(/W2 /WX)
+else(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    ADD_COMPILE_OPTIONS(-Wall)
+endif()
 
 FIND_PACKAGE(OpenMP)
 if (OPENMP_FOUND)
@@ -29,11 +33,18 @@ ADD_LIBRARY(
     ${sources}
 )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME}
-    mingw32
-    nucleus
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/freetype/lib/mingw64/libfreetype.a
-)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
+        nucleus 
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/freetype/lib/lib-vc2019/freetype.lib
+    )
+else(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
+        nucleus 
+        mingw32
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/freetype/lib/lib-mingw-w64/libfreetype.a
+    )
+endif()
 
 INSTALL(
     TARGETS ${PROJECT_NAME}

@@ -1,4 +1,4 @@
-#include "texture.hpp"
+#include <nucleus/module/softrast/asset/texture.hpp>
 
 using namespace nu::softrast;
 

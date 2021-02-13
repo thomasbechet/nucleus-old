@@ -1,7 +1,7 @@
 #ifndef NU_MEMORY_INTERFACE_H
 #define NU_MEMORY_INTERFACE_H
 
-#include "../common/common.h"
+#include <nucleus/core/common/common.h>
 
 NU_API nu_ptr_t nu_malloc(size_t s);
 NU_API nu_ptr_t nu_realloc(nu_ptr_t p, size_t s);

@@ -1,7 +1,7 @@
 #ifndef NU_LOGGER_INTERFACE_H
 #define NU_LOGGER_INTERFACE_H
 
-#include "../common/common.h"
+#include <nucleus/core/common/common.h>
 
 typedef enum {
     NU_INFO     = 0x1 << 0,

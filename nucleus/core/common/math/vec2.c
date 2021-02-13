@@ -1,4 +1,4 @@
-#include "vec2.h"
+#include <nucleus/core/common/math/vec2.h>
 
 #include <cglm/cglm.h>
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "vector.hpp"
-#include "matrix.hpp"
+#include <nucleus/utility/math/vector.hpp>
+#include <nucleus/utility/math/matrix.hpp>
 
 namespace nu
 {
@@ -12,7 +12,6 @@ namespace nu
         Quaternionf(){nu_quatf_identity(data);}
         Quaternionf(const nu_quatf_t q){nu_quatf_copy(q, data);}
         Quaternionf(float angle, const Vector3f &axis){nu_quatf_from_axis(angle, axis, data);}
-        Quaternionf(float rx, float ry, float rz){nu_quatf_from_euler(rx, ry, rz, data);}
     
     public:
         Quaternionf operator*(const Quaternionf &q)const{Quaternionf dest; nu_quatf_mul(data, q, dest.data); return dest;}

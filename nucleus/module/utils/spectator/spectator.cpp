@@ -1,4 +1,4 @@
-#include "spectator.hpp"
+#include <nucleus/module/utils/spectator/spectator.hpp>
 
 #include <memory>
 

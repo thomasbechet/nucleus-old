@@ -1,4 +1,4 @@
-#include "cursor.hpp"
+#include <nucleus/module/utils/console/cursor.hpp>
 
 using namespace nu::utility;
 using namespace nu;

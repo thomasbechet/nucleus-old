@@ -1,13 +1,13 @@
 #ifndef NU_MATH_H
 #define NU_MATH_H
 
-#include "vec2.h"
-#include "vec3.h"
-#include "vec4.h"
-#include "mat4.h"
-#include "quat.h"
-#include "rect.h"
-#include "cam.h"
-#include "utility.h"
+#include <nucleus/core/common/math/vec2.h>
+#include <nucleus/core/common/math/vec3.h>
+#include <nucleus/core/common/math/vec4.h>
+#include <nucleus/core/common/math/mat4.h>
+#include <nucleus/core/common/math/quat.h>
+#include <nucleus/core/common/math/rect.h>
+#include <nucleus/core/common/math/cam.h>
+#include <nucleus/core/common/math/utility.h>
 
 #endif

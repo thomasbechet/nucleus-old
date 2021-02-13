@@ -1,6 +1,6 @@
 #include "module.hpp"
 
-#include "../renderer.hpp"
+#include <nucleus/module/softrast/renderer.hpp>
 
 using namespace nu::softrast;
 
@@ -9,8 +9,6 @@ static const char *interfaces[] = {
     NU_RENDERER_INTERFACE_NAME,
     NUSR_RENDERER_INTERFACE_NAME
 };
-static const uint32_t plugin_count = 0;
-static const char *plugins[] = {};
 
 nu_result_t nu_module_get_info(nu_module_info_t *info)
 {
@@ -19,8 +17,8 @@ nu_result_t nu_module_get_info(nu_module_info_t *info)
     info->flags           = NU_MODULE_FLAG_NONE;
     info->interface_count = interface_count;
     info->interfaces      = interfaces;
-    info->plugin_count    = plugin_count;
-    info->plugins         = plugins;
+    info->plugin_count    = 0;
+    info->plugins         = NULL;
 
     return NU_SUCCESS;
 }
