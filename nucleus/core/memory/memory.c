@@ -44,7 +44,6 @@ void *nu_malloc(size_t s)
 void *nu_realloc(void *p, size_t s)
 {
 #if defined(NU_DEBUG_MEMORY)
-    _memory.alloc_count++;
     return realloc(p, s);
 #else
     return realloc(p, s);

@@ -4,6 +4,7 @@
 #include <nucleus/core/common/platform.h>
 
 #include <stdint.h>
+#include <assert.h>
 
 /* min/max */
 #define NU_MIN(a,b) (((a)<(b))?(a):(b))
@@ -22,5 +23,8 @@
     #define NU_HANDLE_SET_ID(handle, id) handle = (void*)(uintptr_t)(id + 1)
     #define NU_HANDLE_GET_ID(handle, id) id = ((uintptr_t)(handle) - 1)
 #endif
+
+/* assert */
+#define NU_ASSERT(x) assert(x)
 
 #endif

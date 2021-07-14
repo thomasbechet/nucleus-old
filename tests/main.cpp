@@ -32,6 +32,10 @@ static void profile(void)
         avg_count = 0;
     }
 }
+typedef struct {
+    int a;
+    char c;
+} stest;
 static nu_result_t on_start(void)
 {
     nu_module_handle_t module;

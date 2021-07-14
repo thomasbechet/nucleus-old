@@ -17,6 +17,7 @@ extern "C" {
 #include <nucleus/core/system/renderer/interface.h>
 #include <nucleus/core/system/task/interface.h>
 #include <nucleus/core/system/window/interface.h>
+#include <nucleus/core/utils/array.h>
 
 #ifdef __cplusplus
 }
