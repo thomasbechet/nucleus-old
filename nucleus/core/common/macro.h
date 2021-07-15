@@ -25,6 +25,10 @@
 #endif
 
 /* assert */
-#define NU_ASSERT(x) assert(x)
+#ifdef NU_DEBUG
+    #define NU_ASSERT(x) assert(x)
+#else
+    #define NU_ASSERT(x)
+#endif
 
 #endif
