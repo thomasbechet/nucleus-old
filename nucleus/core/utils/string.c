@@ -15,7 +15,7 @@ static inline uint32_t nu_string_get_length_(nu_string_t str)
 }
 static inline char *nu_string_get_str_(nu_string_t str)
 {
-    return (char*)((void*)str + HEADER_LENGTH);
+    return (char*)str + HEADER_LENGTH;
 }
 static inline void nu_string_allocate_noninitialized_(uint32_t len, nu_string_t *str)
 {
@@ -49,9 +49,8 @@ void nu_string_allocate_copy(nu_string_t other, nu_string_t *str)
 }
 void nu_string_allocate_substr(nu_string_t other, uint32_t index, uint32_t len, nu_string_t *str)
 {
-    uint32_t otherlen = nu_string_get_length_(other);
-    NU_ASSERT(index >= 0 && index < otherlen);
-    NU_ASSERT(len > 0 && index + len <= otherlen);
+    NU_ASSERT(index < nu_string_get_length_(other));
+    NU_ASSERT(len > 0 && index + len <= nu_string_get_length_(other));
     nu_string_allocate_noninitialized_(len, str);
     memcpy(nu_string_get_str_(*str), nu_string_get_str_(other) + index, len);
 }
@@ -81,7 +80,7 @@ void nu_string_insert(nu_string_t *str, nu_string_t other, uint32_t index)
     nu_string_t oldstr = *str;
     uint32_t strlen   = nu_string_get_length_(oldstr);
     uint32_t otherlen = nu_string_get_length_(other);
-    NU_ASSERT(index >= 0 && index < strlen);
+    NU_ASSERT(index < strlen);
     nu_string_allocate_noninitialized_(strlen + otherlen, str);
     memcpy(nu_string_get_str_(*str), nu_string_get_str_(oldstr), index);
     memcpy(nu_string_get_str_(*str) + index, nu_string_get_str_(other), otherlen);
@@ -92,7 +91,7 @@ void nu_string_erase(nu_string_t *str, uint32_t index, uint32_t len)
 {
     nu_string_t oldstr = *str;
     uint32_t strlen = nu_string_get_length_(oldstr);
-    NU_ASSERT(index >= 0 && index < strlen);
+    NU_ASSERT(index < strlen);
     NU_ASSERT(len > 0 && index + len <= strlen);
     nu_string_allocate_noninitialized_(strlen - len, str);
     memcpy(nu_string_get_str_(*str), nu_string_get_str_(oldstr), index);

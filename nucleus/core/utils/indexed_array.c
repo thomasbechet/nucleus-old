@@ -29,7 +29,7 @@ static inline nu_indexed_array_header_t *nu_indexed_array_get_header_(nu_indexed
 }
 static inline uint32_t *nu_indexed_array_get_indexes_(nu_indexed_array_t array)
 {
-    return (void*)array + sizeof(nu_indexed_array_header_t);
+    return (uint32_t*)((char*)array + sizeof(nu_indexed_array_header_t));
 }
 
 void nu_indexed_array_allocate(uint32_t object_size, nu_indexed_array_t *array)

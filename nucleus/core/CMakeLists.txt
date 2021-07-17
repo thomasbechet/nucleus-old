@@ -8,7 +8,7 @@ SET(CMAKE_BUILD_TYPE Debug)
 if (MSVC)
 	ADD_COMPILE_OPTIONS(/W2 /WX)
 else (UNIX OR MINGW)
-    ADD_COMPILE_OPTIONS(-Wall)
+    ADD_COMPILE_OPTIONS(-pedantic -Wall -Wextra -Werror)
 endif()
 
 FIND_PACKAGE(OpenMP)
@@ -46,6 +46,7 @@ elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         pthread
         dl
+        m
     )
 endif()
 

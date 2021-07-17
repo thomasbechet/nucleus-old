@@ -22,11 +22,11 @@ static inline nu_array_header_t *nu_array_get_header_(nu_array_t array)
 }
 static inline void *nu_array_get_data_(nu_array_t array, uint32_t object_size)
 {
-    return (void*)array + sizeof(nu_array_header_t) + object_size;
+    return (char*)array + sizeof(nu_array_header_t) + object_size;
 }
 static inline void *nu_array_get_swap_space_(nu_array_t array)
 {
-    return (void*)array + sizeof(nu_array_header_t);
+    return (char*)array + sizeof(nu_array_header_t);
 }
 
 void nu_array_allocate(uint32_t object_size, nu_array_t *array)
@@ -84,14 +84,14 @@ void nu_array_clear(nu_array_t array)
 void *nu_array_get(nu_array_t array, uint32_t index)
 {
     nu_array_header_t *header = nu_array_get_header_(array);
-    NU_ASSERT(index >= 0 && index < header->size);
-    return nu_array_get_data_(array, header->object_size) + header->object_size * index;
+    NU_ASSERT(index < header->size);
+    return (char*)nu_array_get_data_(array, header->object_size) + header->object_size * index;
 }
 void *nu_array_get_last(nu_array_t array)
 {
     nu_array_header_t *header = nu_array_get_header_(array);
     NU_ASSERT(header->size > 0);
-    return nu_array_get_data_(array, header->object_size) + header->object_size * (header->size - 1);
+    return (char*)nu_array_get_data_(array, header->object_size) + header->object_size * (header->size - 1);
 }
 uint32_t nu_array_get_size(nu_array_t array)
 {
@@ -119,7 +119,7 @@ void nu_array_push(nu_array_t *array, const void *object)
     } else {
         header->size++;
     }
-    memcpy(nu_array_get_data_(*array, object_size) + object_size * size, object, object_size);
+    memcpy((char*)nu_array_get_data_(*array, object_size) + object_size * size, object, object_size);
 }
 bool nu_array_pop(nu_array_t array)
 {
@@ -133,18 +133,18 @@ bool nu_array_pop(nu_array_t array)
 void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second)
 {
     nu_array_header_t *header = nu_array_get_header_(array);
-    NU_ASSERT(first >= 0 && first < header->size);
-    NU_ASSERT(second >= 0 && second < header->size);
+    NU_ASSERT(first < header->size);
+    NU_ASSERT(second < header->size);
     if (first != second) {
         uint32_t object_size = header->object_size;
         void *data = nu_array_get_data_(array, object_size);
         void *swap_space = nu_array_get_swap_space_(array);
         /* copy first to the swap space */
-        memcpy(swap_space, data + first * object_size, object_size);
+        memcpy(swap_space, (char*)data + first * object_size, object_size);
         /* copy second to first */
-        memcpy(data + first * object_size, data + second * object_size, object_size);
+        memcpy((char*)data + first * object_size, (char*)data + second * object_size, object_size);
         /* copy swap space to second */
-        memcpy(data + second * object_size, swap_space, object_size);
+        memcpy((char*)data + second * object_size, swap_space, object_size);
     }
 }
 void nu_array_swap_last(nu_array_t array, uint32_t index)

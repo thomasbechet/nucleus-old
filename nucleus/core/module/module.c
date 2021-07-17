@@ -101,7 +101,7 @@ static nu_result_t load_module(const char *filename, nu_module_t *module)
     }
 
     /* copy path */
-    strncpy(module->path, filename, MAX_MODULE_PATH_SIZE);
+    strncpy(module->path, filename, MAX_MODULE_PATH_SIZE - 1);
 
     /* load module info */
     nu_module_info_loader_pfn_t module_get_info;

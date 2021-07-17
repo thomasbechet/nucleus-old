@@ -37,6 +37,7 @@ static void delete_parameter(nu_config_parameter_t *param)
 
 static int handler(void *user, const char *section, const char *name, const char *value)
 {
+    (void)user;
     new_parameter(section, name, value);
     return 1;
 }
