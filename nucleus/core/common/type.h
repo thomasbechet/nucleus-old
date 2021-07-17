@@ -1,9 +1,6 @@
 #ifndef NU_TYPE_H
 #define NU_TYPE_H
 
-typedef uint32_t nu_id_t;
-
-typedef void* nu_ptr_t;
 typedef void* nu_pfn_t;
 
 typedef enum {

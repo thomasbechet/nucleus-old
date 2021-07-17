@@ -33,11 +33,114 @@ static void profile(void)
     }
 }
 typedef struct {
-    int a;
-    char c;
+    uint32_t id;
+    uint32_t v;
 } stest;
 static nu_result_t on_start(void)
 {
+    // const stest data[] = {
+    //     {.d=10.0},
+    //     {.d=11.0},
+    //     {.d=12.0},
+    //     {.d=13.0},
+    //     {.d=15.0},
+    // };
+    // stest p = {
+    //     .d = 66.0
+    // };
+    // nu_array_t ar;
+    // nu_array_allocate_from(&ar, data, 5, sizeof(stest));
+    // nu_array_push(&ar, &p);
+    // nu_array_swap_last(ar, 2);
+    // stest *last = (stest*)nu_array_get_last(ar);
+    // nu_info("%lf\n", last->d);
+    // stest *o = (stest*)nu_array_get(ar, 2);
+    // nu_info("%lf\n", o->d);
+    // nu_info("%d\n", nu_array_get_size(ar));
+    // nu_info("%d\n", nu_array_get_capacity(ar));
+    // nu_info("%d\n", nu_array_get_memory_consumption(ar));
+    // nu_array_free(ar);
+
+    // nu_string_t str0, str1;
+    // nu_string_allocate_from(&str0, "Hello");
+    // nu_string_allocate_from(&str1, "Bonjour");
+    // nu_string_append(&str0, str1);
+    // nu_info("%s\n", nu_string_get_cstr(str0));
+    // nu_info("%d\n", nu_string_get_length(str0));
+    // nu_string_free(str0);
+    // nu_string_free(str1);
+
+    // nu_string_t str0;
+    // nu_string_allocate_from(&str0, "           ");
+    // nu_string_trim(&str0);
+    // nu_info("|%s|\n", nu_string_get_cstr(str0));
+    // nu_info("%d\n", nu_string_get_length(str0));
+    // nu_string_free(str0);
+
+    // nu_string_t str0, str1;
+    // nu_string_allocate_from(&str0, "123456");
+    // nu_string_erase(&str0, 1, 3);
+    // nu_info("%s\n", nu_string_get_cstr(str0));
+    // nu_string_free(str0);
+
+    // nu_array_t ar;
+    // nu_array_allocate(&ar, sizeof(const char*));
+    // const char *str = "Coucou!";
+    // nu_array_push(&ar, &str);
+    // const char *s = *(const char**)nu_array_get(ar, 0);
+    // nu_info("%s\n", s);
+    // nu_info("%d\n", nu_array_get_size(ar));
+    // nu_array_free(ar);
+
+    // nu_string_t str, token;
+    // nu_string_tokens_t tokens;
+    // nu_string_allocate_from(&str, "viewport   set 1029 1234");
+    // nu_string_split(str, " ", &tokens);
+    // uint32_t count = nu_string_tokens_get_length(tokens);
+    // for (uint32_t i = 0; i < count; i++) {
+    //     nu_string_allocate_from(&token, nu_string_tokens_get(tokens, i));
+    //     // nu_string_trim(&token);
+    //     nu_info("%d %s\n",
+    //         nu_string_get_length(token), 
+    //         nu_string_get_cstr(token));
+    //     nu_string_free(token);
+    // }
+    // nu_string_tokens_free(tokens);
+    // nu_string_free(str);
+
+    // nu_indexed_array_t iar;
+    // nu_array_t ids;
+    // stest s;
+    // nu_indexed_array_allocate(&iar, sizeof(uint32_t));
+    // nu_array_allocate(&ids, sizeof(stest));
+
+    // for (uint32_t i = 0; i < 10000; i++) {
+    //     uint32_t len = nu_array_get_size(ids);
+    //     if (rand() % 3 != 0) {
+    //         /* add */
+    //         uint32_t id;
+    //         s.v  = rand() % 5000;
+    //         nu_indexed_array_add(&iar, &s.v, &id);
+    //         s.id = id;
+    //         nu_array_push(&ids, &s);
+    //     } else if (len > 0) {
+    //         /* remove */
+    //         nu_array_swap_last(ids, rand() % len);
+    //         stest s = *(stest*)nu_array_get_last(ids);
+    //         nu_array_pop(ids);
+
+    //         /* test */
+    //         uint32_t va = *(uint32_t*)nu_indexed_array_get(iar, s.id);
+    //         NU_ASSERT(s.v == va);
+    //         nu_indexed_array_remove(iar, s.id);
+    //     }
+    // }
+
+    // nu_info("memory: %d\n", nu_indexed_array_get_memory_consumption(iar));
+
+    // nu_indexed_array_free(iar);
+    // nu_array_free(ids);
+
     nu_module_handle_t module;
     nu_module_load(&module, "engine/module/nucleus-utils");
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);

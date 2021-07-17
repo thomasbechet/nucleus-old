@@ -17,7 +17,7 @@ nu_result_t nuglfw_window_set_mode(nu_window_mode_t mode);
 
 /* glfw window interface */
 const char **nuglfw_get_required_instance_extensions(uint32_t *count);
-nu_result_t nuglfw_create_window_surface(nu_ptr_t instance, nu_ptr_t surface);
+nu_result_t nuglfw_create_window_surface(void *instance, void *surface);
 nu_result_t nuglfw_present_surface(
     const nu_vec2u_t size,
     void *pixels
@@ -25,6 +25,6 @@ nu_result_t nuglfw_present_surface(
 nu_result_t nuglfw_swap_buffers(void);
 
 /* utility functions */
-nu_ptr_t nuglfw_get_window(void);
+void *nuglfw_get_window(void);
 
 #endif

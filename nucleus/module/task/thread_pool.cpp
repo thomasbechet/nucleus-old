@@ -19,11 +19,12 @@ void thread_pool_t::start(unsigned workerCount) noexcept
         proc_count = (proc_count > 0) ? proc_count : 1;
 
         /* create queues */
-        for (uint32_t i = 0; i < proc_count; i++)
-            m_queues.emplace_back(std::make_unique<rigtorp::MPMCQueue<nu_task_job_t>>(25));
-        /* create workers */
-        for (uint32_t i = 0; i < proc_count; i++)
-            m_workers.emplace_back(std::make_unique<std::thread>(&thread_pool_t::worker_main, this, i));
+        /* TODO: fixme please */
+        // for (uint32_t i = 0; i < proc_count; i++)
+        //     m_queues.emplace_back(std::make_unique<rigtorp::MPMCQueue<nu_task_job_t>>(25));
+        // /* create workers */
+        // for (uint32_t i = 0; i < proc_count; i++)
+        //     m_workers.emplace_back(std::make_unique<std::thread>(&thread_pool_t::worker_main, this, i));
 
         nu_info(("[THREADPOOL] " + std::to_string(proc_count) + " workers created.\n").c_str());
     }
@@ -52,9 +53,9 @@ void thread_pool_t::perform(nu_task_handle_t task, const nu_task_job_t *jobs, ui
 {
     for (uint32_t i = 0; i < count; i++)
     {
-        m_queues.at(m_next_worker)->push(jobs[i]);
+        // m_queues.at(m_next_worker)->push(jobs[i]);
         m_job_count.fetch_add(1, std::memory_order_relaxed);
-        m_next_worker = (m_next_worker + 1) % m_queues.size();
+        // m_next_worker = (m_next_worker + 1) % m_queues.size();
     }
 }
 void thread_pool_t::wait_task(nu_task_handle_t task)
@@ -72,9 +73,9 @@ void thread_pool_t::worker_main(uint32_t id) noexcept
     while (m_running.load(std::memory_order_relaxed))
     {
         bool find = false;
-        find = m_queues.at(id)->try_pop(job);
-        for (uint32_t i = 0; !find && i < m_queues.size() && i != id; i++)
-            find = m_queues.at(id)->try_pop(job); 
+        // find = m_queues.at(id)->try_pop(job);
+        // for (uint32_t i = 0; !find && i < m_queues.size() && i != id; i++)
+            // find = m_queues.at(id)->try_pop(job); 
 
         if (find)
         {

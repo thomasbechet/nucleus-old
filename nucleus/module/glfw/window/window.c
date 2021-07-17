@@ -145,7 +145,7 @@ const char **nuglfw_get_required_instance_extensions(uint32_t *count)
 {
     return glfwGetRequiredInstanceExtensions(count);
 }
-nu_result_t nuglfw_create_window_surface(nu_ptr_t instance_ptr, nu_ptr_t surface_ptr)
+nu_result_t nuglfw_create_window_surface(void *instance_ptr, void *surface_ptr)
 {
 #ifdef GLFW_INCLUDE_VULKAN
     VkInstance *instance = (VkInstance*)instance_ptr;
@@ -181,7 +181,7 @@ nu_result_t nuglfw_swap_buffers(void)
     return NU_SUCCESS;
 }
 
-nu_ptr_t nuglfw_get_window(void)
+void *nuglfw_get_window(void)
 {
-    return (nu_ptr_t)_data.window;
+    return (void*)_data.window;
 }

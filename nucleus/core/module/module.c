@@ -3,7 +3,6 @@
 #include <nucleus/core/memory/memory.h>
 #include <nucleus/core/logger/logger.h>
 
-#define NU_LOGGER_MODULE_NAME        "[MODULE] "
 #define NU_MODULE_GET_INFO_NAME      "nu_module_get_info"
 #define NU_MODULE_GET_INTERFACE_NAME "nu_module_get_interface"
 
@@ -14,6 +13,7 @@ typedef nu_result_t (*nu_module_interface_loader_pfn_t)(const char*, void*);
     #include <windows.h>
 #elif defined(NU_PLATFORM_UNIX)
     #include <libgen.h>
+    #include <dlfcn.h>
 #endif
 
 #undef interface
@@ -46,7 +46,7 @@ static nu_result_t load_function(const nu_module_t *module, const char *function
 #endif
 
     if (!*function) {
-        nu_warning(NU_LOGGER_MODULE_NAME"Failed to get function named '%s'.\n", function_name);
+        nu_core_log(NU_WARNING, "Failed to get function named '%s'.\n", function_name);
         *function = NULL;
         return NU_FAILURE;
     }
@@ -83,18 +83,20 @@ static nu_result_t load_module(nu_module_t *module, const char *filename)
     #endif
     module->handle = LoadLibraryA(path);
 #elif defined(NU_PLATFORM_UNIX)
-    char *dir, *fname;
+    char *tdir, *dir, *fname, *tfname;
     char path[MAX_MODULE_PATH_SIZE];
-    dir = dirname(filename);
-    fname = basename(filename);
-    nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%slib%s.so", dir, fname);
+    tdir = strdup(filename); /* TODO: replace with nu_string_t */
+    tfname = strdup(filename);
+    dir = dirname(tdir);
+    fname = basename(tfname);
+    nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%s/lib%s.so", dir, fname);
+    free(tdir);
+    free(tfname);
     module->handle = dlopen(path, RTLD_LAZY);
-    free(dir);
-    free(fname);
 #endif
 
     if (!module->handle) {
-        nu_warning(NU_LOGGER_MODULE_NAME"Failed to load module '%s'.\n", filename);
+        nu_core_log(NU_WARNING, "Failed to load module '%s'.\n", filename);
         return NU_FAILURE;
     }
 
@@ -104,13 +106,13 @@ static nu_result_t load_module(nu_module_t *module, const char *filename)
     /* load module info */
     nu_module_info_loader_pfn_t module_get_info;
     if (load_function(module, NU_MODULE_GET_INFO_NAME, (nu_pfn_t*)&module_get_info) != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_MODULE_NAME"'%s' function is required to load the module '%s'.\n", NU_MODULE_GET_INFO_NAME, filename);
+        nu_core_log(NU_WARNING, "'%s' function is required to load the module '%s'.\n", NU_MODULE_GET_INFO_NAME, filename);
         unload_module(module);
         return NU_FAILURE;
     }
 
     if (module_get_info(&module->info) != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_MODULE_NAME"Failed to retrieve info from module '%s'.\n", filename);
+        nu_core_log(NU_WARNING, "Failed to retrieve info from module '%s'.\n", filename);
         unload_module(module);
         return NU_FAILURE;
     }
@@ -118,7 +120,7 @@ static nu_result_t load_module(nu_module_t *module, const char *filename)
     /* load interface loader */
     if (module->info.interface_count > 0) {
         if (load_function(module, NU_MODULE_GET_INTERFACE_NAME, (nu_pfn_t*)&module->interface_loader) != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_MODULE_NAME"Module '%s' has interfaces but no interface loader.\n", module->info.name);
+            nu_core_log(NU_WARNING, "Module '%s' has interfaces but no interface loader.\n", module->info.name);
             unload_module(module);
             return NU_FAILURE;
         }
@@ -193,7 +195,7 @@ nu_result_t nu_module_get_by_name(nu_module_handle_t *handle, const char *name)
 
     return NU_FAILURE;
 }
-nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, nu_id_t id)
+nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, uint32_t id)
 {
     for (uint32_t i = 0; i < _data.module_count; i++) {
         if (_data.modules[i].info.id == id) {
@@ -204,7 +206,7 @@ nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, nu_id_t id)
 
     return NU_FAILURE;
 }
-nu_id_t nu_module_get_id(nu_module_handle_t handle)
+uint32_t nu_module_get_id(nu_module_handle_t handle)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     return _data.modules[id].info.id;

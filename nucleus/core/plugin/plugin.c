@@ -3,7 +3,6 @@
 #include <nucleus/core/module/interface.h>
 #include <nucleus/core/logger/logger.h>
 
-#define NU_LOGGER_PLUGIN_NAME "[PLUGIN] "
 #define MAX_PLUGIN_COUNT 32
 #define NU_MODULE_GET_PLUGIN_NAME "nu_module_get_plugin"
 
@@ -103,7 +102,7 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
     nu_module_plugin_loader_pfn_t plugin_loader;
     result = nu_module_load_function(module, NU_MODULE_GET_PLUGIN_NAME, (nu_pfn_t*)&plugin_loader);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load '%s' function for plugin: %s.\n", NU_MODULE_GET_PLUGIN_NAME, plugin);
+        nu_core_log(NU_WARNING, "Failed to load '%s' function for plugin: %s.\n", NU_MODULE_GET_PLUGIN_NAME, plugin);
         return result;
     }
 
@@ -111,7 +110,7 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
     memset(&_data.plugins[id].interface, 0, sizeof(nu_plugin_interface_t));
     result = plugin_loader(plugin, &_data.plugins[id].interface);
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to load plugin interface: %s.\n", plugin);
+        nu_core_log(NU_WARNING, "Failed to load plugin interface: %s.\n", plugin);
         return result;
     }
 
@@ -123,7 +122,7 @@ nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin)
     if (_data.plugins[id].interface.initialize) {
         result = _data.plugins[id].interface.initialize();
         if (result != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_PLUGIN_NAME"Failed to initialize plugin: %s.\n", plugin);
+            nu_core_log(NU_WARNING, "Failed to initialize plugin: %s.\n", plugin);
             return result;
         }
     }

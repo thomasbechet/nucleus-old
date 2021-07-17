@@ -10,8 +10,7 @@
 #include <nucleus/core/system/renderer/renderer.h>
 #include <nucleus/core/system/task/task.h>
 #include <nucleus/core/system/window/window.h>
-
-#define NU_CONTEXT_LOGGER_NAME "[SYSTEM] "
+#include <nucleus/core/utils/timer.h>
 
 typedef enum {
     NU_INIT_STATE_UNINITIALIZED,
@@ -56,147 +55,188 @@ static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
 
     /* load configuration */
     if (info) _data.callback = info->callback;
+    nu_core_log(NU_INFO, "Loading configuration...\n");
     if (nu_config_load(_data.callback.config) != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE; }
     _data.states.config = NU_INIT_STATE_STARTED;
 
     /* initialize core systems */
+    nu_core_log(NU_INFO, "========== Initializing core systems ==========\n");
+    nu_core_log(NU_INFO, "Initializing core system: memory...\n");
     if (nu_memory_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.memory = NU_INIT_STATE_INITIALIZED;
+    nu_core_log(NU_INFO, "Initializing core system: logger...\n");
     if (nu_logger_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.logger = NU_INIT_STATE_INITIALIZED;
+    nu_core_log(NU_INFO, "Initializing core system: module...\n");
     if (nu_module_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.module = NU_INIT_STATE_INITIALIZED;
+    nu_core_log(NU_INFO, "Initializing core system: plugin...\n");
     if (nu_plugin_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.plugin = NU_INIT_STATE_INITIALIZED;
+    nu_core_log(NU_INFO, "Initializing core system: event...\n");
     if (nu_event_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.event = NU_INIT_STATE_INITIALIZED;
 
     /* initialize systems */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Initializing systems...\n");
+    nu_core_log(NU_INFO, "============== Initializing systems ===========\n");
+    nu_core_log(NU_INFO, "Initializing system: task...\n");
     if (nu_task_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.task = NU_INIT_STATE_INITIALIZED;
+    nu_core_log(NU_INFO, "Initializing system: window...\n");
     if (nu_window_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.window = NU_INIT_STATE_INITIALIZED;
+    nu_core_log(NU_INFO, "Initializing system: input...\n");
     if (nu_input_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.input = NU_INIT_STATE_INITIALIZED;
+    nu_core_log(NU_INFO, "Initializing system: renderer...\n");
     if (nu_renderer_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.renderer = NU_INIT_STATE_INITIALIZED;
 
     /* start core systems */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Starting core systems...\n");
+    nu_core_log(NU_INFO, "============ Starting core systems ============\n");
+    nu_core_log(NU_INFO, "Starting core system: memory...\n");
     if (nu_memory_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.memory = NU_INIT_STATE_STARTED;
+    nu_core_log(NU_INFO, "Starting core system: logger...\n");
     if (nu_logger_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.logger = NU_INIT_STATE_STARTED;
+    nu_core_log(NU_INFO, "Starting core system: module...\n");
     if (nu_module_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.module = NU_INIT_STATE_STARTED;
+    nu_core_log(NU_INFO, "Starting core system: plugin...\n");
     if (nu_plugin_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.plugin = NU_INIT_STATE_STARTED;
+    nu_core_log(NU_INFO, "Starting core system: event...\n");
     if (nu_event_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.event = NU_INIT_STATE_STARTED;
 
     /* start systems */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Starting systems...\n");
+    nu_core_log(NU_INFO, "============== Starting systems ===============\n");
+    nu_core_log(NU_INFO, "Starting system: task...\n");
     if (nu_task_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.task = NU_INIT_STATE_STARTED;
+    nu_core_log(NU_INFO, "Starting system: window...\n");
     if (nu_window_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.window = NU_INIT_STATE_STARTED;
+    nu_core_log(NU_INFO, "Starting system: input...\n");
     if (nu_input_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.input = NU_INIT_STATE_STARTED;
+    nu_core_log(NU_INFO, "Starting system: renderer...\n");
     if (nu_renderer_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
     _data.states.renderer = NU_INIT_STATE_STARTED;
 
-    nu_info(NU_CONTEXT_LOGGER_NAME"Running context...\n");
+    nu_core_log(NU_INFO, "===============================================\n");
+    nu_core_log(NU_INFO, "Running context...\n");
 
     return result;
 }
 static nu_result_t nu_context_terminate(void)
 {
     /* stop systems */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Stopping systems...\n");
+    nu_core_log(NU_INFO, "=============== Stopping systems ==============\n");
     if (_data.states.renderer == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping system: renderer...\n");
         nu_renderer_stop();
         _data.states.renderer = NU_INIT_STATE_INITIALIZED;
     }
     if (_data.states.input == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping system: input...\n");
         nu_input_stop();
         _data.states.input = NU_INIT_STATE_INITIALIZED;
     }
     if (_data.states.window == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping system: window...\n");
         nu_window_stop();
         _data.states.window = NU_INIT_STATE_INITIALIZED;
     }
     if (_data.states.task == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping system: task...\n");
         nu_task_stop();
         _data.states.task = NU_INIT_STATE_INITIALIZED;
     }
 
     /* stop core systems */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Stopping core systems...\n");
+    nu_core_log(NU_INFO, "============= Stopping core systems ===========\n");
     if (_data.states.event == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping core system: event...\n");
         nu_event_stop();
         _data.states.event = NU_INIT_STATE_INITIALIZED;
     }
     if (_data.states.plugin == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping core system: plugin...\n");
         nu_plugin_stop();
         _data.states.plugin = NU_INIT_STATE_INITIALIZED;
     }
     if (_data.states.module == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping core system: module...\n");
         nu_module_stop();
         _data.states.module = NU_INIT_STATE_INITIALIZED;
     }
     if (_data.states.logger == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping core system: logger...\n");
         nu_logger_stop();
         _data.states.logger = NU_INIT_STATE_INITIALIZED;
     }
     if (_data.states.memory == NU_INIT_STATE_STARTED) {
+        nu_core_log(NU_INFO, "Stopping core system: memory...\n");
         nu_memory_stop();
         _data.states.memory = NU_INIT_STATE_INITIALIZED;
     }
 
     /* terminate systems */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Terminating systems...\n");
+    nu_core_log(NU_INFO, "============== Terminating systems ============\n");
     if (_data.states.renderer == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating system: renderer...\n");
         nu_renderer_terminate();
         _data.states.renderer = NU_INIT_STATE_UNINITIALIZED;
     }
     if (_data.states.input == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating system: input...\n");
         nu_input_terminate();
         _data.states.input = NU_INIT_STATE_UNINITIALIZED;
     }
     if (_data.states.window == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating system: window...\n");
         nu_window_terminate();
         _data.states.window = NU_INIT_STATE_UNINITIALIZED;
     }
     if (_data.states.task == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating system: task...\n");
         nu_task_terminate();
         _data.states.task = NU_INIT_STATE_UNINITIALIZED;
     }
 
     /* terminate core systems */
-    nu_info(NU_CONTEXT_LOGGER_NAME"Terminating core systems...\n");
+    nu_core_log(NU_INFO, "========= Terminating core systems ============\n");
     if (_data.states.event == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating core system: event...\n");
         nu_event_terminate();
         _data.states.event = NU_INIT_STATE_UNINITIALIZED;
     }
     if (_data.states.plugin == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating core system: plugin...\n");
         nu_plugin_terminate();
         _data.states.plugin = NU_INIT_STATE_UNINITIALIZED;
     }
     if (_data.states.module == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating core system: module...\n");
         nu_module_terminate();
         _data.states.module = NU_INIT_STATE_UNINITIALIZED;
     }
     if (_data.states.logger == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating core system: logger...\n");
         nu_logger_terminate();
         _data.states.logger = NU_INIT_STATE_UNINITIALIZED;
     }
     if (_data.states.memory == NU_INIT_STATE_INITIALIZED) {
+        nu_core_log(NU_INFO, "Terminating core system: memory...\n");
         nu_memory_terminate();
         _data.states.memory = NU_INIT_STATE_UNINITIALIZED;
     }
+    nu_core_log(NU_INFO, "===============================================\n");
 
     /* unload configuration */
+    nu_core_log(NU_INFO, "Unloading configuration...\n");
     if (_data.states.config == NU_INIT_STATE_INITIALIZED) {
         nu_config_unload();
         _data.states.config = NU_INIT_STATE_UNINITIALIZED;
@@ -219,6 +259,7 @@ static nu_result_t nu_context_run(void)
     if (_data.callback.start)
         _data.callback.start();
 
+    /* log initial module table */
     nu_module_log();
 
     while (!_data.should_stop) {
@@ -277,31 +318,23 @@ nu_result_t nu_context_init(const nu_context_init_info_t *info)
     nu_result_t result;
     result = NU_SUCCESS;
 
-    /* start engine */
     result = nu_context_initialize(info);
     if (result != NU_SUCCESS) {
-        nu_fatal(NU_CONTEXT_LOGGER_NAME"Failed to initialize nucleus engine.\n");
+        nu_core_log(NU_FATAL, "Failed to initialize nucleus engine.\n");
         return result;
     }
     result = nu_context_run();
     if (result != NU_SUCCESS) {
-        nu_warning(NU_CONTEXT_LOGGER_NAME"Nucleus engine didn't end correctly.\n");
+        nu_core_log(NU_WARNING, "Execution didn't end correctly.\n");
     }
     result = nu_context_terminate();
     if (result != NU_SUCCESS) {
-        nu_warning(NU_CONTEXT_LOGGER_NAME"Nucleus engine didn't terminate correctly.\n");
+        nu_core_log(NU_WARNING, "Execution didn't terminate correctly.\n");
     }
 
-    /* memory check */
 #ifdef NU_DEBUG
-    if (nu_memory_total_alloc() != nu_memory_total_free()) {
-        nu_warning(NU_CONTEXT_LOGGER_NAME"Memory leak detected (alloc: %llu free: %llu).\n", nu_memory_total_alloc(), nu_memory_total_free());
-    } else {
-        nu_info(NU_CONTEXT_LOGGER_NAME"No memory leak detected (alloc: %llu free: %llu).\n", nu_memory_total_alloc(), nu_memory_total_free());
-    }
+    nu_core_log(NU_INFO, "[DEBUG] End process reached.\n");
 #endif
-
-    nu_info(NU_CONTEXT_LOGGER_NAME"End process reached.\n");
 
     return NU_SUCCESS;
 }
@@ -318,7 +351,7 @@ void nu_interrupt(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
-    nu_vlog(NU_FATAL, format, args);
+    nu_core_vlog(NU_FATAL, format, args);
     va_end(args);
     exit(NU_FAILURE);
 }

@@ -1,3 +1,8 @@
 - task system = compléter + trouver un cas d'application concret et refaire les tests (enlever sleep 1)
 - créer un projet dans la section "Projects" (trello like)
-- softrast : calculer pixel en coordonnées entières
+- softrast : calculer pixel en coordonnées entières ?
+- utiliser stb_truetype au lieu de FreeType
+- statistiques graphique
+- statistiques mémoire
+- utiliser un triangle unique (empty vao) pour l'affichage OpenGL
+- custom allocator

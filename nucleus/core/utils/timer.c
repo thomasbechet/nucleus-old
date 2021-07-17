@@ -1,4 +1,4 @@
-#include <nucleus/core/common/timer.h>
+#include <nucleus/core/utils/timer.h>
 
 #if defined(NU_PLATFORM_WINDOWS)
 #include <Windows.h>
@@ -19,5 +19,13 @@ float nu_timer_get_time_elapsed(nu_timer_t *timer)
     return (float)delta;
 }
 #elif defined(NU_PLATFORM_UNIX)
-
+#include <time.h>
+void nu_timer_start(nu_timer_t *timer)
+{
+    *((clock_t*)timer) = clock();
+}
+float nu_timer_get_time_elapsed(nu_timer_t *timer)
+{
+    return (float)(clock() - *((clock_t*)timer)) * 1000.0 / CLOCKS_PER_SEC;
+}
 #endif

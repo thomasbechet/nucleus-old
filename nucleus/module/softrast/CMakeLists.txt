@@ -8,9 +8,9 @@ SET(CMAKE_BUILD_TYPE Release)
 SET(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_DEBUG} -O2")
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_CXX_STANDARD_REQUIRED ON)
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (MSVC)
 	ADD_COMPILE_OPTIONS(/W2 /WX)
-else(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+else (UNIX OR MINGW)
     ADD_COMPILE_OPTIONS(-Wall)
 endif()
 
@@ -33,22 +33,34 @@ ADD_LIBRARY(
     ${sources}
 )
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+if (MSVC)
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus 
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/freetype/lib/lib-vc2019/freetype.lib
     )
-else(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+elseif (MINGW)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus 
         mingw32
         ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/freetype/lib/lib-mingw-w64/libfreetype.a
     )
+elseif (UNIX)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
+        nucleus 
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/freetype/lib/lib-unix/libfreetype.a
+    )
 endif()
 
-INSTALL(
-    TARGETS ${PROJECT_NAME}
-    LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/
-    ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/
-    RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../build/bin/engine/module/
-)
+if (MSVC OR MINGW)
+    INSTALL(
+        TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/
+        ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../libs/
+        RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../build/bin/engine/module/
+    )
+elseif (UNIX)
+    INSTALL(
+        TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../../build/bin/engine/module/
+    )
+endif()

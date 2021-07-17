@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <ctype.h>
 
 /* platform */
 #if (defined(__WIN32__) || defined(WIN32) || defined(__MINGW32__) || defined(_WIN32))

@@ -9,8 +9,6 @@
 #include <thread>
 #include <functional>
 
-#include <MPMCQueue/MPMCQueue.h>
-
 #include <nucleus/nucleus.hpp>
 
 namespace nucleus
@@ -37,7 +35,7 @@ namespace nucleus
         std::atomic_uint m_job_count;
 
         /* workers */
-        std::vector<std::unique_ptr<rigtorp::MPMCQueue<nu_task_job_t>>> m_queues;
+        // std::vector<std::unique_ptr<rigtorp::MPMCQueue<nu_task_job_t>>> m_queues;
         std::vector<std::unique_ptr<std::thread>> m_workers;
         uint32_t m_next_worker;
 

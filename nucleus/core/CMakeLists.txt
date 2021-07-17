@@ -5,9 +5,9 @@ PROJECT(nucleus LANGUAGES C VERSION 0.0.1)
 SET(CMAKE_BUILD_TYPE Debug)
 #SET(CMAKE_BUILD_TYPE Release)
 
-if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-    ADD_COMPILE_OPTIONS(/W2 /WX)
-else(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+if (MSVC)
+	ADD_COMPILE_OPTIONS(/W2 /WX)
+else (UNIX OR MINGW)
     ADD_COMPILE_OPTIONS(-Wall)
 endif()
 
@@ -32,9 +32,9 @@ ADD_LIBRARY(
     ${sources}
 )
 
-if(CMAKE_C_COMPILER_ID STREQUAL "MSVC")
-    
-else(CMAKE_C_COMPILER_ID STREQUAL "GNU")
+if (MSVC)
+
+elseif (MINGW)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME}
         -static
         -static-libgcc
@@ -42,11 +42,23 @@ else(CMAKE_C_COMPILER_ID STREQUAL "GNU")
         pthread
         mingw32
     )
+elseif (UNIX)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+        pthread
+        dl
+    )
 endif()
 
-INSTALL(
-    TARGETS ${PROJECT_NAME}
-    LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/
-    ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/
-    RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../build/bin/
-)
+if (MSVC OR MINGW)
+    INSTALL(
+        TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/
+        ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/
+        RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../build/bin/
+    )
+elseif (UNIX)
+    INSTALL(
+        TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../build/bin/
+    )
+endif()

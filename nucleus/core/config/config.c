@@ -5,7 +5,6 @@
 #include <stdlib.h>
 #include <ini/ini.h>
 
-#define NU_CONFIG_LOG_NAME "[CONFIG] "
 #define MAX_PARAMETER_COUNT 128
 
 typedef struct {
@@ -121,13 +120,13 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
     memset(&_data.config, 0, sizeof(nu_config_t));
 
     if (load_ini_file() != NU_SUCCESS) {
-        nu_warning(NU_CONFIG_LOG_NAME"Failed to load ini file.\n");
+        nu_core_log(NU_WARNING, "Failed to load ini file.\n");
         return NU_FAILURE;
     }
 
     if (callback) {
         if (callback(&_data.config) != NU_SUCCESS) {
-            nu_warning(NU_CONFIG_LOG_NAME"Error during configuration check.\n");
+            nu_core_log(NU_WARNING, "Error during configuration check.\n");
             nu_config_unload();
             return NU_FAILURE;
         }
