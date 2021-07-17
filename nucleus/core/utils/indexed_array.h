@@ -5,7 +5,7 @@
 
 NU_DECLARE_HANDLE(nu_indexed_array_t);
 
-NU_API void nu_indexed_array_allocate(nu_indexed_array_t *array, uint32_t object_size);
+NU_API void nu_indexed_array_allocate(uint32_t object_size, nu_indexed_array_t *array);
 NU_API void nu_indexed_array_free(nu_indexed_array_t array);
 NU_API void nu_indexed_array_add(nu_indexed_array_t *array, void *object, uint32_t *id);
 NU_API void nu_indexed_array_remove(nu_indexed_array_t array, uint32_t id);

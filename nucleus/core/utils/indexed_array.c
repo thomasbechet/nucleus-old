@@ -32,7 +32,7 @@ static inline uint32_t *nu_indexed_array_get_indexes_(nu_indexed_array_t array)
     return (void*)array + sizeof(nu_indexed_array_header_t);
 }
 
-void nu_indexed_array_allocate(nu_indexed_array_t *array, uint32_t object_size)
+void nu_indexed_array_allocate(uint32_t object_size, nu_indexed_array_t *array)
 {
     *array = (nu_indexed_array_t)nu_malloc(sizeof(nu_indexed_array_header_t)
         + sizeof(uint32_t) * INDEXED_ARRAY_DEFAULT_CAPACITY);
@@ -40,7 +40,7 @@ void nu_indexed_array_allocate(nu_indexed_array_t *array, uint32_t object_size)
     header->capacity        = INDEXED_ARRAY_DEFAULT_CAPACITY;
     header->size            = 0;
     header->next_free_id    = 0;
-    nu_array_allocate_capacity(&header->data, object_size, INDEXED_ARRAY_DEFAULT_CAPACITY);
+    nu_array_allocate_capacity(object_size, INDEXED_ARRAY_DEFAULT_CAPACITY, &header->data);
 }
 void nu_indexed_array_free(nu_indexed_array_t array)
 {

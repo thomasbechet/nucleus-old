@@ -59,17 +59,17 @@ void SpectatorPlugin::update()
     nu_button_state_t slowModeState, fastModeState, changeModeState;
     nu_button_state_t forwardState, backwardState, leftState, rightState, upState, downState;
     nu_button_state_t rollLeftState, rollRightState;
-    nu_input_get_keyboard_state(&slowModeState,   NU_KEYBOARD_LCONTROL);
-    nu_input_get_keyboard_state(&fastModeState,   NU_KEYBOARD_LSHIT);
-    nu_input_get_keyboard_state(&changeModeState, NU_KEYBOARD_C);
-    nu_input_get_keyboard_state(&forwardState,    NU_KEYBOARD_W);
-    nu_input_get_keyboard_state(&backwardState,   NU_KEYBOARD_S);
-    nu_input_get_keyboard_state(&leftState,       NU_KEYBOARD_A);
-    nu_input_get_keyboard_state(&rightState,      NU_KEYBOARD_D);
-    nu_input_get_keyboard_state(&upState,         NU_KEYBOARD_X);
-    nu_input_get_keyboard_state(&downState,       NU_KEYBOARD_Z);
-    nu_input_get_keyboard_state(&rollLeftState,   NU_KEYBOARD_Q);
-    nu_input_get_keyboard_state(&rollRightState,  NU_KEYBOARD_E);
+    nu_input_get_keyboard_state(NU_KEYBOARD_LCONTROL, &slowModeState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_LSHIT, &fastModeState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_C, &changeModeState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_W, &forwardState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_S, &backwardState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_A, &leftState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_D, &rightState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_X, &upState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_Z, &downState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_Q, &rollLeftState);
+    nu_input_get_keyboard_state(NU_KEYBOARD_E, &rollRightState);
 
     // Update mode
     if (changeModeState & NU_BUTTON_JUST_PRESSED) m_freeMode = !m_freeMode;

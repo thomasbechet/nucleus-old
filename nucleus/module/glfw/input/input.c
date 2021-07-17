@@ -199,7 +199,7 @@ nu_result_t nuglfw_input_update(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nuglfw_input_get_keyboard_state(nu_button_state_t *state, nu_keyboard_t button)
+nu_result_t nuglfw_input_get_keyboard_state(nu_keyboard_t button, nu_button_state_t *state)
 {
     *state = _data.keyboard_button_states[glfw_keyboard_buttons[(uint32_t)button]];
     return NU_SUCCESS;
@@ -210,7 +210,7 @@ nu_result_t nuglfw_input_get_keyboard_text(const char **text, uint32_t *length)
     *length = _data.text_size;
     return NU_SUCCESS;
 }
-nu_result_t nuglfw_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t button)
+nu_result_t nuglfw_input_get_mouse_state(nu_mouse_t button, nu_button_state_t *state)
 {
     *state = (glfwGetMouseButton(_data.window, glfw_mouse_buttons[(uint32_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
     return NU_SUCCESS;

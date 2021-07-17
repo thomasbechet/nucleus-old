@@ -17,7 +17,7 @@ static inline char *nu_string_get_str_(nu_string_t str)
 {
     return (char*)((void*)str + HEADER_LENGTH);
 }
-static inline void nu_string_allocate_noninitialized_(nu_string_t *str, uint32_t len)
+static inline void nu_string_allocate_noninitialized_(uint32_t len, nu_string_t *str)
 {
     *str = (nu_string_t)nu_malloc(HEADER_LENGTH + len + 1);
     *(uint32_t*)(*str) = len;
@@ -33,26 +33,26 @@ static inline void nu_string_resize_(nu_string_t *str, uint32_t len)
 
 void nu_string_allocate_empty(nu_string_t *str)
 {    
-    nu_string_allocate_noninitialized_(str, 0);
+    nu_string_allocate_noninitialized_(0, str);
 }
-void nu_string_allocate_from(nu_string_t *str, const char *cstr)
+void nu_string_allocate_from(const char *cstr, nu_string_t *str)
 {
     uint32_t len = strlen(cstr);
-    nu_string_allocate_noninitialized_(str, len);
+    nu_string_allocate_noninitialized_(len, str);
     memcpy(nu_string_get_str_(*str), cstr, len);
 }
-void nu_string_allocate_copy(nu_string_t *str, nu_string_t other)
+void nu_string_allocate_copy(nu_string_t other, nu_string_t *str)
 {
     uint32_t allocation = nu_string_get_total_allocation_(other);
     *str = (nu_string_t)nu_malloc(allocation);
     memcpy(*str, other, allocation);
 }
-void nu_string_allocate_substr(nu_string_t *str, nu_string_t other, uint32_t index, uint32_t len)
+void nu_string_allocate_substr(nu_string_t other, uint32_t index, uint32_t len, nu_string_t *str)
 {
     uint32_t otherlen = nu_string_get_length_(other);
     NU_ASSERT(index >= 0 && index < otherlen);
     NU_ASSERT(len > 0 && index + len <= otherlen);
-    nu_string_allocate_noninitialized_(str, len);
+    nu_string_allocate_noninitialized_(len, str);
     memcpy(nu_string_get_str_(*str), nu_string_get_str_(other) + index, len);
 }
 void nu_string_free(nu_string_t str)
@@ -82,7 +82,7 @@ void nu_string_insert(nu_string_t *str, nu_string_t other, uint32_t index)
     uint32_t strlen   = nu_string_get_length_(oldstr);
     uint32_t otherlen = nu_string_get_length_(other);
     NU_ASSERT(index >= 0 && index < strlen);
-    nu_string_allocate_noninitialized_(str, strlen + otherlen);
+    nu_string_allocate_noninitialized_(strlen + otherlen, str);
     memcpy(nu_string_get_str_(*str), nu_string_get_str_(oldstr), index);
     memcpy(nu_string_get_str_(*str) + index, nu_string_get_str_(other), otherlen);
     memcpy(nu_string_get_str_(*str) + index + otherlen, nu_string_get_str_(oldstr) + index, strlen - index);
@@ -94,7 +94,7 @@ void nu_string_erase(nu_string_t *str, uint32_t index, uint32_t len)
     uint32_t strlen = nu_string_get_length_(oldstr);
     NU_ASSERT(index >= 0 && index < strlen);
     NU_ASSERT(len > 0 && index + len <= strlen);
-    nu_string_allocate_noninitialized_(str, strlen - len);
+    nu_string_allocate_noninitialized_(strlen - len, str);
     memcpy(nu_string_get_str_(*str), nu_string_get_str_(oldstr), index);
     memcpy(nu_string_get_str_(*str) + index, nu_string_get_str_(oldstr) + index + len, strlen - (index + len));
     nu_string_free(oldstr);
@@ -124,7 +124,7 @@ void nu_string_trim(nu_string_t *str)
     uint32_t index  = pstart - pstr;
 
     nu_string_t nstr;
-    nu_string_allocate_substr(&nstr, *str, index, length);
+    nu_string_allocate_substr(*str, index, length, &nstr);
     nu_string_free(*str);
     *str = nstr;
 }
@@ -139,7 +139,7 @@ void nu_string_split(nu_string_t str, const char *delim, nu_string_tokens_t *tok
     s = nu_string_get_cstr(str);
     dlen = strlen(delim);
 
-    nu_array_allocate_capacity(&list, sizeof(const char*), 5);
+    nu_array_allocate_capacity(sizeof(const char*), 5, &list);
 
     if (len == 0) {
         *tokens = (nu_string_tokens_t)list;

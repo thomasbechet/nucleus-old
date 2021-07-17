@@ -26,7 +26,7 @@ nu_result_t nu_window_initialize(void)
     nu_window_api_t api = nu_config_get().window.api;
 
     /* get module */
-    result = nu_module_load(&_data.module, nu_window_api_names[api]);
+    result = nu_module_load(nu_window_api_names[api], &_data.module);
     if (result != NU_SUCCESS) {
         return result;
     }

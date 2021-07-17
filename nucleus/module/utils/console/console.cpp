@@ -29,7 +29,7 @@ nu_result_t nuutils_console_plugin_initialize(void)
     _data.command_interface_loaded = false;
     nu_result_t result;
     nu_module_handle_t module;
-    result = nu_module_get_by_name(&module, NUUTILS_MODULE_NAME);
+    result = nu_module_get_by_name(NUUTILS_MODULE_NAME, &module);
     if (result == NU_SUCCESS && nu_module_load_interface(module, NUUTILS_COMMAND_INTERFACE_NAME, &_data.command_interface) == NU_SUCCESS) {
         _data.command_interface_loaded = true;
     } else {
@@ -61,7 +61,7 @@ Console::Console()
     nu_renderer_font_create_info_t fontInfo;
     fontInfo.filename = "engine/font/Coder's Crux.ttf";
     fontInfo.font_size = FONT_SIZE;
-    if (nu_renderer_font_create(&m_font, &fontInfo) != NU_SUCCESS) {
+    if (nu_renderer_font_create(&fontInfo, &m_font) != NU_SUCCESS) {
         nu_fatal(NUUTILS_LOGGER_NAME"Failed to create font.\n");
     }
 
@@ -82,7 +82,7 @@ Console::Console()
     nu_renderer_rectangle_create_info_t info;
     info.color = 0xFFFFFF33;
     info.rect  = {0, 0, 0, 0};
-    nu_renderer_rectangle_create(&m_rectangle, &info);
+    nu_renderer_rectangle_create(&info, &m_rectangle);
 
     // Set component position
     updatePosition();
@@ -111,7 +111,7 @@ void Console::update()
 
     // Enable or disable console
     nu_button_state_t buttonState;
-    nu_input_get_keyboard_state(&buttonState, NU_KEYBOARD_F1);
+    nu_input_get_keyboard_state(NU_KEYBOARD_F1, &buttonState);
     if (buttonState & NU_BUTTON_JUST_PRESSED) {
         if (cursorMode == NU_CURSOR_MODE_NORMAL) {
             nu_input_set_cursor_mode(NU_CURSOR_MODE_DISABLE);
@@ -146,7 +146,7 @@ void Console::update()
 
         // Backspace key
         nu_button_state_t backspaceState;
-        nu_input_get_keyboard_state(&backspaceState, NU_KEYBOARD_BACKSPACE);
+        nu_input_get_keyboard_state(NU_KEYBOARD_BACKSPACE, &backspaceState);
         if (backspaceState & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
             if (m_commandLine->size() > 0) {
                 if (m_selectedCharacter > 0) {
@@ -159,10 +159,10 @@ void Console::update()
 
         // arrow keys
         nu_button_state_t upState, downState, leftState, rightState;
-        nu_input_get_keyboard_state(&upState, NU_KEYBOARD_UP);
-        nu_input_get_keyboard_state(&downState, NU_KEYBOARD_DOWN);
-        nu_input_get_keyboard_state(&leftState, NU_KEYBOARD_LEFT);
-        nu_input_get_keyboard_state(&rightState, NU_KEYBOARD_RIGHT);
+        nu_input_get_keyboard_state(NU_KEYBOARD_UP, &upState);
+        nu_input_get_keyboard_state(NU_KEYBOARD_DOWN, &downState);
+        nu_input_get_keyboard_state(NU_KEYBOARD_LEFT, &leftState);
+        nu_input_get_keyboard_state(NU_KEYBOARD_RIGHT, &rightState);
         if (upState & (NU_BUTTON_JUST_PRESSED | NU_BUTTON_REPEATED)) {
             if (m_selectedOldCommand > 0) {
                 m_selectedOldCommand--;
@@ -193,7 +193,7 @@ void Console::update()
 
         /* enter key */
         nu_button_state_t enter_state;
-        nu_input_get_keyboard_state(&enter_state, NU_KEYBOARD_ENTER);
+        nu_input_get_keyboard_state(NU_KEYBOARD_ENTER, &enter_state);
         if (enter_state & NU_BUTTON_JUST_PRESSED) {
             if (m_commandLine->size() > 0) {
                 // Add command to old commands

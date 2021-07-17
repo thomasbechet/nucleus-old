@@ -66,17 +66,17 @@ nu_module_handle_t nu_input_get_module_handle(void)
     return _data.module;
 }
 
-nu_result_t nu_input_get_keyboard_state(nu_button_state_t *state, nu_keyboard_t button)
+nu_result_t nu_input_get_keyboard_state(nu_keyboard_t button, nu_button_state_t *state)
 {
-    return _data.interface.get_keyboard_state(state, button);
+    return _data.interface.get_keyboard_state(button, state);
 }
 nu_result_t nu_input_get_keyboard_text(const char **text, uint32_t *length)
 {
     return _data.interface.get_keyboard_text(text, length);
 }
-nu_result_t nu_input_get_mouse_state(nu_button_state_t *state, nu_mouse_t button)
+nu_result_t nu_input_get_mouse_state(nu_mouse_t button, nu_button_state_t *state)
 {
-    return _data.interface.get_mouse_state(state, button);
+    return _data.interface.get_mouse_state(button, state);
 }
 nu_result_t nu_input_get_mouse_motion(nu_vec2f_t motion)
 {

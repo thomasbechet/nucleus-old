@@ -65,7 +65,7 @@ static nu_result_t unload_module(const nu_module_t *module)
 
     return NU_SUCCESS;
 }
-static nu_result_t load_module(nu_module_t *module, const char *filename)
+static nu_result_t load_module(const char *filename, nu_module_t *module)
 {
     /* reset memory */
     memset(module, 0, sizeof(nu_module_t));
@@ -159,13 +159,13 @@ nu_result_t nu_module_stop(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nu_module_load(nu_module_handle_t *handle, const char *path)
+nu_result_t nu_module_load(const char *path, nu_module_handle_t *handle)
 {
     /* error check */
     if (_data.module_count >= MAX_MODULE_COUNT) return NU_FAILURE;
 
     /* load module */
-    if (load_module(&_data.modules[_data.module_count], path) != NU_SUCCESS) {
+    if (load_module(path, &_data.modules[_data.module_count]) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
@@ -184,7 +184,7 @@ nu_result_t nu_module_load_interface(nu_module_handle_t handle, const char *inte
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     return _data.modules[id].interface_loader(interface_name, interface);
 }
-nu_result_t nu_module_get_by_name(nu_module_handle_t *handle, const char *name)
+nu_result_t nu_module_get_by_name(const char *name, nu_module_handle_t *handle)
 {
     for (uint32_t i = 0; i < _data.module_count; i++) {
         if (NU_MATCH(_data.modules[i].info.name, name)) {
@@ -195,7 +195,7 @@ nu_result_t nu_module_get_by_name(nu_module_handle_t *handle, const char *name)
 
     return NU_FAILURE;
 }
-nu_result_t nu_module_get_by_id(nu_module_handle_t *handle, uint32_t id)
+nu_result_t nu_module_get_by_id(uint32_t id, nu_module_handle_t *handle)
 {
     for (uint32_t i = 0; i < _data.module_count; i++) {
         if (_data.modules[i].info.id == id) {

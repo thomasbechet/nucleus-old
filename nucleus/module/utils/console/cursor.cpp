@@ -18,7 +18,7 @@ Cursor::Cursor(float frequency)
     nu_renderer_rectangle_create_info_t rectangleInfo;
     rectangleInfo.color = 0xFFFFFFFF;
     rectangleInfo.rect = m_rect.data;
-    nu_renderer_rectangle_create(&m_handle, &rectangleInfo);
+    nu_renderer_rectangle_create(&rectangleInfo, &m_handle);
 
     updateRectangle();
 }

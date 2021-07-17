@@ -5,9 +5,9 @@
 
 NU_DECLARE_HANDLE(nu_array_t);
 
-NU_API void nu_array_allocate(nu_array_t *array, uint32_t object_size);
-NU_API void nu_array_allocate_capacity(nu_array_t *array, uint32_t object_size, uint32_t capacity);
-NU_API void nu_array_allocate_from(nu_array_t *array, const void *data, uint32_t object_count, uint32_t object_size);
+NU_API void nu_array_allocate(uint32_t object_size, nu_array_t *array);
+NU_API void nu_array_allocate_capacity(uint32_t object_size, uint32_t capacity, nu_array_t *array);
+NU_API void nu_array_allocate_from(const void *data, uint32_t object_count, uint32_t object_size, nu_array_t *array);
 NU_API void nu_array_free(nu_array_t array);
 NU_API void *nu_array_get_data(nu_array_t array);
 NU_API const void *nu_array_get_data_const(nu_array_t array);

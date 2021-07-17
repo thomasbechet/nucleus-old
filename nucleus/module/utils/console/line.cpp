@@ -12,7 +12,7 @@ Line::Line(nu_renderer_font_handle_t font)
     nu_vec2i_copy(m_position, label_info.position);
     label_info.font = font;
     label_info.text = "";
-    if (nu_renderer_label_create(&m_handle, &label_info) != NU_SUCCESS) {
+    if (nu_renderer_label_create(&label_info, &m_handle) != NU_SUCCESS) {
         nu_interrupt(NUUTILS_LOGGER_NAME"Failed to create command label.\n");
     }
 }

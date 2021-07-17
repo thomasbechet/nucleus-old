@@ -7,7 +7,7 @@ using namespace nu::softrast;
 WindowInterface::WindowInterface()
 {
     nu_module_handle_t module;
-    if (nu_module_get_by_name(&module, NUGLFW_MODULE_NAME) != NU_SUCCESS) throw new std::runtime_error("Softrast failed to load glfw interface.");
+    if (nu_module_get_by_name(NUGLFW_MODULE_NAME, &module) != NU_SUCCESS) throw new std::runtime_error("Softrast failed to load glfw interface.");
     if (nu_module_load_interface(module, NUGLFW_WINDOW_INTERFACE_NAME, &m_glfwInterface) != NU_SUCCESS) throw new std::runtime_error("Softrast failed to load glfw interface.");
 }
 

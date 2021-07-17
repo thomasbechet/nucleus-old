@@ -14,7 +14,7 @@ typedef struct {
     nu_event_terminate_pfn_t terminate;
 } nu_event_register_info_t;
 
-NU_API nu_result_t nu_event_register(nu_event_id_t *id, const nu_event_register_info_t *info);
+NU_API nu_result_t nu_event_register(const nu_event_register_info_t *info, nu_event_id_t *id);
 NU_API nu_result_t nu_event_post(nu_event_id_t id, void *data);
 NU_API nu_result_t nu_event_subscribe(nu_event_id_t id, nu_event_callback_pfn_t callback);
 

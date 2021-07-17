@@ -36,7 +36,7 @@ nu_result_t nu::softrast::render()
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
+nu_result_t nu::softrast::mesh_create(const nu_renderer_mesh_create_info_t *info, nu_renderer_mesh_handle_t *handle)
 {
     *handle = _data.engine->createMesh(*info);
     return NU_SUCCESS;
@@ -47,7 +47,7 @@ nu_result_t nu::softrast::mesh_destroy(nu_renderer_mesh_handle_t handle)
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info)
+nu_result_t nu::softrast::texture_create(const nu_renderer_texture_create_info_t *info, nu_renderer_texture_handle_t *handle)
 {
     *handle = _data.engine->createTexture(*info);
     return NU_SUCCESS;
@@ -58,7 +58,7 @@ nu_result_t nu::softrast::texture_destroy(nu_renderer_texture_handle_t handle)
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::material_create(nu_renderer_material_handle_t *handle, const nu_renderer_material_create_info_t *info)
+nu_result_t nu::softrast::material_create(const nu_renderer_material_create_info_t *info, nu_renderer_material_handle_t *handle)
 {
     *handle = _data.engine->createMaterial(*info);
     return NU_SUCCESS;
@@ -69,7 +69,7 @@ nu_result_t nu::softrast::material_destroy(nu_renderer_material_handle_t handle)
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
+nu_result_t nu::softrast::font_create(const nu_renderer_font_create_info_t *info, nu_renderer_font_handle_t *handle)
 {
     *handle = _data.engine->createFont(*info);
     return NU_SUCCESS;
@@ -86,7 +86,7 @@ nu_result_t nu::softrast::font_get_text_size(nu_renderer_font_handle_t handle, c
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::camera_create(nu_renderer_camera_handle_t *handle, const nu_renderer_camera_create_info_t *info)
+nu_result_t nu::softrast::camera_create(const nu_renderer_camera_create_info_t *info, nu_renderer_camera_handle_t *handle)
 {
     return NU_SUCCESS;
 }
@@ -109,7 +109,7 @@ nu_result_t nu::softrast::camera_set_active(nu_renderer_camera_handle_t handle)
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info)
+nu_result_t nu::softrast::model_create(const nu_renderer_model_create_info_t *info, nu_renderer_model_handle_t *handle)
 {
     *handle = _data.engine->createModel(*info);
     return NU_SUCCESS;
@@ -125,7 +125,7 @@ nu_result_t nu::softrast::model_set_transform(nu_renderer_model_handle_t handle,
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info)
+nu_result_t nu::softrast::label_create(const nu_renderer_label_create_info_t *info, nu_renderer_label_handle_t *handle)
 {
     *handle = _data.engine->createLabel(*info);
     return NU_SUCCESS;
@@ -146,7 +146,7 @@ nu_result_t nu::softrast::label_set_text(nu_renderer_label_handle_t handle, cons
     return NU_SUCCESS;
 }
 
-nu_result_t nu::softrast::rectangle_create(nu_renderer_rectangle_handle_t *handle, const nu_renderer_rectangle_create_info_t *info)
+nu_result_t nu::softrast::rectangle_create(const nu_renderer_rectangle_create_info_t *info, nu_renderer_rectangle_handle_t *handle)
 {
     *handle = _data.engine->createRectangle(*info);
     return NU_SUCCESS;

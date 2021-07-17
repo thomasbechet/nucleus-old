@@ -22,7 +22,7 @@ nu_result_t nu_task_initialize(void)
     memset(&_data, 0, sizeof(nu_task_data_t));
 
     /* get task module */
-    result = nu_module_load(&_data.module, "engine/module/"NUTK_MODULE_NAME);
+    result = nu_module_load("engine/module/"NUTK_MODULE_NAME, &_data.module);
     if (result != NU_SUCCESS) {
         return result;
     }

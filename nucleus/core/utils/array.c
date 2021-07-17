@@ -29,7 +29,7 @@ static inline void *nu_array_get_swap_space_(nu_array_t array)
     return (void*)array + sizeof(nu_array_header_t);
 }
 
-void nu_array_allocate(nu_array_t *array, uint32_t object_size)
+void nu_array_allocate(uint32_t object_size, nu_array_t *array)
 {
     NU_ASSERT(object_size > 0);
 
@@ -39,7 +39,7 @@ void nu_array_allocate(nu_array_t *array, uint32_t object_size)
     header->object_size = object_size;
     header->size        = 0;
 }
-void nu_array_allocate_capacity(nu_array_t *array, uint32_t object_size, uint32_t capacity)
+void nu_array_allocate_capacity(uint32_t object_size, uint32_t capacity, nu_array_t *array)
 {
     NU_ASSERT(object_size > 0);
     NU_ASSERT(capacity > 0);
@@ -50,7 +50,7 @@ void nu_array_allocate_capacity(nu_array_t *array, uint32_t object_size, uint32_
     header->object_size = object_size;
     header->size        = 0;
 }
-void nu_array_allocate_from(nu_array_t *array, const void *data, uint32_t object_count, uint32_t object_size)
+void nu_array_allocate_from(const void *data, uint32_t object_count, uint32_t object_size, nu_array_t *array)
 {
     NU_ASSERT(object_count > 0 && object_size > 0);
 

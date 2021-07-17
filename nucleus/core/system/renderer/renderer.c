@@ -29,7 +29,7 @@ static nu_result_t initialize_event(void)
     info.initialize = NULL;
     info.terminate  = NULL;
     info.size       = sizeof(nu_renderer_viewport_resize_event_t);
-    if (nu_event_register(&_data.viewport_resize_event_id, &info) != NU_SUCCESS) {
+    if (nu_event_register(&info, &_data.viewport_resize_event_id) != NU_SUCCESS) {
         nu_warning(NU_LOGGER_RENDERER_NAME"Failed to register viewport resize event.\n");
         return NU_FAILURE;
     }
@@ -53,7 +53,7 @@ nu_result_t nu_renderer_initialize(void)
     }
 
     /* get renderer module */
-    result = nu_module_load(&_data.module, nu_renderer_api_names[api]);
+    result = nu_module_load(nu_renderer_api_names[api], &_data.module);
     if (result != NU_SUCCESS) {
         return result;
     }
@@ -96,36 +96,36 @@ nu_module_handle_t nu_renderer_get_module_handle(void)
     return _data.module;
 }
 
-nu_result_t nu_renderer_mesh_create(nu_renderer_mesh_handle_t *handle, const nu_renderer_mesh_create_info_t *info)
+nu_result_t nu_renderer_mesh_create(const nu_renderer_mesh_create_info_t *info, nu_renderer_mesh_handle_t *handle)
 {
-    return _data.interface.mesh_create(handle, info);
+    return _data.interface.mesh_create(info, handle);
 }
 nu_result_t nu_renderer_mesh_destroy(nu_renderer_mesh_handle_t handle)
 {
     return _data.interface.mesh_destroy(handle);
 }
 
-nu_result_t nu_renderer_texture_create(nu_renderer_texture_handle_t *handle, const nu_renderer_texture_create_info_t *info)
+nu_result_t nu_renderer_texture_create(const nu_renderer_texture_create_info_t *info, nu_renderer_texture_handle_t *handle)
 {
-    return _data.interface.texture_create(handle, info);
+    return _data.interface.texture_create(info, handle);
 }
 nu_result_t nu_renderer_texture_destroy(nu_renderer_texture_handle_t handle)
 {
     return _data.interface.texture_destroy(handle);
 }
 
-nu_result_t nu_renderer_material_create(nu_renderer_material_handle_t *handle, const nu_renderer_material_create_info_t *info)
+nu_result_t nu_renderer_material_create(const nu_renderer_material_create_info_t *info, nu_renderer_material_handle_t *handle)
 {
-    return _data.interface.material_create(handle, info);
+    return _data.interface.material_create(info, handle);
 }
 nu_result_t nu_renderer_material_destroy(nu_renderer_material_handle_t handle)
 {
     return _data.interface.material_destroy(handle);
 }
 
-nu_result_t nu_renderer_font_create(nu_renderer_font_handle_t *handle, const nu_renderer_font_create_info_t *info)
+nu_result_t nu_renderer_font_create(const nu_renderer_font_create_info_t *info, nu_renderer_font_handle_t *handle)
 {
-    return _data.interface.font_create(handle, info);
+    return _data.interface.font_create(info, handle);
 }
 nu_result_t nu_renderer_font_destroy(nu_renderer_font_handle_t handle)
 {
@@ -136,9 +136,9 @@ nu_result_t nu_renderer_font_get_text_size(nu_renderer_font_handle_t handle, con
     return _data.interface.font_get_text_size(handle, text, size);
 }
 
-nu_result_t nu_renderer_camera_create(nu_renderer_camera_handle_t *handle, const nu_renderer_camera_create_info_t *info)
+nu_result_t nu_renderer_camera_create(const nu_renderer_camera_create_info_t *info, nu_renderer_camera_handle_t *handle)
 {
-    return _data.interface.camera_create(handle, info);
+    return _data.interface.camera_create(info, handle);
 }
 nu_result_t nu_renderer_camera_destroy(nu_renderer_camera_handle_t handle)
 {
@@ -153,9 +153,9 @@ nu_result_t nu_renderer_camera_set_view(nu_renderer_camera_handle_t handle, cons
     return _data.interface.camera_set_view(handle, eye, forward, up);
 }
 
-nu_result_t nu_renderer_model_create(nu_renderer_model_handle_t *handle, const nu_renderer_model_create_info_t *info)
+nu_result_t nu_renderer_model_create(const nu_renderer_model_create_info_t *info, nu_renderer_model_handle_t *handle)
 {
-    return _data.interface.model_create(handle, info);
+    return _data.interface.model_create(info, handle);
 }
 nu_result_t nu_renderer_model_destroy(nu_renderer_model_handle_t handle)
 {
@@ -166,9 +166,9 @@ nu_result_t nu_renderer_model_set_transform(nu_renderer_model_handle_t handle, c
     return _data.interface.model_set_transform(handle, transform);
 }
 
-nu_result_t nu_renderer_label_create(nu_renderer_label_handle_t *handle, const nu_renderer_label_create_info_t *info)
+nu_result_t nu_renderer_label_create(const nu_renderer_label_create_info_t *info, nu_renderer_label_handle_t *handle)
 {
-    return _data.interface.label_create(handle, info);
+    return _data.interface.label_create(info, handle);
 }
 nu_result_t nu_renderer_label_destroy(nu_renderer_label_handle_t handle)
 {
@@ -183,9 +183,9 @@ nu_result_t nu_renderer_label_set_text(nu_renderer_label_handle_t handle, const 
     return _data.interface.label_set_text(handle, text);
 }
 
-nu_result_t nu_renderer_rectangle_create(nu_renderer_rectangle_handle_t *handle, const nu_renderer_rectangle_create_info_t *info)
+nu_result_t nu_renderer_rectangle_create(const nu_renderer_rectangle_create_info_t *info, nu_renderer_rectangle_handle_t *handle)
 {
-    return _data.interface.rectangle_create(handle, info);
+    return _data.interface.rectangle_create(info, handle);
 }
 nu_result_t nu_renderer_rectangle_destroy(nu_renderer_rectangle_handle_t handle)
 {

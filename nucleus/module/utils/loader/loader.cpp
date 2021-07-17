@@ -87,7 +87,7 @@ nu_result_t load_mesh_from_obj(nu_renderer_mesh_handle_t *handle, const char *fi
     info.submeshes     = &submeshInfo;
     info.submesh_count = 1;
 
-    if (nu_renderer_mesh_create(handle, &info) != NU_SUCCESS) {
+    if (nu_renderer_mesh_create(&info, handle) != NU_SUCCESS) {
         nu_warning(NUUTILS_LOGGER_NAME"Failed to load mesh.\n");
         return NU_FAILURE;
     }
