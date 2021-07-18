@@ -6,3 +6,4 @@
 - statistiques mémoire
 - utiliser un triangle unique (empty vao) pour l'affichage OpenGL
 - custom allocator
+- Android ? https://hackaday.com/2020/05/13/writing-android-apps-in-c-no-java-required/

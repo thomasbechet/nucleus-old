@@ -1,6 +1,6 @@
 #include <nucleus/core/utils/string.h>
 
-#include <nucleus/core/memory/memory.h>
+#include <nucleus/core/coresystem/memory/memory.h>
 #include <nucleus/core/utils/array.h>
 
 #define HEADER_LENGTH sizeof(uint32_t)
@@ -53,6 +53,15 @@ void nu_string_allocate_substr(nu_string_t other, uint32_t index, uint32_t len, 
     NU_ASSERT(len > 0 && index + len <= nu_string_get_length_(other));
     nu_string_allocate_noninitialized_(len, str);
     memcpy(nu_string_get_str_(*str), nu_string_get_str_(other) + index, len);
+}
+void nu_string_allocate_format(const char *format, nu_string_t *str, ...)
+{
+    va_list args;
+    va_start(args, str);
+    uint32_t n = vsnprintf(NULL, 0, format, args);
+    nu_string_allocate_noninitialized_(n, str);
+    vsnprintf(nu_string_get_str_(*str), n, format, args);
+    va_end(args);
 }
 void nu_string_free(nu_string_t str)
 {

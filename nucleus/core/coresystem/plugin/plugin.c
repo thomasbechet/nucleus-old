@@ -1,7 +1,7 @@
-#include <nucleus/core/plugin/plugin.h>
+#include <nucleus/core/coresystem/plugin/plugin.h>
 
-#include <nucleus/core/module/interface.h>
-#include <nucleus/core/logger/logger.h>
+#include <nucleus/core/coresystem/module/interface.h>
+#include <nucleus/core/coresystem/logger/logger.h>
 
 #define MAX_PLUGIN_COUNT 32
 #define NU_MODULE_GET_PLUGIN_NAME "nu_module_get_plugin"

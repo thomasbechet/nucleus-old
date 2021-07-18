@@ -1,7 +1,6 @@
 #include <nucleus/core/system/renderer/renderer.h>
 
 #include <nucleus/core/config/interface.h>
-
 #include <nucleus/module/softrast.h>
 
 #define NU_LOGGER_RENDERER_NAME "[RENDERER] "

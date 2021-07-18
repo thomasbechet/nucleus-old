@@ -1,7 +1,7 @@
 #ifndef NU_PLUGIN_INTERFACE_H
 #define NU_PLUGIN_INTERFACE_H
 
-#include <nucleus/core/module/interface.h>
+#include <nucleus/core/coresystem/module/interface.h>
 
 typedef struct {
     nu_result_t (*initialize)(void);

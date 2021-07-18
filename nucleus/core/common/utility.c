@@ -1,7 +1,5 @@
 #include "utility.h"
 
-#include <nucleus/core/memory/memory.h>
-
 void nu_snprintf(char *str, size_t n, const char *format, ...)
 {
     va_list args;

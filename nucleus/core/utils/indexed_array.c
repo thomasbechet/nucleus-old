@@ -1,6 +1,6 @@
 #include <nucleus/core/utils/indexed_array.h>
 
-#include <nucleus/core/memory/memory.h>
+#include <nucleus/core/coresystem/memory/memory.h>
 #include <nucleus/core/utils/array.h>
 
 #define INDEXED_ARRAY_DEFAULT_CAPACITY 10

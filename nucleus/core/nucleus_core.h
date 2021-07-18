@@ -8,11 +8,11 @@ extern "C" {
 #include <nucleus/core/common/common.h>
 #include <nucleus/core/config/interface.h>
 #include <nucleus/core/context/context.h>
-#include <nucleus/core/event/interface.h>
-#include <nucleus/core/logger/interface.h>
-#include <nucleus/core/memory/interface.h>
-#include <nucleus/core/module/interface.h>
-#include <nucleus/core/plugin/interface.h>
+#include <nucleus/core/coresystem/event/interface.h>
+#include <nucleus/core/coresystem/logger/interface.h>
+#include <nucleus/core/coresystem/memory/interface.h>
+#include <nucleus/core/coresystem/module/interface.h>
+#include <nucleus/core/coresystem/plugin/interface.h>
 #include <nucleus/core/system/input/interface.h>
 #include <nucleus/core/system/renderer/interface.h>
 #include <nucleus/core/system/task/interface.h>

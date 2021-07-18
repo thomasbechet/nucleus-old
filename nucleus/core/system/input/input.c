@@ -1,8 +1,8 @@
 #include <nucleus/core/system/input/input.h>
 
 #include <nucleus/core/config/interface.h>
-#include <nucleus/core/memory/interface.h>
-#include <nucleus/core/logger/interface.h>
+#include <nucleus/core/coresystem/memory/interface.h>
+#include <nucleus/core/coresystem/logger/interface.h>
 
 #define NU_LOGGER_INPUT_NAME "[INPUT] "
 

@@ -1,8 +1,8 @@
 #ifndef NU_RENDERER_INTERFACE_H
 #define NU_RENDERER_INTERFACE_H
 
-#include <nucleus/core/module/interface.h>
-#include <nucleus/core/event/interface.h>
+#include <nucleus/core/coresystem/module/interface.h>
+#include <nucleus/core/coresystem/event/interface.h>
 
 #define NU_RENDERER_INTERFACE_NAME "nu_renderer_interface"
 

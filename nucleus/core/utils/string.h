@@ -10,6 +10,7 @@ NU_API void nu_string_allocate_empty(nu_string_t *str);
 NU_API void nu_string_allocate_from(const char *cstr, nu_string_t *str);
 NU_API void nu_string_allocate_copy(nu_string_t other, nu_string_t *str);
 NU_API void nu_string_allocate_substr(nu_string_t other, uint32_t index, uint32_t len, nu_string_t *str);
+NU_API void nu_string_allocate_format(const char *format, nu_string_t *str, ...);
 NU_API void nu_string_free(nu_string_t str);
 NU_API const char *nu_string_get_cstr(nu_string_t str);
 NU_API uint32_t nu_string_get_length(nu_string_t str);

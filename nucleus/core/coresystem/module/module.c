@@ -1,7 +1,7 @@
-#include <nucleus/core/module/module.h>
+#include <nucleus/core/coresystem/module/module.h>
 
-#include <nucleus/core/memory/memory.h>
-#include <nucleus/core/logger/logger.h>
+#include <nucleus/core/coresystem/memory/memory.h>
+#include <nucleus/core/coresystem/logger/logger.h>
 
 #define NU_MODULE_GET_INFO_NAME      "nu_module_get_info"
 #define NU_MODULE_GET_INTERFACE_NAME "nu_module_get_interface"

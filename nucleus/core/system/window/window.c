@@ -1,7 +1,6 @@
 #include <nucleus/core/system/window/window.h>
 
 #include <nucleus/core/config/interface.h>
-
 #include <nucleus/module/glfw.h>
 
 #define NU_LOGGER_WINDOW_NAME "[WINDOW] "

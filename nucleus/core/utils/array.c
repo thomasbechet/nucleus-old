@@ -1,6 +1,6 @@
 #include <nucleus/core/utils/array.h>
 
-#include <nucleus/core/memory/memory.h>
+#include <nucleus/core/coresystem/memory/memory.h>
 
 #define ARRAY_DEFAULT_CAPACITY 10
 
@@ -109,15 +109,11 @@ uint32_t nu_array_get_memory_consumption(nu_array_t array)
 void nu_array_push(nu_array_t *array, const void *object)
 {
     nu_array_header_t *header = nu_array_get_header_(*array);
-    uint32_t size        = header->size;
+    uint32_t size        = header->size++; /* increment size */
     uint32_t object_size = header->object_size;
-
     if (size >= header->capacity) {
-        header->capacity *= 2;
-        header->size++;
+        header->capacity *= 3;
         *array = nu_realloc(*array, sizeof(nu_array_header_t) + object_size * (header->capacity + 1));
-    } else {
-        header->size++;
     }
     memcpy((char*)nu_array_get_data_(*array, object_size) + object_size * size, object, object_size);
 }
@@ -138,13 +134,15 @@ void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second)
     if (first != second) {
         uint32_t object_size = header->object_size;
         void *data = nu_array_get_data_(array, object_size);
-        void *swap_space = nu_array_get_swap_space_(array);
+        void *dfirst = (char*)data + first * object_size;
+        void *dsecond = (char*)data + second * object_size;
+        void *dswap = nu_array_get_swap_space_(array);
         /* copy first to the swap space */
-        memcpy(swap_space, (char*)data + first * object_size, object_size);
+        memcpy(dswap, dfirst, object_size);
         /* copy second to first */
-        memcpy((char*)data + first * object_size, (char*)data + second * object_size, object_size);
+        memcpy(dfirst, dsecond, object_size);
         /* copy swap space to second */
-        memcpy((char*)data + second * object_size, swap_space, object_size);
+        memcpy(dsecond, dswap, object_size);
     }
 }
 void nu_array_swap_last(nu_array_t array, uint32_t index)

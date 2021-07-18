@@ -1,11 +1,11 @@
 #include <nucleus/core/context/context.h>
 
 #include <nucleus/core/config/config.h>
-#include <nucleus/core/event/event.h>
-#include <nucleus/core/logger/logger.h>
-#include <nucleus/core/memory/memory.h>
-#include <nucleus/core/module/module.h>
-#include <nucleus/core/plugin/plugin.h>
+#include <nucleus/core/coresystem/event/event.h>
+#include <nucleus/core/coresystem/logger/logger.h>
+#include <nucleus/core/coresystem/memory/memory.h>
+#include <nucleus/core/coresystem/module/module.h>
+#include <nucleus/core/coresystem/plugin/plugin.h>
 #include <nucleus/core/system/input/input.h>
 #include <nucleus/core/system/renderer/renderer.h>
 #include <nucleus/core/system/task/task.h>

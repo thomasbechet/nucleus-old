@@ -1,6 +1,7 @@
 #include <nucleus/core/config/config.h>
 
-#include <nucleus/core/logger/logger.h>
+/* Dependencies with nu_core_log(), should be moved */
+#include <nucleus/core/coresystem/logger/logger.h>
 
 #include <stdlib.h>
 #include <ini/ini.h>

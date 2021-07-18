@@ -35,6 +35,7 @@ typedef struct {
     uint32_t id;
     uint32_t v;
 } stest;
+#include <vector>
 static nu_result_t on_start(void)
 {
     // nu_string_t str, token;
@@ -53,6 +54,38 @@ static nu_result_t on_start(void)
     // nu_string_tokens_free(tokens);
     // nu_string_free(str);
 
+    // nu_timer_t t;
+    
+    // nu_array_t ar;
+    // uint32_t v = 555;
+    // nu_array_allocate_capacity(sizeof(uint32_t), 50000000, &ar);
+    // nu_timer_start(&t);
+    // for (uint32_t i = 50000000; i--;) {
+    //     nu_array_push(&ar, &v);
+    // }
+    // float d = nu_timer_get_time_elapsed(&t);
+    // printf("%lf\n", d);
+    // nu_array_free(ar);
+
+    // std::vector<uint32_t> vec;
+    // nu_timer_start(&t);
+    // for (uint32_t i = 50000000; i--;) {
+    //     vec.emplace_back(v);
+    // }
+    // d = nu_timer_get_time_elapsed(&t);
+    // printf("%lf\n", d);
+
+    nu_array_t ar;
+    uint32_t v0 = 5;
+    uint32_t v1 = 2;
+    nu_array_allocate_capacity(sizeof(uint32_t), 5, &ar);
+    nu_array_push(&ar, &v0);
+    nu_array_push(&ar, &v1);
+    nu_array_swap(ar, 0, 1);
+    uint32_t p = *(uint32_t*)nu_array_get_last(ar);
+    nu_info("%d\n", p);
+    nu_array_free(ar);
+
     nu_module_handle_t module;
     nu_module_load("engine/module/nucleus-utils", &module);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
@@ -66,10 +99,10 @@ static nu_result_t on_start(void)
 
     ima_data = stbi_load("engine/texture/brick.jpg", &width, &height, &channel, STBI_rgb);
     if (!ima_data) nu_interrupt("Failed to load brick texture.\n");
-    texture_info.width = (uint32_t)width;
-    texture_info.height = (uint32_t)height;
+    texture_info.width   = (uint32_t)width;
+    texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
-    texture_info.data = ima_data;
+    texture_info.data    = ima_data;
     nu_renderer_texture_handle_t brick_texture_id;
     if (nu_renderer_texture_create(&texture_info, &brick_texture_id) != NU_SUCCESS) {
         nu_warning("Failed to create texture.\n");
@@ -78,10 +111,10 @@ static nu_result_t on_start(void)
 
     ima_data = stbi_load("engine/texture/checkerboard.jpg", &width, &height, &channel, STBI_rgb);
     if (!ima_data) nu_interrupt("Failed to load rdr2 texture.\n");
-    texture_info.width = (uint32_t)width;
-    texture_info.height = (uint32_t)height;
+    texture_info.width   = (uint32_t)width;
+    texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
-    texture_info.data = ima_data;
+    texture_info.data    = ima_data;
     nu_renderer_texture_handle_t rdr2_texture_id;
     if (nu_renderer_texture_create(&texture_info, &rdr2_texture_id) != NU_SUCCESS) {
         nu_warning("Failed to create texture.\n");
@@ -90,8 +123,8 @@ static nu_result_t on_start(void)
 
     ima_data = stbi_load("engine/model/alfred/alfred.jpg", &width, &height, &channel, STBI_rgb);
     if (!ima_data) nu_interrupt("Failed to load alfred texture.\n");
-    texture_info.width = (uint32_t)width;
-    texture_info.height = (uint32_t)height;
+    texture_info.width   = (uint32_t)width;
+    texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
     texture_info.data = ima_data;
     nu_renderer_texture_handle_t alfred_texture;
@@ -102,10 +135,10 @@ static nu_result_t on_start(void)
 
     /* create materials */
     nu_renderer_material_create_info_t material_info = {0};
-    material_info.diffuse_texture      = rdr2_texture_id;
-    material_info.normal_texture       = NU_NULL_HANDLE;
-    material_info.specular_texture     = NU_NULL_HANDLE;
-    material_info.specular_uniform     = 1.0f;
+    material_info.diffuse_texture  = rdr2_texture_id;
+    material_info.normal_texture   = NU_NULL_HANDLE;
+    material_info.specular_texture = NU_NULL_HANDLE;
+    material_info.specular_uniform = 1.0f;
 
     nu_renderer_material_handle_t material0 = {0};
     if (nu_renderer_material_create(&material_info, &material0) != NU_SUCCESS) {
