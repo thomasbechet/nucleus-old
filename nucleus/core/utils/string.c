@@ -165,7 +165,7 @@ void nu_string_split(nu_string_t str, const char *delim, nu_string_tokens_t *tok
                 char *token = (char*)nu_malloc(sizeof(char) * (tlen + 1));
                 token[tlen] = '\0';
                 memcpy(token, s + start, tlen);
-                nu_array_push(&list, &token);
+                nu_array_push(list, &token);
                 start = i + dlen;
                 i += dlen - 1;
             }
@@ -177,7 +177,7 @@ void nu_string_split(nu_string_t str, const char *delim, nu_string_tokens_t *tok
     char *token = (char*)nu_malloc(sizeof(char) * (tlen + 1));
     token[tlen] = '\0';
     memcpy(token, s + start, tlen);
-    nu_array_push(&list, &token);
+    nu_array_push(list, &token);
 
     *tokens = (nu_string_tokens_t)list;
 }
