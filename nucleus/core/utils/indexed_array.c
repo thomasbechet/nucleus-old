@@ -30,7 +30,6 @@ typedef struct {
     uint32_t capacity;
     uint32_t next_free_id;
     nu_array_t data;
-    nu_array_t free_ids;
     nu_index_pair_t *indexes;
 } nu_indexed_array_header_t;
 
@@ -42,14 +41,12 @@ void nu_indexed_array_allocate(uint32_t object_size, nu_indexed_array_t *array)
     header->capacity     = INDEXED_ARRAY_DEFAULT_CAPACITY;
     header->next_free_id = 0;
     nu_array_allocate_capacity(object_size, INDEXED_ARRAY_DEFAULT_CAPACITY, &header->data);
-    nu_array_allocate(sizeof(uint32_t), &header->free_ids);
     header->indexes      = (nu_index_pair_t*)nu_malloc(sizeof(nu_index_pair_t) * INDEXED_ARRAY_DEFAULT_CAPACITY);
 }
 void nu_indexed_array_free(nu_indexed_array_t array)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
     nu_array_free(header->data);
-    nu_array_free(header->free_ids);
     nu_free(header->indexes);
     nu_free(array);
 }
