@@ -104,7 +104,7 @@ static nu_result_t on_start(void)
     nu_indexed_array_allocate(sizeof(uint32_t), &iar);
     nu_array_allocate(sizeof(stest), &ids);
 
-    for (uint32_t i = 0; i < 500000; i++) {
+    for (uint32_t i = 0; i < 10000000; i++) {
         uint32_t len = nu_array_get_size(ids);
         if (rand() % 3 != 0) {
             /* add */
