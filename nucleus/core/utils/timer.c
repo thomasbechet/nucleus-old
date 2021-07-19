@@ -11,7 +11,7 @@ typedef struct {
 
 void nu_timer_allocate(nu_timer_t *timer) 
 {
-    *timer = (nu_timer_data_t*)nu_malloc(sizeof(nu_timer_data_t));
+    *timer = (nu_timer_t)nu_malloc(sizeof(nu_timer_data_t));
 }
 void nu_timer_free(nu_timer_t timer) 
 {
