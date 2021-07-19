@@ -3,7 +3,7 @@
 using namespace nu::utility;
 using namespace nu;
 
-LineBuffer::LineBuffer(nu_renderer_font_handle_t font, uint32_t maxLine)
+LineBuffer::LineBuffer(nu_renderer_font_t font, uint32_t maxLine)
 {
     m_font = font;
     Vector2u size;

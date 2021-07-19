@@ -7,9 +7,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
-static nu_result_t load_monkey(nu_renderer_mesh_handle_t *mesh)
+static nu_result_t load_monkey(nu_renderer_mesh_t *mesh)
 {
-    nu_module_handle_t module;
+    nu_module_t module;
     nuutils_loader_interface_t loader;
     if (nu_module_get_by_name(NUUTILS_MODULE_NAME, &module) != NU_SUCCESS) return NU_FAILURE;
     if (nu_module_load_interface(module, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) return NU_FAILURE;
@@ -134,7 +134,7 @@ static nu_result_t on_start(void)
     nu_indexed_array_free(iar);
     nu_array_free(ids);
 
-    nu_module_handle_t module;
+    nu_module_t module;
     nu_module_load("engine/module/nucleus-utils", &module);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
     nu_plugin_require(module, NUUTILS_CONSOLE_PLUGIN_NAME);
@@ -151,7 +151,7 @@ static nu_result_t on_start(void)
     texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
     texture_info.data    = ima_data;
-    nu_renderer_texture_handle_t brick_texture_id;
+    nu_renderer_texture_t brick_texture_id;
     if (nu_renderer_texture_create(&texture_info, &brick_texture_id) != NU_SUCCESS) {
         nu_warning("Failed to create texture.\n");
     }
@@ -163,7 +163,7 @@ static nu_result_t on_start(void)
     texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
     texture_info.data    = ima_data;
-    nu_renderer_texture_handle_t rdr2_texture_id;
+    nu_renderer_texture_t rdr2_texture_id;
     if (nu_renderer_texture_create(&texture_info, &rdr2_texture_id) != NU_SUCCESS) {
         nu_warning("Failed to create texture.\n");
     }
@@ -175,7 +175,7 @@ static nu_result_t on_start(void)
     texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
     texture_info.data = ima_data;
-    nu_renderer_texture_handle_t alfred_texture;
+    nu_renderer_texture_t alfred_texture;
     if (nu_renderer_texture_create(&texture_info, &alfred_texture) != NU_SUCCESS) {
         nu_warning("Failed to create texture.\n");
     }
@@ -188,18 +188,18 @@ static nu_result_t on_start(void)
     material_info.specular_texture = NU_NULL_HANDLE;
     material_info.specular_uniform = 1.0f;
 
-    nu_renderer_material_handle_t material0 = {0};
+    nu_renderer_material_t material0 = {0};
     if (nu_renderer_material_create(&material_info, &material0) != NU_SUCCESS) {
         nu_interrupt("Failed to create material0.\n");
     }
 
-    nu_renderer_material_handle_t material1 = {0};
+    nu_renderer_material_t material1 = {0};
     material_info.diffuse_texture = brick_texture_id;
     if (nu_renderer_material_create(&material_info, &material1) != NU_SUCCESS) {
         nu_interrupt("Failed to create material1.\n");
     }
 
-    nu_renderer_material_handle_t alfred_material = {0};
+    nu_renderer_material_t alfred_material = {0};
     material_info.diffuse_texture = alfred_texture;
     if (nu_renderer_material_create(&material_info, &alfred_material) != NU_SUCCESS) {
         nu_interrupt("Failed to create alfred_material.\n");
@@ -253,13 +253,13 @@ static nu_result_t on_start(void)
     nu_renderer_mesh_create_info_t mesh_info = {0};
     mesh_info.submeshes     = &submesh_info;
     mesh_info.submesh_count = 1;
-    nu_renderer_mesh_handle_t mesh_id;
+    nu_renderer_mesh_t mesh_id;
     if (nu_renderer_mesh_create(&mesh_info, &mesh_id) != NU_SUCCESS) {
         nu_warning("Failed to create cube mesh.\n");
     }
 
     /* create static meshes */
-    nu_renderer_model_handle_t model_id;
+    nu_renderer_model_t model_id;
     nu_renderer_model_create_info_t model_info = {0};
     model_info.mesh           = mesh_id;
     model_info.materials      = &material0;
@@ -289,7 +289,7 @@ static nu_result_t on_start(void)
     }
 
     /* create monkey */
-    nu_renderer_mesh_handle_t mesh_handle;
+    nu_renderer_mesh_t mesh_handle;
     if (load_monkey(&mesh_handle) == NU_SUCCESS) {
         model_info.mesh           = mesh_handle;
         model_info.materials      = &alfred_material;

@@ -5,7 +5,7 @@
 using namespace nu::utility;
 using namespace nu;
 
-Line::Line(nu_renderer_font_handle_t font)
+Line::Line(nu_renderer_font_t font)
 {
     // Create label
     nu_renderer_label_create_info_t label_info;

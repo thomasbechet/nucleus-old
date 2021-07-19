@@ -45,11 +45,11 @@ void thread_pool_t::stop() noexcept
     }
 }
 
-nu_task_handle_t thread_pool_t::create_task() noexcept
+nu_task_t thread_pool_t::create_task() noexcept
 {
     return 0;
 }
-void thread_pool_t::perform(nu_task_handle_t task, const nu_task_job_t *jobs, uint32_t count)
+void thread_pool_t::perform(nu_task_t task, const nu_task_job_t *jobs, uint32_t count)
 {
     for (uint32_t i = 0; i < count; i++)
     {
@@ -58,7 +58,7 @@ void thread_pool_t::perform(nu_task_handle_t task, const nu_task_job_t *jobs, ui
         // m_next_worker = (m_next_worker + 1) % m_queues.size();
     }
 }
-void thread_pool_t::wait_task(nu_task_handle_t task)
+void thread_pool_t::wait_task(nu_task_t task)
 {
     std::unique_lock<std::mutex> lock(m_mutex);
     while (m_job_count.load(std::memory_order_relaxed) > 0)

@@ -6,23 +6,23 @@ using namespace nu::utility;
 
 typedef struct {
     std::unique_ptr<SpectatorPlugin> plugin;
-} nu_plugin_data_t;
+} nuutils_module_data_t;
 
-static nu_plugin_data_t _data;
+static nuutils_module_data_t _module;
 
 nu_result_t nuutils_spectator_plugin_initialize(void)
 {
-    _data.plugin = std::make_unique<SpectatorPlugin>();
+    _module.plugin = std::make_unique<SpectatorPlugin>();
     return NU_SUCCESS;
 }
 nu_result_t nuutils_spectator_plugin_terminate(void)
 {
-    _data.plugin.reset();
+    _module.plugin.reset();
     return NU_SUCCESS;
 }
 nu_result_t nuutils_spectator_plugin_update(void)
 {
-    _data.plugin->update();
+    _module.plugin->update();
     return NU_SUCCESS;
 }
 

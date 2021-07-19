@@ -12,9 +12,9 @@ typedef struct {
     GLuint vertices_vbo;
     GLuint uvs_vbo;
     GLuint vao;
-} surface_data_t;
+} nuglfw_module_data_t;
 
-static surface_data_t _data;
+static nuglfw_module_data_t _module;
 
 static const char *quad_vertex = " \
     #version 330 core \n\
@@ -77,15 +77,15 @@ static void create_quad_shader(void)
         glDeleteShader(fragment_shader);
     }
 
-    _data.quad_shader = glCreateProgram();
-    glAttachShader(_data.quad_shader, vertex_shader);
-    glAttachShader(_data.quad_shader, fragment_shader);
+    _module.quad_shader = glCreateProgram();
+    glAttachShader(_module.quad_shader, vertex_shader);
+    glAttachShader(_module.quad_shader, fragment_shader);
 
-    glLinkProgram(_data.quad_shader);
-    glGetProgramiv(_data.quad_shader, GL_LINK_STATUS, &success);
+    glLinkProgram(_module.quad_shader);
+    glGetProgramiv(_module.quad_shader, GL_LINK_STATUS, &success);
     if (success == GL_FALSE) {
         nu_warning(NUGLFW_LOGGER_NAME"Failed to link quad shader.\n");
-        glDeleteProgram(_data.quad_shader);
+        glDeleteProgram(_module.quad_shader);
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
     }
@@ -95,22 +95,22 @@ static void create_quad_shader(void)
 }
 static void destroy_quad_shader(void)
 {
-    glDeleteProgram(_data.quad_shader);
+    glDeleteProgram(_module.quad_shader);
 }
 
 static void create_vao(void)
 {
-    glGenVertexArrays(1, &_data.vao);
-    glBindVertexArray(_data.vao);
+    glGenVertexArrays(1, &_module.vao);
+    glBindVertexArray(_module.vao);
 
-    glGenBuffers(1, &_data.vertices_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _data.vertices_vbo);
+    glGenBuffers(1, &_module.vertices_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _module.vertices_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
-    glGenBuffers(1, &_data.uvs_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _data.uvs_vbo);
+    glGenBuffers(1, &_module.uvs_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _module.uvs_vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(uvs), uvs, GL_STATIC_DRAW);
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
@@ -119,23 +119,23 @@ static void create_vao(void)
 }
 static void destroy_vao(void)
 {
-    glDeleteBuffers(1, &_data.vertices_vbo);
-    glDeleteBuffers(1, &_data.uvs_vbo);
-    glDeleteVertexArrays(1, &_data.vao);
+    glDeleteBuffers(1, &_module.vertices_vbo);
+    glDeleteBuffers(1, &_module.uvs_vbo);
+    glDeleteVertexArrays(1, &_module.vao);
 }
 
 static void create_texture(void)
 {
-    glGenTextures(1, &_data.texture);
-    glBindTexture(GL_TEXTURE_2D, _data.texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _data.width, _data.height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, 0);
+    glGenTextures(1, &_module.texture);
+    glBindTexture(GL_TEXTURE_2D, _module.texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, _module.width, _module.height, 0, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 static void destroy_texture(void)
 {
-    glDeleteTextures(1, &_data.texture);
+    glDeleteTextures(1, &_module.texture);
 }
 
 nu_result_t nuglfw_surface_create(void)
@@ -145,8 +145,8 @@ nu_result_t nuglfw_surface_create(void)
         return NU_FAILURE;
     }
 
-    _data.width = 0;
-    _data.height = 0;
+    _module.width = 0;
+    _module.height = 0;
 
     create_quad_shader();
     create_vao();
@@ -169,22 +169,22 @@ nu_result_t nuglfw_surface_draw(
 )
 {
     /* check resize */
-    if (width != _data.width || height != _data.height) {
-        _data.width = width;
-        _data.height = height;
+    if (width != _module.width || height != _module.height) {
+        _module.width = width;
+        _module.height = height;
         destroy_texture();
         create_texture();
     }
 
     /* update texture */
-    glBindTexture(GL_TEXTURE_2D, _data.texture);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _data.width, _data.height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, pixels);
+    glBindTexture(GL_TEXTURE_2D, _module.texture);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, _module.width, _module.height, GL_RGBA, GL_UNSIGNED_INT_8_8_8_8, pixels);
 
     /* render texture */
-    glUseProgram(_data.quad_shader);
+    glUseProgram(_module.quad_shader);
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, _data.texture);
-    glBindVertexArray(_data.vao);
+    glBindTexture(GL_TEXTURE_2D, _module.texture);
+    glBindVertexArray(_module.vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     return NU_SUCCESS;

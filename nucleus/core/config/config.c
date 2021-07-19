@@ -18,13 +18,13 @@ typedef struct {
     nu_config_t config;
     nu_config_parameter_t parameters[MAX_PARAMETER_COUNT];
     uint32_t parameter_count;
-} nu_config_data_t;
+} nu_system_data_t;
 
-static nu_config_data_t _data;
+static nu_system_data_t _system;
 
 static void new_parameter(const char *section, const char *name, const char *value)
 {
-    nu_config_parameter_t *param = &_data.parameters[_data.parameter_count++];
+    nu_config_parameter_t *param = &_system.parameters[_system.parameter_count++];
     param->section = strdup(section);
     param->name    = strdup(name);
     param->value   = strdup(value);
@@ -45,73 +45,73 @@ static int handler(void *user, const char *section, const char *name, const char
 
 static nu_result_t load_ini_file(void)
 {
-    _data.parameter_count = 0;
+    _system.parameter_count = 0;
 
     if (ini_parse("engine/nucleus.ini", handler, NULL) < 0) {
         return NU_FAILURE;
     }
 
     /* context */
-    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, 0, &_data.config.context.version_major);
-    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MINOR, 0, &_data.config.context.version_minor);
-    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_PATCH, 1, &_data.config.context.version_patch);
-    nu_config_get_bool(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_LOG_CONFIG, true, &_data.config.context.log_config);
+    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, 0, &_system.config.context.version_major);
+    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MINOR, 0, &_system.config.context.version_minor);
+    nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_PATCH, 1, &_system.config.context.version_patch);
+    nu_config_get_bool(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_LOG_CONFIG, true, &_system.config.context.log_config);
 
     /* window */
     const char *window_api;
     nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, NULL, &window_api);
     if (NU_MATCH(window_api, "glfw")) {
-        _data.config.window.api = NU_WINDOW_API_GLFW;
+        _system.config.window.api = NU_WINDOW_API_GLFW;
     } else {
-        _data.config.window.api = NU_WINDOW_API_NONE;
+        _system.config.window.api = NU_WINDOW_API_NONE;
     }
 
     const char *window_mode;
     nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_MODE, "windowed", &window_mode);
     if (NU_MATCH(window_mode, "fullscreen")) {
-        _data.config.window.mode = NU_WINDOW_MODE_FULLSCREEN;
+        _system.config.window.mode = NU_WINDOW_MODE_FULLSCREEN;
     } else if (NU_MATCH(window_mode, "windowed")) {
-        _data.config.window.mode = NU_WINDOW_MODE_WINDOWED;
+        _system.config.window.mode = NU_WINDOW_MODE_WINDOWED;
     } else if (NU_MATCH(window_mode, "borderless")) {
-        _data.config.window.mode = NU_WINDOW_MODE_BORDERLESS;
+        _system.config.window.mode = NU_WINDOW_MODE_BORDERLESS;
     }
 
-    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_WIDTH, 1600, &_data.config.window.width);
-    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_HEIGHT, 900, &_data.config.window.height);
-    nu_config_get_bool(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_VSYNC, true, &_data.config.window.vsync);
+    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_WIDTH, 1600, &_system.config.window.width);
+    nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_HEIGHT, 900, &_system.config.window.height);
+    nu_config_get_bool(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_VSYNC, true, &_system.config.window.vsync);
 
     /* input */
     const char *input_api;
     nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_API, "", &input_api);
     if (NU_MATCH(input_api, "glfw")) {
-        _data.config.input.api = NU_INPUT_API_GLFW;
+        _system.config.input.api = NU_INPUT_API_GLFW;
     } else {
-        _data.config.input.api = NU_INPUT_API_NONE;
+        _system.config.input.api = NU_INPUT_API_NONE;
     }
 
     const char *input_cursor_mode;
     nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_CURSOR_MODE, "normal", &input_cursor_mode);
     if (NU_MATCH(input_cursor_mode, "normal")) {
-        _data.config.input.cursor_mode = NU_CURSOR_MODE_NORMAL;
+        _system.config.input.cursor_mode = NU_CURSOR_MODE_NORMAL;
     } else if (NU_MATCH(input_cursor_mode, "hidden")) {
-        _data.config.input.cursor_mode = NU_CURSOR_MODE_HIDDEN;
+        _system.config.input.cursor_mode = NU_CURSOR_MODE_HIDDEN;
     } else if (NU_MATCH(input_cursor_mode, "disable")) {
-        _data.config.input.cursor_mode = NU_CURSOR_MODE_DISABLE;
+        _system.config.input.cursor_mode = NU_CURSOR_MODE_DISABLE;
     }
 
     /* renderer */
     const char *renderer_api;
     nu_config_get_string(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, "", &renderer_api);
     if (NU_MATCH(renderer_api, "softrast")) {
-        _data.config.renderer.api = NU_RENDERER_API_SOFTRAST;
+        _system.config.renderer.api = NU_RENDERER_API_SOFTRAST;
     } else if (NU_MATCH(renderer_api, "raytracer")) {
-        _data.config.renderer.api = NU_RENDERER_API_RAYTRACER;
+        _system.config.renderer.api = NU_RENDERER_API_RAYTRACER;
     } else if (NU_MATCH(renderer_api, "vulkan")) {
-        _data.config.renderer.api = NU_RENDERER_API_VULKAN;
+        _system.config.renderer.api = NU_RENDERER_API_VULKAN;
     } else if (NU_MATCH(renderer_api, "opengl")) {
-        _data.config.renderer.api = NU_RENDERER_API_OPENGL;
+        _system.config.renderer.api = NU_RENDERER_API_OPENGL;
     } else {
-        _data.config.renderer.api = NU_RENDERER_API_NONE;
+        _system.config.renderer.api = NU_RENDERER_API_NONE;
     }
 
     return NU_SUCCESS;
@@ -119,7 +119,7 @@ static nu_result_t load_ini_file(void)
 
 nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
 {
-    memset(&_data.config, 0, sizeof(nu_config_t));
+    memset(&_system.config, 0, sizeof(nu_config_t));
 
     if (load_ini_file() != NU_SUCCESS) {
         nu_core_log(NU_WARNING, "Failed to load ini file.\n");
@@ -127,7 +127,7 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
     }
 
     if (callback) {
-        if (callback(&_data.config) != NU_SUCCESS) {
+        if (callback(&_system.config) != NU_SUCCESS) {
             nu_core_log(NU_WARNING, "Error during configuration check.\n");
             nu_config_unload();
             return NU_FAILURE;
@@ -139,8 +139,8 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
 nu_result_t nu_config_unload(void)
 {
     /* free memory from parameters */
-    for (uint32_t i = 0; i < _data.parameter_count; i++) {
-        delete_parameter(&_data.parameters[i]);
+    for (uint32_t i = 0; i < _system.parameter_count; i++) {
+        delete_parameter(&_system.parameters[i]);
     }
 
     return NU_SUCCESS;
@@ -148,14 +148,14 @@ nu_result_t nu_config_unload(void)
 
 nu_config_t nu_config_get(void)
 {
-    return _data.config;
+    return _system.config;
 }
 nu_result_t nu_config_get_string(const char *section, const char *name, const char *default_value, const char **value)
 {
     const char *str = NULL;
-    for (uint32_t i = 0; i < _data.parameter_count; i++) {
-        if (NU_MATCH(section, _data.parameters[i].section) && NU_MATCH(name, _data.parameters[i].name)) {
-            str = _data.parameters[i].value;
+    for (uint32_t i = 0; i < _system.parameter_count; i++) {
+        if (NU_MATCH(section, _system.parameters[i].section) && NU_MATCH(name, _system.parameters[i].name)) {
+            str = _system.parameters[i].value;
             break;
         }
     }
@@ -260,18 +260,18 @@ nu_result_t nu_config_log(void)
     uint32_t max_section = strlen(section_header);
     uint32_t max_name    = strlen(name_header);
     uint32_t max_value   = strlen(value_header);
-    for (uint32_t i = 0; i < _data.parameter_count; i++) {
-        max_section = NU_MAX(max_section, strlen(_data.parameters[i].section));
-        max_name = NU_MAX(max_name, strlen(_data.parameters[i].name));
-        max_value = NU_MAX(max_value, strlen(_data.parameters[i].value));
+    for (uint32_t i = 0; i < _system.parameter_count; i++) {
+        max_section = NU_MAX(max_section, strlen(_system.parameters[i].section));
+        max_name = NU_MAX(max_name, strlen(_system.parameters[i].name));
+        max_value = NU_MAX(max_value, strlen(_system.parameters[i].value));
     }
 
     log_transition_line(max_section, max_name, max_value);
     log_line(max_section, max_name, max_value, section_header, name_header, value_header);
 
     char *current_section = "";
-    for (uint32_t i = 0; i < _data.parameter_count; i++) {
-        const nu_config_parameter_t *param = &_data.parameters[i];
+    for (uint32_t i = 0; i < _system.parameter_count; i++) {
+        const nu_config_parameter_t *param = &_system.parameters[i];
         if (NU_MATCH(current_section, param->section)) {
             log_line(max_section, max_name, max_value, NULL, param->name, param->value);
         } else {

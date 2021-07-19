@@ -17,7 +17,7 @@ namespace nu::utility
         void update();
 
     private:
-        nu_renderer_camera_handle_t m_camera;
+        nu_renderer_camera_t m_camera;
         Transform m_transform;
         Vector3f m_velocity;
 

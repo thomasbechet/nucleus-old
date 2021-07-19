@@ -8,6 +8,6 @@ namespace nu::softrast
     {
         Material(const nu_renderer_material_create_info_t &info);
 
-        nu_renderer_texture_handle_t texture;
+        nu_renderer_texture_t texture;
     };
 }

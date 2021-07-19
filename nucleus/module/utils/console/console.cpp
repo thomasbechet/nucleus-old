@@ -14,24 +14,24 @@ typedef struct {
     std::unique_ptr<Console> console;
     nuutils_command_interface_t command_interface;
     bool command_interface_loaded;
-} nu_console_data_t;
+} nuutils_module_data_t;
 
-static nu_console_data_t _data;
+static nuutils_module_data_t _module;
 
 static nu_result_t on_event(nu_event_id_t id, void *data)
 {
-    return _data.console->onEvent(id, data);
+    return _module.console->onEvent(id, data);
 }
 
 nu_result_t nuutils_console_plugin_initialize(void)
 {
     /* load command interface */
-    _data.command_interface_loaded = false;
+    _module.command_interface_loaded = false;
     nu_result_t result;
-    nu_module_handle_t module;
+    nu_module_t module;
     result = nu_module_get_by_name(NUUTILS_MODULE_NAME, &module);
-    if (result == NU_SUCCESS && nu_module_load_interface(module, NUUTILS_COMMAND_INTERFACE_NAME, &_data.command_interface) == NU_SUCCESS) {
-        _data.command_interface_loaded = true;
+    if (result == NU_SUCCESS && nu_module_load_interface(module, NUUTILS_COMMAND_INTERFACE_NAME, &_module.command_interface) == NU_SUCCESS) {
+        _module.command_interface_loaded = true;
     } else {
         nu_warning(NUUTILS_LOGGER_NAME"Using console without command plugin.\n");
     }
@@ -40,18 +40,18 @@ nu_result_t nuutils_console_plugin_initialize(void)
     nu_event_subscribe(nu_renderer_viewport_resize_event_get_id(), on_event);
 
     // Create console
-    _data.console = std::make_unique<Console>();
+    _module.console = std::make_unique<Console>();
     
     return NU_SUCCESS;
 }
 nu_result_t nuutils_console_plugin_terminate(void)
 {
-    _data.console.reset();
+    _module.console.reset();
     return NU_SUCCESS;
 }
 nu_result_t nuutils_console_plugin_update(void)
 {
-    _data.console->update();
+    _module.console->update();
     return NU_SUCCESS;
 }
 
@@ -204,8 +204,8 @@ void Console::update()
                 m_lineBuffer->add(m_commandLine->getCommand());
 
                 // Execute command
-                if (_data.command_interface_loaded) {
-                    _data.command_interface.execute(m_commandLine->getCommand().c_str());
+                if (_module.command_interface_loaded) {
+                    _module.command_interface.execute(m_commandLine->getCommand().c_str());
                 }
                 
                 // Clear command line

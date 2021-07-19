@@ -28,7 +28,7 @@ typedef enum {
     NU_WINDOW_API_GLFW = 1
 } nu_window_api_t;
 
-NU_API nu_module_handle_t nu_window_get_module_handle(void);
+NU_API nu_module_t nu_window_get_module(void);
 
 NU_API nu_result_t nu_window_set_size(const nu_vec2u_t size);
 NU_API nu_result_t nu_window_get_size(nu_vec2u_t size);

@@ -12,14 +12,14 @@ namespace nu::softrast
     class GUI
     {
     public:
-        nu_renderer_label_handle_t createLabel(const nu_renderer_label_create_info_t &info);
-        void destroyLabel(nu_renderer_label_handle_t handle);
-        void setLabelPosition(nu_renderer_label_handle_t handle, const Vector2i &position);
-        void setLabelText(nu_renderer_label_handle_t handle, const std::string &text);
+        nu_renderer_label_t createLabel(const nu_renderer_label_create_info_t &info);
+        void destroyLabel(nu_renderer_label_t handle);
+        void setLabelPosition(nu_renderer_label_t handle, const Vector2i &position);
+        void setLabelText(nu_renderer_label_t handle, const std::string &text);
 
-        nu_renderer_rectangle_handle_t createRectangle(const nu_renderer_rectangle_create_info_t &info);
-        void destroyRectangle(nu_renderer_rectangle_handle_t handle);
-        void setRectangleRect(nu_renderer_rectangle_handle_t handle, const Rect &rect);
+        nu_renderer_rectangle_t createRectangle(const nu_renderer_rectangle_create_info_t &info);
+        void destroyRectangle(nu_renderer_rectangle_t handle);
+        void setRectangleRect(nu_renderer_rectangle_t handle, const Rect &rect);
 
         void draw(ColorFramebuffer &colorBuffer, const AssetManager &assetManager) const;
 

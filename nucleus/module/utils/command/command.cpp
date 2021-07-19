@@ -10,9 +10,9 @@
 
 typedef struct {
     nu_event_id_t event_id;
-} nuutils_command_data_t;
+} nuutils_module_data_t;
 
-static nuutils_command_data_t _data;
+static nuutils_module_data_t _module;
 
 // String utility functions
 static inline std::string &ltrim(std::string &s) {
@@ -71,7 +71,7 @@ nu_result_t nuutils_command_plugin_initialize(void)
     info.initialize = nuutils_command_event_initialize;
     info.terminate  = nuutils_command_event_terminate;
     info.size       = sizeof(nuutils_command_event_t);
-    if (nu_event_register(&info, &_data.event_id) != NU_SUCCESS) {
+    if (nu_event_register(&info, &_module.event_id) != NU_SUCCESS) {
         nu_warning(NUUTILS_LOGGER_NAME"Failed to initialize command event.\n");
         return NU_FAILURE;
     }
@@ -85,7 +85,7 @@ nu_result_t nuutils_command_plugin_terminate(void)
 
 nu_result_t nuutils_command_get_event_id(nu_event_id_t *id)
 {
-    *id = _data.event_id;
+    *id = _module.event_id;
     return NU_SUCCESS;
 }
 nu_result_t nuutils_command_execute(const char *cstr_command)
@@ -103,7 +103,7 @@ nu_result_t nuutils_command_execute(const char *cstr_command)
         event.args[i] = (char*)nu_malloc(sizeof(char) * (token.size() + 1));
         strcpy(event.args[i], token.c_str());
     }
-    nu_event_post(_data.event_id, &event);
+    nu_event_post(_module.event_id, &event);
 
     //Handle builtin commands
     if (tokens.size() == 2 && tokens.at(0) == "fov") {

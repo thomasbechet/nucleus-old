@@ -7,13 +7,13 @@ OPTION(NU_DEBUG_MEMORY           "Debug memory"            ON)
 
 OPTION(NU_BUILD_CORE             "Build nucleus-core"      ON)
 
-OPTION(NU_BUILD_MODULE_TASK      "Build nucleus-task"      OFF)
-OPTION(NU_BUILD_MODULE_GLFW      "Build nucleus-glfw"      OFF)
-OPTION(NU_BUILD_MODULE_SOFTRAST  "Build nucleus-softrast"  OFF)
+OPTION(NU_BUILD_MODULE_TASK      "Build nucleus-task"      ON)
+OPTION(NU_BUILD_MODULE_GLFW      "Build nucleus-glfw"      ON)
+OPTION(NU_BUILD_MODULE_SOFTRAST  "Build nucleus-softrast"  ON)
 OPTION(NU_BUILD_MODULE_RAYTRACER "Build nucleus-raytracer" OFF)
 OPTION(NU_BUILD_MODULE_OPENGL    "Build nucleus-opengl"    OFF)
 OPTION(NU_BUILD_MODULE_VULKAN    "Build nucleus-vulkan"    OFF)
-OPTION(NU_BUILD_MODULE_UTILS     "Build nucleus-utils"     OFF)
+OPTION(NU_BUILD_MODULE_UTILS     "Build nucleus-utils"     ON)
 
 # Add compile definitions
 IF (NU_DEBUG)

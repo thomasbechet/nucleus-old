@@ -14,7 +14,7 @@ struct MeshVertices
     std::vector<std::array<float, 3>> colors;
 };
 
-nu_result_t load_mesh_from_obj(nu_renderer_mesh_handle_t *handle, const char *filename)
+nu_result_t load_mesh_from_obj(nu_renderer_mesh_t *handle, const char *filename)
 {
     tinyobj::attrib_t attrib;
     std::vector<tinyobj::shape_t> shapes;
@@ -94,7 +94,7 @@ nu_result_t load_mesh_from_obj(nu_renderer_mesh_handle_t *handle, const char *fi
 
     return NU_SUCCESS;
 }
-nu_result_t load_texture(nu_renderer_texture_handle_t *handle, const char *filename)
+nu_result_t load_texture(nu_renderer_texture_t *handle, const char *filename)
 {
     return NU_SUCCESS;
 }

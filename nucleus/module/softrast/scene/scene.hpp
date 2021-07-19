@@ -17,9 +17,9 @@ namespace nu::softrast
         void setCameraFov(float fov);
         void setCameraView(const Vector3f &eye, const Vector3f &forward, const Vector3f &up);
 
-        nu_renderer_model_handle_t createModel(const nu_renderer_model_create_info_t &info);
-        void destroyModel(nu_renderer_model_handle_t handle);
-        void setModelTransform(nu_renderer_model_handle_t handle, const nu::Matrix4f &transform);
+        nu_renderer_model_t createModel(const nu_renderer_model_create_info_t &info);
+        void destroyModel(nu_renderer_model_t handle);
+        void setModelTransform(nu_renderer_model_t handle, const nu::Matrix4f &transform);
 
         void draw(ColorFramebuffer &colorBuffer, Framebuffer<float> &depthBuffer, const AssetManager &assetManager) const;
 

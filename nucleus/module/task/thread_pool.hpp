@@ -21,9 +21,9 @@ namespace nucleus
         void start(unsigned workerCount) noexcept;
         void stop() noexcept;
 
-        nu_task_handle_t create_task() noexcept;
-        void perform(nu_task_handle_t task, const nu_task_job_t *jobs, uint32_t count);
-        void wait_task(nu_task_handle_t task);
+        nu_task_t create_task() noexcept;
+        void perform(nu_task_t task, const nu_task_job_t *jobs, uint32_t count);
+        void wait_task(nu_task_t task);
 
     private:
         void worker_main(uint32_t id) noexcept;

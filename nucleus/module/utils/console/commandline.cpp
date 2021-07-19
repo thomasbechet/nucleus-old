@@ -2,7 +2,7 @@
 
 using namespace nu::utility;
 
-CommandLine::CommandLine(nu_renderer_font_handle_t font) : Line(font) 
+CommandLine::CommandLine(nu_renderer_font_t font) : Line(font) 
 {
     updateText();
 }

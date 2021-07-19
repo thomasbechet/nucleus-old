@@ -7,11 +7,11 @@
 #define NU_LOGGER_INPUT_NAME "[INPUT] "
 
 typedef struct {
-    nu_module_handle_t module;
+    nu_module_t module;
     nu_input_interface_t interface;
-} nu_input_data_t;
+} nu_system_data_t;
 
-static nu_input_data_t _data;
+static nu_system_data_t _system;
 
 nu_result_t nu_input_initialize(void)
 {
@@ -22,21 +22,21 @@ nu_result_t nu_input_initialize(void)
 
     /* load module */
     if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
-        _data.module = nu_window_get_module_handle(); /* copy module handle */
+        _system.module = nu_window_get_module(); /* copy module handle */
     } else {
         nu_warning(NU_LOGGER_INPUT_NAME"Unsupported api.\n");
         return NU_FAILURE;
     }
 
     /* load input interface */
-    result = nu_module_load_interface(_data.module, NU_INPUT_INTERFACE_NAME, &_data.interface);
+    result = nu_module_load_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_INPUT_NAME"Failed to load interface.\n");
         return result;
     }
 
     /* initialize input system */
-    result = _data.interface.initialize();
+    result = _system.interface.initialize();
     if (result != NU_SUCCESS) {
         nu_warning(NU_LOGGER_INPUT_NAME"Failed to initialize input system.\n");
         return result;
@@ -46,51 +46,51 @@ nu_result_t nu_input_initialize(void)
 }
 nu_result_t nu_input_terminate(void)
 {
-    return _data.interface.terminate();
+    return _system.interface.terminate();
 }
 nu_result_t nu_input_start(void)
 {
-    return _data.interface.start();
+    return _system.interface.start();
 }
 nu_result_t nu_input_stop(void)
 {
-    return _data.interface.stop();
+    return _system.interface.stop();
 }
 nu_result_t nu_input_update(void)
 {
-    return _data.interface.update();
+    return _system.interface.update();
 }
 
-nu_module_handle_t nu_input_get_module_handle(void)
+nu_module_t nu_input_get_module(void)
 {
-    return _data.module;
+    return _system.module;
 }
 
 nu_result_t nu_input_get_keyboard_state(nu_keyboard_t button, nu_button_state_t *state)
 {
-    return _data.interface.get_keyboard_state(button, state);
+    return _system.interface.get_keyboard_state(button, state);
 }
 nu_result_t nu_input_get_keyboard_text(const char **text, uint32_t *length)
 {
-    return _data.interface.get_keyboard_text(text, length);
+    return _system.interface.get_keyboard_text(text, length);
 }
 nu_result_t nu_input_get_mouse_state(nu_mouse_t button, nu_button_state_t *state)
 {
-    return _data.interface.get_mouse_state(button, state);
+    return _system.interface.get_mouse_state(button, state);
 }
 nu_result_t nu_input_get_mouse_motion(nu_vec2f_t motion)
 {
-    return _data.interface.get_mouse_motion(motion);
+    return _system.interface.get_mouse_motion(motion);
 }
 nu_result_t nu_input_get_mouse_scroll(nu_vec2f_t scroll)
 {
-    return _data.interface.get_mouse_scroll(scroll);
+    return _system.interface.get_mouse_scroll(scroll);
 }
 nu_result_t nu_input_get_cursor_mode(nu_cursor_mode_t *mode)
 {
-    return _data.interface.get_cursor_mode(mode);
+    return _system.interface.get_cursor_mode(mode);
 }
 nu_result_t nu_input_set_cursor_mode(nu_cursor_mode_t mode)
 {
-    return _data.interface.set_cursor_mode(mode);
+    return _system.interface.set_cursor_mode(mode);
 }

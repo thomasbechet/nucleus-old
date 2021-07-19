@@ -7,7 +7,7 @@ namespace nu::utility
     class CommandLine : public Line
     {
     public:
-        CommandLine(nu_renderer_font_handle_t font);
+        CommandLine(nu_renderer_font_t font);
 
         void removeAt(uint32_t index);
         void appendAt(uint32_t index, const std::string &str);

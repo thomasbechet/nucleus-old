@@ -4,44 +4,44 @@
 
 using namespace nu::softrast;
 
-nu_renderer_label_handle_t GUI::createLabel(const nu_renderer_label_create_info_t &info)
+nu_renderer_label_t GUI::createLabel(const nu_renderer_label_create_info_t &info)
 {
     uint32_t id = m_nextId++;
     m_labels.emplace(id, Label(info));
-    nu_renderer_label_handle_t handle;
+    nu_renderer_label_t handle;
     NU_HANDLE_SET_ID(handle, id);
     return handle;
 }
-void GUI::destroyLabel(nu_renderer_label_handle_t handle)
+void GUI::destroyLabel(nu_renderer_label_t handle)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     m_labels.erase(id);
 }
-void GUI::setLabelPosition(nu_renderer_label_handle_t handle, const Vector2i &position)
+void GUI::setLabelPosition(nu_renderer_label_t handle, const Vector2i &position)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     m_labels.at(id).position = position;
 }
-void GUI::setLabelText(nu_renderer_label_handle_t handle, const std::string &text)
+void GUI::setLabelText(nu_renderer_label_t handle, const std::string &text)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     m_labels.at(id).text = text;
 }
 
-nu_renderer_rectangle_handle_t GUI::createRectangle(const nu_renderer_rectangle_create_info_t &info)
+nu_renderer_rectangle_t GUI::createRectangle(const nu_renderer_rectangle_create_info_t &info)
 {
     uint32_t id = m_nextId++;
     m_rectangles.emplace(id, Rectangle(info));
-    nu_renderer_rectangle_handle_t handle;
+    nu_renderer_rectangle_t handle;
     NU_HANDLE_SET_ID(handle, id);
     return handle;
 }
-void GUI::destroyRectangle(nu_renderer_rectangle_handle_t handle)
+void GUI::destroyRectangle(nu_renderer_rectangle_t handle)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     m_rectangles.erase(id);
 }
-void GUI::setRectangleRect(nu_renderer_rectangle_handle_t handle, const Rect &rect)
+void GUI::setRectangleRect(nu_renderer_rectangle_t handle, const Rect &rect)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     m_rectangles.at(id).rect = rect;

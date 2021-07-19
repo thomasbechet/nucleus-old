@@ -4,6 +4,7 @@
 #include <nucleus/core/common/common.h>
 
 NU_DECLARE_HANDLE(nu_array_t);
+typedef bool (*nu_array_find_pfn_t)(const void *user, const void *object);
 
 NU_API void nu_array_allocate(uint32_t object_size, nu_array_t *array);
 NU_API void nu_array_allocate_capacity(uint32_t object_size, uint32_t capacity, nu_array_t *array);
@@ -14,6 +15,7 @@ NU_API const void *nu_array_get_data_const(nu_array_t array);
 NU_API void nu_array_clear(nu_array_t array);
 NU_API void *nu_array_get(nu_array_t array, uint32_t index);
 NU_API void *nu_array_get_last(nu_array_t array);
+NU_API bool nu_array_find_index(nu_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *index);
 NU_API uint32_t nu_array_get_size(nu_array_t array);
 NU_API uint32_t nu_array_get_capacity(nu_array_t array);
 NU_API uint32_t nu_array_get_allocated_memory(nu_array_t array);

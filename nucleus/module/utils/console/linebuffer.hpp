@@ -10,7 +10,7 @@ namespace nu::utility
     class LineBuffer
     {
     public:
-        LineBuffer(nu_renderer_font_handle_t font, uint32_t maxLine);
+        LineBuffer(nu_renderer_font_t font, uint32_t maxLine);
 
         void add(const std::string &text);
         void clear();
@@ -22,7 +22,7 @@ namespace nu::utility
 
         Vector2i m_position;
         std::vector<std::unique_ptr<Line>> m_lines;
-        nu_renderer_font_handle_t m_font;
+        nu_renderer_font_t m_font;
         bool m_visible = true;
         uint32_t m_labelHeight;
         uint32_t m_maxLine;

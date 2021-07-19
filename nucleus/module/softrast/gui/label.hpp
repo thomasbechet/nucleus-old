@@ -10,7 +10,7 @@ namespace nu::softrast
     {
         Label(const nu_renderer_label_create_info_t &info);
 
-        nu_renderer_font_handle_t font;
+        nu_renderer_font_t font;
         std::string text;
         Vector2i position;
     };

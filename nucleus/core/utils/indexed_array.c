@@ -1,7 +1,6 @@
 #include <nucleus/core/utils/indexed_array.h>
 
 #include <nucleus/core/coresystem/memory/memory.h>
-#include <nucleus/core/utils/array.h>
 
 #define INDEXED_ARRAY_DEFAULT_CAPACITY 10
 #define FREE_INDEX_FLAG 0x0
@@ -123,6 +122,24 @@ void *nu_indexed_array_get(nu_indexed_array_t array, uint32_t id)
     uint32_t index = header->indexes[id].id_to_index;
     NU_ASSERT(index != FREE_INDEX_FLAG);
     return nu_array_get(header->data, index - 1);
+}
+bool nu_indexed_array_find_id(nu_indexed_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *id)
+{
+    nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
+    uint32_t index;
+    if (!nu_array_find_index(header->data, find_pfn, user, &index)) {
+        return false;
+    }
+    *id = header->indexes[index].index_to_id;
+    NU_ASSERT(*id != FREE_INDEX_FLAG);
+    return true;
+}
+void nu_indexed_array_clear(nu_indexed_array_t array)
+{
+    nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
+    header->size = 0;
+    nu_array_clear(header->data);
+    nu_array_clear(header->free_ids);
 }
 uint32_t nu_indexed_array_get_size(nu_indexed_array_t array)
 {

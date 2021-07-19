@@ -9,7 +9,7 @@ namespace nu::utility
     class Line
     {
     public:
-        Line(nu_renderer_font_handle_t font);
+        Line(nu_renderer_font_t font);
         ~Line();
 
         void setPosition(const Vector2i &position);
@@ -21,7 +21,7 @@ namespace nu::utility
         void updateLabelText();
 
     protected:
-        nu_renderer_label_handle_t m_handle;
+        nu_renderer_label_t m_handle;
         std::string m_text;
         Vector2i m_position;
         bool m_visible = true;

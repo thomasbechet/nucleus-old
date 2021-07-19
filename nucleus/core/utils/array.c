@@ -83,6 +83,17 @@ void *nu_array_get_last(nu_array_t array)
     NU_ASSERT(header->size > 0);
     return header->data + header->object_size * (header->size - 1);
 }
+bool nu_array_find_index(nu_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *index)
+{
+    nu_array_header_t *header = (nu_array_header_t*)array;
+    for (uint32_t i = 0; i < header->size; i++) {
+        if (find_pfn(user, &header->data[i * header->object_size])) {
+            *index = i;
+            return true;
+        }
+    }
+    return false;
+}
 uint32_t nu_array_get_size(nu_array_t array)
 {
     return ((nu_array_header_t*)array)->size;

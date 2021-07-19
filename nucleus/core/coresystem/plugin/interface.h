@@ -11,6 +11,6 @@ typedef struct {
     nu_result_t (*late_update)(void);
 } nu_plugin_interface_t;
 
-NU_API nu_result_t nu_plugin_require(nu_module_handle_t module, const char *plugin);
+NU_API nu_result_t nu_plugin_require(nu_module_t module, const char *plugin);
 
 #endif

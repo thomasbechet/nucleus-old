@@ -25,7 +25,7 @@ typedef enum {
     NU_INPUT_API_GLFW = 1
 } nu_input_api_t;
 
-NU_API nu_module_handle_t nu_input_get_module_handle(void);
+NU_API nu_module_t nu_input_get_module(void);
 
 NU_API nu_result_t nu_input_get_keyboard_state(nu_keyboard_t button, nu_button_state_t *state);
 NU_API nu_result_t nu_input_get_keyboard_text(const char **text, uint32_t *length);

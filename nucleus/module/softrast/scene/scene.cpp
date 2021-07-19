@@ -22,20 +22,20 @@ void Scene::setCameraView(const Vector3f &eye, const Vector3f &forward, const Ve
     m_camera.view = Matrix4f::lookAt(eye, eye + forward, up);
 }
 
-nu_renderer_model_handle_t Scene::createModel(const nu_renderer_model_create_info_t &info)
+nu_renderer_model_t Scene::createModel(const nu_renderer_model_create_info_t &info)
 {
     uint32_t id = m_nextId++;
     m_models.emplace(id, Model(info));
-    nu_renderer_model_handle_t handle;
+    nu_renderer_model_t handle;
     NU_HANDLE_SET_ID(handle, id);
     return handle;
 }
-void Scene::destroyModel(nu_renderer_model_handle_t handle)
+void Scene::destroyModel(nu_renderer_model_t handle)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     m_models.erase(id);
 }
-void Scene::setModelTransform(nu_renderer_model_handle_t handle, const Matrix4f &transform)
+void Scene::setModelTransform(nu_renderer_model_t handle, const Matrix4f &transform)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
     m_models.at(id).transform = transform;

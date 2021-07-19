@@ -19,7 +19,7 @@ namespace nu::utility
     private:
         void updateRectangle();
 
-        nu_renderer_rectangle_handle_t m_handle;
+        nu_renderer_rectangle_t m_handle;
         Rect m_rect;
         float m_delta;
         float m_frequency;

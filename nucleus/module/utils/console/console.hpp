@@ -30,7 +30,7 @@ namespace nu::utility
         uint32_t m_selectedOldCommand;
         std::unique_ptr<Cursor> m_cursor;
         uint32_t m_selectedCharacter;
-        nu_renderer_font_handle_t m_font;
-        nu_renderer_rectangle_handle_t m_rectangle;
+        nu_renderer_font_t m_font;
+        nu_renderer_rectangle_t m_rectangle;
     };
 }

@@ -32,56 +32,56 @@ void Engine::render()
     m_colorBuffer.display(m_windowInterface);
 }
 
-nu_renderer_mesh_handle_t Engine::createMesh(const nu_renderer_mesh_create_info_t &info)
+nu_renderer_mesh_t Engine::createMesh(const nu_renderer_mesh_create_info_t &info)
 {
     return m_assetManager.createMesh(info);
 }
-void Engine::destroyMesh(nu_renderer_mesh_handle_t handle)
+void Engine::destroyMesh(nu_renderer_mesh_t handle)
 {
     m_assetManager.destroyMesh(handle);
 }
 
-nu_renderer_texture_handle_t Engine::createTexture(const nu_renderer_texture_create_info_t &info)
+nu_renderer_texture_t Engine::createTexture(const nu_renderer_texture_create_info_t &info)
 {
     return m_assetManager.createTexture(info);
 }
-void Engine::destroyTexture(nu_renderer_texture_handle_t handle)
+void Engine::destroyTexture(nu_renderer_texture_t handle)
 {
     m_assetManager.destroyTexture(handle);
 }
 
-nu_renderer_material_handle_t Engine::createMaterial(const nu_renderer_material_create_info_t &info)
+nu_renderer_material_t Engine::createMaterial(const nu_renderer_material_create_info_t &info)
 {
     return m_assetManager.createMaterial(info);
 }
-void Engine::destroyMaterial(nu_renderer_material_handle_t handle)
+void Engine::destroyMaterial(nu_renderer_material_t handle)
 {
     m_assetManager.destroyMaterial(handle);
 }
 
-nu_renderer_font_handle_t Engine::createFont(const nu_renderer_font_create_info_t &info)
+nu_renderer_font_t Engine::createFont(const nu_renderer_font_create_info_t &info)
 {
     return m_assetManager.createFont(info);
 }
-void Engine::destroyFont(nu_renderer_font_handle_t handle)
+void Engine::destroyFont(nu_renderer_font_t handle)
 {
     m_assetManager.destroyFont(handle);
 }
-Vector2u Engine::getFontTextSize(nu_renderer_font_handle_t handle, const std::string &text)
+Vector2u Engine::getFontTextSize(nu_renderer_font_t handle, const std::string &text)
 {
     const Font &font = m_assetManager.getFont(handle);
     return font.getTextSize(text);
 }
 
-nu_renderer_model_handle_t Engine::createModel(const nu_renderer_model_create_info_t &info)
+nu_renderer_model_t Engine::createModel(const nu_renderer_model_create_info_t &info)
 {
     return m_scene.createModel(info);
 }
-void Engine::destroyModel(nu_renderer_model_handle_t handle)
+void Engine::destroyModel(nu_renderer_model_t handle)
 {
     m_scene.destroyModel(handle);
 }
-void Engine::setModelTransform(nu_renderer_model_handle_t handle, const Matrix4f &transform)
+void Engine::setModelTransform(nu_renderer_model_t handle, const Matrix4f &transform)
 {
     m_scene.setModelTransform(handle, transform);
 }
@@ -95,32 +95,32 @@ void Engine::setCameraView(const Vector3f &eye, const Vector3f &forward, const V
     m_scene.setCameraView(eye, forward, up);
 }
 
-nu_renderer_label_handle_t Engine::createLabel(const nu_renderer_label_create_info_t &info)
+nu_renderer_label_t Engine::createLabel(const nu_renderer_label_create_info_t &info)
 {
     return m_gui.createLabel(info);
 }
-void Engine::destroyLabel(nu_renderer_label_handle_t handle)
+void Engine::destroyLabel(nu_renderer_label_t handle)
 {
     m_gui.destroyLabel(handle);
 }
-void Engine::setLabelPosition(nu_renderer_label_handle_t handle, const Vector2i &position)
+void Engine::setLabelPosition(nu_renderer_label_t handle, const Vector2i &position)
 {
     m_gui.setLabelPosition(handle, position);
 }
-void Engine::setLabelText(nu_renderer_label_handle_t handle, const std::string &text)
+void Engine::setLabelText(nu_renderer_label_t handle, const std::string &text)
 {
     m_gui.setLabelText(handle, text);
 }
 
-nu_renderer_rectangle_handle_t Engine::createRectangle(const nu_renderer_rectangle_create_info_t &info)
+nu_renderer_rectangle_t Engine::createRectangle(const nu_renderer_rectangle_create_info_t &info)
 {
     return m_gui.createRectangle(info);
 }
-void Engine::destroyRectangle(nu_renderer_rectangle_handle_t handle)
+void Engine::destroyRectangle(nu_renderer_rectangle_t handle)
 {
     m_gui.destroyRectangle(handle);
 }
-void Engine::setRectangleRect(nu_renderer_rectangle_handle_t handle, const Rect &rect)
+void Engine::setRectangleRect(nu_renderer_rectangle_t handle, const Rect &rect)
 {
     m_gui.setRectangleRect(handle, rect);
 }
