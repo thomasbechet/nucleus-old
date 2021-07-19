@@ -42,7 +42,7 @@ static nu_result_t load_function(const nu_module_t *module, const char *function
     *function = (nu_pfn_t)GetProcAddress((HMODULE)module->handle, function_name);
     SetErrorMode(old_mode);
 #elif defined(NU_PLATFORM_UNIX)
-    *function = (nu_pfn_t)dlsym(module->handle, function_name);
+    *(void**)(&(*function)) = dlsym(module->handle, function_name);
 #endif
 
     if (!*function) {
