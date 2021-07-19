@@ -38,6 +38,7 @@ typedef struct {
     nu_system_states_t states;
     float delta_time;
     bool should_stop;
+    nu_timer_t timer;
 } nu_context_data_t;
 
 static nu_context_data_t _context;
@@ -128,10 +129,16 @@ static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
     nu_core_log(NU_INFO, "===============================================\n");
     nu_core_log(NU_INFO, "Running context...\n");
 
+    /* allocate memory */
+    nu_timer_allocate(&_context.timer);
+
     return result;
 }
 static nu_result_t nu_context_terminate(void)
 {
+    /* free resources */
+    nu_timer_free(_context.timer);
+
     /* stop systems */
     nu_core_log(NU_INFO, "=============== Stopping systems ==============\n");
     if (_context.states.renderer == NU_INIT_STATE_STARTED) {
@@ -253,8 +260,7 @@ static nu_result_t nu_context_run(void)
 
     delta = accumulator = 0.0f;
 
-    nu_timer_t timer;
-    nu_timer_start(&timer);
+    nu_timer_start(_context.timer);
 
     if (_context.callback.start)
         _context.callback.start();
@@ -264,8 +270,8 @@ static nu_result_t nu_context_run(void)
 
     while (!_context.should_stop) {
         /* compute delta */
-        delta = nu_timer_get_time_elapsed(&timer);
-        nu_timer_start(&timer);
+        delta = nu_timer_get_time_elapsed(_context.timer);
+        nu_timer_start(_context.timer);
 
         if (delta > MAXIMUM_TIMESTEP)
             delta = MAXIMUM_TIMESTEP; /* slowing down */

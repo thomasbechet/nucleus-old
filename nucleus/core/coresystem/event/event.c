@@ -1,50 +1,49 @@
 #include <nucleus/core/coresystem/event/event.h>
 
 #include <nucleus/core/coresystem/memory/memory.h>
-
-#define MAX_EVENT_COUNT 128
-#define MAX_SUBSCRIBE_COUNT 128
-#define MAX_MESSAGE_PER_EVENT_COUNT 64 
+#include <nucleus/core/utils/array.h>
 
 typedef struct {
-    nu_event_callback_pfn_t subscribers[MAX_SUBSCRIBE_COUNT];
-    uint32_t subscriber_count;
-    void *messages;
-    uint32_t message_count;
-    uint32_t message_size;
+    nu_array_t subscribers;
+    nu_array_t messages;
     nu_event_initialize_pfn_t initialize;
     nu_event_terminate_pfn_t terminate;
-} nu_event_buffer_t;
+} nu_event_data_t;
 
 typedef struct {
-    nu_event_buffer_t events[MAX_EVENT_COUNT];
-    uint32_t event_count;
+    nu_array_t events;
 } nu_system_data_t;
 
 static nu_system_data_t _system;
 
 nu_result_t nu_event_initialize(void)
 {
-    /* initialize data */
-    _system.event_count = 0;
+    /* allocate resources */
+    nu_array_allocate(sizeof(nu_event_data_t), &_system.events);
 
     return NU_SUCCESS;
 }
 nu_result_t nu_event_terminate(void)
 {
     /* terminate all messages */
-    for (uint32_t ei = 0; ei < _system.event_count; ei++) {
-        for (uint32_t mi = 0; mi < _system.events[ei].message_count; mi++) {
-            void *data = (void*)((char*)_system.events[ei].messages + mi * _system.events[ei].message_size);
-            if (_system.events[ei].terminate) _system.events[ei].terminate(data);
+    uint32_t event_count = nu_array_get_size(_system.events);
+    nu_event_data_t *events = (nu_event_data_t*)nu_array_get_data(_system.events);
+    for (uint32_t ei = 0; ei < event_count; ei++) {
+        uint32_t message_count = nu_array_get_size(events[ei].messages);
+        for (uint32_t mi = 0; mi < message_count; mi++) {
+            if (events[ei].terminate) {
+                events[ei].terminate(nu_array_get(events[ei].messages, mi));
+            }
         }
-        _system.events[ei].message_count = 0;
+        nu_array_clear(events[ei].messages);
     }
 
     /* free message buffers */
-    for (uint32_t i = 0; i < _system.event_count; i++) {
-        nu_free(_system.events[i].messages);
+    for (uint32_t i = 0; i < event_count; i++) {
+        nu_array_free(events[i].messages);
+        nu_array_free(events[i].subscribers);
     }
+    nu_array_free(_system.events);
 
     return NU_SUCCESS;
 }
@@ -58,16 +57,25 @@ nu_result_t nu_event_stop(void)
 }
 nu_result_t nu_event_dispatch_all(void)
 {
-    for (uint32_t ei = 0; ei < _system.event_count; ei++) {
-        for (uint32_t mi = 0; mi < _system.events[ei].message_count; mi++) {
-            void *data = (void*)((char*)_system.events[ei].messages + mi * _system.events[ei].message_size);
-            for (uint32_t si = 0; si < _system.events[ei].subscriber_count; si++) {
-                _system.events[ei].subscribers[si](ei, data);
+    uint32_t event_count = nu_array_get_size(_system.events);
+    nu_event_data_t *events = (nu_event_data_t*)nu_array_get_data(_system.events);
+    for (uint32_t ei = 0; ei < event_count; ei++) {
+        uint32_t subscriber_count = nu_array_get_size(events[ei].subscribers);
+        uint32_t message_count = nu_array_get_size(events[ei].messages);
+        nu_event_callback_pfn_t *subscribers = (nu_event_callback_pfn_t*)nu_array_get_data(events[ei].subscribers);
+        for (uint32_t mi = 0; mi < message_count; mi++) {
+            /* send message */
+            void *data = nu_array_get(events[ei].messages, mi);
+            for (uint32_t si = 0; si < subscriber_count; si++) {
+                subscribers[si](ei, data);
             }
             /* terminate message */
-            if (_system.events[ei].terminate) _system.events[ei].terminate(data);
+            if (events[ei].terminate) {
+                events[ei].terminate(data);
+            }
         }
-        _system.events[ei].message_count = 0;
+        /* clear messages */
+        nu_array_clear(events[ei].messages);
     }
 
     return NU_SUCCESS;
@@ -75,33 +83,38 @@ nu_result_t nu_event_dispatch_all(void)
 
 nu_result_t nu_event_register(const nu_event_register_info_t *info, nu_event_id_t *id)
 {
-    if (_system.event_count >= MAX_EVENT_COUNT) return NU_FAILURE;
+    /* create event */
+    nu_event_data_t event;
+    nu_array_allocate(info->size, &event.messages);
+    nu_array_allocate(sizeof(nu_event_callback_pfn_t), &event.subscribers);
+    event.initialize = info->initialize;
+    event.terminate  = info->terminate;
 
-    _system.events[_system.event_count].message_size  = info->size;
-    _system.events[_system.event_count].message_count = 0;
-    _system.events[_system.event_count].messages      = nu_malloc(info->size * MAX_MESSAGE_PER_EVENT_COUNT);
-    _system.events[_system.event_count].initialize    = info->initialize;
-    _system.events[_system.event_count].terminate     = info->terminate;
+    /* save the id */
+    *id = nu_array_get_size(_system.events);
 
-    *id = _system.event_count++;
+    /* add the event */
+    nu_array_push(_system.events, &event);
 
     return NU_SUCCESS;
 }
 nu_result_t nu_event_post(nu_event_id_t id, void *data)
 {
-    void *dest = (void*)((char*)_system.events[id].messages + _system.events[id].message_count * _system.events[id].message_size);
-    memcpy(dest, data, _system.events[id].message_size);
-    _system.events[id].message_count++;
+    /* add the message */
+    nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
+    nu_array_push(event->messages, data);
 
     /* initialize message */
-    if (_system.events[id].initialize) _system.events[id].initialize(data);
+    if (event->initialize) {
+        event->initialize(data);
+    }
 
     return NU_SUCCESS;
 }
 nu_result_t nu_event_subscribe(nu_event_id_t id, nu_event_callback_pfn_t callback)
 {
-    _system.events[id].subscribers[_system.events[id].subscriber_count] = callback;
-    _system.events[id].subscriber_count++;
+    nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
+    nu_array_push(event->subscribers, &callback);
 
     return NU_SUCCESS;
 }

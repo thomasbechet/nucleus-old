@@ -3,6 +3,7 @@
 #include <nucleus/core/coresystem/memory/memory.h>
 #include <nucleus/core/coresystem/logger/logger.h>
 #include <nucleus/core/utils/indexed_array.h>
+#include <nucleus/core/utils/string.h>
 
 #define NU_MODULE_GET_INFO_NAME      "nu_module_get_info"
 #define NU_MODULE_GET_INTERFACE_NAME "nu_module_get_interface"
@@ -23,7 +24,7 @@ typedef nu_result_t (*nu_module_interface_loader_pfn_t)(const char*, void*);
 
 typedef struct {
     nu_module_info_t info;
-    char path[MAX_MODULE_PATH_SIZE];
+    nu_string_t path;
     void *handle;
     nu_module_interface_loader_pfn_t interface_loader;
 } nu_module_data_t;
@@ -61,6 +62,8 @@ static nu_result_t unload_module(const nu_module_data_t *module)
 #elif defined(NU_PLATFORM_UNIX)
     dlclose(module->handle);
 #endif
+
+    nu_string_free(module->path);
 
     return NU_SUCCESS;
 }
@@ -100,7 +103,7 @@ static nu_result_t load_module(const char *filename, nu_module_data_t *module)
     }
 
     /* copy path */
-    strncpy(module->path, filename, MAX_MODULE_PATH_SIZE - 1);
+    nu_string_allocate_from(filename, &module->path);
 
     /* load module info */
     nu_module_info_loader_pfn_t module_get_info;
@@ -143,7 +146,6 @@ nu_result_t nu_module_terminate(void)
     for (uint32_t i = 0; i < size; i++) {
         unload_module(&data[i]);
     }
-    nu_indexed_array_clear(_system.modules);
 
     /* free resources */
     nu_indexed_array_free(_system.modules);

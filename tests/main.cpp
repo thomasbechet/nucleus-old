@@ -55,6 +55,7 @@ static nu_result_t on_start(void)
     // nu_string_free(str);
 
     // nu_timer_t t;
+    // nu_timer_allocate(&t);
     
     // nu_array_t ar;
     // uint32_t v = 555;
@@ -86,6 +87,7 @@ static nu_result_t on_start(void)
     // stest p = *(stest*)nu_array_get_last(ar);
     // nu_info("%d\n", p.v);
     // nu_array_free(ar);
+    // nu_timer_free(t);
 
 
     // nu_indexed_array_t ar;
@@ -98,41 +100,41 @@ static nu_result_t on_start(void)
     // nu_info("memory         %d\n", nu_indexed_array_get_allocated_memory(ar));
     // nu_indexed_array_free(ar);
 
-    nu_indexed_array_t iar;
-    nu_array_t ids;
-    stest s;
-    nu_indexed_array_allocate(sizeof(uint32_t), &iar);
-    nu_array_allocate(sizeof(stest), &ids);
+    // nu_indexed_array_t iar;
+    // nu_array_t ids;
+    // stest s;
+    // nu_indexed_array_allocate(sizeof(uint32_t), &iar);
+    // nu_array_allocate(sizeof(stest), &ids);
 
-    for (uint32_t i = 0; i < 10000000; i++) {
-        uint32_t len = nu_array_get_size(ids);
-        if (rand() % 3 != 0) {
-            /* add */
-            uint32_t id;
-            s.v  = rand() % 5000;
-            nu_indexed_array_add(iar, &s.v, &id);
-            s.id = id;
-            nu_array_push(ids, &s);
-        } else if (len > 0) {
-            /* remove */
-            nu_array_swap_last(ids, rand() % len);
-            stest s = *(stest*)nu_array_get_last(ids);
-            nu_array_pop(ids);
+    // for (uint32_t i = 0; i < 10000000; i++) {
+    //     uint32_t len = nu_array_get_size(ids);
+    //     if (rand() % 3 != 0) {
+    //         /* add */
+    //         uint32_t id;
+    //         s.v  = rand() % 5000;
+    //         nu_indexed_array_add(iar, &s.v, &id);
+    //         s.id = id;
+    //         nu_array_push(ids, &s);
+    //     } else if (len > 0) {
+    //         /* remove */
+    //         nu_array_swap_last(ids, rand() % len);
+    //         stest s = *(stest*)nu_array_get_last(ids);
+    //         nu_array_pop(ids);
 
-            /* test */
-            uint32_t va = *(uint32_t*)nu_indexed_array_get(iar, s.id);
-            NU_ASSERT(s.v == va);
-            nu_indexed_array_remove(iar, s.id);
-        }
-    }
+    //         /* test */
+    //         uint32_t va = *(uint32_t*)nu_indexed_array_get(iar, s.id);
+    //         NU_ASSERT(s.v == va);
+    //         nu_indexed_array_remove(iar, s.id);
+    //     }
+    // }
 
-    nu_info("memory: %d\n", nu_indexed_array_get_allocated_memory(iar));
-    nu_info("size:   %d\n", nu_indexed_array_get_size(iar));
-    nu_info("index:  %d\n", nu_indexed_array_get_index_capacity(iar));
-    nu_info("data:   %d\n", nu_indexed_array_get_capacity(iar));
+    // nu_info("memory: %d\n", nu_indexed_array_get_allocated_memory(iar));
+    // nu_info("size:   %d\n", nu_indexed_array_get_size(iar));
+    // nu_info("index:  %d\n", nu_indexed_array_get_index_capacity(iar));
+    // nu_info("data:   %d\n", nu_indexed_array_get_capacity(iar));
 
-    nu_indexed_array_free(iar);
-    nu_array_free(ids);
+    // nu_indexed_array_free(iar);
+    // nu_array_free(ids);
 
     nu_module_t module;
     nu_module_load("engine/module/nucleus-utils", &module);

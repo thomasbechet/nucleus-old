@@ -116,7 +116,9 @@ void nu_array_push(nu_array_t array, const void *object)
         header->capacity *= 3;
         header->data = nu_realloc(header->data, header->object_size * header->capacity);
     }
-    memcpy(header->data + header->object_size * (header->size - 1), object, header->object_size);
+    if (object) {
+        memcpy(header->data + header->object_size * (header->size - 1), object, header->object_size);
+    }
 }
 bool nu_array_pop(nu_array_t array)
 {
