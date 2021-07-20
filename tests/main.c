@@ -35,7 +35,6 @@ typedef struct {
     uint32_t id;
     uint32_t v;
 } stest;
-#include <vector>
 static nu_result_t on_start(void)
 {
     // nu_string_t str, token;
@@ -270,9 +269,9 @@ static nu_result_t on_start(void)
     nu_mat4f_identity(model_info.transform);
     
     nu_vec3f_t translation0 = {0.0f, -4.0f, 0.0f};
-    nu_translate(model_info.transform, translation0);
+    nu_mat4f_translate(model_info.transform, translation0);
     nu_vec3f_t scale0 = {100.0f, 0.1f, 100.0f};
-    nu_scale(model_info.transform, scale0);
+    nu_mat4f_scale(model_info.transform, scale0);
     nu_renderer_model_create(&model_info, &model_id);
 
     model_info.materials = &material1;
@@ -282,9 +281,9 @@ static nu_result_t on_start(void)
             for (uint32_t k = 0; k < 5; k++) {
                 nu_mat4f_identity(model_info.transform);
                 nu_vec3f_t translation1 = {i * 2.0f, k * 2.0f, j * 2.0f};
-                nu_translate(model_info.transform, translation1);
+                nu_mat4f_translate(model_info.transform, translation1);
                 nu_vec3f_t scale1 = {0.5f, 0.5f, 0.5f};
-                nu_scale(model_info.transform, scale1);
+                nu_mat4f_scale(model_info.transform, scale1);
                 nu_renderer_model_create(&model_info, &model_id);
             }
         }
@@ -298,9 +297,9 @@ static nu_result_t on_start(void)
         model_info.material_count = 1;
         nu_mat4f_identity(model_info.transform);
         nu_vec3f_t translation2 = {0, 30, 0};
-        nu_translate(model_info.transform, translation2);
+        nu_mat4f_translate(model_info.transform, translation2);
         nu_vec3f_t scale2 = {4, 4, 4};
-        nu_scale(model_info.transform, scale2);
+        nu_mat4f_scale(model_info.transform, scale2);
         nu_renderer_model_create(&model_info, &model_id);
     } else {
         nu_warning("Failed to load monkey\n");

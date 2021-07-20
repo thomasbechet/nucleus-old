@@ -26,7 +26,7 @@ void nu_quatf_mul(const nu_quatf_t a, const nu_quatf_t b, nu_quatf_t dest)
 {
     glm_quat_mul((float*)a, (float*)b, dest);
 }
-void nu_quatf_mulv(const nu_quatf_t q, const nu_vec3f_t v, nu_quatf_t dest)
+void nu_quatf_mulv(const nu_quatf_t q, const nu_vec3f_t v, nu_vec3f_t dest)
 {
     glm_quat_rotatev((float*)q, (float*)v, dest);
 }

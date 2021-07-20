@@ -22,15 +22,19 @@ void nu_mat4f_identity(nu_mat4f_t m)
 {
     glm_mat4_identity((vec4*)m);
 }
-void nu_translate(nu_mat4f_t m, const nu_vec3f_t translate)
+void nu_mat4f_translate(nu_mat4f_t m, const nu_vec3f_t translate)
 {
     glm_translate(m, (float*)translate);
 }
-void nu_rotate(nu_mat4f_t m, float angle, const nu_vec3f_t axis)
+void nu_mat4f_rotate(nu_mat4f_t m, const nu_quatf_t rotation)
+{
+    glm_quat_rotate(m, (float*)rotation, m);
+}
+void nu_mat4f_rotate_axis(nu_mat4f_t m, float angle, const nu_vec3f_t axis)
 {
     glm_rotate(m, angle, (float*)axis);
 }
-void nu_scale(nu_mat4f_t m, const nu_vec3f_t scale)
+void nu_mat4f_scale(nu_mat4f_t m, const nu_vec3f_t scale)
 {
     glm_scale(m, (float*)scale);
 }

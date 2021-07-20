@@ -18,9 +18,9 @@ namespace nu
         operator const nu_mat4f_t&()const{return data;}
 
         static Matrix4f identity(){return Matrix4f();}
-        static Matrix4f translate(const Vector3f &v){Matrix4f m; nu_translate(m.data, v.data); return m;}
-        static Matrix4f rotate(float angle, const Vector3f &axis){Matrix4f m; nu_rotate(m.data, angle, axis.data); return m;}
-        static Matrix4f scale(const Vector3f &s){Matrix4f m; nu_scale(m.data, s.data); return m;}
+        static Matrix4f translate(const Vector3f &v){Matrix4f m; nu_mat4f_translate(m.data, v.data); return m;}
+        static Matrix4f rotate(float angle, const Vector3f &axis){Matrix4f m; nu_mat4f_rotate_axis(m.data, angle, axis.data); return m;}
+        static Matrix4f scale(const Vector3f &s){Matrix4f m; nu_mat4f_scale(m.data, s.data); return m;}
         static Matrix4f lookAt(const Vector3f &eye, const Vector3f &center, const Vector3f &up){Matrix4f m; nu_lookat(eye.data, center.data, up.data, m.data); return m;}
     };
 }
