@@ -20,47 +20,67 @@ static nu_system_data_t _system;
 nu_result_t nu_window_initialize(void)
 {
     nu_result_t result;
-    result = NU_SUCCESS;
 
+    memset(&_system, 0, sizeof(nu_system_data_t));
     nu_window_api_t api = nu_config_get().window.api;
 
-    /* get module */
-    result = nu_module_load(nu_window_api_names[api], &_system.module);
-    if (result != NU_SUCCESS) {
-        return result;
+    if (api != NU_WINDOW_API_NONE) {
+        /* get module */
+        result = nu_module_load(nu_window_api_names[api], &_system.module);
+        if (result != NU_SUCCESS) {
+            return result;
+        }
+
+        /* load window interface */
+        result = nu_module_load_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
+        if (result != NU_SUCCESS) {
+            nu_warning(NU_LOGGER_WINDOW_NAME"Failed to load interface.\n");
+            return result;
+        }
+
+        /* initialize window system */
+        if (_system.interface.initialize) {
+            result = _system.interface.initialize();
+            if (result != NU_SUCCESS) {
+                nu_warning(NU_LOGGER_WINDOW_NAME"Failed to initialize window system.\n");
+                return result;
+            }
+        }
     }
 
-    /* load window interface */
-    result = nu_module_load_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_WINDOW_NAME"Failed to load interface.\n");
-        return result;
-    }
-
-    /* initialize window system */
-    result = _system.interface.initialize();
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_WINDOW_NAME"Failed to initialize window system.\n");
-        return result;
-    }
-
-    return result;
+    return NU_SUCCESS;
 }
 nu_result_t nu_window_terminate(void)
 {
-    return _system.interface.terminate();
+    if (_system.interface.terminate) {
+        return _system.interface.terminate();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_window_start(void)
 {
-    return _system.interface.start();
+    if (_system.interface.start) {
+        return _system.interface.start();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_window_stop(void)
 {
-    return _system.interface.stop();
+    if (_system.interface.stop) {
+        return _system.interface.stop();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_window_update(void)
 {
-    return _system.interface.update();
+    if (_system.interface.update) {
+        return _system.interface.update();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 
 nu_module_t nu_window_get_module(void)
@@ -70,17 +90,34 @@ nu_module_t nu_window_get_module(void)
 
 nu_result_t nu_window_set_size(const nu_vec2u_t size)
 {
-    return _system.interface.set_size(size);
+    if (_system.interface.set_size) {
+        return _system.interface.set_size(size);
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_window_get_size(nu_vec2u_t size)
 {
-    return _system.interface.get_size(size);
+    if (_system.interface.get_size) {
+        return _system.interface.get_size(size);
+    } else {
+        size[0] = size[1] = 0;
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_window_set_title(const char *title)
 {
-    return _system.interface.set_title(title);
+    if (_system.interface.set_title) {
+        return _system.interface.set_title(title);
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_window_set_mode(nu_window_mode_t mode)
 {
-    return _system.interface.set_mode(mode);
+    if (_system.interface.set_mode) {
+        return _system.interface.set_mode(mode);
+    } else {
+        return NU_SUCCESS;
+    }
 }

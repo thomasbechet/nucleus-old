@@ -51,6 +51,11 @@ static nu_result_t load_ini_file(void)
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_PATCH, 1, &_system.config.context.version_patch);
     nu_config_get_bool(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_LOG_CONFIG, true, &_system.config.context.log_config);
 
+    /* task */
+    const char *task_api;
+    nu_config_get_string(NU_CONFIG_TASK_SECTION, NU_CONFIG_TASK_API, NULL, &task_api);
+    _system.config.task.api = NU_TASK_API_NONE;
+
     /* window */
     const char *window_api;
     nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, NULL, &window_api);
@@ -98,12 +103,8 @@ static nu_result_t load_ini_file(void)
     nu_config_get_string(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, "", &renderer_api);
     if (NU_MATCH(renderer_api, "softrast")) {
         _system.config.renderer.api = NU_RENDERER_API_SOFTRAST;
-    } else if (NU_MATCH(renderer_api, "raytracer")) {
-        _system.config.renderer.api = NU_RENDERER_API_RAYTRACER;
     } else if (NU_MATCH(renderer_api, "vulkan")) {
         _system.config.renderer.api = NU_RENDERER_API_VULKAN;
-    } else if (NU_MATCH(renderer_api, "opengl")) {
-        _system.config.renderer.api = NU_RENDERER_API_OPENGL;
     } else {
         _system.config.renderer.api = NU_RENDERER_API_NONE;
     }

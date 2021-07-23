@@ -8,8 +8,8 @@
 NU_DECLARE_HANDLE(nu_task_t);
 
 typedef enum {
-    NU_TASK_API_NONE = 0,
-} nu_renderer_api_t;
+    NU_TASK_API_NONE = 0
+} nu_task_api_t;
 
 typedef struct {
     void (*func)(void*, uint32_t, uint32_t);

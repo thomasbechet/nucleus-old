@@ -9,7 +9,6 @@
 typedef struct {
     nu_module_t module;
     nu_input_interface_t interface;
-    bool headless;
 } nu_system_data_t;
 
 static nu_system_data_t _system;
@@ -17,49 +16,69 @@ static nu_system_data_t _system;
 nu_result_t nu_input_initialize(void)
 {
     nu_result_t result;
-    result = NU_SUCCESS;
 
+    memset(&_system, 0, sizeof(nu_system_data_t));
     nu_input_api_t api = nu_config_get().input.api;
 
-    /* load module */
-    if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
-        _system.module = nu_window_get_module(); /* copy module handle */
-    } else {
-        nu_warning(NU_LOGGER_INPUT_NAME"Unsupported api.\n");
-        return NU_FAILURE;
-    }
+    if (api != NU_INPUT_API_NONE) {
+        /* load module */
+        if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
+            _system.module = nu_window_get_module(); /* copy module handle */
+        } else {
+            nu_warning(NU_LOGGER_INPUT_NAME"Unsupported api.\n");
+            return NU_FAILURE;
+        }
 
-    /* load input interface */
-    result = nu_module_load_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_INPUT_NAME"Failed to load interface.\n");
-        return result;
-    }
+        /* load input interface */
+        result = nu_module_load_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
+        if (result != NU_SUCCESS) {
+            nu_warning(NU_LOGGER_INPUT_NAME"Failed to load interface.\n");
+            return result;
+        }
 
-    /* initialize input system */
-    result = _system.interface.initialize();
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_INPUT_NAME"Failed to initialize input system.\n");
-        return result;
+        /* initialize input system */
+        if (_system.interface.initialize) {
+            result = _system.interface.initialize();
+            if (result != NU_SUCCESS) {
+                nu_warning(NU_LOGGER_INPUT_NAME"Failed to initialize input system.\n");
+                return result;
+            }
+        }
     }
-
+    
     return NU_SUCCESS;
 }
 nu_result_t nu_input_terminate(void)
 {
-    return _system.interface.terminate();
+    if (_system.interface.terminate) {
+        return _system.interface.terminate();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_input_start(void)
 {
-    return _system.interface.start();
+    if (_system.interface.start) {
+        return _system.interface.start();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_input_stop(void)
 {
-    return _system.interface.stop();
+    if (_system.interface.stop) {
+        return _system.interface.stop();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_input_update(void)
 {
-    return _system.interface.update();
+    if (_system.interface.update) {
+        return _system.interface.update();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 
 nu_module_t nu_input_get_module(void)
@@ -73,7 +92,7 @@ nu_result_t nu_input_get_keyboard_state(nu_keyboard_t button, nu_button_state_t 
         return _system.interface.get_keyboard_state(button, state);
     } else {
         *state = NU_BUTTON_RELEASED;
-        return NU_FAILURE;
+        return NU_SUCCESS;
     }
 }
 nu_result_t nu_input_get_keyboard_text(const char **text, uint32_t *length)
@@ -115,9 +134,18 @@ nu_result_t nu_input_get_mouse_scroll(nu_vec2f_t scroll)
 }
 nu_result_t nu_input_get_cursor_mode(nu_cursor_mode_t *mode)
 {
-    return _system.interface.get_cursor_mode(mode);
+    if (_system.interface.get_cursor_mode) {
+        return _system.interface.get_cursor_mode(mode);
+    } else {
+        *mode = NU_CURSOR_MODE_DISABLE;
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_input_set_cursor_mode(nu_cursor_mode_t mode)
 {
-    return _system.interface.set_cursor_mode(mode);
+    if (_system.interface.set_cursor_mode) {
+        return _system.interface.set_cursor_mode(mode);
+    } else {
+        return NU_SUCCESS;
+    }
 }

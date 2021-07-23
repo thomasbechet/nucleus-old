@@ -1,8 +1,8 @@
 #include <nucleus/core/system/task/task.h>
 
+#include <nucleus/core/config/interface.h>
 #include <nucleus/core/coresystem/memory/interface.h>
 #include <nucleus/core/coresystem/logger/interface.h>
-#include <nucleus/module/task.h>
 
 #define NU_LOGGER_TASK_NAME "[TASK] "
 
@@ -16,43 +16,59 @@ static nu_system_data_t _system;
 nu_result_t nu_task_initialize(void)
 {
     nu_result_t result;
-    result = NU_SUCCESS;
 
     memset(&_system, 0, sizeof(nu_system_data_t));
+    nu_task_api_t api = nu_config_get().task.api;
 
-    /* get task module */
-    result = nu_module_load("engine/module/"NUTK_MODULE_NAME, &_system.module);
-    if (result != NU_SUCCESS) {
-        return result;
+    if (api != NU_TASK_API_NONE) {
+        /* get task module */
+        result = nu_module_load("engine/module/none", &_system.module);
+        if (result != NU_SUCCESS) {
+            return result;
+        }
+
+        /* load task interface */
+        result = nu_module_load_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
+        if (result != NU_SUCCESS) {
+            nu_warning(NU_LOGGER_TASK_NAME"Failed to load interface.\n");
+            return result;
+        }
+
+        /* initialize task system */
+        if (_system.interface.initialize) {
+            result = _system.interface.initialize();
+            if (result != NU_SUCCESS) {
+                nu_warning(NU_LOGGER_TASK_NAME"Failed to initialize task system.\n");
+                return result;
+            }
+        }
     }
 
-    /* load task interface */
-    result = nu_module_load_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_TASK_NAME"Failed to load interface.\n");
-        return result;
-    }
-
-    /* initialize task system */
-    result = _system.interface.initialize();
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_TASK_NAME"Failed to initialize task system.\n");
-        return result;
-    }
-
-    return result;
+    return NU_SUCCESS;
 }
 nu_result_t nu_task_terminate(void)
 {
-    return _system.interface.terminate();
+    if (_system.interface.terminate) {
+        return _system.interface.terminate();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_task_start(void)
 {
-    return _system.interface.start();
+    if (_system.interface.start) {
+        return _system.interface.start();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_task_stop(void)
 {
-    return _system.interface.stop();
+    if (_system.interface.stop) {
+        return _system.interface.stop();
+    } else {
+        return NU_SUCCESS;
+    }
 }
 
 nu_module_t nu_task_get_module(void)
@@ -62,24 +78,37 @@ nu_module_t nu_task_get_module(void)
 
 nu_result_t nu_task_create(nu_task_t *task)
 {
-    return _system.interface.create(task);
+    if (_system.interface.create) {
+        return _system.interface.create(task);
+    } else {
+        *task = NU_NULL_HANDLE;
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_task_perform(nu_task_t task, nu_task_job_t *jobs, uint32_t count)
-{
-    return _system.interface.perform(task, jobs, count);
+{ 
+    if (_system.interface.perform) {
+        return _system.interface.perform(task, jobs, count);
+    } else {
+        return NU_SUCCESS;
+    }
 }
 nu_result_t nu_task_perform_parallel(nu_task_t task, nu_task_job_t job, uint32_t count)
 {
-    nu_result_t result;
-    result = NU_SUCCESS;
-
     for (uint32_t i = 0; i < count; i++) {
-        result = _system.interface.perform(task, &job, 1);
+        nu_result_t result = nu_task_perform(task, &job, 1);
+        if (result != NU_SUCCESS) {
+            nu_warning(NU_LOGGER_TASK_NAME"Failed to perform task.");
+        }
     }
 
-    return result;
+    return NU_SUCCESS;
 }
 nu_result_t nu_task_wait(nu_task_t task)
 {
-    return _system.interface.wait(task);
+    if (_system.interface.wait) {
+        return _system.interface.wait(task);
+    } else {
+        return NU_SUCCESS;
+    }
 }

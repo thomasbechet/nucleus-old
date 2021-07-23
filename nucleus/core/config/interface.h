@@ -12,6 +12,9 @@
 #define NU_CONFIG_CONTEXT_VERSION_PATCH "version_patch"
 #define NU_CONFIG_CONTEXT_LOG_CONFIG    "log_config"
 
+#define NU_CONFIG_TASK_SECTION          "task"
+#define NU_CONFIG_TASK_API              "api"
+
 #define NU_CONFIG_WINDOW_SECTION        "window"
 #define NU_CONFIG_WINDOW_API            "api"
 #define NU_CONFIG_WINDOW_MODE           "mode"
@@ -34,6 +37,10 @@ typedef struct {
 } nu_config_context_t;
 
 typedef struct {
+    nu_task_api_t api;
+} nu_config_task_t;
+
+typedef struct {
     nu_window_api_t api;
     nu_window_mode_t mode;
     uint32_t width;
@@ -52,6 +59,7 @@ typedef struct {
 
 typedef struct {
     nu_config_context_t context;
+    nu_config_task_t task;
     nu_config_window_t window;
     nu_config_input_t input;
     nu_config_renderer_t renderer;

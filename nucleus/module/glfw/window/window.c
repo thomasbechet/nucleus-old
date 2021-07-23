@@ -26,9 +26,7 @@ nu_result_t nuglfw_window_initialize(void)
 
     /* pre context initialization */
     nu_renderer_api_t api = nu_config_get().renderer.api;
-    if (api == NU_RENDERER_API_SOFTRAST ||
-        api == NU_RENDERER_API_OPENGL || 
-        api == NU_RENDERER_API_RAYTRACER) {
+    if (api == NU_RENDERER_API_SOFTRAST) {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -55,12 +53,9 @@ nu_result_t nuglfw_window_initialize(void)
     }
 
     /* post context initialization */
-    if (api == NU_RENDERER_API_SOFTRAST ||
-        api == NU_RENDERER_API_RAYTRACER) {
+    if (api == NU_RENDERER_API_SOFTRAST) {
         glfwMakeContextCurrent(_module.window);
         nuglfw_surface_create();
-    } else if (api == NU_RENDERER_API_OPENGL) {
-        glfwMakeContextCurrent(_module.window);
     }
 
     if (nu_config_get().window.vsync) {
@@ -73,8 +68,7 @@ nu_result_t nuglfw_window_initialize(void)
 }
 nu_result_t nuglfw_window_terminate(void)
 {
-    if (nu_config_get().renderer.api == NU_RENDERER_API_SOFTRAST ||
-        nu_config_get().renderer.api == NU_RENDERER_API_RAYTRACER) {
+    if (nu_config_get().renderer.api == NU_RENDERER_API_SOFTRAST) {
         nuglfw_surface_destroy();
     }
 
