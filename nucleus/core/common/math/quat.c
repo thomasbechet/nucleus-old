@@ -22,6 +22,12 @@ void nu_quatf_to_mat3(const nu_quatf_t q, nu_mat3f_t dest)
 {
     glm_quat_mat3((float*)q, dest);
 }
+void nu_quatf_mul_axis(const nu_quatf_t q, float angle, const nu_vec3f_t axis, nu_quatf_t dest)
+{
+    nu_quatf_t temp;
+    nu_quatf_from_axis(angle, axis, temp);
+    nu_quatf_mul(q, temp, dest);
+}
 void nu_quatf_mul(const nu_quatf_t a, const nu_quatf_t b, nu_quatf_t dest)
 {
     glm_quat_mul((float*)a, (float*)b, dest);

@@ -13,7 +13,7 @@ static nu_result_t load_monkey(nu_renderer_mesh_t *mesh)
     nuutils_loader_interface_t loader;
     if (nu_module_get_by_name(NUUTILS_MODULE_NAME, &module) != NU_SUCCESS) return NU_FAILURE;
     if (nu_module_load_interface(module, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) return NU_FAILURE;
-    if (loader.load_mesh_from_obj(mesh, "engine/model/alfred/alfred.obj") != NU_SUCCESS) return NU_FAILURE;
+    if (loader.load_mesh_from_obj("engine/model/alfred/alfred.obj", mesh) != NU_SUCCESS) return NU_FAILURE;
 
     return NU_SUCCESS;
 }
@@ -37,21 +37,19 @@ typedef struct {
 } stest;
 static nu_result_t on_start(void)
 {
-    // nu_string_t str, token;
-    // nu_string_tokens_t tokens;
-    // nu_string_allocate_from("viewport   set 1029 1234", &str);
-    // nu_string_split(str, " ", &tokens);
-    // uint32_t count = nu_string_tokens_get_length(tokens);
-    // for (uint32_t i = 0; i < count; i++) {
-    //     nu_string_allocate_from(nu_string_tokens_get(tokens, i), &token);
-    //     // nu_string_trim(&token);
-    //     nu_info("%d %s\n",
-    //         nu_string_get_length(token), 
-    //         nu_string_get_cstr(token));
-    //     nu_string_free(token);
-    // }
-    // nu_string_tokens_free(tokens);
-    // nu_string_free(str);
+    nu_string_t token;
+    nu_string_array_t tokens;
+    nu_string_array_allocate(&tokens);
+    nu_string_split_cstr("set viewport 123 321", " ", tokens);
+    uint32_t count = nu_string_array_get_length(tokens);
+    for (uint32_t i = 0; i < count; i++) {
+        nu_string_allocate_cstr(nu_string_array_get(tokens, i), &token);
+        nu_info("%d %s\n",
+            nu_string_get_length(token), 
+            nu_string_get_cstr(token));
+        nu_string_free(token);
+    }
+    nu_string_array_free(tokens);
 
     // nu_timer_t t;
     // nu_timer_allocate(&t);

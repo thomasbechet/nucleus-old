@@ -15,6 +15,11 @@ NU_DECLARE_HANDLE(nu_renderer_model_t);
 NU_DECLARE_HANDLE(nu_renderer_label_t);
 NU_DECLARE_HANDLE(nu_renderer_rectangle_t);
 
+typedef enum {
+    NU_RENDERER_API_NONE       = 0,
+    NU_RENDERER_API_SOFTRAST   = 1
+} nu_renderer_api_t;
+
 typedef struct {
     uint32_t vertex_count;
     nu_vec3f_t *positions;
@@ -78,14 +83,6 @@ typedef struct {
     nu_rect_t rect;
     uint32_t color;
 } nu_renderer_rectangle_create_info_t;
-
-typedef enum {
-    NU_RENDERER_API_NONE       = 0,
-    NU_RENDERER_API_SOFTRAST   = 1,
-    NU_RENDERER_API_RAYTRACER  = 2,
-    NU_RENDERER_API_VULKAN     = 3,
-    NU_RENDERER_API_OPENGL     = 4
-} nu_renderer_api_t;
 
 typedef struct {
     nu_vec2u_t size;

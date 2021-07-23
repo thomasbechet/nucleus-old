@@ -5,8 +5,8 @@
 
 #define NU_VEC3F_FORWARD  (nu_vec3f_t){ 0,  0, -1}
 #define NU_VEC3F_BACKWARD (nu_vec3f_t){ 0,  0,  1}
-#define NU_VEC3F_RIGHT    (nu_vec3f_t){-1,  0,  0}
-#define NU_VEC3F_LEFT     (nu_vec3f_t){ 1,  0,  0}
+#define NU_VEC3F_LEFT     (nu_vec3f_t){-1,  0,  0}
+#define NU_VEC3F_RIGHT    (nu_vec3f_t){ 1,  0,  0}
 #define NU_VEC3F_UP       (nu_vec3f_t){ 0,  1,  0}
 #define NU_VEC3F_DOWN     (nu_vec3f_t){ 0, -1,  0}
 

@@ -103,7 +103,7 @@ static nu_result_t load_module(const char *filename, nu_module_data_t *module)
     }
 
     /* copy path */
-    nu_string_allocate_from(filename, &module->path);
+    nu_string_allocate_cstr(filename, &module->path);
 
     /* load module info */
     nu_module_info_loader_pfn_t module_get_info;

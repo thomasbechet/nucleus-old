@@ -124,7 +124,7 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
 
     /* save plugin name and module*/
     plugin.module = module;
-    nu_string_allocate_from(plugin_name, &plugin.name);
+    nu_string_allocate_cstr(plugin_name, &plugin.name);
 
     /* initialize plugin */
     if (plugin.interface.initialize) {

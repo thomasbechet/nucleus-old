@@ -7,8 +7,7 @@
 #define NUUTILS_COMMAND_INTERFACE_NAME "nuutils_command_interface"
 
 typedef struct {
-    char **args;
-    uint32_t argc;
+    nu_string_array_t tokens;
 } nuutils_command_event_t;
 
 typedef struct {

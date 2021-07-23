@@ -7,11 +7,14 @@
 #include <ini/ini.h>
 
 #define MAX_PARAMETER_COUNT 128
+#define MAX_SECTION_SIZE 50
+#define MAX_NAME_SIZE 50
+#define MAX_VALUE_SIZE 200
 
 typedef struct {
-    char *section;
-    char *name;
-    char *value;
+    char section[MAX_SECTION_SIZE];
+    char name[MAX_SECTION_SIZE];
+    char value[MAX_VALUE_SIZE];
 } nu_config_parameter_t;
 
 typedef struct {
@@ -22,24 +25,15 @@ typedef struct {
 
 static nu_system_data_t _system;
 
-static void new_parameter(const char *section, const char *name, const char *value)
-{
-    nu_config_parameter_t *param = &_system.parameters[_system.parameter_count++];
-    param->section = strdup(section);
-    param->name    = strdup(name);
-    param->value   = strdup(value);
-}
-static void delete_parameter(nu_config_parameter_t *param)
-{
-    free(param->section);
-    free(param->name);
-    free(param->value);
-}
-
 static int handler(void *user, const char *section, const char *name, const char *value)
 {
     (void)user;
-    new_parameter(section, name, value);
+
+    nu_config_parameter_t *param = &_system.parameters[_system.parameter_count++];
+    strncpy(param->section, section, MAX_SECTION_SIZE);
+    strncpy(param->name, name, MAX_NAME_SIZE);
+    strncpy(param->value, value, MAX_VALUE_SIZE);
+
     return 1;
 }
 
@@ -138,11 +132,6 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
 }
 nu_result_t nu_config_unload(void)
 {
-    /* free memory from parameters */
-    for (uint32_t i = 0; i < _system.parameter_count; i++) {
-        delete_parameter(&_system.parameters[i]);
-    }
-
     return NU_SUCCESS;
 }
 
@@ -168,9 +157,7 @@ nu_result_t nu_config_get_int(const char *section, const char *name, int32_t def
     const char *str;
     nu_config_get_string(section, name, NULL, &str);
     if (str) {
-        char *t;
-        *value = strtol(str, &t, 10);
-        if (*t != '\0') return EXIT_FAILURE;
+        return nu_strtoi(str, value);
     } else {
         *value = default_value;
     }
@@ -182,9 +169,7 @@ nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t d
     const char *str;
     nu_config_get_string(section, name, NULL, &str);
     if (str) {
-        char *t;
-        *value = strtoul(str, &t, 10);
-        if (*t != '\0') return EXIT_FAILURE;
+        return nu_strtou(str, value);
     } else {
         *value = default_value;
     }
@@ -208,9 +193,7 @@ nu_result_t nu_config_get_float(const char *section, const char *name, float def
     const char *str;
     nu_config_get_string(section, name, NULL, &str);
     if (str) {
-        char *t;
-        *value = strtof(str, &t);
-        if (*t != '\0') return EXIT_FAILURE;
+        return nu_strtof(str, value);
     } else {
         *value = default_value;
     }
@@ -269,7 +252,7 @@ nu_result_t nu_config_log(void)
     log_transition_line(max_section, max_name, max_value);
     log_line(max_section, max_name, max_value, section_header, name_header, value_header);
 
-    char *current_section = "";
+    const char *current_section = "";
     for (uint32_t i = 0; i < _system.parameter_count; i++) {
         const nu_config_parameter_t *param = &_system.parameters[i];
         if (NU_MATCH(current_section, param->section)) {

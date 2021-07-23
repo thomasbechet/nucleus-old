@@ -1,10 +1,10 @@
-#include <nucleus/module/utils/module/module.hpp>
+#include <nucleus/module/utils/module/module.h>
 
 #include <nucleus/module/utils/module/interface.h>
-#include <nucleus/module/utils/console/console.hpp>
-#include <nucleus/module/utils/command/command.hpp>
-#include <nucleus/module/utils/loader/loader.hpp>
-#include <nucleus/module/utils/spectator/spectator.hpp>
+#include <nucleus/module/utils/console/console.h>
+#include <nucleus/module/utils/command/command.h>
+#include <nucleus/module/utils/loader/loader.h>
+#include <nucleus/module/utils/spectator/spectator.h>
 
 static const uint32_t interface_count = 2;
 static const char *interfaces[] = {
@@ -35,8 +35,8 @@ nu_result_t nu_module_get_interface(const char *name, void *interface)
     if (NU_MATCH(name, NUUTILS_LOADER_INTERFACE_NAME)) {
         nuutils_loader_interface_t *i = (nuutils_loader_interface_t*)interface;
 
-        i->load_mesh_from_obj = load_mesh_from_obj;
-        i->load_texture       = load_texture;
+        i->load_mesh_from_obj = nuutils_load_mesh_from_obj;
+        i->load_texture       = nuutils_load_texture;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUUTILS_COMMAND_INTERFACE_NAME)) {

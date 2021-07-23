@@ -9,6 +9,7 @@
 typedef struct {
     nu_module_t module;
     nu_input_interface_t interface;
+    bool headless;
 } nu_system_data_t;
 
 static nu_system_data_t _system;
@@ -68,23 +69,49 @@ nu_module_t nu_input_get_module(void)
 
 nu_result_t nu_input_get_keyboard_state(nu_keyboard_t button, nu_button_state_t *state)
 {
-    return _system.interface.get_keyboard_state(button, state);
+    if (_system.interface.get_keyboard_state) {
+        return _system.interface.get_keyboard_state(button, state);
+    } else {
+        *state = NU_BUTTON_RELEASED;
+        return NU_FAILURE;
+    }
 }
 nu_result_t nu_input_get_keyboard_text(const char **text, uint32_t *length)
 {
-    return _system.interface.get_keyboard_text(text, length);
+    if (_system.interface.get_keyboard_text) {
+        return _system.interface.get_keyboard_text(text, length);
+    } else {
+        *text = NULL;
+        *length = 0;
+        return NU_FAILURE;
+    }
 }
 nu_result_t nu_input_get_mouse_state(nu_mouse_t button, nu_button_state_t *state)
 {
-    return _system.interface.get_mouse_state(button, state);
+    if (_system.interface.get_mouse_state) {
+        return _system.interface.get_mouse_state(button, state);
+    } else {
+        *state = NU_BUTTON_RELEASED;
+        return NU_FAILURE;
+    }
 }
 nu_result_t nu_input_get_mouse_motion(nu_vec2f_t motion)
 {
-    return _system.interface.get_mouse_motion(motion);
+    if (_system.interface.get_mouse_motion) {
+        return _system.interface.get_mouse_motion(motion);
+    } else {
+        nu_vec2f_zero(motion);
+        return NU_FAILURE;
+    }
 }
 nu_result_t nu_input_get_mouse_scroll(nu_vec2f_t scroll)
 {
-    return _system.interface.get_mouse_scroll(scroll);
+    if (_system.interface.get_mouse_scroll) {
+        return _system.interface.get_mouse_scroll(scroll);
+    } else {
+        nu_vec2f_zero(scroll);
+        return NU_FAILURE;
+    }
 }
 nu_result_t nu_input_get_cursor_mode(nu_cursor_mode_t *mode)
 {

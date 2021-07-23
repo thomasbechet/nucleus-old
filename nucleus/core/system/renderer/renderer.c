@@ -7,10 +7,7 @@
 
 static const char *nu_renderer_api_names[] = {
     "engine/module/nucleus-renderer-none",
-    "engine/module/"NUSR_MODULE_NAME,
-    "engine/module/nucleus-renderer-none",
-    "engine/module/nucleus-renderer-none",
-    "engine/module/nucleus-renderer-none"
+    "engine/module/"NUSR_MODULE_NAME
 };
 
 typedef struct {
