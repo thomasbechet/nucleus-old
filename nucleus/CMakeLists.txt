@@ -2,13 +2,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
 
 PROJECT(nucleus-package VERSION 0.0.1)
 
-OPTION(NU_DEBUG                  "Debug"                   ON)
-OPTION(NU_DEBUG_MEMORY           "Debug memory"            ON)
+OPTION(NU_DEBUG               "Debug"                   ON)
+OPTION(NU_DEBUG_MEMORY        "Debug memory"            ON)
 
-OPTION(NU_BUILD_CORE             "Build nucleus-core"      ON)
+OPTION(NU_BUILD_CORE          "Build nucleus-core"      ON)
 
-OPTION(NU_BUILD_MODULE_GLFW      "Build nucleus-glfw"      ON)
-OPTION(NU_BUILD_MODULE_UTILS     "Build nucleus-utils"     ON)
+OPTION(NU_BUILD_MODULE_GLFW   "Build nucleus-glfw"      ON)
+OPTION(NU_BUILD_MODULE_VULKAN "Build nucleus-vulkan"    ON)
+OPTION(NU_BUILD_MODULE_UTILS  "Build nucleus-utils"     ON)
 
 # Add compile definitions
 IF (NU_DEBUG)
@@ -25,13 +26,13 @@ IF (NU_BUILD_CORE)
 ENDIF()
 
 # Add subdirectories
+IF (NU_BUILD_MODULE_VULKAN)
+    ADD_SUBDIRECTORY(module/vulkan)
+    ADD_COMPILE_DEFINITIONS(NU_BUILD_MODULE_VULKAN)
+ENDIF()
 IF (NU_BUILD_MODULE_GLFW)
     ADD_SUBDIRECTORY(module/glfw)
     ADD_COMPILE_DEFINITIONS(NU_BUILD_MODULE_GLFW)
-ENDIF()
-IF (NU_BUILD_MODULE_OPENGL)
-    ADD_SUBDIRECTORY(module/opengl)
-    ADD_COMPILE_DEFINITIONS(NU_BUILD_MODULE_OPENGL)
 ENDIF()
 IF (NU_BUILD_MODULE_UTILS)
     ADD_SUBDIRECTORY(module/utils)

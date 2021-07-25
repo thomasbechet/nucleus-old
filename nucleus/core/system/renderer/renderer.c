@@ -2,13 +2,14 @@
 
 #include <nucleus/core/config/interface.h>
 #include <nucleus/core/coresystem/logger/interface.h>
+#include <nucleus/module/vulkan/module/interface.h>
 
 #define NU_LOGGER_RENDERER_NAME "[RENDERER] "
 
 static const char *nu_renderer_api_names[] = {
     "engine/module/nucleus-renderer-none",
     "engine/module/nucleus-renderer-none",
-    "engine/module/nucleus-renderer-none"
+    "engine/module/"NUVK_MODULE_NAME
 };
 
 typedef struct {

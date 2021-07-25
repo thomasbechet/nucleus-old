@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
 
-PROJECT(nucleus-glfw LANGUAGES C VERSION 0.0.1)
+PROJECT(nucleus-vulkan LANGUAGES C VERSION 0.0.1)
 
 SET(CMAKE_BUILD_TYPE Debug)
 #SET(CMAKE_BUILD_TYPE Release)
@@ -11,49 +11,32 @@ else (UNIX OR MINGW)
     ADD_COMPILE_OPTIONS(-Wall)
 endif()
 
-ADD_DEFINITIONS(-DGLEW_STATIC -DGLEW_NO_GLU)
-
-IF (NU_BUILD_MODULE_VULKAN)
-    FIND_PACKAGE(Vulkan REQUIRED FATAL_ERROR)
-ENDIF()
+FIND_PACKAGE(Vulkan REQUIRED FATAL_ERROR)
 
 INCLUDE_DIRECTORIES(
-    ../../../extlibs/glfw/include/
-    ../../../extlibs/glew/include/
     ../../../
-    IF (NU_BUILD_MODULE_VULKAN)
-        ${Vulkan_INCLUDE_DIRS}
-    ENDIF()
+    ${Vulkan_INCLUDE_DIRS}
 )
 
 FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
 ADD_LIBRARY(
     ${PROJECT_NAME} SHARED
-    ../../../extlibs/glew/src/glew.c
     ${sources}
 )
-
-FIND_PACKAGE(OpenGL)
 
 if (MSVC)
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
-        "${OPENGL_gl_LIBRARY}"
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-vc2019/glfw3.lib
     )
 elseif (MINGW)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
-        "${OPENGL_gl_LIBRARY}" 
         mingw32
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-mingw-w64/libglfw3.a
     )
 elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
-        "${OPENGL_gl_LIBRARY}"
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-unix/libglfw3.a
     )
 endif()
 
