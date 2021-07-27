@@ -7,8 +7,8 @@ OPTION(NU_DEBUG_MEMORY        "Debug memory"            ON)
 
 OPTION(NU_BUILD_CORE          "Build nucleus-core"      ON)
 
-OPTION(NU_BUILD_MODULE_GLFW   "Build nucleus-glfw"      ON)
 OPTION(NU_BUILD_MODULE_VULKAN "Build nucleus-vulkan"    ON)
+OPTION(NU_BUILD_MODULE_GLFW   "Build nucleus-glfw"      ON)
 OPTION(NU_BUILD_MODULE_UTILS  "Build nucleus-utils"     ON)
 
 # Add compile definitions
