@@ -51,8 +51,27 @@ void *nu_malloc(size_t s)
     return malloc(s);
 #endif
 }
+void *nu_malloc_aligned(size_t alignment, size_t s)
+{
+#if defined(NU_DEBUG_MEMORY)
+    _system.alloc_count++;
+    return aligned_alloc(alignment, s);
+#else
+    return aligned_alloc(alignment, s);
+#endif
+}
 void *nu_realloc(void *p, size_t s)
 {
+#if defined(NU_DEBUG_MEMORY)
+    _system.realloc_count++;
+    return realloc(p, s);
+#else
+    return realloc(p, s);
+#endif
+}
+void *nu_realloc_aligned(void *p, size_t alignment, size_t s)
+{
+    (void)alignment;
 #if defined(NU_DEBUG_MEMORY)
     _system.realloc_count++;
     return realloc(p, s);

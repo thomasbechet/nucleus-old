@@ -31,7 +31,7 @@ nu_result_t nuutils_command_plugin_initialize(void)
     info.terminate  = nuutils_command_event_terminate;
     info.size       = sizeof(nuutils_command_event_t);
     if (nu_event_register(&info, &_module.event_id) != NU_SUCCESS) {
-        nu_warning(NUUTILS_LOGGER_NAME"Failed to initialize command event.\n");
+        nu_error(NUUTILS_LOGGER_NAME"Failed to initialize command event.\n");
         return NU_FAILURE;
     }
 

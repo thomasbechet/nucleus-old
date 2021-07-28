@@ -28,7 +28,7 @@ static nu_result_t initialize_event(void)
     info.terminate  = NULL;
     info.size       = sizeof(nu_renderer_viewport_resize_event_t);
     if (nu_event_register(&info, &_system.viewport_resize_event_id) != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_RENDERER_NAME"Failed to register viewport resize event.\n");
+        nu_error(NU_LOGGER_RENDERER_NAME"Failed to register viewport resize event.\n");
         return NU_FAILURE;
     }
 
@@ -45,7 +45,7 @@ nu_result_t nu_renderer_initialize(void)
     /* initialize event */
     result = initialize_event();
     if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_RENDERER_NAME"Failed to initialize event.\n");
+        nu_error(NU_LOGGER_RENDERER_NAME"Failed to initialize event.\n");
         return result;
     }
 
@@ -59,7 +59,7 @@ nu_result_t nu_renderer_initialize(void)
         /* load renderer interface */
         result = nu_module_load_interface(_system.module, NU_RENDERER_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_RENDERER_NAME"Failed to load interface.\n");
+            nu_error(NU_LOGGER_RENDERER_NAME"Failed to load interface.\n");
             return result;
         }
 
@@ -67,12 +67,12 @@ nu_result_t nu_renderer_initialize(void)
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             if (result != NU_SUCCESS) {
-                nu_warning(NU_LOGGER_RENDERER_NAME"Failed to initialize renderer system.\n");
+                nu_error(NU_LOGGER_RENDERER_NAME"Failed to initialize renderer system.\n");
                 return result;
             }
         }
     } else {
-        nu_info(NU_LOGGER_RENDERER_NAME"Running in passive mode.");
+        nu_info(NU_LOGGER_RENDERER_NAME"Running in passive mode.\n");
     }
 
     return NU_SUCCESS;

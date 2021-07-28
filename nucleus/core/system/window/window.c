@@ -34,7 +34,7 @@ nu_result_t nu_window_initialize(void)
         /* load window interface */
         result = nu_module_load_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_WINDOW_NAME"Failed to load interface.\n");
+            nu_error(NU_LOGGER_WINDOW_NAME"Failed to load interface.\n");
             return result;
         }
 
@@ -42,10 +42,12 @@ nu_result_t nu_window_initialize(void)
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             if (result != NU_SUCCESS) {
-                nu_warning(NU_LOGGER_WINDOW_NAME"Failed to initialize window system.\n");
+                nu_error(NU_LOGGER_WINDOW_NAME"Failed to initialize window system.\n");
                 return result;
             }
         }
+    } else {
+        nu_info(NU_LOGGER_WINDOW_NAME"Running in passive mode.\n");
     }
 
     return NU_SUCCESS;

@@ -4,7 +4,9 @@
 #include <nucleus/core/common/common.h>
 
 NU_API void *nu_malloc(size_t s);
+NU_API void *nu_malloc_aligned(size_t alignment, size_t s);
 NU_API void *nu_realloc(void *p, size_t s);
+NU_API void *nu_realloc_aligned(void *p, size_t alignment, size_t s);
 NU_API void *nu_calloc(size_t n, size_t s);
 NU_API void nu_free(void *p);
 

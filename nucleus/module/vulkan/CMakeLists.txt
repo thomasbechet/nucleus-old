@@ -28,15 +28,18 @@ ADD_LIBRARY(
 if (MSVC)
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
+        ${Vulkan_LIBRARIES}
     )
 elseif (MINGW)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
         mingw32
+        ${Vulkan_LIBRARIES}
     )
 elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
+        ${Vulkan_LIBRARIES}
     )
 endif()
 

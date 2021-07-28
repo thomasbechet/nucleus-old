@@ -297,9 +297,9 @@ void nu_string_array_add_ncstr(nu_string_array_t array, const char *cstr, uint32
     header->indexes[header->length] = header->head;
     /* copy the cstr */
     memcpy(header->data + header->head, cstr, n);
-    header->data[header->head + n + 1] = '\0';
+    header->data[header->head + n] = '\0';
     /* udpate meta data */
-    header->head += n + 2;
+    header->head += n + 1;
     header->length++;
 }
 void nu_string_array_clear(nu_string_array_t array)

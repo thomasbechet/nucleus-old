@@ -19,7 +19,7 @@ typedef struct {
     VkQueue present_queue;
 } nuvk_context_t;
 
-nu_result_t nuvk_context_initialize(nuvk_context_t *context);
-nu_result_t nuvk_context_terminate(nuvk_context_t *context);
+nu_result_t nuvk_context_initialize(nuvk_context_t *context, VkAllocationCallbacks *allocator);
+nu_result_t nuvk_context_terminate(nuvk_context_t *context, VkAllocationCallbacks *allocator);
 
 #endif

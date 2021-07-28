@@ -30,7 +30,7 @@ nu_result_t nu_task_initialize(void)
         /* load task interface */
         result = nu_module_load_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_TASK_NAME"Failed to load interface.\n");
+            nu_error(NU_LOGGER_TASK_NAME"Failed to load interface.\n");
             return result;
         }
 
@@ -38,10 +38,12 @@ nu_result_t nu_task_initialize(void)
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             if (result != NU_SUCCESS) {
-                nu_warning(NU_LOGGER_TASK_NAME"Failed to initialize task system.\n");
+                nu_error(NU_LOGGER_TASK_NAME"Failed to initialize task system.\n");
                 return result;
             }
         }
+    } else {
+        nu_info(NU_LOGGER_TASK_NAME"Running in passive mode.\n");
     }
 
     return NU_SUCCESS;

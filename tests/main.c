@@ -37,19 +37,19 @@ typedef struct {
 } stest;
 static nu_result_t on_start(void)
 {
-    nu_string_t token;
-    nu_string_array_t tokens;
-    nu_string_array_allocate(&tokens);
-    nu_string_split_cstr("set viewport 123 321", " ", tokens);
-    uint32_t count = nu_string_array_get_length(tokens);
-    for (uint32_t i = 0; i < count; i++) {
-        nu_string_allocate_cstr(nu_string_array_get(tokens, i), &token);
-        nu_info("%d %s\n",
-            nu_string_get_length(token), 
-            nu_string_get_cstr(token));
-        nu_string_free(token);
-    }
-    nu_string_array_free(tokens);
+    // nu_string_t token;
+    // nu_string_array_t tokens;
+    // nu_string_array_allocate(&tokens);
+    // nu_string_split_cstr("set viewport 123 321", " ", tokens);
+    // uint32_t count = nu_string_array_get_length(tokens);
+    // for (uint32_t i = 0; i < count; i++) {
+    //     nu_string_allocate_cstr(nu_string_array_get(tokens, i), &token);
+    //     nu_info("%d %s\n",
+    //         nu_string_get_length(token), 
+    //         nu_string_get_cstr(token));
+    //     nu_string_free(token);
+    // }
+    // nu_string_array_free(tokens);
 
     // nu_timer_t t;
     // nu_timer_allocate(&t);
