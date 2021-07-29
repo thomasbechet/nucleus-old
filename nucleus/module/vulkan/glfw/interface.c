@@ -21,9 +21,9 @@ nu_result_t nuvk_glfw_load_interface(void)
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_glfw_create_window_surface(VkInstance instance, VkSurfaceKHR *surface)
+nu_result_t nuvk_glfw_create_window_surface(VkInstance instance, VkSurfaceKHR *surface, VkAllocationCallbacks *allocator)
 {
-    return _glfw_interface.create_window_surface(&instance, surface);
+    return _glfw_interface.create_window_surface(&instance, surface, allocator);
 }
 nu_result_t nuvk_glfw_get_required_instance_extensions(const char ***required_extensions, uint32_t *count)
 {

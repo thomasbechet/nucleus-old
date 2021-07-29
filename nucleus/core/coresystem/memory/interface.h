@@ -9,6 +9,7 @@ NU_API void *nu_realloc(void *p, size_t s);
 NU_API void *nu_realloc_aligned(void *p, size_t alignment, size_t s);
 NU_API void *nu_calloc(size_t n, size_t s);
 NU_API void nu_free(void *p);
+NU_API void nu_free_aligned(void *p);
 
 NU_API uint64_t nu_memory_total_alloc(void);
 NU_API uint64_t nu_memory_total_free(void);

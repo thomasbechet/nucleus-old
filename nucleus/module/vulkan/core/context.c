@@ -284,19 +284,32 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context, VkAllocat
     VkDeviceQueueCreateInfo queue_infos[2];
     memset(queue_infos, 0, sizeof(VkDeviceQueueCreateInfo) * 2);
 
-    float priority = 0.0;
+    float priorities[] = {0.0f, 0.0f};
+    uint32_t queue_info_count = 0;
 
-    queue_infos[0].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queue_infos[0].flags            = 0x0;
-    queue_infos[0].queueFamilyIndex = context->graphics_queue_family_index;
-    queue_infos[0].queueCount       = 1;
-    queue_infos[0].pQueuePriorities = &priority;
+    if (context->graphics_queue_family_index == context->present_queue_family_index) {
+        queue_infos[0].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_infos[0].flags            = 0x0;
+        queue_infos[0].queueFamilyIndex = context->graphics_queue_family_index;
+        queue_infos[0].queueCount       = 2;
+        queue_infos[0].pQueuePriorities = priorities;
+        
+        queue_info_count = 1;
+    } else {
+        queue_infos[0].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_infos[0].flags            = 0x0;
+        queue_infos[0].queueFamilyIndex = context->graphics_queue_family_index;
+        queue_infos[0].queueCount       = 1;
+        queue_infos[0].pQueuePriorities = priorities;
 
-    queue_infos[1].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    queue_infos[1].flags            = 0x0;
-    queue_infos[1].queueFamilyIndex = context->present_queue_family_index;
-    queue_infos[1].queueCount       = 1;
-    queue_infos[1].pQueuePriorities = &priority;
+        queue_infos[1].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queue_infos[1].flags            = 0x0;
+        queue_infos[1].queueFamilyIndex = context->present_queue_family_index;
+        queue_infos[1].queueCount       = 1;
+        queue_infos[1].pQueuePriorities = priorities;
+    
+        queue_info_count = 2;
+    }
 
     nu_array_t extensions;
     nu_array_allocate(sizeof(const char *), &extensions);
@@ -310,7 +323,7 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context, VkAllocat
     memset(&device_info, 0, sizeof(VkDeviceCreateInfo));
     device_info.sType                   = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
     device_info.flags                   = 0x0;
-    device_info.queueCreateInfoCount    = 2;
+    device_info.queueCreateInfoCount    = queue_info_count;
     device_info.pQueueCreateInfos       = queue_infos;
     device_info.enabledLayerCount       = 0;
     device_info.ppEnabledLayerNames     = NULL;
@@ -330,9 +343,21 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context, VkAllocat
     return NU_SUCCESS;
 }
 
+static nu_result_t nuvk_context_pick_queues(nuvk_context_t *context)
+{
+    if (context->graphics_queue_family_index == context->present_queue_family_index) {
+        vkGetDeviceQueue(context->device, context->graphics_queue_family_index, 0, &context->graphics_queue);
+        vkGetDeviceQueue(context->device, context->present_queue_family_index, 1, &context->present_queue);
+    } else {
+        vkGetDeviceQueue(context->device, context->graphics_queue_family_index, 0, &context->graphics_queue);
+        vkGetDeviceQueue(context->device, context->present_queue_family_index, 0, &context->present_queue);
+    }
+
+    return NU_SUCCESS;
+}
+
 nu_result_t nuvk_context_initialize(nuvk_context_t *context, VkAllocationCallbacks *allocator)
 {
-    /* load glfw interface */
     if (nuvk_glfw_load_interface() != NU_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to load glfw interface.\n");
         return NU_FAILURE;
@@ -342,7 +367,7 @@ nu_result_t nuvk_context_initialize(nuvk_context_t *context, VkAllocationCallbac
         return NU_FAILURE;
     }
 
-    if (nuvk_glfw_create_window_surface(context->instance, &context->surface) != NU_SUCCESS) {
+    if (nuvk_glfw_create_window_surface(context->instance, &context->surface, allocator) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
@@ -361,6 +386,10 @@ nu_result_t nuvk_context_initialize(nuvk_context_t *context, VkAllocationCallbac
     }
 
     if (nuvk_context_create_device(context, allocator) != NU_SUCCESS) {
+        return NU_FAILURE;
+    }
+
+    if (nuvk_context_pick_queues(context) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 

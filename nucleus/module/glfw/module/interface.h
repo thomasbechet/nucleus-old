@@ -12,7 +12,7 @@
 
 typedef struct {
     const char **(*get_required_instance_extensions)(uint32_t*);
-    nu_result_t (*create_window_surface)(void*, void*);
+    nu_result_t (*create_window_surface)(void*, void*, void*);
     nu_result_t (*present_surface)(const nu_vec2u_t, void*);
     nu_result_t (*swap_buffers)(void);
 } nuglfw_window_interface_t;

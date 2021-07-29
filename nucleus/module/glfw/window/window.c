@@ -120,16 +120,16 @@ nu_result_t nuglfw_window_set_mode(nu_window_mode_t mode)
 {
     if (mode == NU_WINDOW_MODE_FULLSCREEN) {
         const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-            glfwSetWindowMonitor(_module.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
+        glfwSetWindowMonitor(_module.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
     } else if (mode == NU_WINDOW_MODE_WINDOWED) {
         glfwSetWindowMonitor(_module.window, NULL, 10, 10, _module.size[0], _module.size[1], 0);
     } else if (mode == NU_WINDOW_MODE_BORDERLESS) {
         const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-            glfwWindowHint(GLFW_RED_BITS, mode->redBits);
-            glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
-            glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
-            glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
-            glfwSetWindowMonitor(_module.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
+        glfwWindowHint(GLFW_RED_BITS, mode->redBits);
+        glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
+        glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
+        glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
+        glfwSetWindowMonitor(_module.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate);
     }
 
     return NU_SUCCESS;
@@ -139,13 +139,14 @@ const char **nuglfw_get_required_instance_extensions(uint32_t *count)
 {
     return glfwGetRequiredInstanceExtensions(count);
 }
-nu_result_t nuglfw_create_window_surface(void *instance_ptr, void *surface_ptr)
+nu_result_t nuglfw_create_window_surface(void *instance_ptr, void *surface_ptr, void *allocator_ptr)
 {
 #ifdef GLFW_INCLUDE_VULKAN
     VkInstance *instance = (VkInstance*)instance_ptr;
     VkSurfaceKHR *surface = (VkSurfaceKHR*)surface_ptr;
+    VkAllocationCallbacks *allocator = (VkAllocationCallbacks*)allocator_ptr;
 
-    VkResult result = glfwCreateWindowSurface(*instance, _module.window, NULL, surface);
+    VkResult result = glfwCreateWindowSurface(*instance, _module.window, allocator, surface);
     if (result != VK_SUCCESS) {
         nu_error(NUGLFW_LOGGER_NAME"Failed to create surface.\n");
         return NU_FAILURE; 
