@@ -5,6 +5,7 @@
 #include <vulkan/vulkan.h>
 
 #define NUVK_CONTEXT_ENABLE_VALIDATION_LAYER true
+#define NUVK_CONTEXT_API_VERSION             VK_API_VERSION_1_2
 
 typedef struct {
     VkInstance instance;
@@ -19,7 +20,7 @@ typedef struct {
     VkQueue present_queue;
 } nuvk_context_t;
 
-nu_result_t nuvk_context_initialize(nuvk_context_t *context, VkAllocationCallbacks *allocator);
-nu_result_t nuvk_context_terminate(nuvk_context_t *context, VkAllocationCallbacks *allocator);
+nu_result_t nuvk_context_initialize(nuvk_context_t *context, const VkAllocationCallbacks *allocator);
+nu_result_t nuvk_context_terminate(nuvk_context_t *context, const VkAllocationCallbacks *allocator);
 
 #endif

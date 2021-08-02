@@ -42,7 +42,7 @@ static nu_result_t nuvk_context_fill_required_instance_extensions(nu_array_t ext
 
     return NU_SUCCESS;
 }
-static nu_result_t nuvk_context_create_instance(nuvk_context_t *context, VkAllocationCallbacks *allocator)
+static nu_result_t nuvk_context_create_instance(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
 {
     nu_array_t required_layers;
     nu_array_allocate(sizeof(const char*), &required_layers);
@@ -59,7 +59,7 @@ static nu_result_t nuvk_context_create_instance(nuvk_context_t *context, VkAlloc
     application_info.applicationVersion = 0; 
     application_info.pEngineName        = "VulkanEngine";
     application_info.engineVersion      = 0;
-    application_info.apiVersion         = VK_API_VERSION_1_2;
+    application_info.apiVersion         = NUVK_CONTEXT_API_VERSION;
 
     VkInstanceCreateInfo instance_info;
     memset(&instance_info, 0, sizeof(VkInstanceCreateInfo));
@@ -117,7 +117,7 @@ static VkBool32 nuvk_context_report_callback_function(
 
     return VK_FALSE;
 }
-static nu_result_t nuvk_context_create_debug_report_callback(nuvk_context_t *context, VkAllocationCallbacks *allocator)
+static nu_result_t nuvk_context_create_debug_report_callback(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
 {
     VkDebugReportCallbackCreateInfoEXT debug_info;
     memset(&debug_info, 0, sizeof(VkDebugReportCallbackCreateInfoEXT));
@@ -279,7 +279,7 @@ static nu_result_t nuvk_context_pick_queue_family_indices(nuvk_context_t *contex
     return NU_SUCCESS;
 }
 
-static nu_result_t nuvk_context_create_device(nuvk_context_t *context, VkAllocationCallbacks *allocator)
+static nu_result_t nuvk_context_create_device(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
 {
     VkDeviceQueueCreateInfo queue_infos[2];
     memset(queue_infos, 0, sizeof(VkDeviceQueueCreateInfo) * 2);
@@ -356,13 +356,8 @@ static nu_result_t nuvk_context_pick_queues(nuvk_context_t *context)
     return NU_SUCCESS;
 }
 
-nu_result_t nuvk_context_initialize(nuvk_context_t *context, VkAllocationCallbacks *allocator)
+nu_result_t nuvk_context_initialize(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
 {
-    if (nuvk_glfw_load_interface() != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to load glfw interface.\n");
-        return NU_FAILURE;
-    }
-
     if (nuvk_context_create_instance(context, allocator) != NU_SUCCESS) {
         return NU_FAILURE;
     }
@@ -395,7 +390,7 @@ nu_result_t nuvk_context_initialize(nuvk_context_t *context, VkAllocationCallbac
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_context_terminate(nuvk_context_t *context, VkAllocationCallbacks *allocator)
+nu_result_t nuvk_context_terminate(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
 {
     vkDeviceWaitIdle(context->device);
 

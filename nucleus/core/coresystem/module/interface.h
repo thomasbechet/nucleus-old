@@ -6,7 +6,8 @@
 NU_DECLARE_HANDLE(nu_module_t);
 
 typedef enum {
-    NU_MODULE_FLAG_NONE = 0x0
+    NU_MODULE_FLAG_NONE       = 0x0,
+    NU_MODULE_FLAG_HOT_RELOAD = 0x1
 } nu_module_flags_t;
 
 typedef struct {
