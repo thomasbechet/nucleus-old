@@ -4,8 +4,7 @@
 
 nu_result_t nuvk_command_pool_initialize(
     nuvk_command_pool_t *pool, 
-    const nuvk_context_t *context, 
-    const VkAllocationCallbacks *allocator
+    const nuvk_context_t *context
 )
 {
     VkCommandPoolCreateInfo info;
@@ -14,16 +13,16 @@ nu_result_t nuvk_command_pool_initialize(
     info.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     info.queueFamilyIndex = context->graphics_queue_family_index;
 
-    if (vkCreateCommandPool(context->device, &info, allocator, &pool->graphics_command_pool) != VK_SUCCESS) {
+    if (vkCreateCommandPool(context->device, &info, &context->allocator, &pool->graphics_command_pool) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create command pool.\n");
         return NU_FAILURE;
     }
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_command_pool_terminate(nuvk_command_pool_t *pool, const nuvk_context_t *context, const VkAllocationCallbacks *allocator)
+nu_result_t nuvk_command_pool_terminate(nuvk_command_pool_t *pool, const nuvk_context_t *context)
 {
-    vkDestroyCommandPool(context->device, pool->graphics_command_pool, allocator);
+    vkDestroyCommandPool(context->device, pool->graphics_command_pool, &context->allocator);
 
     return NU_SUCCESS;
 }

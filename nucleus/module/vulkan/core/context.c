@@ -4,6 +4,49 @@
 
 #define NUVK_LOGGER_NAME "[VULKAN] "
 
+static void *allocation_function(void *user, size_t size, size_t alignment, VkSystemAllocationScope allocation_scope)
+{
+    if (size == 0) return NULL;
+    void *ptr = nu_malloc_aligned(alignment, size);
+    memset(ptr, 0, size);
+    return ptr;
+}
+static void free_function(void *user, void *memory)
+{
+    if (memory == NULL) return;
+    nu_free_aligned(memory);
+}
+static void *reallocation_function(void *user, void *original, size_t size, size_t alignment, VkSystemAllocationScope allocation_scope)
+{
+    if (original == NULL) return NULL;
+    if (size == 0) {
+        nu_free_aligned(original);
+        return NULL;
+    }
+    return nu_realloc_aligned(original, alignment, size);
+}
+static void internal_allocation_function(void *user, size_t size, VkInternalAllocationType allocation_type, VkSystemAllocationScope allocation_scope)
+{
+    
+}
+static void internal_free_function(void *user, size_t size, VkInternalAllocationType allocation_type, VkSystemAllocationScope allocation_scope)
+{
+       
+}
+
+static nu_result_t nuvk_context_create_allocator(nuvk_context_t *context)
+{
+    memset(&context->allocator, 0, sizeof(VkAllocationCallbacks));
+    context->allocator.pUserData             = NULL;
+    context->allocator.pfnAllocation         = allocation_function;
+    context->allocator.pfnFree               = free_function;
+    context->allocator.pfnReallocation       = reallocation_function;
+    context->allocator.pfnInternalAllocation = internal_allocation_function;
+    context->allocator.pfnInternalFree       = internal_free_function;
+
+    return NU_SUCCESS;
+}
+
 static nu_result_t nuvk_context_fill_required_instance_layers(nu_array_t layers)
 {
     static uint32_t required_layer_count = 1;
@@ -42,7 +85,7 @@ static nu_result_t nuvk_context_fill_required_instance_extensions(nu_array_t ext
 
     return NU_SUCCESS;
 }
-static nu_result_t nuvk_context_create_instance(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
+static nu_result_t nuvk_context_create_instance(nuvk_context_t *context)
 {
     nu_array_t required_layers;
     nu_array_allocate(sizeof(const char*), &required_layers);
@@ -71,7 +114,7 @@ static nu_result_t nuvk_context_create_instance(nuvk_context_t *context, const V
     instance_info.enabledExtensionCount   = nu_array_get_size(required_extensions);
     instance_info.ppEnabledExtensionNames = (const char *const *)nu_array_get_data_const(required_extensions);  
 
-    VkResult error = vkCreateInstance(&instance_info, allocator, &context->instance);
+    VkResult error = vkCreateInstance(&instance_info, &context->allocator, &context->instance);
 
     nu_array_free(required_layers);
     nu_array_free(required_extensions);
@@ -117,7 +160,7 @@ static VkBool32 nuvk_context_report_callback_function(
 
     return VK_FALSE;
 }
-static nu_result_t nuvk_context_create_debug_report_callback(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
+static nu_result_t nuvk_context_create_debug_report_callback(nuvk_context_t *context)
 {
     VkDebugReportCallbackCreateInfoEXT debug_info;
     memset(&debug_info, 0, sizeof(VkDebugReportCallbackCreateInfoEXT));
@@ -133,7 +176,7 @@ static nu_result_t nuvk_context_create_debug_report_callback(nuvk_context_t *con
         return NU_FAILURE;
     }
 
-    VkResult error = create_debug_report_callback(context->instance, &debug_info, allocator, &context->debug_report_callback);
+    VkResult error = create_debug_report_callback(context->instance, &debug_info, &context->allocator, &context->debug_report_callback);
     if (error != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create debug report callback.\n");
         return NU_FAILURE;
@@ -279,7 +322,7 @@ static nu_result_t nuvk_context_pick_queue_family_indices(nuvk_context_t *contex
     return NU_SUCCESS;
 }
 
-static nu_result_t nuvk_context_create_device(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
+static nu_result_t nuvk_context_create_device(nuvk_context_t *context)
 {
     VkDeviceQueueCreateInfo queue_infos[2];
     memset(queue_infos, 0, sizeof(VkDeviceQueueCreateInfo) * 2);
@@ -331,7 +374,7 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context, const VkA
     device_info.ppEnabledExtensionNames = (const char *const *)nu_array_get_data_const(extensions);
     device_info.pEnabledFeatures        = &features;
 
-    VkResult error = vkCreateDevice(context->physical_device, &device_info, allocator, &context->device);
+    VkResult error = vkCreateDevice(context->physical_device, &device_info, &context->allocator, &context->device);
 
     nu_array_free(extensions);
 
@@ -356,18 +399,22 @@ static nu_result_t nuvk_context_pick_queues(nuvk_context_t *context)
     return NU_SUCCESS;
 }
 
-nu_result_t nuvk_context_initialize(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
+nu_result_t nuvk_context_initialize(nuvk_context_t *context)
 {
-    if (nuvk_context_create_instance(context, allocator) != NU_SUCCESS) {
+    if (nuvk_context_create_allocator(context) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
-    if (nuvk_glfw_create_window_surface(context->instance, &context->surface, allocator) != NU_SUCCESS) {
+    if (nuvk_context_create_instance(context) != NU_SUCCESS) {
+        return NU_FAILURE;
+    }
+
+    if (nuvk_glfw_create_window_surface(context->instance, &context->surface, &context->allocator) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
     if (NUVK_CONTEXT_ENABLE_VALIDATION_LAYER) {
-        if (nuvk_context_create_debug_report_callback(context, allocator) != NU_SUCCESS) {
+        if (nuvk_context_create_debug_report_callback(context) != NU_SUCCESS) {
             return NU_FAILURE;
         }
     }
@@ -380,7 +427,7 @@ nu_result_t nuvk_context_initialize(nuvk_context_t *context, const VkAllocationC
         return NU_FAILURE;
     }
 
-    if (nuvk_context_create_device(context, allocator) != NU_SUCCESS) {
+    if (nuvk_context_create_device(context) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
@@ -390,22 +437,22 @@ nu_result_t nuvk_context_initialize(nuvk_context_t *context, const VkAllocationC
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_context_terminate(nuvk_context_t *context, const VkAllocationCallbacks *allocator)
+nu_result_t nuvk_context_terminate(nuvk_context_t *context)
 {
     vkDeviceWaitIdle(context->device);
 
-    vkDestroyDevice(context->device, allocator);
+    vkDestroyDevice(context->device, &context->allocator);
     if (NUVK_CONTEXT_ENABLE_VALIDATION_LAYER) {
         PFN_vkDestroyDebugReportCallbackEXT destroy_debug_report_callback = VK_NULL_HANDLE;
         destroy_debug_report_callback = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(context->instance, "vkDestroyDebugReportCallbackEXT");
         if (destroy_debug_report_callback == VK_NULL_HANDLE) {
             nu_warning(NUVK_LOGGER_NAME"Failed to recover the vkCreateDebutReportCallbackEXT function.\n");
         } else {
-            destroy_debug_report_callback(context->instance, context->debug_report_callback, allocator);
+            destroy_debug_report_callback(context->instance, context->debug_report_callback, &context->allocator);
         }
     }
-    vkDestroySurfaceKHR(context->instance, context->surface, allocator);
-    vkDestroyInstance(context->instance, allocator);
+    vkDestroySurfaceKHR(context->instance, context->surface, &context->allocator);
+    vkDestroyInstance(context->instance, &context->allocator);
 
     return NU_SUCCESS;
 }

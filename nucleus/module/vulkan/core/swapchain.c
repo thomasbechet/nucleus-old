@@ -2,7 +2,7 @@
 
 #define NUVK_LOGGER_NAME "[VULKAN] "
 
-static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, const VkAllocationCallbacks *allocator, uint32_t width, uint32_t height, VkSwapchainKHR old_swapchain)
+static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, uint32_t width, uint32_t height, VkSwapchainKHR old_swapchain)
 {
     /* get surface capatibilities */
     VkSurfaceCapabilitiesKHR capatibilities;
@@ -86,7 +86,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
     }
 
     /* destroy previous swapchain */
-    nuvk_swapchain_terminate(swapchain, context, allocator);
+    nuvk_swapchain_terminate(swapchain, context);
 
     /* create swapchain */
     VkSwapchainCreateInfoKHR info;
@@ -106,7 +106,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
     info.clipped          = VK_TRUE;
     info.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-    if (vkCreateSwapchainKHR(context->device, &info, allocator, &swapchain->swapchain) != VK_SUCCESS) {
+    if (vkCreateSwapchainKHR(context->device, &info, &context->allocator, &swapchain->swapchain) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create swapchain.\n");
         return NU_FAILURE;
     }
@@ -133,7 +133,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
         view_info.subresourceRange.layerCount = 1;
         view_info.subresourceRange.levelCount = 1;
         view_info.image = swapchain->images[i];
-        if (vkCreateImageView(context->device, &view_info, allocator, &swapchain->image_views[i]) != VK_SUCCESS) {
+        if (vkCreateImageView(context->device, &view_info, &context->allocator, &swapchain->image_views[i]) != VK_SUCCESS) {
             nu_error(NUVK_LOGGER_NAME"Failed to create image view.\n");
             return NU_FAILURE;
         }
@@ -142,16 +142,16 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
     return NU_SUCCESS;
 }
 
-nu_result_t nuvk_swapchain_initialize(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, const VkAllocationCallbacks *allocator, uint32_t width, uint32_t height)
+nu_result_t nuvk_swapchain_initialize(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, uint32_t width, uint32_t height)
 {
-    return nuvk_swapchain_create(swapchain, context, allocator, width, height, VK_NULL_HANDLE);
+    return nuvk_swapchain_create(swapchain, context, width, height, VK_NULL_HANDLE);
 }
-nu_result_t nuvk_swapchain_terminate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, const VkAllocationCallbacks *allocator)
+nu_result_t nuvk_swapchain_terminate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context)
 {
     if (swapchain->swapchain != VK_NULL_HANDLE) {
-        vkDestroySwapchainKHR(context->device, swapchain->swapchain, allocator);
+        vkDestroySwapchainKHR(context->device, swapchain->swapchain, &context->allocator);
         for (uint32_t i = 0; i < swapchain->image_count; i++) {
-            vkDestroyImageView(context->device, swapchain->image_views[i], allocator);
+            vkDestroyImageView(context->device, swapchain->image_views[i], &context->allocator);
         }
         nu_free(swapchain->images);
         nu_free(swapchain->image_views);
@@ -159,7 +159,7 @@ nu_result_t nuvk_swapchain_terminate(nuvk_swapchain_t *swapchain, const nuvk_con
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_swapchain_recreate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, const VkAllocationCallbacks *allocator, uint32_t width, uint32_t height)
+nu_result_t nuvk_swapchain_recreate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, uint32_t width, uint32_t height)
 {
-    return nuvk_swapchain_create(swapchain, context, allocator, width, height, swapchain->swapchain);
+    return nuvk_swapchain_create(swapchain, context, width, height, swapchain->swapchain);
 }

@@ -23,14 +23,13 @@ typedef struct {
 
 nu_result_t nuvk_memory_manager_initialize(
     nuvk_memory_manager_t *manager,
-    const nuvk_context_t *context,
-    const VkAllocationCallbacks *allocator
+    const nuvk_context_t *context
 );
 nu_result_t nuvk_memory_manager_terminate(nuvk_memory_manager_t *manager);
 
-nu_result_t nuvk_buffer_create(const nuvk_memory_manager_t *manager, const nuvk_buffer_info_t *info, nuvk_buffer_t *buffer);
-nu_result_t nuvk_buffer_destroy(const nuvk_memory_manager_t *manager, nuvk_buffer_t *buffer);
-nu_result_t nuvk_buffer_map(const nuvk_memory_manager_t *manager, nuvk_buffer_t *buffer);
-nu_result_t nuvk_buffer_unmap(const nuvk_memory_manager_t *manager, nuvk_buffer_t *buffer);
+nu_result_t nuvk_buffer_create(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager, const nuvk_buffer_info_t *info);
+nu_result_t nuvk_buffer_destroy(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager);
+nu_result_t nuvk_buffer_map(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager);
+nu_result_t nuvk_buffer_unmap(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager);
 
 #endif

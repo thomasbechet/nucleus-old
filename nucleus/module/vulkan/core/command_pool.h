@@ -9,10 +9,9 @@ typedef struct {
 
 nu_result_t nuvk_command_pool_initialize(
     nuvk_command_pool_t *pool,
-    const nuvk_context_t *context,
-    const VkAllocationCallbacks *allocator
+    const nuvk_context_t *context
 );
-nu_result_t nuvk_command_pool_terminate(nuvk_command_pool_t *pool, const nuvk_context_t *context, const VkAllocationCallbacks *allocator);
+nu_result_t nuvk_command_pool_terminate(nuvk_command_pool_t *pool, const nuvk_context_t *context);
 
 nu_result_t nuvk_command_buffer_begin_single(VkDevice device, VkCommandPool command_pool, VkCommandBuffer *command_buffer);
 nu_result_t nuvk_command_buffer_end_single(VkCommandBuffer command_buffer, VkCommandPool command_pool, VkQueue queue);

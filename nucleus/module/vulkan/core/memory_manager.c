@@ -4,8 +4,7 @@
 
 nu_result_t nuvk_memory_manager_initialize(
     nuvk_memory_manager_t *manager, 
-    const nuvk_context_t *context, 
-    const VkAllocationCallbacks *allocator
+    const nuvk_context_t *context
 )
 {
     VmaAllocatorCreateInfo info;
@@ -14,7 +13,7 @@ nu_result_t nuvk_memory_manager_initialize(
     info.instance             = context->instance;
     info.physicalDevice       = context->physical_device;
     info.device               = context->device;
-    info.pAllocationCallbacks = allocator;
+    info.pAllocationCallbacks = &context->allocator;
 
     if (vmaCreateAllocator(&info, &manager->allocator) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create vma.\n");
@@ -30,7 +29,7 @@ nu_result_t nuvk_memory_manager_terminate(nuvk_memory_manager_t *manager)
     return NU_SUCCESS;
 }
 
-nu_result_t nuvk_buffer_create(const nuvk_memory_manager_t *manager, const nuvk_buffer_info_t *info, nuvk_buffer_t *buffer)
+nu_result_t nuvk_buffer_create(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager, const nuvk_buffer_info_t *info)
 {
     VkBufferCreateInfo buffer_info;
     memset(&buffer_info, 0, sizeof(VkBufferCreateInfo));
@@ -53,7 +52,7 @@ nu_result_t nuvk_buffer_create(const nuvk_memory_manager_t *manager, const nuvk_
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_buffer_destroy(const nuvk_memory_manager_t *manager, nuvk_buffer_t *buffer)
+nu_result_t nuvk_buffer_destroy(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager)
 {
     if (buffer->map != NULL) {
         vmaUnmapMemory(manager->allocator, buffer->allocation);
@@ -62,7 +61,7 @@ nu_result_t nuvk_buffer_destroy(const nuvk_memory_manager_t *manager, nuvk_buffe
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_buffer_map(const nuvk_memory_manager_t *manager, nuvk_buffer_t *buffer)
+nu_result_t nuvk_buffer_map(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager)
 {
     if (vmaMapMemory(manager->allocator, buffer->allocation, &buffer->map) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to map memory.\n");
@@ -71,7 +70,7 @@ nu_result_t nuvk_buffer_map(const nuvk_memory_manager_t *manager, nuvk_buffer_t 
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_buffer_unmap(const nuvk_memory_manager_t *manager, nuvk_buffer_t *buffer)
+nu_result_t nuvk_buffer_unmap(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager)
 {
     if (buffer->map != NULL) {
         vmaUnmapMemory(manager->allocator, buffer->allocation);

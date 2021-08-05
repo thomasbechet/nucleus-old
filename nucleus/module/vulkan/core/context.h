@@ -8,6 +8,7 @@
 #define NUVK_CONTEXT_API_VERSION             VK_API_VERSION_1_2
 
 typedef struct {
+    VkAllocationCallbacks allocator;
     VkInstance instance;
     VkDebugReportCallbackEXT debug_report_callback;
     VkPhysicalDevice physical_device;
@@ -20,7 +21,7 @@ typedef struct {
     VkQueue present_queue;
 } nuvk_context_t;
 
-nu_result_t nuvk_context_initialize(nuvk_context_t *context, const VkAllocationCallbacks *allocator);
-nu_result_t nuvk_context_terminate(nuvk_context_t *context, const VkAllocationCallbacks *allocator);
+nu_result_t nuvk_context_initialize(nuvk_context_t *context);
+nu_result_t nuvk_context_terminate(nuvk_context_t *context);
 
 #endif

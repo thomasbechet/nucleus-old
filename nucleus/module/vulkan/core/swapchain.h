@@ -13,8 +13,8 @@ typedef struct {
     VkExtent2D extent; 
 } nuvk_swapchain_t;
 
-nu_result_t nuvk_swapchain_initialize(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, const VkAllocationCallbacks *allocator, uint32_t width, uint32_t height);
-nu_result_t nuvk_swapchain_terminate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, const VkAllocationCallbacks *allocator);
-nu_result_t nuvk_swapchain_recreate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, const VkAllocationCallbacks *allocator, uint32_t width, uint32_t height);
+nu_result_t nuvk_swapchain_initialize(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, uint32_t width, uint32_t height);
+nu_result_t nuvk_swapchain_terminate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context);
+nu_result_t nuvk_swapchain_recreate(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, uint32_t width, uint32_t height);
 
 #endif
