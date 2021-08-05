@@ -4,7 +4,7 @@
 #include <nucleus/nucleus.h>
 #include <vulkan/vulkan.h>
 
-nu_result_t nuvk_glfw_load_interface(void);
+nu_result_t nuvk_glfw_get_interface(void);
 nu_result_t nuvk_glfw_create_window_surface(VkInstance instance, VkSurfaceKHR *surface, const VkAllocationCallbacks *allocator);
 nu_result_t nuvk_glfw_get_required_instance_extensions(const char ***required_extensions, uint32_t *count);
 

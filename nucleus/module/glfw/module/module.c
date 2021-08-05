@@ -10,19 +10,17 @@ static const char *interfaces[] = {
     NUGLFW_WINDOW_INTERFACE_NAME
 };
 
-nu_result_t nu_module_get_info(nu_module_info_t *info)
+nu_result_t nu_module_info(nu_module_info_t *info)
 {
     info->name            = NUGLFW_MODULE_NAME;
     info->id              = NUGLFW_MODULE_ID;
     info->flags           = NU_MODULE_FLAG_NONE;
     info->interface_count = interface_count;
     info->interfaces      = interfaces;
-    info->plugin_count    = 0;
-    info->plugins         = NULL;
 
     return NU_SUCCESS;
 }
-nu_result_t nu_module_get_interface(const char *name, void *interface)
+nu_result_t nu_module_interface(const char *name, void *interface)
 {
     if (NU_MATCH(name, NU_WINDOW_INTERFACE_NAME)) {
         nu_window_interface_t *i = (nu_window_interface_t*)interface;

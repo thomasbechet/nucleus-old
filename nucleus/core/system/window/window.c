@@ -31,10 +31,10 @@ nu_result_t nu_window_initialize(void)
             return result;
         }
 
-        /* load window interface */
-        result = nu_module_load_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
+        /* get window interface */
+        result = nu_module_get_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_WINDOW_NAME"Failed to load interface.\n");
+            nu_error(NU_LOGGER_WINDOW_NAME"Failed to get interface.\n");
             return result;
         }
 

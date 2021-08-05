@@ -12,7 +12,7 @@ static nu_result_t load_monkey(nu_renderer_mesh_t *mesh)
     nu_module_t module;
     nuutils_loader_interface_t loader;
     if (nu_module_get_by_name(NUUTILS_MODULE_NAME, &module) != NU_SUCCESS) return NU_FAILURE;
-    if (nu_module_load_interface(module, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) return NU_FAILURE;
+    if (nu_module_get_interface(module, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) return NU_FAILURE;
     if (loader.load_mesh_from_obj("engine/model/alfred/alfred.obj", mesh) != NU_SUCCESS) return NU_FAILURE;
 
     return NU_SUCCESS;
@@ -35,6 +35,7 @@ typedef struct {
     uint32_t id;
     uint32_t v;
 } stest;
+
 static nu_result_t on_start(void)
 {
     // nu_string_t token;

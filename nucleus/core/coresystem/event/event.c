@@ -55,31 +55,6 @@ nu_result_t nu_event_stop(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t nu_event_dispatch_all(void)
-{
-    uint32_t event_count = nu_array_get_size(_system.events);
-    nu_event_data_t *events = (nu_event_data_t*)nu_array_get_data(_system.events);
-    for (uint32_t ei = 0; ei < event_count; ei++) {
-        uint32_t subscriber_count = nu_array_get_size(events[ei].subscribers);
-        uint32_t message_count = nu_array_get_size(events[ei].messages);
-        nu_event_callback_pfn_t *subscribers = (nu_event_callback_pfn_t*)nu_array_get_data(events[ei].subscribers);
-        for (uint32_t mi = 0; mi < message_count; mi++) {
-            /* send message */
-            void *data = nu_array_get(events[ei].messages, mi);
-            for (uint32_t si = 0; si < subscriber_count; si++) {
-                subscribers[si](ei, data);
-            }
-            /* terminate message */
-            if (events[ei].terminate) {
-                events[ei].terminate(data);
-            }
-        }
-        /* clear messages */
-        nu_array_clear(events[ei].messages);
-    }
-
-    return NU_SUCCESS;
-}
 
 nu_result_t nu_event_register(const nu_event_register_info_t *info, nu_event_id_t *id)
 {
@@ -115,6 +90,39 @@ nu_result_t nu_event_subscribe(nu_event_id_t id, nu_event_callback_pfn_t callbac
 {
     nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
     nu_array_push(event->subscribers, &callback);
+
+    return NU_SUCCESS;
+}
+nu_result_t nu_event_dispatch(nu_event_id_t id)
+{
+    nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
+
+    /* dispatch */
+    uint32_t subscriber_count = nu_array_get_size(event->subscribers);
+    uint32_t message_count = nu_array_get_size(event->messages);
+    nu_event_callback_pfn_t *subscribers = (nu_event_callback_pfn_t*)nu_array_get_data(event->subscribers);
+    for (uint32_t mi = 0; mi < message_count; mi++) {
+        /* send message */
+        void *data = nu_array_get(event->messages, mi);
+        for (uint32_t si = 0; si < subscriber_count; si++) {
+            subscribers[si](id, data);
+        }
+        /* terminate message */
+        if (event->terminate) {
+            event->terminate(data);
+        }
+    }
+    /* clear messages */
+    nu_array_clear(event->messages);
+
+    return NU_SUCCESS;
+}
+nu_result_t nu_event_dispatch_all(void)
+{
+    uint32_t event_count = nu_array_get_size(_system.events);
+    for (uint32_t ei = 0; ei < event_count; ei++) {
+        nu_event_dispatch(ei); /* id are indexes */
+    }
 
     return NU_SUCCESS;
 }

@@ -27,10 +27,10 @@ nu_result_t nu_task_initialize(void)
             return result;
         }
 
-        /* load task interface */
-        result = nu_module_load_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
+        /* get task interface */
+        result = nu_module_get_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_TASK_NAME"Failed to load interface.\n");
+            nu_error(NU_LOGGER_TASK_NAME"Failed to get interface.\n");
             return result;
         }
 

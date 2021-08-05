@@ -5,13 +5,9 @@
 #include <nucleus/core/utils/array.h>
 #include <nucleus/core/utils/string.h>
 
-#define NU_MODULE_GET_PLUGIN_NAME "nu_module_get_plugin"
-
-typedef nu_result_t (*nu_module_plugin_loader_pfn_t)(const char*, nu_plugin_interface_t*);
-
 typedef struct {
     nu_module_t module;
-    nu_plugin_interface_t interface;
+    nu_plugin_callbacks_t callbacks;
     nu_string_t name;
 } nu_plugin_data_t;
 
@@ -49,8 +45,8 @@ nu_result_t nu_plugin_stop(void)
     uint32_t size = nu_array_get_size(_system.plugins);
     nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
     for (uint32_t i = 0; i < size; i++) {
-        if (plugins[i].interface.terminate) {
-            plugins[i].interface.terminate();
+        if (plugins[i].callbacks.terminate) {
+            plugins[i].callbacks.terminate();
         }
     }
     return NU_SUCCESS;
@@ -60,8 +56,8 @@ nu_result_t nu_plugin_update(void)
     uint32_t size = nu_array_get_size(_system.plugins);
     nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
     for (uint32_t i = 0; i < size; i++) {
-        if (plugins[i].interface.update) {
-            plugins[i].interface.update();
+        if (plugins[i].callbacks.update) {
+            plugins[i].callbacks.update();
         }
     }
     return NU_SUCCESS;
@@ -71,8 +67,8 @@ nu_result_t nu_plugin_fixed_update(void)
     uint32_t size = nu_array_get_size(_system.plugins);
     nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
     for (uint32_t i = 0; i < size; i++) {
-        if (plugins[i].interface.fixed_update) {
-            plugins[i].interface.fixed_update();
+        if (plugins[i].callbacks.fixed_update) {
+            plugins[i].callbacks.fixed_update();
         }
     }
     return NU_SUCCESS;
@@ -82,8 +78,8 @@ nu_result_t nu_plugin_late_update(void)
     uint32_t size = nu_array_get_size(_system.plugins);
     nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
     for (uint32_t i = 0; i < size; i++) {
-        if (plugins[i].interface.late_update) {
-            plugins[i].interface.late_update();
+        if (plugins[i].callbacks.late_update) {
+            plugins[i].callbacks.late_update();
         }
     }
     return NU_SUCCESS;
@@ -107,18 +103,18 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     nu_plugin_data_t plugin;
     memset(&plugin, 0, sizeof(nu_plugin_data_t));
 
-    /* load plugin loader interface */
-    nu_module_plugin_loader_pfn_t plugin_loader;
-    result = nu_module_load_function(module, NU_MODULE_GET_PLUGIN_NAME, (nu_pfn_t*)&plugin_loader);
+    /* get plugin interface */
+    nu_plugin_interface_t interface;
+    result = nu_module_get_interface(module, NU_PLUGIN_INTERFACE_NAME, (nu_pfn_t*)&interface);
     if (result != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to load '%s' function for plugin: %s.\n", NU_MODULE_GET_PLUGIN_NAME, plugin_name);
+        nu_core_log(NU_WARNING, "Failed to get '%s' interface for plugin: %s.\n", NU_PLUGIN_INTERFACE_NAME, plugin_name);
         return result;
     }
 
-    /* load plugin interface */
-    result = plugin_loader(plugin_name, &plugin.interface);
+    /* get callbacks */
+    result = interface.get_callbacks(plugin_name, &plugin.callbacks);
     if (result != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to load plugin interface: %s.\n", plugin);
+        nu_core_log(NU_WARNING, "Failed to get plugin callbacks: %s.\n", plugin);
         return result;
     }
 
@@ -127,8 +123,8 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     nu_string_allocate_cstr(plugin_name, &plugin.name);
 
     /* initialize plugin */
-    if (plugin.interface.initialize) {
-        result = plugin.interface.initialize();
+    if (plugin.callbacks.initialize) {
+        result = plugin.callbacks.initialize();
         if (result != NU_SUCCESS) {
             nu_core_log(NU_WARNING, "Failed to initialize plugin: %s.\n", plugin_name);
             return result;

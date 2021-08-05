@@ -6,7 +6,7 @@
 
 static nuglfw_window_interface_t _glfw_interface;
 
-nu_result_t nuvk_glfw_load_interface(void)
+nu_result_t nuvk_glfw_get_interface(void)
 {
     nu_module_t module = nu_window_get_module();
     if (nu_module_get_id(module) != NUGLFW_MODULE_ID) {
@@ -14,8 +14,8 @@ nu_result_t nuvk_glfw_load_interface(void)
         return NU_FAILURE;
     }
 
-    if (nu_module_load_interface(module, NUGLFW_WINDOW_INTERFACE_NAME, &_glfw_interface) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Vulkan failed to load glfw loader.\n");
+    if (nu_module_get_interface(module, NUGLFW_WINDOW_INTERFACE_NAME, &_glfw_interface) != NU_SUCCESS) {
+        nu_error(NUVK_LOGGER_NAME"Vulkan failed to get glfw loader.\n");
         return NU_FAILURE;
     }
 

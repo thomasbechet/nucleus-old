@@ -29,10 +29,10 @@ nu_result_t nu_input_initialize(void)
             return NU_FAILURE;
         }
 
-        /* load input interface */
-        result = nu_module_load_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
+        /* get input interface */
+        result = nu_module_get_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_INPUT_NAME"Failed to load interface.\n");
+            nu_error(NU_LOGGER_INPUT_NAME"Failed to get interface.\n");
             return result;
         }
 

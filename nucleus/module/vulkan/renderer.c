@@ -23,8 +23,8 @@ static nuvk_module_data_t _module;
 
 nu_result_t nuvk_renderer_initialize(void)
 {
-    if (nuvk_glfw_load_interface() != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to load glfw interface.\n");
+    if (nuvk_glfw_get_interface() != NU_SUCCESS) {
+        nu_error(NUVK_LOGGER_NAME"Failed to get glfw interface.\n");
         return NU_FAILURE;
     }
 
