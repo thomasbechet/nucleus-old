@@ -26,6 +26,9 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->terminate  = nuvk_renderer_terminate;
         i->render     = nuvk_renderer_render;
 
+        i->camera_set_fov  = nuvk_renderer_camera_set_fov;
+        i->camera_set_view = nuvk_renderer_camera_set_view;
+
         return NU_SUCCESS;
     }
 

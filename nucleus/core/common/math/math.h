@@ -8,7 +8,6 @@
 #include <nucleus/core/common/math/quat.h>
 #include <nucleus/core/common/math/rect.h>
 #include <nucleus/core/common/math/transform.h>
-#include <nucleus/core/common/math/cam.h>
 #include <nucleus/core/common/math/utility.h>
 
 #endif

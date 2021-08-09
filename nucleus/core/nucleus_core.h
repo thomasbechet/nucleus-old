@@ -21,6 +21,7 @@ extern "C" {
 #include <nucleus/core/utils/indexed_array.h>
 #include <nucleus/core/utils/string.h>
 #include <nucleus/core/utils/timer.h>
+#include <nucleus/core/utils/io.h>
 
 #ifdef __cplusplus
 }

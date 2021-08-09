@@ -2,7 +2,7 @@
 
 #include <nucleus/module/glfw.h>
 
-#define NUVK_LOGGER_NAME "[VULKAN] "
+#define NUVK_LOGGER_NAME "[VULKAN GLFW] "
 
 static nuglfw_window_interface_t _glfw_interface;
 

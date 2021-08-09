@@ -2,8 +2,6 @@
 
 #include <nucleus/module/vulkan/glfw/interface.h>
 
-#define NUVK_LOGGER_NAME "[VULKAN] "
-
 static void *allocation_function(void *user, size_t size, size_t alignment, VkSystemAllocationScope allocation_scope)
 {
     if (size == 0) return NULL;

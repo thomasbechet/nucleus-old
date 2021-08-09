@@ -1,7 +1,5 @@
 #include <nucleus/module/vulkan/core/render_context.h>
 
-#define NUVK_LOGGER_NAME "[VULKAN] "
-
 nu_result_t nuvk_render_context_initialize(
     nuvk_render_context_t *render_context,
     const nuvk_context_t *context,
@@ -152,7 +150,7 @@ bool nuvk_render_context_end(
 
     VkResult result = vkQueuePresentKHR(context->present_queue, &present_info);
     if (result != VK_SUCCESS) {
-        if (result == VK_SUBOPTIMAL_KHR) {
+        if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
             return false;
         } else {
             nu_error(NUVK_LOGGER_NAME"Failed to present KHR.\n");

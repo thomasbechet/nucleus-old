@@ -1,7 +1,5 @@
 #include <nucleus/module/vulkan/core/swapchain.h>
 
-#define NUVK_LOGGER_NAME "[VULKAN] "
-
 static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk_context_t *context, uint32_t width, uint32_t height, VkSwapchainKHR old_swapchain)
 {
     /* get surface capatibilities */
@@ -85,9 +83,6 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
         pre_transform = capatibilities.currentTransform;
     }
 
-    /* destroy previous swapchain */
-    nuvk_swapchain_terminate(swapchain, context);
-
     /* create swapchain */
     VkSwapchainCreateInfoKHR info;
     memset(&info, 0, sizeof(VkSwapchainCreateInfoKHR));
@@ -109,6 +104,16 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
     if (vkCreateSwapchainKHR(context->device, &info, &context->allocator, &swapchain->swapchain) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create swapchain.\n");
         return NU_FAILURE;
+    }
+
+    /* destroy previous swapchain and images */
+    if (old_swapchain != VK_NULL_HANDLE) {
+        vkDestroySwapchainKHR(context->device, old_swapchain, &context->allocator);
+        for (uint32_t i = 0; i < swapchain->image_count; i++) {
+            vkDestroyImageView(context->device, swapchain->image_views[i], &context->allocator);
+        }
+        nu_free(swapchain->images);
+        nu_free(swapchain->image_views);
     }
 
     /* recover images */

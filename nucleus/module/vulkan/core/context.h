@@ -6,6 +6,7 @@
 
 #define NUVK_CONTEXT_ENABLE_VALIDATION_LAYER true
 #define NUVK_CONTEXT_API_VERSION             VK_API_VERSION_1_2
+#define NUVK_LOGGER_NAME                     "[VULKAN] "
 
 typedef struct {
     VkAllocationCallbacks allocator;

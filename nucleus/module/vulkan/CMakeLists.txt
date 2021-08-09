@@ -37,6 +37,7 @@ elseif (MINGW)
         nucleus
         mingw32
         ${Vulkan_LIBRARIES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/shaderc/lib/lib-mingw-w64/libshaderc_combined.a
     )
 elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 

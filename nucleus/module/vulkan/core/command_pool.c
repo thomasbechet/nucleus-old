@@ -1,7 +1,5 @@
 #include <nucleus/module/vulkan/core/command_pool.h>
 
-#define NUVK_LOGGER_NAME "[VULKAN] "
-
 nu_result_t nuvk_command_pool_initialize(
     nuvk_command_pool_t *pool, 
     const nuvk_context_t *context
