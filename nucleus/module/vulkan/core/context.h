@@ -17,6 +17,7 @@ typedef struct {
     VkSurfaceKHR surface;
     uint32_t graphics_queue_family_index;
     uint32_t present_queue_family_index;
+    bool single_graphics_present_queue;
     VkDevice device;
     VkQueue graphics_queue;
     VkQueue present_queue;

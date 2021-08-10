@@ -16,6 +16,7 @@ FIND_PACKAGE(Vulkan REQUIRED FATAL_ERROR)
 INCLUDE_DIRECTORIES(
     ../../../
     ../../../extlibs/vma/include/
+    ../../../extlibs/shaderc/include/
     ${Vulkan_INCLUDE_DIRS}
 )
 
@@ -43,6 +44,7 @@ elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
         ${Vulkan_LIBRARIES}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/shaderc/lib/lib-unix/libshaderc_combined.a
     )
 endif()
 
