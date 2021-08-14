@@ -22,3 +22,12 @@ nu_result_t nuvk_sdf_renderpasses_terminate(
 
     return NU_SUCCESS;
 }
+nu_result_t nuvk_sdf_renderpasses_update_swapchain(
+    nuvk_sdf_renderpasses_t *renderpasses,
+    const nuvk_context_t *context,
+    const nuvk_swapchain_t *swapchain
+)
+{
+    vkDestroyRenderPass(context->device, renderpasses->postprocess, &context->allocator);
+    return nuvk_sdf_renderpasses_initialize(renderpasses, context, swapchain);
+}

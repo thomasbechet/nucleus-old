@@ -2,10 +2,10 @@
 #define NUVK_SDF_BUFFERS_H
 
 #include <nucleus/module/vulkan/core/render_context.h>
-#include <nucleus/module/vulkan/sdf/buffer/low_frequency.h>
+#include <nucleus/module/vulkan/sdf/buffer/environment.h>
 
 typedef struct {
-    nuvk_sdf_buffer_low_frequency_t low_frequency;
+    nuvk_sdf_buffer_environment_t environment;
 } nuvk_sdf_buffers_t;
 
 nu_result_t nuvk_sdf_buffers_initialize(

@@ -24,5 +24,12 @@ nu_result_t nuvk_sdf_pipelines_terminate(
     nuvk_sdf_pipelines_t *pipelines,
     const nuvk_context_t *context
 );
+nu_result_t nuvk_sdf_pipelines_update_swapchain(
+    nuvk_sdf_pipelines_t *pipelines,
+    const nuvk_context_t *context,
+    const nuvk_swapchain_t *swapchain,
+    const nuvk_sdf_shaders_t *shaders,
+    const nuvk_sdf_renderpasses_t *renderpasses
+);
 
 #endif

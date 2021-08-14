@@ -6,13 +6,13 @@ nu_result_t nuvk_sdf_shader_postprocess_create(
     const nuvk_shader_manager_t *shader_manager
 )
 {
-    if (nuvk_shader_module_create_from_glsl(context, shader_manager, "engine/shader/postprocess.vert", 
+    if (nuvk_shader_module_create_from_glsl(context, shader_manager, "$ENGINE_DIR/shader/postprocess.vert", 
         VK_SHADER_STAGE_VERTEX_BIT, &shader->vertex) != NU_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create postprocess vertex shader.\n");
         return NU_SUCCESS;
     }
 
-    if (nuvk_shader_module_create_from_glsl(context, shader_manager, "engine/shader/postprocess.frag", 
+    if (nuvk_shader_module_create_from_glsl(context, shader_manager, "$ENGINE_DIR/shader/postprocess.frag", 
         VK_SHADER_STAGE_FRAGMENT_BIT, &shader->fragment) != NU_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create postprocess fragment shader.\n");
         return NU_SUCCESS;

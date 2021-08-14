@@ -1,17 +1,46 @@
 #include <nucleus/core/coresystem/logger/logger.h>
 
+#include <nucleus/core/utils/io.h>
+#include <nucleus/core/utils/path.h>
+#include <nucleus/core/config/config.h>
+
 #define NU_CORE_LOGGER_NAME "[CORE] "
 
 #ifdef NU_PLATFORM_WINDOWS
 #include <windows.h>
 #endif
 
+typedef struct {
+    nu_file_t log_file;
+} nu_system_data_t;
+
+static nu_system_data_t _system;
+
 nu_result_t nu_logger_initialize(void)
 {
+    _system.log_file = NULL;
+    if (nu_config_get().logger.enable_log_file) {
+        nu_path_t path, filename;
+        nu_path_allocate_cstr(nu_config_get().logger.log_file_directory, &path);
+        nu_path_allocate_cstr("nucleus.log", &filename);
+        nu_path_join(&path, filename);
+        if (nu_file_open(nu_path_get_cstr(path), NU_IO_MODE_WRITE, &_system.log_file) != NU_SUCCESS) {
+            nu_core_log(NU_ERROR, NU_CORE_LOGGER_NAME"Failed to open log file: %s.\n", nu_path_get_cstr(path));
+            return NU_FAILURE;
+        }
+        nu_path_free(path);
+        nu_path_free(filename);
+    }
+
     return NU_SUCCESS;
 }
 nu_result_t nu_logger_terminate(void)
 {
+    if (_system.log_file) {
+        nu_file_close(_system.log_file);
+        _system.log_file = NULL;
+    }
+
     return NU_SUCCESS;
 }
 nu_result_t nu_logger_start(void)
@@ -32,6 +61,10 @@ void nu_log(nu_severity_t severity, const char *format, ...)
 }
 void nu_vlog(nu_severity_t severity, const char *format, va_list args)
 {
+    if (_system.log_file) {
+        nu_file_write_vprintf(_system.log_file, format, args);
+    }
+
 #if defined(NU_PLATFORM_WINDOWS)
     switch (severity) {
         case NU_INFO:
@@ -122,7 +155,13 @@ void nu_core_log(nu_severity_t severity, const char *format, ...)
 }
 void nu_core_vlog(nu_severity_t severity, const char *format, va_list args)
 {
-/* This function must not use any other system */
+    /* This function must not be used by any non core system */
+
+    if (_system.log_file) {
+        nu_file_write_printf(_system.log_file, NU_CORE_LOGGER_NAME);
+        nu_file_write_vprintf(_system.log_file, format, args);
+    }
+
 #if defined(NU_PLATFORM_WINDOWS)
     switch (severity) {
         case NU_INFO:

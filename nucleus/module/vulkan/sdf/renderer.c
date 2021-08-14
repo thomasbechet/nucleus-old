@@ -73,16 +73,17 @@ nu_result_t nuvk_sdf_renderer_render(
     /* start camera */
     nuvk_sdf_camera_start_frame(&renderer->camera, swapchain);
 
-    /* write low frequency buffer */
-    nuvk_sdf_buffer_low_frequency_write_camera(&renderer->buffers.low_frequency, &renderer->camera,
+    /* write environment buffer */
+    nuvk_sdf_buffer_environment_write_camera(&renderer->buffers.environment, &renderer->camera,
         render_context->active_inflight_frame_index);
 
-    /* postprocess pass */
+    /* screen render area */
     VkRect2D render_area;
-    render_area.extent   = swapchain->extent;
     render_area.offset.x = 0;
     render_area.offset.y = 0;
+    render_area.extent   = swapchain->extent;
 
+    /* postprocess pass */
     VkRenderPassBeginInfo begin_info;
     memset(&begin_info, 0, sizeof(VkRenderPassBeginInfo));
     begin_info.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -92,9 +93,9 @@ nu_result_t nuvk_sdf_renderer_render(
     vkCmdBeginRenderPass(cmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess.pipeline);
-    uint32_t dynamic_offset = renderer->buffers.low_frequency.uniform_buffer_size * render_context->active_inflight_frame_index;
+    uint32_t dynamic_offset = renderer->buffers.environment.uniform_buffer_size * render_context->active_inflight_frame_index;
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess.layout,
-        0, 1, &renderer->descriptors.low_frequency.descriptor, 1, &dynamic_offset);
+        0, 1, &renderer->descriptors.environment.descriptor, 1, &dynamic_offset);
     vkCmdDraw(cmd, 3, 1, 0, 0);
 
     vkCmdEndRenderPass(cmd);
@@ -104,12 +105,26 @@ nu_result_t nuvk_sdf_renderer_render(
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_renderer_swapchain_updated(
+nu_result_t nuvk_sdf_renderer_update_swapchain(
     nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
     const nuvk_swapchain_t *swapchain
 )
 {
-    nu_info("Swapchain updated.\n");
+    if (nuvk_sdf_renderpasses_update_swapchain(&renderer->renderpasses, context, swapchain) != NU_SUCCESS) {
+        nu_error(NUVK_LOGGER_NAME"Failed to update swapchain for pipelines.\n");
+        return NU_FAILURE;
+    }
+
+    if (nuvk_sdf_pipelines_update_swapchain(&renderer->pipelines, context, swapchain, &renderer->shaders, &renderer->renderpasses) != NU_SUCCESS) {
+        nu_error(NUVK_LOGGER_NAME"Failed to update swapchain for pipelines.\n");
+        return NU_FAILURE;
+    }
+
+    if (nuvk_sdf_framebuffers_update_swapchain(&renderer->framebuffers, context, swapchain, &renderer->renderpasses) != NU_SUCCESS) {
+        nu_error(NUVK_LOGGER_NAME"Failed to update swapchain for framebuffers.\n");
+        return NU_FAILURE;
+    }
 
     return NU_SUCCESS;
 }

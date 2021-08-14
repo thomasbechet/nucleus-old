@@ -6,8 +6,8 @@
 #define NU_LOGGER_WINDOW_NAME "[WINDOW] "
 
 static const char *nu_window_api_names[] = {
-    "engine/module/nucleus-window-none",
-    "engine/module/"NUGLFW_MODULE_NAME
+    "$MODULE_DIR/nucleus-window-none",
+    "$MODULE_DIR/"NUGLFW_MODULE_NAME
 };
 
 typedef struct {

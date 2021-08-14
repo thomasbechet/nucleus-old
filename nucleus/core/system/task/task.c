@@ -22,7 +22,7 @@ nu_result_t nu_task_initialize(void)
 
     if (api != NU_TASK_API_NONE) {
         /* get task module */
-        result = nu_module_load("engine/module/none", &_system.module);
+        result = nu_module_load("$MODULE_DIR/none", &_system.module);
         if (result != NU_SUCCESS) {
             return result;
         }

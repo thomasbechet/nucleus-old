@@ -18,5 +18,11 @@ nu_result_t nuvk_sdf_framebuffers_terminate(
     nuvk_sdf_framebuffers_t *framebuffers,
     const nuvk_context_t *context
 );
+nu_result_t nuvk_sdf_framebuffers_update_swapchain(
+    nuvk_sdf_framebuffers_t *framebuffers,
+    const nuvk_context_t *context,
+    const nuvk_swapchain_t *swapchain,
+    const nuvk_sdf_renderpasses_t *renderpasses
+);
 
 #endif

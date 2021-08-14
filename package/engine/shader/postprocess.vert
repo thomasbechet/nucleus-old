@@ -3,7 +3,7 @@
 layout(location = 1) out vec2 pos;
 layout(location = 2) out flat mat4 invVPMatrix;
 
-layout(set = 0, binding = 0) uniform HighFrequencyUniformBuffer {
+layout(set = 0, binding = 0) uniform EnvironmentUniformBuffer {
     mat4 VPMatrix;
     vec3 eye;
 };

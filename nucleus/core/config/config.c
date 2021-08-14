@@ -2,6 +2,7 @@
 
 /* Dependencies with nu_core_log(), should be moved */
 #include <nucleus/core/coresystem/logger/logger.h>
+#include <nucleus/core/utils/path.h>
 
 #include <stdlib.h>
 #include <ini/ini.h>
@@ -50,6 +51,11 @@ static nu_result_t load_ini_file(void)
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MINOR, 0, &_system.config.context.version_minor);
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_PATCH, 1, &_system.config.context.version_patch);
     nu_config_get_bool(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_LOG_CONFIG, true, &_system.config.context.log_config);
+
+    /* logger */
+    nu_config_get_bool(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_ENABLE_LOG_FILE, false, &_system.config.logger.enable_log_file);
+    nu_config_get_bool(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_ENABLE_CORE_LOG_FILE, false, &_system.config.logger.enable_core_log_file);
+    nu_config_get_string(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_LOG_FILE_DIRECTORY, NU_PATH_ROOT_DIRECTORY, &_system.config.logger.log_file_directory);
 
     /* task */
     const char *task_api;

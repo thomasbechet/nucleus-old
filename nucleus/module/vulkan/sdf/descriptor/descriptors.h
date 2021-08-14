@@ -2,11 +2,11 @@
 #define NUVK_SDF_DESCRIPTORS_H
 
 #include <nucleus/module/vulkan/sdf/buffer/buffers.h>
-#include <nucleus/module/vulkan/sdf/descriptor/low_frequency.h>
+#include <nucleus/module/vulkan/sdf/descriptor/environment.h>
 
 typedef struct {
     VkDescriptorPool pool;
-    nuvk_sdf_descriptor_low_frequency_t low_frequency;
+    nuvk_sdf_descriptor_environment_t environment;
 } nuvk_sdf_descriptors_t;
 
 nu_result_t nuvk_sdf_descriptors_initialize(

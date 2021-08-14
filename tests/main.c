@@ -13,7 +13,7 @@ static nu_result_t load_monkey(nu_renderer_mesh_t *mesh)
     nuutils_loader_interface_t loader;
     if (nu_module_get_by_name(NUUTILS_MODULE_NAME, &module) != NU_SUCCESS) return NU_FAILURE;
     if (nu_module_get_interface(module, NUUTILS_LOADER_INTERFACE_NAME, &loader) != NU_SUCCESS) return NU_FAILURE;
-    if (loader.load_mesh_from_obj("engine/model/alfred/alfred.obj", mesh) != NU_SUCCESS) return NU_FAILURE;
+    if (loader.load_mesh_from_obj("$ENGINE_DIR/model/alfred/alfred.obj", mesh) != NU_SUCCESS) return NU_FAILURE;
 
     return NU_SUCCESS;
 }
@@ -135,7 +135,7 @@ static nu_result_t on_start(void)
     // nu_array_free(ids);
 
     nu_module_t module;
-    nu_module_load("engine/module/nucleus-utils", &module);
+    NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
     nu_plugin_require(module, NUUTILS_CONSOLE_PLUGIN_NAME);
     nu_plugin_require(module, NUUTILS_SPECTATOR_PLUGIN_NAME);

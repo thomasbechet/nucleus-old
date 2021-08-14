@@ -1,9 +1,9 @@
-#include <nucleus/module/vulkan/sdf/descriptor/low_frequency.h>
+#include <nucleus/module/vulkan/sdf/descriptor/environment.h>
 
-nu_result_t nuvk_sdf_descriptor_low_frequency_create(
-    nuvk_sdf_descriptor_low_frequency_t *descriptor,
+nu_result_t nuvk_sdf_descriptor_environment_create(
+    nuvk_sdf_descriptor_environment_t *descriptor,
     const nuvk_context_t *context,
-    const nuvk_sdf_buffer_low_frequency_t *low_frequency_buffer,
+    const nuvk_sdf_buffer_environment_t *environment_buffer,
     VkDescriptorPool pool
 )
 {
@@ -40,9 +40,9 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
 
     /* write descriptor set */
     VkDescriptorBufferInfo buffer_info;
-    buffer_info.buffer = low_frequency_buffer->buffer.buffer;
+    buffer_info.buffer = environment_buffer->buffer.buffer;
     buffer_info.offset = 0;
-    buffer_info.range  = low_frequency_buffer->uniform_buffer_size;
+    buffer_info.range  = environment_buffer->uniform_buffer_size;
 
     VkWriteDescriptorSet write;
     memset(&write, 0, sizeof(VkWriteDescriptorSet));
@@ -57,8 +57,8 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_descriptor_low_frequency_destroy(
-    nuvk_sdf_descriptor_low_frequency_t *descriptor,
+nu_result_t nuvk_sdf_descriptor_environment_destroy(
+    nuvk_sdf_descriptor_environment_t *descriptor,
     const nuvk_context_t *context
 )
 {

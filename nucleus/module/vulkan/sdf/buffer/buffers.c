@@ -9,7 +9,7 @@ nu_result_t nuvk_sdf_buffers_initialize(
 {
     nu_result_t result = NU_SUCCESS;
 
-    result &= nuvk_sdf_buffer_low_frequency_create(&buffers->low_frequency, context, memory_manager, render_context);
+    result &= nuvk_sdf_buffer_environment_create(&buffers->environment, context, memory_manager, render_context);
 
     return result;
 }
@@ -19,7 +19,7 @@ nu_result_t nuvk_sdf_buffers_terminate(
     const nuvk_memory_manager_t *memory_manager
 )
 {
-    nuvk_sdf_buffer_low_frequency_destroy(&buffers->low_frequency, context, memory_manager);
+    nuvk_sdf_buffer_environment_destroy(&buffers->environment, context, memory_manager);
 
     return NU_SUCCESS;
 }

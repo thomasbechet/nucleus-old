@@ -16,5 +16,10 @@ nu_result_t nuvk_sdf_renderpasses_terminate(
     nuvk_sdf_renderpasses_t *renderpasses,
     const nuvk_context_t *context
 );
+nu_result_t nuvk_sdf_renderpasses_update_swapchain(
+    nuvk_sdf_renderpasses_t *renderpasses,
+    const nuvk_context_t *context,
+    const nuvk_swapchain_t *swapchain
+);
 
 #endif

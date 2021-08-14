@@ -11,8 +11,8 @@ nu_result_t nuvk_sdf_descriptors_initialize(
     nu_result_t result = NU_SUCCESS;
 
     result &= nuvk_sdf_descriptor_pool_create(&descriptors->pool, context, 2);
-    result &= nuvk_sdf_descriptor_low_frequency_create(&descriptors->low_frequency, context, 
-        &buffers->low_frequency, descriptors->pool);
+    result &= nuvk_sdf_descriptor_environment_create(&descriptors->environment, context, 
+        &buffers->environment, descriptors->pool);
 
     return result;
 }
@@ -21,7 +21,7 @@ nu_result_t nuvk_sdf_descriptors_terminate(
     const nuvk_context_t *context
 )
 {
-    nuvk_sdf_descriptor_low_frequency_destroy(&descriptors->low_frequency, context);
+    nuvk_sdf_descriptor_environment_destroy(&descriptors->environment, context);
     vkDestroyDescriptorPool(context->device, descriptors->pool, &context->allocator);
 
     return NU_SUCCESS;

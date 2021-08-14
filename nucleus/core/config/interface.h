@@ -12,22 +12,27 @@
 #define NU_CONFIG_CONTEXT_VERSION_PATCH "version_patch"
 #define NU_CONFIG_CONTEXT_LOG_CONFIG    "log_config"
 
-#define NU_CONFIG_TASK_SECTION          "task"
-#define NU_CONFIG_TASK_API              "api"
+#define NU_CONFIG_LOGGER_SECTION              "logger"
+#define NU_CONFIG_LOGGER_ENABLE_LOG_FILE      "enable_log_file"
+#define NU_CONFIG_LOGGER_ENABLE_CORE_LOG_FILE "log_file"
+#define NU_CONFIG_LOGGER_LOG_FILE_DIRECTORY   "log_file_directory"
 
-#define NU_CONFIG_WINDOW_SECTION        "window"
-#define NU_CONFIG_WINDOW_API            "api"
-#define NU_CONFIG_WINDOW_MODE           "mode"
-#define NU_CONFIG_WINDOW_WIDTH          "width"
-#define NU_CONFIG_WINDOW_HEIGHT         "height"
-#define NU_CONFIG_WINDOW_VSYNC          "vertical_synchronization"
+#define NU_CONFIG_TASK_SECTION "task"
+#define NU_CONFIG_TASK_API     "api"
 
-#define NU_CONFIG_INPUT_SECTION         "input"
-#define NU_CONFIG_INPUT_API             "api"
-#define NU_CONFIG_INPUT_CURSOR_MODE     "cursor_mode"
+#define NU_CONFIG_WINDOW_SECTION "window"
+#define NU_CONFIG_WINDOW_API     "api"
+#define NU_CONFIG_WINDOW_MODE    "mode"
+#define NU_CONFIG_WINDOW_WIDTH   "width"
+#define NU_CONFIG_WINDOW_HEIGHT  "height"
+#define NU_CONFIG_WINDOW_VSYNC   "vertical_synchronization"
 
-#define NU_CONFIG_RENDERER_SECTION      "renderer"
-#define NU_CONFIG_RENDERER_API          "api"
+#define NU_CONFIG_INPUT_SECTION     "input"
+#define NU_CONFIG_INPUT_API         "api"
+#define NU_CONFIG_INPUT_CURSOR_MODE "cursor_mode"
+
+#define NU_CONFIG_RENDERER_SECTION "renderer"
+#define NU_CONFIG_RENDERER_API     "api"
 
 typedef struct {
     uint32_t version_major;
@@ -35,6 +40,12 @@ typedef struct {
     uint32_t version_patch;
     bool log_config;
 } nu_config_context_t;
+
+typedef struct {
+    bool enable_log_file;
+    bool enable_core_log_file;
+    const char *log_file_directory;
+} nu_config_logger_t;
 
 typedef struct {
     nu_task_api_t api;
@@ -59,6 +70,7 @@ typedef struct {
 
 typedef struct {
     nu_config_context_t context;
+    nu_config_logger_t logger;
     nu_config_task_t task;
     nu_config_window_t window;
     nu_config_input_t input;

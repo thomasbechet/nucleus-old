@@ -98,7 +98,7 @@ nu_result_t nuvk_renderer_render(void)
             nuvk_swapchain_recreate(&_module.swapchain, &_module.context, size[0], size[1]);
 
             /* notify renderer */
-            nuvk_sdf_renderer_swapchain_updated(&_module.renderer, &_module.swapchain);
+            nuvk_sdf_renderer_update_swapchain(&_module.renderer, &_module.context, &_module.swapchain);
 
             /* reset out of date flag */
             _module.render_context_out_of_date = false;

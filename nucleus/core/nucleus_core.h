@@ -22,6 +22,7 @@ extern "C" {
 #include <nucleus/core/utils/string.h>
 #include <nucleus/core/utils/timer.h>
 #include <nucleus/core/utils/io.h>
+#include <nucleus/core/utils/path.h>
 
 #ifdef __cplusplus
 }

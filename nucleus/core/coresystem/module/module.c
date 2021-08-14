@@ -3,7 +3,7 @@
 #include <nucleus/core/coresystem/memory/memory.h>
 #include <nucleus/core/coresystem/logger/logger.h>
 #include <nucleus/core/utils/indexed_array.h>
-#include <nucleus/core/utils/string.h>
+#include <nucleus/core/utils/path.h>
 
 #define NU_MODULE_INFO_NAME      "nu_module_info"
 #define NU_MODULE_INTERFACE_NAME "nu_module_interface"
@@ -24,7 +24,7 @@ typedef nu_result_t (*nu_module_interface_loader_pfn_t)(const char*, void*);
 
 typedef struct {
     nu_module_info_t info;
-    nu_string_t path;
+    nu_path_t path;
     void *handle;
     nu_module_interface_loader_pfn_t interface_loader;
 } nu_module_data_t;
@@ -63,58 +63,64 @@ static nu_result_t unload_module(const nu_module_data_t *module)
     dlclose(module->handle);
 #endif
 
-    nu_string_free(module->path);
+    nu_path_free(module->path);
 
     return NU_SUCCESS;
 }
-static nu_result_t load_module(const char *filename, nu_module_data_t *module)
+static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
 {
     /* reset memory */
     memset(module, 0, sizeof(nu_module_data_t));
+    nu_path_allocate_cstr(path_cstr, &module->path);
+
+    /* extract directory and filename */
+    nu_string_t directory, filename;
+    nu_path_get_directory(module->path, &directory);
+    nu_path_get_filename(module->path, &filename);
 
     /* loading module */
 #if defined(NU_PLATFORM_WINDOWS)
-    char dir[MAX_MODULE_PATH_SIZE];
-    char fname[128];
-    char path[MAX_MODULE_PATH_SIZE];
-    _splitpath_s(filename, NULL, 0, dir, sizeof(dir), fname, sizeof(fname), NULL, 0);
+    nu_string_t final_path;
+    
     #if defined(__MINGW32__)
-        nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%slib%s.dll", dir, fname);
+        nu_string_allocate_format(&final_path, "%slib%s.dll", nu_string_get_cstr(directory),
+            nu_string_get_cstr(filename));
     #else
-        nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%s%s.dll", dir, fname);
+        nu_string_allocate_format(&final_path, "%s%s.dll", nu_string_get_cstr(directory),
+            nu_string_get_cstr(filename));
     #endif
-    module->handle = LoadLibraryA(path);
+
+    module->handle = LoadLibraryA(nu_string_get_cstr(final_path));
+
+    nu_string_free(final_path);
 #elif defined(NU_PLATFORM_UNIX)
-    char *tdir, *dir, *fname, *tfname;
-    char path[MAX_MODULE_PATH_SIZE];
-    tdir = strdup(filename); /* TODO: replace with nu_string_t */
-    tfname = strdup(filename);
-    dir = dirname(tdir);
-    fname = basename(tfname);
-    nu_snprintf(path, MAX_MODULE_PATH_SIZE, "%s/lib%s.so", dir, fname);
-    free(tdir);
-    free(tfname);
+    nu_string_allocate_format(&final_path, "%slib%s.so", nu_string_get_cstr(directory),
+        nu_string_get_cstr(filename));
+
     module->handle = dlopen(path, RTLD_LAZY);
+
+    nu_string_free(final_path);
 #endif
 
+    nu_string_free(directory);
+    nu_string_free(filename);
+
     if (!module->handle) {
-        nu_core_log(NU_WARNING, "Failed to load module '%s'.\n", filename);
+        nu_path_free(module->path);
+        nu_core_log(NU_WARNING, "Failed to load module '%s'.\n", path_cstr);
         return NU_FAILURE;
     }
-
-    /* copy path */
-    nu_string_allocate_cstr(filename, &module->path);
 
     /* get module info */
     nu_module_info_loader_pfn_t module_get_info;
     if (get_function(module, NU_MODULE_INFO_NAME, (nu_pfn_t*)&module_get_info) != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "'%s' function is required to load the module '%s'.\n", NU_MODULE_INFO_NAME, filename);
+        nu_core_log(NU_WARNING, "'%s' function is required to load the module '%s'.\n", NU_MODULE_INFO_NAME, path_cstr);
         unload_module(module);
         return NU_FAILURE;
     }
 
     if (module_get_info(&module->info) != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to retrieve info from module '%s'.\n", filename);
+        nu_core_log(NU_WARNING, "Failed to retrieve info from module '%s'.\n", path_cstr);
         unload_module(module);
         return NU_FAILURE;
     }
@@ -173,6 +179,8 @@ nu_result_t nu_module_load(const char *path, nu_module_t *handle)
     uint32_t id;
     nu_indexed_array_add(_system.modules, &module, &id);
     NU_HANDLE_SET_ID(*handle, id);
+
+    nu_info("%ld %s\n", id, path);
 
     return NU_SUCCESS;
 }
