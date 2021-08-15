@@ -180,8 +180,6 @@ nu_result_t nu_module_load(const char *path, nu_module_t *handle)
     nu_indexed_array_add(_system.modules, &module, &id);
     NU_HANDLE_SET_ID(*handle, id);
 
-    nu_info("%ld %s\n", id, path);
-
     return NU_SUCCESS;
 }
 nu_result_t nu_module_get_function(nu_module_t handle, const char *function_name, nu_pfn_t *function)

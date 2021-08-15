@@ -27,6 +27,11 @@ typedef nu_vec3f_t nu_mat3f_t[3];
 typedef NU_ALIGN_MAT nu_vec4f_t nu_mat4f_t[4];
 typedef NU_ALIGN(16) float nu_quatf_t[4];
 
+typedef struct {
+    nu_vec3f_t min;
+    nu_vec3f_t max;
+} nu_aabb_t;
+
 /* constants */
 #define NU_PI 3.14159265358979323846264338327950288
 

@@ -7,6 +7,7 @@
 #include <nucleus/module/vulkan/sdf/descriptor/descriptors.h>
 #include <nucleus/module/vulkan/sdf/shader/shaders.h>
 #include <nucleus/module/vulkan/sdf/pipeline/pipelines.h>
+#include <nucleus/module/vulkan/sdf/image/images.h>
 #include <nucleus/module/vulkan/sdf/framebuffer/framebuffers.h>
 #include <nucleus/module/vulkan/sdf/entity/camera.h>
 
@@ -16,6 +17,7 @@ typedef struct {
     nuvk_sdf_descriptors_t descriptors;
     nuvk_sdf_shaders_t shaders;
     nuvk_sdf_pipelines_t pipelines;
+    nuvk_sdf_images_t images;
     nuvk_sdf_framebuffers_t framebuffers;
     nuvk_sdf_camera_t camera;
 } nuvk_sdf_renderer_t;
@@ -41,6 +43,7 @@ nu_result_t nuvk_sdf_renderer_render(
 nu_result_t nuvk_sdf_renderer_update_swapchain(
     nuvk_sdf_renderer_t *renderer,
     const nuvk_context_t *context,
+    const nuvk_memory_manager_t *memory_manager,
     const nuvk_swapchain_t *swapchain
 );
 

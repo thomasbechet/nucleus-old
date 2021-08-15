@@ -1,7 +1,7 @@
 #ifndef NUVK_SDF_BUFFER_ENVIRONMENT_H
 #define NUVK_SDF_BUFFER_ENVIRONMENT_H
 
-#include <nucleus/module/vulkan/core/memory.h>
+#include <nucleus/module/vulkan/core/buffer.h>
 #include <nucleus/module/vulkan/core/render_context.h>
 #include <nucleus/module/vulkan/sdf/entity/camera.h>
 
