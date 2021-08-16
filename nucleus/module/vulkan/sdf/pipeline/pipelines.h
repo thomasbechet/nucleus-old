@@ -1,12 +1,14 @@
 #ifndef NUVK_SDF_PIPELINES_H
 #define NUVK_SDF_PIPELINES_H
 
+#include <nucleus/module/vulkan/sdf/pipeline/geometry.h>
 #include <nucleus/module/vulkan/sdf/pipeline/postprocess.h>
 #include <nucleus/module/vulkan/sdf/shader/shaders.h>
 #include <nucleus/module/vulkan/sdf/descriptor/descriptors.h>
 #include <nucleus/module/vulkan/sdf/renderpass/renderpasses.h>
 
 typedef struct {
+    nuvk_sdf_pipeline_geometry_t geometry;
     nuvk_sdf_pipeline_postprocess_t postprocess;
 } nuvk_sdf_pipelines_t;
 

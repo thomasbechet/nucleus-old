@@ -11,8 +11,10 @@ nu_result_t nuvk_sdf_pipelines_initialize(
 {
     nu_result_t result = NU_SUCCESS;
 
+    result &= nuvk_sdf_pipeline_geometry_create(&pipelines->geometry, context, swapchain,
+        &shaders->geometry, descriptors, renderpasses->geometry);
     result &= nuvk_sdf_pipeline_postprocess_create(&pipelines->postprocess, context, swapchain,
-        &shaders->postprocess,  descriptors, renderpasses->postprocess);
+        &shaders->postprocess, descriptors, renderpasses->postprocess);
 
     return result;
 }
@@ -22,6 +24,7 @@ nu_result_t nuvk_sdf_pipelines_terminate(
 )
 {
     nuvk_sdf_pipeline_postprocess_destroy(&pipelines->postprocess, context);
+    nuvk_sdf_pipeline_geometry_destroy(&pipelines->geometry, context);
 
     return NU_SUCCESS;
 }
@@ -35,6 +38,8 @@ nu_result_t nuvk_sdf_pipelines_update_swapchain(
 {
     nu_result_t result = NU_SUCCESS;
 
+    result &= nuvk_sdf_pipeline_geometry_update_swapchain(&pipelines->geometry, context, swapchain,
+        &shaders->geometry, renderpasses->geometry);
     result &= nuvk_sdf_pipeline_postprocess_update_swapchain(&pipelines->postprocess, context, swapchain,
         &shaders->postprocess, renderpasses->postprocess);
 

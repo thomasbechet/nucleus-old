@@ -1,15 +1,5 @@
 #include <nucleus/module/vulkan/sdf/buffer/environment.h>
 
-static size_t pad_uniform_buffer_size(size_t original_size, const nuvk_context_t *context)
-{
-    size_t min_ubo_alignment = (size_t)context->physical_device_properties.limits.minUniformBufferOffsetAlignment;
-    size_t aligned_size = original_size;
-    if (min_ubo_alignment > 0) {
-        aligned_size = (aligned_size + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
-    }
-    return aligned_size;
-}
-
 nu_result_t nuvk_sdf_buffer_environment_create(
     nuvk_sdf_buffer_environment_t *buffer,
     const nuvk_context_t *context,
@@ -17,7 +7,7 @@ nu_result_t nuvk_sdf_buffer_environment_create(
     const nuvk_render_context_t *render_context
 )
 {
-    buffer->uniform_buffer_size = pad_uniform_buffer_size(sizeof(nuvk_sdf_buffer_environment_t), context);
+    buffer->uniform_buffer_size = nuvk_buffer_pad_uniform_buffer_size(context, sizeof(nuvk_sdf_buffer_environment_data_t));
 
     nuvk_buffer_info_t info;
     info.size         = buffer->uniform_buffer_size * render_context->max_inflight_frame_count;
@@ -38,7 +28,6 @@ nu_result_t nuvk_sdf_buffer_environment_create(
 }
 nu_result_t nuvk_sdf_buffer_environment_destroy(
     nuvk_sdf_buffer_environment_t *buffer,
-    const nuvk_context_t *context,
     const nuvk_memory_manager_t *memory_manager
 )
 {

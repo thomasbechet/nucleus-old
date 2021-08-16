@@ -1,5 +1,15 @@
 #include <nucleus/module/vulkan/core/buffer.h>
 
+uint32_t nuvk_buffer_pad_uniform_buffer_size(const nuvk_context_t *context, uint32_t original_size)
+{
+    uint32_t min_ubo_alignment = (uint32_t)context->physical_device_properties.limits.minUniformBufferOffsetAlignment;
+    uint32_t aligned_size = original_size;
+    if (min_ubo_alignment > 0) {
+        aligned_size = (aligned_size + min_ubo_alignment - 1) & ~(min_ubo_alignment - 1);
+    }
+    return aligned_size;
+}
+
 nu_result_t nuvk_buffer_create(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager, const nuvk_buffer_info_t *info)
 {
     VkBufferCreateInfo buffer_info;

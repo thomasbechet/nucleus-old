@@ -32,16 +32,16 @@
 */
 
 typedef struct {
-    uint32_t id_to_index;
-    uint32_t index_to_id;
+    uint32_t id_to_index; /* [ID]->[DATA] */
+    uint32_t index_to_id; /* [ID]<-[DATA] */
 } nu_index_pair_t;
 
 typedef struct {
     uint32_t size;
     uint32_t capacity;
+    nu_index_pair_t *indexes;
     nu_array_t data;
     nu_array_t free_ids;
-    nu_index_pair_t *indexes;
 } nu_indexed_array_header_t;
 
 void nu_indexed_array_allocate(uint32_t object_size, nu_indexed_array_t *array)

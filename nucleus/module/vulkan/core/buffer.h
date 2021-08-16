@@ -15,6 +15,8 @@ typedef struct {
     void *map;
 } nuvk_buffer_t;
 
+uint32_t nuvk_buffer_pad_uniform_buffer_size(const nuvk_context_t *context, uint32_t original_size);
+
 nu_result_t nuvk_buffer_create(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager, const nuvk_buffer_info_t *info);
 nu_result_t nuvk_buffer_destroy(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager);
 nu_result_t nuvk_buffer_map(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager);

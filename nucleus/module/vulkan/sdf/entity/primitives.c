@@ -2,8 +2,9 @@
 
 /* sphere */
 
-typedef struct {
+typedef struct { /* must match 16 bytes alignment (mat4 + data) */
     float radius;
+    float _pad0[3];
 } nuvk_sdf_sphere_data_t;
 
 static const char *sphere_glsl_data_code =
@@ -28,15 +29,13 @@ static void sphere_c_aabb_code(const void *d, nu_aabb_t *aabb)
 /* rectangle */
 /* TODO */
 
-nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_primitives_t *primitives)
+nu_result_t nuvk_sdf_primitives_initialize(nuvk_sdf_primitives_t *primitives)
 {
-    nuvk_sdf_instance_type_info_t sphere_info;
-    memset(&sphere_info, 0, sizeof(nuvk_sdf_instance_type_info_t));
-    sphere_info.data_size      = sizeof(nuvk_sdf_sphere_data_t);
-    sphere_info.glsl_data_code = sphere_glsl_data_code;
-    sphere_info.glsl_sdf_code  = sphere_glsl_sdf_code;
-    sphere_info.c_sdf_code     = sphere_c_sdf_code;
-    sphere_info.c_aabb_code    = sphere_c_aabb_code;
+    primitives->sphere.data_size      = sizeof(nuvk_sdf_sphere_data_t);
+    primitives->sphere.glsl_data_code = sphere_glsl_data_code;
+    primitives->sphere.glsl_sdf_code  = sphere_glsl_sdf_code;
+    primitives->sphere.c_sdf_code     = sphere_c_sdf_code;
+    primitives->sphere.c_aabb_code    = sphere_c_aabb_code;
 
     return NU_SUCCESS;
 }

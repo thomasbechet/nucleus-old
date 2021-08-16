@@ -8,6 +8,7 @@ nu_result_t nuvk_sdf_shaders_initialize(
 {
     nu_result_t result = NU_SUCCESS;
 
+    result &= nuvk_sdf_shader_geometry_create(&shaders->geometry, context, shader_manager);
     result &= nuvk_sdf_shader_postprocess_create(&shaders->postprocess, context, shader_manager);
 
     return result;
@@ -20,6 +21,7 @@ nu_result_t nuvk_sdf_shaders_terminate(
     nu_result_t result = NU_SUCCESS;
 
     result &= nuvk_sdf_shader_postprocess_destroy(&shaders->postprocess, context);
+    result &= nuvk_sdf_shader_geometry_destroy(&shaders->geometry, context);
 
     return result;
 }

@@ -10,6 +10,21 @@ float map(in vec3 p) {
     return length(p) - 1.0;
 }
 
+struct InstanceData0 {
+	float radius;
+};
+struct Instance0 {
+	mat4 invMatrix;
+	InstanceData0 data;
+};
+
+layout(set = 0, binding = 1) uniform TypeArraysHeaderUBO {
+	uint instanceCount0;
+};
+layout(set = 0, binding = 2) uniform TypeArraysUBO {
+	Instance0 instances0[];
+};
+
 vec3 normalScene(in vec3 p, in float sd) {
 #if 1
     const vec2 e = vec2(EPSILON, 0);
@@ -57,9 +72,9 @@ HitInfo intersectScene(in vec3 p, in vec3 dir, in float maxDepth) {
 			break;
 		}
 	}
-	
+
 	if (hit.intersect) {
-		hit.normal     = normalScene(hit.position, sd);
+		hit.normal = normalScene(hit.position, sd);
 	}
 	
 	return hit;

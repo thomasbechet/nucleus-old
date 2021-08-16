@@ -1,9 +1,11 @@
 #ifndef NUVK_SDF_SHADERS_H
 #define NUVK_SDF_SHADERS_H
 
+#include <nucleus/module/vulkan/sdf/shader/geometry.h>
 #include <nucleus/module/vulkan/sdf/shader/postprocess.h>
 
 typedef struct {
+    nuvk_sdf_shader_geometry_t geometry;
     nuvk_sdf_shader_postprocess_t postprocess;
 } nuvk_sdf_shaders_t;
 

@@ -10,12 +10,12 @@ nu_result_t nuvk_sdf_renderpass_geometry_create(
     memset(&attachment, 0, sizeof(VkAttachmentDescription));
     attachment.format         = image->image.format;
     attachment.samples        = VK_SAMPLE_COUNT_1_BIT;
-    attachment.loadOp         = VK_ATTACHMENT_LOAD_OP_CLEAR;
+    attachment.loadOp         = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachment.storeOp        = VK_ATTACHMENT_STORE_OP_STORE;
     attachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachment.finalLayout    = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+    attachment.finalLayout    = VK_IMAGE_LAYOUT_READ_ONLY_OPTIMAL_KHR;
 
     VkAttachmentReference color_reference;
     memset(&color_reference, 0, sizeof(VkAttachmentReference));

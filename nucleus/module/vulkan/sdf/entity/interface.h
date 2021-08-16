@@ -3,6 +3,8 @@
 
 #include <nucleus/nucleus.h>
 
+#define NUVK_SDF_INSTANCE_PER_TYPE_MAX_COUNT 64
+
 NU_DECLARE_HANDLE(nuvk_sdf_instance_type_t);
 NU_DECLARE_HANDLE(nuvk_sdf_instance_t);
 

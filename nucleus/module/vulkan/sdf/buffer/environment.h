@@ -23,7 +23,6 @@ nu_result_t nuvk_sdf_buffer_environment_create(
 );
 nu_result_t nuvk_sdf_buffer_environment_destroy(
     nuvk_sdf_buffer_environment_t *buffer,
-    const nuvk_context_t *context,
     const nuvk_memory_manager_t *memory_manager
 );
 

@@ -10,8 +10,12 @@
 #include <nucleus/module/vulkan/sdf/image/images.h>
 #include <nucleus/module/vulkan/sdf/framebuffer/framebuffers.h>
 #include <nucleus/module/vulkan/sdf/entity/camera.h>
+#include <nucleus/module/vulkan/sdf/entity/primitives.h>
 
 typedef struct {
+    nuvk_sdf_camera_t camera;
+    nuvk_sdf_primitives_t primitives;
+
     nuvk_sdf_buffers_t buffers;
     nuvk_sdf_renderpasses_t renderpasses;
     nuvk_sdf_descriptors_t descriptors;
@@ -19,7 +23,6 @@ typedef struct {
     nuvk_sdf_pipelines_t pipelines;
     nuvk_sdf_images_t images;
     nuvk_sdf_framebuffers_t framebuffers;
-    nuvk_sdf_camera_t camera;
 } nuvk_sdf_renderer_t;
 
 nu_result_t nuvk_sdf_renderer_initialize(
