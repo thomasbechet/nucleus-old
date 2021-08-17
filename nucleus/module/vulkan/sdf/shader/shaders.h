@@ -12,7 +12,8 @@ typedef struct {
 nu_result_t nuvk_sdf_shaders_initialize(
     nuvk_sdf_shaders_t *shaders,
     const nuvk_context_t *context,
-    const nuvk_shader_manager_t *shader_manager
+    const nuvk_shader_manager_t *shader_manager,
+    const nuvk_sdf_descriptors_t *descriptors
 );
 nu_result_t nuvk_sdf_shaders_terminate(
     nuvk_sdf_shaders_t *shaders,

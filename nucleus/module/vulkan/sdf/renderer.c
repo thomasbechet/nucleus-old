@@ -39,13 +39,12 @@ nu_result_t nuvk_sdf_renderer_initialize(
         return NU_FAILURE;
     }
 
-    if (nuvk_sdf_shaders_initialize(&renderer->shaders, context, shader_manager) != NU_SUCCESS) {
+    if (nuvk_sdf_shaders_initialize(&renderer->shaders, context, shader_manager, &renderer->descriptors) != NU_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create shaders.\n");
         return NU_FAILURE;
     }
 
-    if (nuvk_sdf_pipelines_initialize(&renderer->pipelines, context, swapchain, &renderer->shaders, &renderer->descriptors,
-        &renderer->renderpasses) != NU_SUCCESS) {
+    if (nuvk_sdf_pipelines_initialize(&renderer->pipelines, context, swapchain, &renderer->shaders, &renderer->renderpasses) != NU_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create pipelines.\n");
         return NU_FAILURE;
     }
@@ -77,7 +76,6 @@ nu_result_t nuvk_sdf_renderer_render(
 )
 {
     VkRenderPassBeginInfo begin_info;
-    VkDescriptorSet descriptor_sets[3];
 
     /* recover active command buffer */
     VkCommandBuffer cmd = render_context->command_buffers[render_context->active_inflight_frame_index];
@@ -95,12 +93,14 @@ nu_result_t nuvk_sdf_renderer_render(
     render_area.offset.y = 0;
     render_area.extent   = swapchain->extent;
 
-    /* compute dynamic offsets */
+    /* bind low frequency descriptor set */
     uint32_t dynamic_offsets[3] = {
         renderer->buffers.environment.uniform_buffer_size * render_context->active_inflight_frame_index,
         renderer->buffers.instances.total_header_buffer_size * render_context->active_inflight_frame_index,
         renderer->buffers.instances.total_type_arrays_buffer_size * render_context->active_inflight_frame_index
     };
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->shaders.geometry.layout,
+        0, 1, &renderer->descriptors.low_frequency.descriptor, 3, dynamic_offsets);
 
     /* geometry pass */
     memset(&begin_info, 0, sizeof(VkRenderPassBeginInfo));
@@ -110,10 +110,7 @@ nu_result_t nuvk_sdf_renderer_render(
     begin_info.renderArea  = render_area;
     vkCmdBeginRenderPass(cmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.geometry.pipeline);
-    descriptor_sets[0] = renderer->descriptors.low_frequency.descriptor;
-    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.geometry.layout,
-        0, 1, descriptor_sets, 3, dynamic_offsets);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.geometry);
     vkCmdDraw(cmd, 3, 1, 0, 0);
 
     vkCmdEndRenderPass(cmd);
@@ -126,11 +123,9 @@ nu_result_t nuvk_sdf_renderer_render(
     begin_info.renderArea  = render_area;
     vkCmdBeginRenderPass(cmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess.pipeline);
-    descriptor_sets[0] = renderer->descriptors.low_frequency.descriptor;
-    descriptor_sets[1] = renderer->descriptors.postprocess.descriptor;
-    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess.layout,
-        0, 2, descriptor_sets, 3, dynamic_offsets);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess);
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->shaders.postprocess.layout,
+        1, 1, &renderer->descriptors.postprocess.descriptor, 0, NULL);
     vkCmdDraw(cmd, 3, 1, 0, 0);
 
     vkCmdEndRenderPass(cmd);

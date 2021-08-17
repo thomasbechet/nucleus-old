@@ -1,34 +1,7 @@
 #include <nucleus/module/vulkan/sdf/pipeline/postprocess.h>
 
-static nu_result_t nuvk_sdf_pipeline_postprocess_create_pipeline_layout(
-    nuvk_sdf_pipeline_postprocess_t *pipeline,
-    const nuvk_context_t *context,
-    const nuvk_sdf_descriptors_t *descriptors
-)
-{
-    VkDescriptorSetLayout setLayouts[2] = {
-        descriptors->low_frequency.layout,
-        descriptors->postprocess.layout
-    };
-
-    VkPipelineLayoutCreateInfo layout_info;
-    memset(&layout_info, 0, sizeof(VkPipelineLayoutCreateInfo));
-    layout_info.sType                  = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    layout_info.pushConstantRangeCount = 0;
-    layout_info.pPushConstantRanges    = NULL;
-    layout_info.setLayoutCount         = 2;
-    layout_info.pSetLayouts            = setLayouts;
-
-    if (vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create postprocess pipeline layout.\n");
-        return NU_FAILURE;
-    }
-
-    return NU_SUCCESS;
-}
-
-static nu_result_t nuvk_sdf_pipeline_postprocess_create_pipeline(
-    nuvk_sdf_pipeline_postprocess_t *pipeline,
+nu_result_t nuvk_sdf_pipeline_postprocess_create(
+    VkPipeline *pipeline,
     const nuvk_context_t *context,
     const nuvk_swapchain_t *swapchain,
     const nuvk_sdf_shader_postprocess_t *shader,
@@ -103,57 +76,16 @@ static nu_result_t nuvk_sdf_pipeline_postprocess_create_pipeline(
     pipeline_info.pRasterizationState = &rasterization_state;
     pipeline_info.pMultisampleState   = &multisample_state;
     pipeline_info.pColorBlendState    = &color_blend_state;
-    pipeline_info.layout              = pipeline->layout;
+    pipeline_info.layout              = shader->layout;
     pipeline_info.renderPass          = postprocess_renderpass;
     pipeline_info.subpass             = 0;
     pipeline_info.pDynamicState       = NULL;
     pipeline_info.basePipelineHandle  = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(context->device, VK_NULL_HANDLE, 1, &pipeline_info, &context->allocator, &pipeline->pipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(context->device, VK_NULL_HANDLE, 1, &pipeline_info, &context->allocator, pipeline) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create postprocess pipeline.\n");
         return NU_FAILURE;
     }
 
     return NU_SUCCESS;
-}
-
-nu_result_t nuvk_sdf_pipeline_postprocess_create(
-    nuvk_sdf_pipeline_postprocess_t *pipeline,
-    const nuvk_context_t *context,
-    const nuvk_swapchain_t *swapchain,
-    const nuvk_sdf_shader_postprocess_t *shader,
-    const nuvk_sdf_descriptors_t *descriptors,
-    VkRenderPass postprocess_renderpass
-)
-{
-    nu_result_t result = NU_SUCCESS;
-
-    /* create pipeline layout */
-    result &= nuvk_sdf_pipeline_postprocess_create_pipeline_layout(pipeline, context, descriptors);
-    
-    /* create pipeline */
-    result &= nuvk_sdf_pipeline_postprocess_create_pipeline(pipeline, context, swapchain, shader, postprocess_renderpass);
-
-    return NU_SUCCESS;
-}
-nu_result_t nuvk_sdf_pipeline_postprocess_destroy(
-    nuvk_sdf_pipeline_postprocess_t *pipeline,
-    const nuvk_context_t *context
-)
-{
-    vkDestroyPipeline(context->device, pipeline->pipeline, &context->allocator);
-    vkDestroyPipelineLayout(context->device, pipeline->layout, &context->allocator);
-
-    return NU_SUCCESS;
-}
-nu_result_t nuvk_sdf_pipeline_postprocess_update_swapchain(
-    nuvk_sdf_pipeline_postprocess_t *pipeline,
-    const nuvk_context_t *context,
-    const nuvk_swapchain_t *swapchain,
-    const nuvk_sdf_shader_postprocess_t *shader,
-    VkRenderPass postprocess_renderpass
-)
-{
-    vkDestroyPipeline(context->device, pipeline->pipeline, &context->allocator);
-    return nuvk_sdf_pipeline_postprocess_create_pipeline(pipeline, context, swapchain, shader, postprocess_renderpass);
 }

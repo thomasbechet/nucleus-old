@@ -3,13 +3,14 @@
 nu_result_t nuvk_sdf_shaders_initialize(
     nuvk_sdf_shaders_t *shaders,
     const nuvk_context_t *context,
-    const nuvk_shader_manager_t *shader_manager
+    const nuvk_shader_manager_t *shader_manager,
+    const nuvk_sdf_descriptors_t *descriptors
 )
 {
     nu_result_t result = NU_SUCCESS;
 
-    result &= nuvk_sdf_shader_geometry_create(&shaders->geometry, context, shader_manager);
-    result &= nuvk_sdf_shader_postprocess_create(&shaders->postprocess, context, shader_manager);
+    result &= nuvk_sdf_shader_geometry_create(&shaders->geometry, context, shader_manager, descriptors);
+    result &= nuvk_sdf_shader_postprocess_create(&shaders->postprocess, context, shader_manager, descriptors);
 
     return result;
 }
@@ -18,10 +19,8 @@ nu_result_t nuvk_sdf_shaders_terminate(
     const nuvk_context_t *context
 )
 {
-    nu_result_t result = NU_SUCCESS;
+    nuvk_sdf_shader_postprocess_destroy(&shaders->postprocess, context);
+    nuvk_sdf_shader_geometry_destroy(&shaders->geometry, context);
 
-    result &= nuvk_sdf_shader_postprocess_destroy(&shaders->postprocess, context);
-    result &= nuvk_sdf_shader_geometry_destroy(&shaders->geometry, context);
-
-    return result;
+    return NU_SUCCESS;
 }
