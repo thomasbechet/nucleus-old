@@ -1,7 +1,7 @@
 #ifndef NUVK_SDF_PRIMITIVES_H
 #define NUVK_SDF_PRIMITIVES_H
 
-#include <nucleus/module/vulkan/sdf/entity/interface.h>
+#include <nucleus/module/vulkan/sdf/scene/interface.h>
 
 typedef struct {
     nuvk_sdf_instance_type_info_t sphere;

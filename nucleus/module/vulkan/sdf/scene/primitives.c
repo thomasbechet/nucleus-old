@@ -1,4 +1,4 @@
-#include <nucleus/module/vulkan/sdf/entity/primitives.h>
+#include <nucleus/module/vulkan/sdf/scene/primitives.h>
 
 /* sphere */
 
@@ -31,11 +31,12 @@ static void sphere_c_aabb_code(const void *d, nu_aabb_t *aabb)
 
 nu_result_t nuvk_sdf_primitives_initialize(nuvk_sdf_primitives_t *primitives)
 {
-    primitives->sphere.data_size      = sizeof(nuvk_sdf_sphere_data_t);
-    primitives->sphere.glsl_data_code = sphere_glsl_data_code;
-    primitives->sphere.glsl_sdf_code  = sphere_glsl_sdf_code;
-    primitives->sphere.c_sdf_code     = sphere_c_sdf_code;
-    primitives->sphere.c_aabb_code    = sphere_c_aabb_code;
+    primitives->sphere.data_size          = sizeof(nuvk_sdf_sphere_data_t);
+    primitives->sphere.glsl_data_code     = sphere_glsl_data_code;
+    primitives->sphere.glsl_sdf_code      = sphere_glsl_sdf_code;
+    primitives->sphere.c_sdf_code         = sphere_c_sdf_code;
+    primitives->sphere.c_aabb_code        = sphere_c_aabb_code;
+    primitives->sphere.max_instance_count = 128;
 
     return NU_SUCCESS;
 }

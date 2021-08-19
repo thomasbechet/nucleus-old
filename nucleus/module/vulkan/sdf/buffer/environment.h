@@ -3,7 +3,7 @@
 
 #include <nucleus/module/vulkan/core/buffer.h>
 #include <nucleus/module/vulkan/core/render_context.h>
-#include <nucleus/module/vulkan/sdf/entity/camera.h>
+#include <nucleus/module/vulkan/sdf/scene/camera.h>
 
 typedef struct {
     nu_mat4f_t vp_matrix;
@@ -11,7 +11,7 @@ typedef struct {
 } nuvk_sdf_buffer_environment_data_t;
 
 typedef struct {
-    uint32_t uniform_buffer_size;
+    uint32_t uniform_buffer_range;
     nuvk_buffer_t buffer;
 } nuvk_sdf_buffer_environment_t;
 

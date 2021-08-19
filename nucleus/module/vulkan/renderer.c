@@ -19,7 +19,7 @@ typedef struct {
     nuvk_swapchain_t swapchain;
     nuvk_render_context_t render_context;
 
-    nuvk_sdf_renderer_t renderer;
+    nuvk_sdf_renderer_t sdf;
 
     bool render_context_out_of_date;
 } nuvk_module_data_t;
@@ -54,7 +54,7 @@ nu_result_t nuvk_renderer_initialize(void)
         return NU_FAILURE;
     }
 
-    if (nuvk_sdf_renderer_initialize(&_module.renderer, &_module.context, &_module.memory_manager, 
+    if (nuvk_sdf_renderer_initialize(&_module.sdf, &_module.context, &_module.memory_manager, 
         &_module.shader_manager, &_module.swapchain, &_module.render_context) != NU_SUCCESS) {
         return NU_FAILURE;
     }
@@ -63,7 +63,7 @@ nu_result_t nuvk_renderer_initialize(void)
 }
 nu_result_t nuvk_renderer_terminate(void)
 {
-    nuvk_sdf_renderer_terminate(&_module.renderer, &_module.context, &_module.memory_manager);
+    nuvk_sdf_renderer_terminate(&_module.sdf, &_module.context, &_module.memory_manager);
 
     nuvk_render_context_terminate(&_module.render_context, &_module.context);
     nuvk_swapchain_terminate(&_module.swapchain, &_module.context);
@@ -79,7 +79,7 @@ static bool nuvk_renderer_try_render(void)
 {
     if (!nuvk_render_context_begin(&_module.render_context, &_module.context, &_module.swapchain)) return false;
 
-    nuvk_sdf_renderer_render(&_module.renderer, &_module.swapchain, &_module.render_context);
+    nuvk_sdf_renderer_render(&_module.sdf, &_module.swapchain, &_module.render_context);
 
     if (!nuvk_render_context_end(&_module.render_context, &_module.context, &_module.swapchain)) return false;
 
@@ -98,7 +98,7 @@ nu_result_t nuvk_renderer_render(void)
             nuvk_swapchain_recreate(&_module.swapchain, &_module.context, size[0], size[1]);
 
             /* notify renderer */
-            nuvk_sdf_renderer_update_swapchain(&_module.renderer, &_module.context, &_module.memory_manager, &_module.swapchain);
+            nuvk_sdf_renderer_update_swapchain(&_module.sdf, &_module.context, &_module.memory_manager, &_module.swapchain);
 
             /* reset out of date flag */
             _module.render_context_out_of_date = false;
@@ -107,18 +107,36 @@ nu_result_t nuvk_renderer_render(void)
 
     return NU_SUCCESS;
 }
+
 nu_result_t nuvk_renderer_camera_set_fov(nu_renderer_camera_t handle, float fov)
 {
-    _module.renderer.camera.fov = fov;
+    _module.sdf.camera.fov = fov;
 
     return NU_SUCCESS;
 }
 nu_result_t nuvk_renderer_camera_set_view(nu_renderer_camera_t handle, const nu_vec3f_t eye, const nu_vec3f_t forward, const nu_vec3f_t up)
 {
-    nu_vec3f_copy(eye, _module.renderer.camera.eye);
-    nu_vec3f_copy(eye, _module.renderer.camera.center);
-    nu_vec3f_add(_module.renderer.camera.center, forward, _module.renderer.camera.center);
-    nu_vec3f_copy(up, _module.renderer.camera.up);
+    nu_vec3f_copy(eye, _module.sdf.camera.eye);
+    nu_vec3f_copy(eye, _module.sdf.camera.center);
+    nu_vec3f_add(_module.sdf.camera.center, forward, _module.sdf.camera.center);
+    nu_vec3f_copy(up, _module.sdf.camera.up);
 
     return NU_SUCCESS;
+}
+
+nu_result_t nuvk_sdf_instance_create(const nuvk_sdf_instance_info_t *info, nuvk_sdf_instance_t *handle)
+{
+    return nuvk_sdf_scene_create_instance(&_module.sdf.scene, info, handle);
+}
+nu_result_t nuvk_sdf_instance_destroy(nuvk_sdf_instance_t handle)
+{
+    return nuvk_sdf_scene_destroy_instance(&_module.sdf.scene, handle);
+}
+nu_result_t nuvk_sdf_instance_update_transform(nuvk_sdf_instance_t handle, const nu_transform_t *transform)
+{
+    return nuvk_sdf_scene_update_instance_transform(&_module.sdf.scene, handle, transform);
+}
+nu_result_t nuvk_sdf_instance_update_data(nuvk_sdf_instance_t handle, const void *data)
+{
+    return nuvk_sdf_scene_update_instance_data(&_module.sdf.scene, handle, data);
 }

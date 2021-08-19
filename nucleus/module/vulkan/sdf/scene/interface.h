@@ -3,7 +3,7 @@
 
 #include <nucleus/nucleus.h>
 
-#define NUVK_SDF_INSTANCE_PER_TYPE_MAX_COUNT 64
+#define NUVK_SDF_MAX_INSTANCE_TYPE_COUNT 32
 
 NU_DECLARE_HANDLE(nuvk_sdf_instance_type_t);
 NU_DECLARE_HANDLE(nuvk_sdf_instance_t);
@@ -17,10 +17,13 @@ typedef struct {
     const char *glsl_sdf_code;
     nuvk_sdf_instance_sdf_pfn_t c_sdf_code;
     nuvk_sdf_instance_aabb_pfn_t c_aabb_code;
+    uint32_t max_instance_count;
 } nuvk_sdf_instance_type_info_t;
 
 typedef enum {
-    NUVK_SDF_INSTANCE_FLAG_STATIC = 1
+    NUVK_SDF_INSTANCE_FLAG_STATIC_TRANSFORM = 1 << 0,
+    NUVK_SDF_INSTANCE_FLAG_STATIC_DATA      = 1 << 1,
+    NUVK_SDF_INSTANCE_FLAG_STATIC_AABB      = 1 << 2 
 } nuvk_sdf_instance_flags_t;
 
 typedef struct {

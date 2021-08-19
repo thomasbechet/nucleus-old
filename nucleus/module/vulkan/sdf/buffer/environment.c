@@ -7,10 +7,10 @@ nu_result_t nuvk_sdf_buffer_environment_create(
     const nuvk_render_context_t *render_context
 )
 {
-    buffer->uniform_buffer_size = nuvk_buffer_pad_uniform_buffer_size(context, sizeof(nuvk_sdf_buffer_environment_data_t));
+    buffer->uniform_buffer_range = nuvk_buffer_pad_uniform_buffer_size(context, sizeof(nuvk_sdf_buffer_environment_data_t));
 
     nuvk_buffer_info_t info;
-    info.size         = buffer->uniform_buffer_size * render_context->max_inflight_frame_count;
+    info.size         = buffer->uniform_buffer_range * render_context->max_inflight_frame_count;
     info.buffer_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
@@ -43,7 +43,7 @@ nu_result_t nuvk_sdf_buffer_environment_write_camera(
     uint32_t active_inflight_frame_index
 )
 {
-    char *pdata = (char*)buffer->buffer.map + buffer->uniform_buffer_size * active_inflight_frame_index;
+    char *pdata = (char*)buffer->buffer.map + buffer->uniform_buffer_range * active_inflight_frame_index;
     nuvk_sdf_buffer_environment_data_t *data = (nuvk_sdf_buffer_environment_data_t*)pdata;
     nu_mat4f_copy(camera->vp_matrix, data->vp_matrix);
     nu_vec3f_copy(camera->eye, data->eye);

@@ -1,4 +1,4 @@
-#include <nucleus/module/vulkan/sdf/entity/camera.h>
+#include <nucleus/module/vulkan/sdf/scene/camera.h>
 
 nu_result_t nuvk_sdf_camera_initialize(nuvk_sdf_camera_t *camera)
 {

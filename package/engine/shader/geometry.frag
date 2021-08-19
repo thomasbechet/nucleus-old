@@ -17,10 +17,5 @@ void main() {
     vec3 dir = normalize((ptransform / ptransform.w).xyz - eye);
 
     HitInfo hit = intersectScene(eye, dir, MAX_DISTANCE);
-    if (hit.intersect) {    
-        normalDepthTex.xyz = hit.normal;
-        normalDepthTex.w   = hit.depth;
-    } else {
-        normalDepthTex.w = MAX_DISTANCE;
-    }
+    normalDepthTex.rgba = vec4(hit.normal, hit.depth);
 }

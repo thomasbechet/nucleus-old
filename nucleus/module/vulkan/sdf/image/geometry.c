@@ -11,7 +11,7 @@ nu_result_t nuvk_sdf_image_geometry_create(
     memset(&info, 0, sizeof(nuvk_image_info_t));
     info.extent.width  = swapchain->extent.width;
     info.extent.height = swapchain->extent.height;
-    info.format        = VK_FORMAT_R8G8B8A8_SRGB;
+    info.format        = VK_FORMAT_R16G16B16A16_SFLOAT;
     info.tiling        = VK_IMAGE_TILING_OPTIMAL;
     info.image_usage   = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
     info.aspectMask    = VK_IMAGE_ASPECT_COLOR_BIT;

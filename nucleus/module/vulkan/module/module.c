@@ -2,9 +2,10 @@
 
 #include <nucleus/module/vulkan/renderer.h>
 
-static const uint32_t interface_count = 1;
+static const uint32_t interface_count = 2;
 static const char *interfaces[] = {
-    NU_RENDERER_INTERFACE_NAME
+    NU_RENDERER_INTERFACE_NAME,
+    NUVK_SDF_INTERFACE_NAME
 };
 
 nu_result_t nu_module_info(nu_module_info_t *info)
@@ -28,6 +29,15 @@ nu_result_t nu_module_interface(const char *name, void *interface)
 
         i->camera_set_fov  = nuvk_renderer_camera_set_fov;
         i->camera_set_view = nuvk_renderer_camera_set_view;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUVK_SDF_INTERFACE_NAME)) {
+        nuvk_sdf_interface_t *i = (nuvk_sdf_interface_t*)interface;
+
+        i->instance_create           = nuvk_sdf_instance_create;
+        i->instance_destroy          = nuvk_sdf_instance_destroy;
+        i->instance_update_transform = nuvk_sdf_instance_update_transform;
+        i->instance_update_data      = nuvk_sdf_instance_update_data;
 
         return NU_SUCCESS;
     }

@@ -11,10 +11,9 @@ nu_result_t nuvk_sdf_renderer_initialize(
     const nuvk_render_context_t *render_context
 )
 {
-    nuvk_sdf_camera_initialize(&renderer->camera);
-    nuvk_sdf_primitives_initialize(&renderer->primitives);
+    nu_info("%ld\n", context->physical_device_properties.limits.maxUniformBufferRange);
 
-    if (nuvk_sdf_buffers_initialize(&renderer->buffers, context, memory_manager, render_context, &renderer->primitives) != NU_SUCCESS) {
+    if (nuvk_sdf_buffers_initialize(&renderer->buffers, context, memory_manager, render_context) != NU_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create buffers.\n");
         return NU_FAILURE;
     }
@@ -49,6 +48,9 @@ nu_result_t nuvk_sdf_renderer_initialize(
         return NU_FAILURE;
     }
 
+    nuvk_sdf_camera_initialize(&renderer->camera);
+    nuvk_sdf_scene_initialize(&renderer->scene);
+
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_renderer_terminate(
@@ -58,6 +60,8 @@ nu_result_t nuvk_sdf_renderer_terminate(
 )
 {
     vkDeviceWaitIdle(context->device);
+
+    nuvk_sdf_scene_terminate(&renderer->scene);
 
     nuvk_sdf_pipelines_terminate(&renderer->pipelines, context);
     nuvk_sdf_descriptors_terminate(&renderer->descriptors, context);
@@ -75,13 +79,14 @@ nu_result_t nuvk_sdf_renderer_render(
     const nuvk_render_context_t *render_context
 )
 {
-    VkRenderPassBeginInfo begin_info;
-
     /* recover active command buffer */
     VkCommandBuffer cmd = render_context->command_buffers[render_context->active_inflight_frame_index];
 
     /* start camera */
     nuvk_sdf_camera_start_frame(&renderer->camera, swapchain);
+
+    /* update scene */
+    nuvk_sdf_scene_update(&renderer->scene, &renderer->camera);
 
     /* write environment buffer */
     nuvk_sdf_buffer_environment_write_camera(&renderer->buffers.environment, &renderer->camera,
@@ -95,20 +100,21 @@ nu_result_t nuvk_sdf_renderer_render(
 
     /* bind low frequency descriptor set */
     uint32_t dynamic_offsets[3] = {
-        renderer->buffers.environment.uniform_buffer_size * render_context->active_inflight_frame_index,
-        renderer->buffers.instances.total_header_buffer_size * render_context->active_inflight_frame_index,
-        renderer->buffers.instances.total_type_arrays_buffer_size * render_context->active_inflight_frame_index
+        renderer->buffers.environment.uniform_buffer_range      * render_context->active_inflight_frame_index,
+        renderer->buffers.instances.header_uniform_buffer_range * render_context->active_inflight_frame_index,
+        renderer->buffers.instances.types_uniform_buffer_range  * render_context->active_inflight_frame_index
     };
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->shaders.geometry.layout,
         0, 1, &renderer->descriptors.low_frequency.descriptor, 3, dynamic_offsets);
 
     /* geometry pass */
-    memset(&begin_info, 0, sizeof(VkRenderPassBeginInfo));
-    begin_info.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    begin_info.renderPass  = renderer->renderpasses.geometry;
-    begin_info.framebuffer = renderer->framebuffers.geometry.framebuffer;
-    begin_info.renderArea  = render_area;
-    vkCmdBeginRenderPass(cmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
+    VkRenderPassBeginInfo geometry_begin_info;
+    memset(&geometry_begin_info, 0, sizeof(VkRenderPassBeginInfo));
+    geometry_begin_info.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    geometry_begin_info.renderPass  = renderer->renderpasses.geometry;
+    geometry_begin_info.framebuffer = renderer->framebuffers.geometry.framebuffer;
+    geometry_begin_info.renderArea  = render_area;
+    vkCmdBeginRenderPass(cmd, &geometry_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.geometry);
     vkCmdDraw(cmd, 3, 1, 0, 0);
@@ -116,12 +122,13 @@ nu_result_t nuvk_sdf_renderer_render(
     vkCmdEndRenderPass(cmd);
 
     /* postprocess pass */
-    memset(&begin_info, 0, sizeof(VkRenderPassBeginInfo));
-    begin_info.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    begin_info.renderPass  = renderer->renderpasses.postprocess;
-    begin_info.framebuffer = renderer->framebuffers.postprocess.framebuffers[render_context->active_swapchain_image_index];
-    begin_info.renderArea  = render_area;
-    vkCmdBeginRenderPass(cmd, &begin_info, VK_SUBPASS_CONTENTS_INLINE);
+    VkRenderPassBeginInfo postprocess_begin_info;
+    memset(&postprocess_begin_info, 0, sizeof(VkRenderPassBeginInfo));
+    postprocess_begin_info.sType       = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    postprocess_begin_info.renderPass  = renderer->renderpasses.postprocess;
+    postprocess_begin_info.framebuffer = renderer->framebuffers.postprocess.framebuffers[render_context->active_swapchain_image_index];
+    postprocess_begin_info.renderArea  = render_area;
+    vkCmdBeginRenderPass(cmd, &postprocess_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->shaders.postprocess.layout,

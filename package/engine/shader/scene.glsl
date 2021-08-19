@@ -1,5 +1,5 @@
 #define MAX_RAYMARCH_STEP  512
-#define MAX_DISTANCE       300
+#define MAX_DISTANCE       300.0
 #define MIN_HIT_DISTANCE   0.0001
 #define MAX_SHAPE_COUNT    128
 #define MAX_MATERIAL_COUNT 64
@@ -10,6 +10,11 @@ float map(in vec3 p) {
     return length(p) - 1.0;
 }
 
+layout(set = 0, binding = 1) uniform TypeArraysHeaderUBO {
+	uint instanceIndices0Count;
+	uint instanceIndices0[128];
+};
+
 struct InstanceData0 {
 	float radius;
 };
@@ -17,13 +22,13 @@ struct Instance0 {
 	mat4 invMatrix;
 	InstanceData0 data;
 };
-
-layout(set = 0, binding = 1) uniform TypeArraysHeaderUBO {
-	uint instanceCount0;
-};
 layout(set = 0, binding = 2) uniform TypeArraysUBO {
-	Instance0 instances0[];
+	Instance0 instances0[128];
 };
+
+for (uint i = 0; i < instanceIndices0Count; i++) {
+	instances0[instancesIndices0[i]]
+}
 
 vec3 normalScene(in vec3 p, in float sd) {
 #if 1
