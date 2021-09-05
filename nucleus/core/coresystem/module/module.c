@@ -74,7 +74,8 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
     nu_path_allocate_cstr(path_cstr, &module->path);
 
     /* extract directory and filename */
-    nu_string_t directory, filename;
+    nu_string_t filename;
+    nu_path_t directory;
     nu_path_get_directory(module->path, &directory);
     nu_path_get_filename(module->path, &filename);
 
@@ -83,10 +84,10 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
     nu_string_t final_path;
     
     #if defined(__MINGW32__)
-        nu_string_allocate_format(&final_path, "%slib%s.dll", nu_string_get_cstr(directory),
+        nu_string_allocate_format(&final_path, "%slib%s.dll", nu_path_get_cstr(directory),
             nu_string_get_cstr(filename));
     #else
-        nu_string_allocate_format(&final_path, "%s%s.dll", nu_string_get_cstr(directory),
+        nu_string_allocate_format(&final_path, "%s%s.dll", nu_path_get_cstr(directory),
             nu_string_get_cstr(filename));
     #endif
 
@@ -102,7 +103,7 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
     nu_string_free(final_path);
 #endif
 
-    nu_string_free(directory);
+    nu_path_free(directory);
     nu_string_free(filename);
 
     if (!module->handle) {

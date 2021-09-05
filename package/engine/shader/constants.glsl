@@ -1,0 +1,7 @@
+#define MAX_RAYMARCH_STEP  512
+#define MAX_DISTANCE       300.0
+#define MIN_HIT_DISTANCE   0.001
+#define MAX_SHAPE_COUNT    128
+#define MAX_MATERIAL_COUNT 64
+#define MAX_INSTANCE_COUNT 128
+#define EPSILON            0.005

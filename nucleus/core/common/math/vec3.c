@@ -66,3 +66,15 @@ void nu_vec3f_lerp(const nu_vec3f_t from, const nu_vec3f_t to, float t, nu_vec3f
 {
     glm_vec3_lerp((float*)from, (float*)to, t, dest);
 }
+void nu_vec3f_abs(nu_vec3f_t v)
+{
+    glm_vec3_abs(v, v);
+}
+void nu_vec3f_maxv(const nu_vec3f_t a, const nu_vec3f_t b, nu_vec3f_t dest)
+{
+    glm_vec3_maxv((float*)a, (float*)b, dest);
+}
+void nu_vec3f_minv(const nu_vec3f_t a, const nu_vec3f_t b, nu_vec3f_t dest)
+{
+    glm_vec3_minv((float*)a, (float*)b, dest);
+}

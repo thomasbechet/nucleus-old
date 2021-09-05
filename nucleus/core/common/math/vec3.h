@@ -3,6 +3,7 @@
 
 #include <nucleus/core/common/math/types.h>
 
+#define NU_VEC3F_ZERO     (nu_vec3f_t){ 0,  0,  0}
 #define NU_VEC3F_FORWARD  (nu_vec3f_t){ 0,  0, -1}
 #define NU_VEC3F_BACKWARD (nu_vec3f_t){ 0,  0,  1}
 #define NU_VEC3F_LEFT     (nu_vec3f_t){-1,  0,  0}
@@ -26,5 +27,8 @@ NU_API float nu_vec3f_length(const nu_vec3f_t v);
 NU_API void nu_vec3f_normalize(nu_vec3f_t v);
 NU_API void nu_vec3f_cross(const nu_vec3f_t a, const nu_vec3f_t b, nu_vec3f_t dest);
 NU_API void nu_vec3f_lerp(const nu_vec3f_t from, const nu_vec3f_t to, float t, nu_vec3f_t dest);
+NU_API void nu_vec3f_abs(nu_vec3f_t v);
+NU_API void nu_vec3f_maxv(const nu_vec3f_t a, const nu_vec3f_t b, nu_vec3f_t dest);
+NU_API void nu_vec3f_minv(const nu_vec3f_t a, const nu_vec3f_t b, nu_vec3f_t dest);
 
 #endif

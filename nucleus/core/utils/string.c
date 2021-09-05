@@ -45,6 +45,15 @@ void nu_string_allocate(nu_string_t *str)
 {    
     nu_string_allocate_(0, str);
 }
+void nu_string_allocate_capacity(nu_string_t *str, uint32_t capacity)
+{
+    nu_string_allocate_(capacity, str);
+}
+void nu_string_allocate_length(nu_string_t *str, uint32_t length)
+{
+    nu_string_allocate_(length, str);
+    nu_string_set_length_(str, length);
+}
 static inline void nu_string_allocate_ncstr(const char *cstr, uint32_t n, nu_string_t *str)
 {
     nu_string_allocate_(n, str);
@@ -80,19 +89,34 @@ void nu_string_allocate_format(nu_string_t *str, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
+    nu_string_allocate_vformat(str, format, args);
+    va_end(args);
+}
+void nu_string_allocate_vformat(nu_string_t *str, const char *format, va_list args)
+{
+    va_list args_temp;
+    va_copy(args_temp, args);
     uint32_t n = vsnprintf(NULL, 0, format, args);
-    va_end(args);
+    va_end(args_temp);
     nu_string_allocate_(n, str);
-    va_start(args, format);
+    va_copy(args_temp, args);
     vsnprintf(nu_string_get_str_(*str), n + 1, format, args);
-    va_end(args);
+    va_end(args_temp);
     nu_string_set_length_(str, n);
 }
 void nu_string_free(nu_string_t str)
 {
     nu_free(str);
 }
+void nu_string_clear(nu_string_t *str)
+{
+    nu_string_set_length_(str, 0);
+}
 const char *nu_string_get_cstr(nu_string_t str)
+{
+    return nu_string_get_str_(str);
+}
+char *nu_string_get_data(nu_string_t str)
 {
     return nu_string_get_str_(str);
 }
@@ -210,12 +234,15 @@ uint32_t nu_string_find_last(nu_string_t str, nu_string_t token)
 static inline uint32_t nu_string_replace_ncstr(nu_string_t *str, const char *token, uint32_t ntoken, const char *other, uint32_t nother)
 {
     if (ntoken > 0) {
-        uint32_t strlen = nu_string_get_length_(*str);
+        uint32_t nstr = nu_string_get_length_(*str);
+        
         const char *cstr = nu_string_get_str_(*str);
         const char *first = cstr;
+        uint32_t len = nstr;
+        
         uint32_t count = 0;
         uint32_t index;
-        while ((index = nu_string_find_first_ncstr(cstr, strlen, token, ntoken)) != strlen) {
+        while ((index = nu_string_find_first_ncstr(cstr, len, token, ntoken)) != len) {
             /* update index in the whole string view */
             index += (cstr - first);
 
@@ -223,12 +250,13 @@ static inline uint32_t nu_string_replace_ncstr(nu_string_t *str, const char *tok
             nu_string_erase(str, index, ntoken);
             nu_string_insert_ncstr(str, other, nother, index);
 
-            /* update strlen and cstr to be in the string subset */
-            strlen += ((int32_t)nother - (int32_t)ntoken);
-            cstr = first + (index + nother);
+            /* update string pointer and length */
+            cstr = nu_string_get_cstr(*str) + (index + nother);
+            len = nstr - index - ntoken;
 
             count++;
         }
+
         return count;
     } else {
         return 0;

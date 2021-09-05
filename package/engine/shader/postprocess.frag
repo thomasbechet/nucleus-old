@@ -10,7 +10,7 @@ layout(set = 0, binding = 0) uniform EnvironmentUBO {
     vec3 eye;
 };
 
-#include "$ENGINE_DIR/shader/scene.glsl"
+__INJECT_CONSTANTS__
 
 layout(set = 1, binding = 0) uniform sampler2D normalDepthTex;
 
@@ -20,8 +20,12 @@ void main() {
 
     vec4 normalDepth = texture(normalDepthTex, uv);
 
+    // color = vec4(normalDepth.rgb, 1);
+
     if (normalDepth.w < MAX_DISTANCE) {
-        color = vec4(0.7, 0, 0.1, 1) * max(0, dot(normalDepth.xyz, normalize(vec3(1, 1, 0))));
+        const vec3 backgroundColor = vec3(1., 163., 236.) / vec3(500);
+        color = vec4(1.0) * max(0, dot(normalDepth.xyz, normalize(vec3(1, 1, 0))));
+        color += backgroundColor.xyzz * 0.2;
     } else {
         vec4 ptransform = invVPMatrix * vec4(pos, 1, 1);
         vec3 dir = normalize((ptransform / ptransform.w).xyz - eye);

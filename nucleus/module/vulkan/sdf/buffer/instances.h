@@ -32,28 +32,30 @@ nu_result_t nuvk_sdf_buffer_instances_destroy(
 
 nu_result_t nuvk_sdf_buffer_instances_configure_instance_types(
     nuvk_sdf_buffer_instances_t *buffer,
-    const nuvk_sdf_instance_type_info_t *info_list,
+    const nuvk_sdf_instance_type_info_t *types,
     uint32_t type_count
 );
 nu_result_t nuvk_sdf_buffer_instances_write_index_count(
     nuvk_sdf_buffer_instances_t *buffer,
     uint32_t active_inflight_frame_index,
     uint32_t type_index,
-    uint32_t index_position,
-    uint32_t index
+    uint32_t count
 );
 nu_result_t nuvk_sdf_buffer_instances_write_index(
     nuvk_sdf_buffer_instances_t *buffer,
     uint32_t active_inflight_frame_index,
     uint32_t type_index,
-    uint32_t count
+    uint32_t index_position,
+    uint32_t index
 );
-nu_result_t nuvk_sdf_buffer_instances_write_instance_matrix(
+nu_result_t nuvk_sdf_buffer_instances_write_instance_transform(
     nuvk_sdf_buffer_instances_t *buffer,
     uint32_t active_inflight_frame_index,
     uint32_t type_index,
     uint32_t instance_index,
-    const nu_mat4f_t matrix
+    const nu_mat3f_t inv_rotation,
+    const nu_vec3f_t translation,
+    const nu_vec3f_t scale
 );
 nu_result_t nuvk_sdf_buffer_instances_write_instance_data(
     nuvk_sdf_buffer_instances_t *buffer,

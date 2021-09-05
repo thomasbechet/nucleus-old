@@ -10,12 +10,14 @@ layout(set = 0, binding = 0) uniform EnvironmentUBO {
     vec3 eye;
 };
 
-#include "$ENGINE_DIR/shader/scene.glsl"
+__INJECT_CONSTANTS__
+__INJECT_INSTANCES__
 
 void main() {
     vec4 ptransform = invVPMatrix * vec4(pos, 1, 1);
     vec3 dir = normalize((ptransform / ptransform.w).xyz - eye);
 
-    HitInfo hit = intersectScene(eye, dir, MAX_DISTANCE);
-    normalDepthTex.rgba = vec4(hit.normal, hit.depth);
+    vec3 normal;
+    float depth = tracePrimary(eye, dir, normal);
+    normalDepthTex.rgba = vec4(normal, depth);
 }

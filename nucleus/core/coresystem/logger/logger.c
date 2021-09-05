@@ -24,7 +24,7 @@ nu_result_t nu_logger_initialize(void)
         nu_path_allocate_cstr(nu_config_get().logger.log_file_directory, &path);
         nu_path_allocate_cstr("nucleus.log", &filename);
         nu_path_join(&path, filename);
-        if (nu_file_open(nu_path_get_cstr(path), NU_IO_MODE_WRITE, &_system.log_file) != NU_SUCCESS) {
+        if (nu_file_open(path, NU_IO_MODE_WRITE, &_system.log_file) != NU_SUCCESS) {
             nu_core_log(NU_ERROR, NU_CORE_LOGGER_NAME"Failed to open log file: %s.\n", nu_path_get_cstr(path));
             return NU_FAILURE;
         }

@@ -1,99 +1,207 @@
 #include <nucleus/module/vulkan/sdf/scene/scene.h>
 
-typedef struct {
-    nu_aabb_t aabb;
-    nu_transform_t transform;
-    nu_mat4f_t inv_matrix;
-    uint32_t gpu_instance_index;
-    uint32_t data_index;
-} nuvk_sdf_instance_data_t;
-
-typedef struct {
-    nuvk_sdf_instance_type_info_t info;
-
-    nuvk_sdf_instance_data_t *instances;
-    uint32_t instance_count;
-    nu_array_t free_instance_indices;
-
-    void *data;
-    nu_array_t free_data_indices;
-
-    uint32_t *indices;
-    uint32_t index_count;
-
-    uint32_t *instance_updates;
-} nuvk_sdf_instance_type_data_t;
-
-typedef struct {
-    uint32_t type_index;
-    uint32_t instance_index;
-} nuvk_sdf_instance_handle_data_t;
-
 nu_result_t nuvk_sdf_scene_initialize(nuvk_sdf_scene_t *scene)
 {
-    nu_array_allocate_capacity(sizeof(nuvk_sdf_instance_type_data_t), NUVK_SDF_MAX_INSTANCE_TYPE_COUNT, &scene->instance_types);
+    nuvk_sdf_camera_initialize(&scene->camera);
     nu_indexed_array_allocate(sizeof(nuvk_sdf_instance_handle_data_t), &scene->instance_handles);
+    scene->type_count = 0;
 
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_scene_terminate(nuvk_sdf_scene_t *scene)
 {
+    for (uint32_t t = 0; t < scene->type_count; t++) {
+        nu_free(scene->types[t].instances);
+        nu_free(scene->types[t].data);
+        nu_array_free(scene->types[t].free_instance_indices);
+        nu_free(scene->types[t].indices);
+        nu_free(scene->types[t].index_updates);
+    }
+
+    nu_indexed_array_free(scene->instance_handles);
+
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_scene_update(
+nu_result_t nuvk_sdf_scene_update_buffers(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
-    const nuvk_sdf_buffer_instances_t *buffer,
-    const nuvk_sdf_camera_t *camera
+    nuvk_sdf_buffer_environment_t *environment_buffer,
+    nuvk_sdf_buffer_instances_t *instances_buffer
 )
 {
+    /* update camera buffer */
+    nuvk_sdf_buffer_environment_write_camera(environment_buffer, &scene->camera,
+        render_context->active_inflight_frame_index);
+
+    /* update indice and instance buffers */
+    for (uint32_t t = 0; t < scene->type_count; t++) {
+        nuvk_sdf_instance_type_data_t *type = &scene->types[t];
+        
+        /* update index count */
+        nuvk_sdf_buffer_instances_write_index_count(instances_buffer, render_context->active_inflight_frame_index,
+            t, type->index_count);
+
+        /* update index, transform and instance data if needed */
+        for (uint32_t i = 0; i < type->index_count; i++) {
+            if (type->index_updates[i]) {
+                uint32_t instance_index            = type->indices[i];
+                nuvk_sdf_instance_data_t *instance = &type->instances[instance_index];
+                
+                nuvk_sdf_buffer_instances_write_index(instances_buffer, render_context->active_inflight_frame_index,
+                    t, i, instance_index);
+
+                nuvk_sdf_buffer_instances_write_instance_transform(instances_buffer, render_context->active_inflight_frame_index,
+                    t, instance_index, instance->inv_rotation, instance->translation, instance->scale);
+
+                nuvk_sdf_buffer_instances_write_instance_data(instances_buffer, render_context->active_inflight_frame_index,
+                    t, instance_index, (char*)type->data + instance_index * type->info.data_size);
+
+                type->index_updates[i]--;
+            }
+        }
+    }
+
     return NU_SUCCESS;
 }
 
 nu_result_t nuvk_sdf_scene_register_instance_type(
     nuvk_sdf_scene_t *scene,
-    const nuvk_sdf_buffer_instances_t *buffer,
-    const nuvk_sdf_instance_type_info_t *info
+    const nuvk_sdf_instance_type_info_t *info,
+    nuvk_sdf_instance_type_t *handle
 )
 {
+    if (scene->type_count >= NUVK_SDF_MAX_INSTANCE_TYPE_COUNT) {
+        nu_error(NUVK_LOGGER_NAME"Max sdf type count reached.\n");
+        return NU_FAILURE;
+    }
+
+    NU_HANDLE_SET_ID(*handle, scene->type_count);
+    nuvk_sdf_instance_type_data_t *type = &scene->types[scene->type_count++];
+
+    /* setup and allocate memory */
+    type->info = *info;
+    
+    type->instances      = (nuvk_sdf_instance_data_t*)nu_malloc(sizeof(nuvk_sdf_instance_data_t) * info->max_instance_count);
+    type->data           = nu_malloc(info->data_size * info->max_instance_count);
+    type->instance_count = 0;
+    nu_array_allocate_capacity(sizeof(uint32_t), info->max_instance_count, &type->free_instance_indices);
+
+    type->indices     = (uint32_t*)nu_malloc(sizeof(uint32_t) * info->max_instance_count);
+    type->index_count = 0;
+
+    type->index_updates = (uint32_t*)nu_malloc(sizeof(uint32_t) * info->max_instance_count);
+
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_scene_create_instance(
     nuvk_sdf_scene_t *scene,
+    const nuvk_render_context_t *render_context,
     const nuvk_sdf_instance_info_t *info,
     nuvk_sdf_instance_t *handle
 )
 {
+    uint32_t type_index;
+    NU_HANDLE_GET_ID(info->type, type_index);
+    NU_ASSERT(type_index < scene->type_count);
+    nuvk_sdf_instance_type_data_t *type = &scene->types[type_index];
+    
+    NU_ASSERT(type->instance_count <= type->info.max_instance_count);
 
+    /* recover instance index */
+    uint32_t instance_index;
+    if (!nu_array_is_empty(type->free_instance_indices)) {
+        instance_index = *(uint32_t*)nu_array_get_last(type->free_instance_indices);
+        nu_array_pop(type->free_instance_indices);
+    } else {
+        instance_index = type->instance_count++;
+    }
+
+    /* setup instance */
+    nuvk_sdf_instance_data_t *instance = &type->instances[instance_index];
+    instance->transform = info->transform;
+    
+    nu_quatf_to_mat3(info->transform.rotation, instance->inv_rotation);
+    nu_mat3f_transpose(instance->inv_rotation);
+    nu_vec3f_copy(info->transform.translation, instance->translation);
+    nu_vec3f_copy(info->transform.scale, instance->scale);
+
+    /* update indices and notify buffer */
+    instance->index_position                      = type->index_count;
+    type->indices[instance->index_position]       = instance_index;
+    type->index_count++;
+    type->index_updates[instance->index_position] = render_context->max_inflight_frame_count;
+
+    /* save data */
+    void *pdata = (char*)type->data + instance->index_position * type->info.data_size;
+    memcpy(pdata, info->data, type->info.data_size);
+
+    /* setup handle */
+    nuvk_sdf_instance_handle_data_t handle_data;
+    handle_data.type_index     = type_index;
+    handle_data.instance_index = instance_index;
+    uint32_t id;
+    nu_indexed_array_add(scene->instance_handles, &handle_data, &id);
+    NU_HANDLE_SET_ID(*handle, id);
 
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_scene_destroy_instance(
     nuvk_sdf_scene_t *scene,
+    const nuvk_render_context_t *render_context,
     nuvk_sdf_instance_t handle
 )
 {
+    uint32_t handle_id;
+    NU_HANDLE_GET_ID(handle, handle_id);
+    nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)nu_indexed_array_get(scene->instance_handles, handle_id);
+    (void)handle_data;
 
+    nu_warning(NUVK_LOGGER_NAME"Destroying instance has not been implemented yet.\n");
 
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_scene_update_instance_transform(
     nuvk_sdf_scene_t *scene,
+    const nuvk_render_context_t *render_context,
     nuvk_sdf_instance_t handle,
     const nu_transform_t *transform
 )
 {
+    uint32_t handle_id;
+    NU_HANDLE_GET_ID(handle, handle_id);
+    nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)nu_indexed_array_get(scene->instance_handles, handle_id);
+    NU_ASSERT(handle_data->type_index < scene->type_count);
+    nuvk_sdf_instance_type_data_t *type = &scene->types[handle_data->type_index];
+    NU_ASSERT(handle_data->instance_index < type->instance_count);    
+    nuvk_sdf_instance_data_t *instance = &type->instances[handle_data->instance_index];
 
+    nu_quatf_to_mat3(transform->rotation, instance->inv_rotation);
+    nu_mat3f_transpose(instance->inv_rotation);
+    nu_vec3f_copy(transform->translation, instance->translation);
+    nu_vec3f_copy(transform->scale, instance->scale);
+
+    type->index_updates[instance->index_position] = render_context->max_inflight_frame_count;
 
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_scene_update_instance_data(
     nuvk_sdf_scene_t *scene,
+    const nuvk_render_context_t *render_context,
     nuvk_sdf_instance_t handle,
     const void *data
 )
 {
+    uint32_t handle_id;
+    NU_HANDLE_GET_ID(handle, handle_id);
+    nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)nu_indexed_array_get(scene->instance_handles, handle_id);
+    NU_ASSERT(handle_data->type_index < scene->type_count);
+    nuvk_sdf_instance_type_data_t *type = &scene->types[handle_data->type_index];
+    NU_ASSERT(handle_data->instance_index < type->instance_count);    
+    nuvk_sdf_instance_data_t *instance = &type->instances[handle_data->instance_index];
 
+    memcpy((char*)type->data + type->info.data_size * handle_data->instance_index, data, type->info.data_size);
+
+    type->index_updates[instance->index_position] = render_context->max_inflight_frame_count;
 
     return NU_SUCCESS;
 }

@@ -8,7 +8,7 @@
 NU_DECLARE_HANDLE(nuvk_sdf_instance_type_t);
 NU_DECLARE_HANDLE(nuvk_sdf_instance_t);
 
-typedef float (*nuvk_sdf_instance_sdf_pfn_t)(nu_vec3f_t, const void*);
+typedef float (*nuvk_sdf_instance_sdf_pfn_t)(const nu_vec3f_t, const void*);
 typedef void (*nuvk_sdf_instance_aabb_pfn_t)(const void*, nu_aabb_t*);
 
 typedef struct {

@@ -13,6 +13,7 @@ NU_API void nu_array_free(nu_array_t array);
 NU_API void *nu_array_get_data(nu_array_t array);
 NU_API const void *nu_array_get_data_const(nu_array_t array);
 NU_API void nu_array_clear(nu_array_t array);
+NU_API bool nu_array_is_empty(nu_array_t array);
 NU_API void *nu_array_get(nu_array_t array, uint32_t index);
 NU_API void *nu_array_get_last(nu_array_t array);
 NU_API bool nu_array_find_index(nu_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *index);

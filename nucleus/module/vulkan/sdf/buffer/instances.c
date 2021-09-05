@@ -1,5 +1,7 @@
 #include <nucleus/module/vulkan/sdf/buffer/instances.h>
 
+#define INSTANCE_HEADER_SIZE (sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t) + sizeof(nu_vec4f_t))
+
 nu_result_t nuvk_sdf_buffer_instances_create(
     nuvk_sdf_buffer_instances_t *buffer,
     const nuvk_context_t *context,
@@ -82,9 +84,9 @@ nu_result_t nuvk_sdf_buffer_instances_configure_instance_types(
     buffer->next_index_offset    = 0;
     buffer->next_instance_offset = 0;
     for (uint32_t i = 0; i < type_count; i++) {
-        buffer->instance_sizes[i]     = (sizeof(nu_mat4f_t) + info[i].data_size); /* must have 16 bytes alignment */
+        buffer->instance_sizes[i]     = (INSTANCE_HEADER_SIZE + info[i].data_size); /* must have 16 bytes alignment */
         buffer->instance_offsets[i]   = buffer->next_instance_offset;
-        buffer->next_instance_offset += info[i].max_instance_count;
+        buffer->next_instance_offset += info[i].max_instance_count * buffer->instance_sizes[i];
 
         if (buffer->next_instance_offset >= buffer->instance_uniform_buffer_range) {
             nu_error(NUVK_LOGGER_NAME"Max instance uniform buffer range reached.\n");
@@ -92,7 +94,7 @@ nu_result_t nuvk_sdf_buffer_instances_configure_instance_types(
         }
 
         buffer->index_offsets[i]   = buffer->next_index_offset;
-        buffer->next_index_offset += sizeof(uint32_t) * (info[i].max_instance_count + 1); /* +1 with the index count */
+        buffer->next_index_offset += sizeof(uint32_t) * 4 * (info[i].max_instance_count + 1); /* +1 with the index count */
 
         if (buffer->next_index_offset >= buffer->index_uniform_buffer_range) {
             nu_error(NUVK_LOGGER_NAME"Max index uniform buffer range reached.\n");
@@ -117,7 +119,7 @@ nu_result_t nuvk_sdf_buffer_instances_write_index_count(
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_buffer_instances_wrote_index(
+nu_result_t nuvk_sdf_buffer_instances_write_index(
     nuvk_sdf_buffer_instances_t *buffer,
     uint32_t active_inflight_frame_index,
     uint32_t type_index,
@@ -129,25 +131,32 @@ nu_result_t nuvk_sdf_buffer_instances_wrote_index(
 
     char *data = (char*)buffer->index_buffer.map + buffer->index_uniform_buffer_range * active_inflight_frame_index
         + buffer->index_offsets[type_index] 
-        + sizeof(uint32_t) * (index_position + 1);
+        + sizeof(uint32_t) * 4 * (index_position + 1); /* using std140 */
     *((uint32_t*)data) = index;
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_buffer_instances_write_instance_matrix(
+nu_result_t nuvk_sdf_buffer_instances_write_instance_transform(
     nuvk_sdf_buffer_instances_t *buffer,
     uint32_t active_inflight_frame_index,
     uint32_t type_index,
     uint32_t instance_index,
-    const nu_mat4f_t matrix
+    const nu_mat3f_t inv_rotation,
+    const nu_vec3f_t translation,
+    const nu_vec3f_t scale
 )
 {
     NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
 
     char *data = (char*)buffer->instance_buffer.map + (buffer->instance_uniform_buffer_range * active_inflight_frame_index)
         + buffer->instance_offsets[type_index]
-        + buffer->instance_sizes[type_index] * instance_index; 
-    nu_mat4f_copy(matrix, (nu_vec4f_t*)data);
+        + buffer->instance_sizes[type_index] * instance_index;
+
+    memcpy(data + sizeof(nu_vec4f_t) * 0, inv_rotation[0], sizeof(nu_vec3f_t));
+    memcpy(data + sizeof(nu_vec4f_t) * 1, inv_rotation[1], sizeof(nu_vec3f_t));
+    memcpy(data + sizeof(nu_vec4f_t) * 2, inv_rotation[2], sizeof(nu_vec3f_t));
+    memcpy(data + sizeof(nu_vec4f_t) * 3, translation, sizeof(nu_vec3f_t));
+    memcpy(data + sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t), scale, sizeof(nu_vec3f_t));
 
     return NU_SUCCESS;
 }
@@ -161,12 +170,12 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_data(
 {
     NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
 
-    char *data = (char*)buffer->instance_buffer.map + (buffer->instance_uniform_buffer_range * active_inflight_frame_index)
+    char *pdata = (char*)buffer->instance_buffer.map + (buffer->instance_uniform_buffer_range * active_inflight_frame_index)
         + buffer->instance_offsets[type_index]
         + buffer->instance_sizes[type_index] * instance_index
-        + sizeof(nu_mat4f_t);
-    uint32_t data_size = (buffer->instance_sizes[type_index] - sizeof(nu_mat4f_t));
-    memcpy(data, data, data_size);
+        + INSTANCE_HEADER_SIZE;
+    uint32_t data_size = (buffer->instance_sizes[type_index] - INSTANCE_HEADER_SIZE);
+    memcpy(pdata, data, data_size);
 
     return NU_SUCCESS;
 }

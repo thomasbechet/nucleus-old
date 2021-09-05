@@ -118,13 +118,13 @@ nu_result_t nuglfw_window_set_title(const char *title)
 }
 nu_result_t nuglfw_window_set_mode(nu_window_mode_t mode)
 {
-    if (mode == NU_WINDOW_MODE_FULLSCREEN) {
-        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-        glfwSetWindowMonitor(_module.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, 0);
-    } else if (mode == NU_WINDOW_MODE_WINDOWED) {
+    if (mode == NU_WINDOW_MODE_WINDOWED) {
         glfwSetWindowMonitor(_module.window, NULL, 10, 10, _module.size[0], _module.size[1], 0);
+    } else if (mode == NU_WINDOW_MODE_FULLSCREEN) {
+        const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        glfwSetWindowMonitor(_module.window, glfwGetPrimaryMonitor(), 0, 0, mode->width, mode->height, mode->refreshRate); 
     } else if (mode == NU_WINDOW_MODE_BORDERLESS) {
-        const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+        const GLFWvidmode *mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
         glfwWindowHint(GLFW_RED_BITS, mode->redBits);
         glfwWindowHint(GLFW_GREEN_BITS, mode->greenBits);
         glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);

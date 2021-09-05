@@ -71,6 +71,10 @@ void nu_array_clear(nu_array_t array)
 {
     ((nu_array_header_t*)array)->size = 0;
 }
+bool nu_array_is_empty(nu_array_t array)
+{
+    return ((nu_array_header_t*)array)->size == 0;
+}
 void *nu_array_get(nu_array_t array, uint32_t index)
 {
     nu_array_header_t *header = (nu_array_header_t*)array;

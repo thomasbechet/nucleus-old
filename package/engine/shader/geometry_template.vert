@@ -9,11 +9,12 @@ layout(set = 0, binding = 0) uniform EnvironmentUBO {
 };
 
 void main() {
-    float x = float((gl_VertexIndex & 1) << 2);
-    float y = float((gl_VertexIndex & 2) << 1);
+    pos = vec2(
+        float((gl_VertexIndex & 1) << 2),
+        float((gl_VertexIndex & 2) << 1)
+    ) - 1.0;
 
-    pos = (vec2(x, y) * 0.5) * 2.0 - 1.0;
     invVPMatrix = inverse(VPMatrix);
 
-    gl_Position = vec4(x - 1.0, y - 1.0, 0.0, 1.0);
+    gl_Position = vec4(pos, 0.0, 1.0);
 }

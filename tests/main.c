@@ -134,6 +134,7 @@ static nu_result_t on_start(void)
     // nu_indexed_array_free(iar);
     // nu_array_free(ids);
 
+
     nu_module_t module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
@@ -317,6 +318,18 @@ static nu_result_t on_update(void)
     nu_input_get_keyboard_state(NU_KEYBOARD_ESCAPE, &escape_state);
     if (escape_state & NU_BUTTON_PRESSED) {
         nu_context_request_stop();
+    }
+
+    nu_button_state_t f6_state, f7_state, f8_state;
+    nu_input_get_keyboard_state(NU_KEYBOARD_F6, &f6_state);
+    nu_input_get_keyboard_state(NU_KEYBOARD_F7, &f7_state);
+    nu_input_get_keyboard_state(NU_KEYBOARD_F8, &f8_state);
+    if (f6_state & NU_BUTTON_JUST_PRESSED) {
+        nu_window_set_mode(NU_WINDOW_MODE_WINDOWED);
+    } else if (f7_state & NU_BUTTON_JUST_PRESSED) {
+        nu_window_set_mode(NU_WINDOW_MODE_BORDERLESS);
+    } else if (f8_state & NU_BUTTON_JUST_PRESSED) {
+        nu_window_set_mode(NU_WINDOW_MODE_FULLSCREEN);
     }
 
     return NU_SUCCESS;
