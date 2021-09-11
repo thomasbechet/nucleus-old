@@ -1,6 +1,6 @@
 #include <nucleus/module/utils/command/command.h>
 
-#define NUUTILS_LOGGER_NAME "[COMMAND] "
+#define NUUTILS_LOGGER_NAME "COMMAND"
 
 typedef struct {
     nu_event_id_t event_id;
@@ -31,7 +31,7 @@ nu_result_t nuutils_command_plugin_initialize(void)
     info.terminate  = nuutils_command_event_terminate;
     info.size       = sizeof(nuutils_command_event_t);
     if (nu_event_register(&info, &_module.event_id) != NU_SUCCESS) {
-        nu_error(NUUTILS_LOGGER_NAME"Failed to initialize command event.\n");
+        nu_error(NUUTILS_LOGGER_NAME, "Failed to initialize command event.");
         return NU_FAILURE;
     }
 

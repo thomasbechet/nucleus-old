@@ -1,7 +1,7 @@
 #include <nucleus/core/coresystem/event/event.h>
 
 #include <nucleus/core/coresystem/memory/memory.h>
-#include <nucleus/core/utils/array.h>
+#include <nucleus/core/utility/container/array.h>
 
 typedef struct {
     nu_array_t subscribers;

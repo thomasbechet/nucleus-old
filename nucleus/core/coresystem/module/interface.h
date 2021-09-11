@@ -1,7 +1,7 @@
 #ifndef NU_MODULE_INTERFACE_H
 #define NU_MODULE_INTERFACE_H
 
-#include <nucleus/core/common/common.h>
+#include <nucleus/core/utility/all.h>
 
 NU_DECLARE_HANDLE(nu_module_t);
 

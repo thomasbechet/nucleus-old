@@ -74,7 +74,7 @@ bool nuvk_render_context_begin(
     VkSemaphore image_available_semaphore = render_context->image_available_semaphores[render_context->active_inflight_frame_index];
 
     if (vkWaitForFences(context->device, 1, &inflight_fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to wait fence.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to wait fence.");
         return false;
     }
     vkResetFences(context->device, 1, &inflight_fence);
@@ -85,7 +85,7 @@ bool nuvk_render_context_begin(
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             return false;
         } else {
-            nu_error(NUVK_LOGGER_NAME"Failed to acquire next image KHR.\n");
+            nu_error(NUVK_LOGGER_NAME, "Failed to acquire next image KHR.");
             return false;
         }
     }
@@ -100,7 +100,7 @@ bool nuvk_render_context_begin(
     begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
     if (vkBeginCommandBuffer(cmd, &begin_info) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to begin command buffer.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to begin command buffer.");
         return false;
     }
 
@@ -135,7 +135,7 @@ bool nuvk_render_context_end(
     submit_info.pSignalSemaphores    = &render_finished_semaphore;
 
     if (vkQueueSubmit(context->queues.graphics_compute, 1, &submit_info, inflight_fence) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to submit command buffer.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to submit command buffer.");
         return false;
     }
 
@@ -153,7 +153,7 @@ bool nuvk_render_context_end(
         if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
             return false;
         } else {
-            nu_error(NUVK_LOGGER_NAME"Failed to present KHR.\n");
+            nu_error(NUVK_LOGGER_NAME, "Failed to present KHR.");
             return false;
         }
     }

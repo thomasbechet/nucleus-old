@@ -63,7 +63,7 @@ static void create_quad_shader(void)
     glCompileShader(vertex_shader);
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
-        nu_error(NUGLFW_LOGGER_NAME"Failed to compile quad vertex shader.\n");
+        nu_error(NUGLFW_LOGGER_NAME, "Failed to compile quad vertex shader.");
         glDeleteShader(vertex_shader);
     }
     
@@ -72,7 +72,7 @@ static void create_quad_shader(void)
     glCompileShader(fragment_shader);
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
     if (success == GL_FALSE) {
-        nu_error(NUGLFW_LOGGER_NAME"Failed to compile quad fragment shader.\n");
+        nu_error(NUGLFW_LOGGER_NAME, "Failed to compile quad fragment shader.");
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
     }
@@ -84,7 +84,7 @@ static void create_quad_shader(void)
     glLinkProgram(_module.quad_shader);
     glGetProgramiv(_module.quad_shader, GL_LINK_STATUS, &success);
     if (success == GL_FALSE) {
-        nu_error(NUGLFW_LOGGER_NAME"Failed to link quad shader.\n");
+        nu_error(NUGLFW_LOGGER_NAME, "Failed to link quad shader.");
         glDeleteProgram(_module.quad_shader);
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
@@ -141,7 +141,7 @@ static void destroy_texture(void)
 nu_result_t nuglfw_surface_create(void)
 {
     if (glewInit()) {
-        nu_error(NUGLFW_LOGGER_NAME"Failed to initialize glew.\n");
+        nu_error(NUGLFW_LOGGER_NAME, "Failed to initialize glew.");
         return NU_FAILURE;
     }
 

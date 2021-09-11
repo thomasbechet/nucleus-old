@@ -16,9 +16,9 @@ static nu_system_data_t _system;
 
 static void nu_memory_log_status(nu_severity_t severity)
 {
-    nu_core_log(severity, "[DEBUG MEMORY] [alloc:%llu free:%llu realloc:%llu]\n",
+    nu_core_log(severity, "[DEBUG MEMORY] [alloc:%llu free:%llu realloc:%llu]",
         _system.alloc_count, _system.free_count, _system.realloc_count);
-    nu_core_log(severity, "[DEBUG MEMORY] [alloc-aligned:%llu free-aligned:%llu realloc-aligned:%llu]\n",
+    nu_core_log(severity, "[DEBUG MEMORY] [alloc-aligned:%llu free-aligned:%llu realloc-aligned:%llu]",
         _system.alloc_aligned_count, _system.free_aligned_count, _system.realloc_aligned_count);
 }
 
@@ -38,10 +38,10 @@ nu_result_t nu_memory_terminate(void)
 #ifdef NU_DEBUG_MEMORY
     if (_system.alloc_count != _system.free_count) {
         nu_memory_log_status(NU_WARNING);
-        nu_core_log(NU_WARNING, "[DEBUG MEMORY] Memory leak detected.\n");
+        nu_core_log(NU_WARNING, "[DEBUG MEMORY] Memory leak detected.");
     } else {
         nu_memory_log_status(NU_INFO);
-        nu_core_log(NU_INFO, "[DEBUG MEMORY] No memory leak detected.\n");
+        nu_core_log(NU_INFO, "[DEBUG MEMORY] No memory leak detected.");
     }
 #endif
 
@@ -107,7 +107,7 @@ void nu_free(void *p)
 #if defined(NU_DEBUG_MEMORY)
     if (_system.free_count >= _system.alloc_count) {
         nu_memory_log_status(NU_FATAL);
-        nu_interrupt("[DEBUG MEMORY] Free on non allocated memory detected. Exiting...\n");
+        nu_interrupt("[DEBUG MEMORY] Free on non allocated memory detected. Exiting...");
     }
     _system.free_count++;
 #endif
@@ -118,7 +118,7 @@ void nu_free_aligned(void *p)
 #if defined(NU_DEBUG_MEMORY)
     if (_system.free_aligned_count >= _system.alloc_aligned_count) {
         nu_memory_log_status(NU_FATAL);
-        nu_interrupt("[DEBUG MEMORY] Free on non allocated aligned memory detected. Exiting...\n");
+        nu_interrupt("[DEBUG MEMORY] Free on non allocated aligned memory detected. Exiting...");
     }
     _system.free_aligned_count++;
 #endif

@@ -19,7 +19,7 @@ static nu_result_t create_modules(
         compute_source, "light.comp", &pipeline->compute);
     nu_string_free(compute_source);
     if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create light compute shader.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create light compute shader.");
         return NU_FAILURE;
     }
 
@@ -46,7 +46,7 @@ static nu_result_t create_layout(
     layout_info.pSetLayouts            = set_layouts;
 
     if (vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create light pipeline layout.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create light pipeline layout.");
         return NU_FAILURE;
     }
 
@@ -69,7 +69,7 @@ static nu_result_t create_pipeline(
     info.stage.module = pipeline->compute;
 
     if (vkCreateComputePipelines(context->device, VK_NULL_HANDLE, 1, &info, &context->allocator, &pipeline->pipeline) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create light pipeline.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create light pipeline.");
         return NU_FAILURE;
     }
 

@@ -3,7 +3,7 @@
 #include <nucleus/module/utils/console/controller.h>
 #include <nucleus/module/utils/console/view.h>
 
-#define NUUTILS_LOGGER_NAME "[CONSOLE] "
+#define NUUTILS_LOGGER_NAME "CONSOLE"
 
 typedef struct {
     nuutils_command_interface_t command_interface;
@@ -32,7 +32,7 @@ nu_result_t nuutils_console_plugin_initialize(void)
     if (result == NU_SUCCESS && nu_module_get_interface(module, NUUTILS_COMMAND_INTERFACE_NAME, &_module.command_interface) == NU_SUCCESS) {
         _module.command_interface_loaded = true;
     } else {
-        nu_warning(NUUTILS_LOGGER_NAME"Using console without command plugin.\n");
+        nu_warning(NUUTILS_LOGGER_NAME, "Using console without command plugin.");
     }
 
     /* subscrive event */
@@ -44,7 +44,7 @@ nu_result_t nuutils_console_plugin_initialize(void)
     font_info.filename  = "$ENGINE_DIR/font/Coder's Crux.ttf";
     font_info.font_size = 16;
     if (nu_renderer_font_create(&font_info, &_module.font) != NU_SUCCESS) {
-        nu_fatal(NUUTILS_LOGGER_NAME"Failed to create font.\n");
+        nu_fatal(NUUTILS_LOGGER_NAME, "Failed to create font.");
     }
 
     /* create controller */

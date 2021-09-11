@@ -4,7 +4,7 @@
 #include <nucleus/core/coresystem/logger/interface.h>
 #include <nucleus/module/vulkan/module/interface.h>
 
-#define NU_LOGGER_RENDERER_NAME "[RENDERER] "
+#define NU_LOGGER_RENDERER_NAME "RENDERER"
 
 static const char *nu_renderer_api_names[] = {
     "$MODULE_DIR/nucleus-renderer-none",
@@ -28,7 +28,7 @@ static nu_result_t initialize_event(void)
     info.terminate  = NULL;
     info.size       = sizeof(nu_renderer_viewport_resize_event_t);
     if (nu_event_register(&info, &_system.viewport_resize_event_id) != NU_SUCCESS) {
-        nu_error(NU_LOGGER_RENDERER_NAME"Failed to register viewport resize event.\n");
+        nu_error(NU_LOGGER_RENDERER_NAME, "Failed to register viewport resize event.");
         return NU_FAILURE;
     }
 
@@ -45,7 +45,7 @@ nu_result_t nu_renderer_initialize(void)
     /* initialize event */
     result = initialize_event();
     if (result != NU_SUCCESS) {
-        nu_error(NU_LOGGER_RENDERER_NAME"Failed to initialize event.\n");
+        nu_error(NU_LOGGER_RENDERER_NAME, "Failed to initialize event.");
         return result;
     }
 
@@ -59,7 +59,7 @@ nu_result_t nu_renderer_initialize(void)
         /* get renderer interface */
         result = nu_module_get_interface(_system.module, NU_RENDERER_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_RENDERER_NAME"Failed to get interface.\n");
+            nu_error(NU_LOGGER_RENDERER_NAME, "Failed to get interface.");
             return result;
         }
 
@@ -67,12 +67,12 @@ nu_result_t nu_renderer_initialize(void)
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_RENDERER_NAME"Failed to initialize renderer system.\n");
+                nu_error(NU_LOGGER_RENDERER_NAME, "Failed to initialize renderer system.");
                 return result;
             }
         }
     } else {
-        nu_info(NU_LOGGER_RENDERER_NAME"Running in passive mode.\n");
+        nu_info(NU_LOGGER_RENDERER_NAME, "Running in passive mode.");
     }
 
     return NU_SUCCESS;

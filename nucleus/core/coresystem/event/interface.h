@@ -1,7 +1,7 @@
 #ifndef NU_EVENT_INTERFACE_H
 #define NU_EVENT_INTERFACE_H
 
-#include <nucleus/core/common/common.h>
+#include <nucleus/core/utility/all.h>
 
 typedef uint32_t nu_event_id_t;
 typedef nu_result_t (*nu_event_callback_pfn_t)(nu_event_id_t, void*);

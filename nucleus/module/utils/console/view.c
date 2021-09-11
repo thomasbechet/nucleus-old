@@ -30,7 +30,7 @@ void nuutils_console_view_initialize(nuutils_console_view_t *view, nu_renderer_f
         /* create labels */
         nu_renderer_label_t label;
         if (nu_renderer_label_create(&label_info, &label) != NU_SUCCESS) {
-            nu_interrupt("Failed to create the label.\n");
+            nu_interrupt("Failed to create the label.");
         }
         nu_array_push(view->command_buffer_labels, &label);
 
@@ -42,7 +42,7 @@ void nuutils_console_view_initialize(nuutils_console_view_t *view, nu_renderer_f
 
     /* command */
     if (nu_renderer_label_create(&label_info, &view->command_label) != NU_SUCCESS) {
-        nu_interrupt("Failed to create the label.\n");
+        nu_interrupt("Failed to create the label.");
     }
     nu_string_allocate(&view->command_string);
 
@@ -51,7 +51,7 @@ void nuutils_console_view_initialize(nuutils_console_view_t *view, nu_renderer_f
     rectangle_info.color = 0xFFFFFF33;
     rectangle_info.rect = (nu_rect_t){0, 0, 0, 0};
     if (nu_renderer_rectangle_create(&rectangle_info, &view->background) != NU_SUCCESS) {
-        nu_interrupt("Failed to create rectangle.\n");
+        nu_interrupt("Failed to create rectangle.");
     }
 
     /* cursor */
@@ -61,7 +61,7 @@ void nuutils_console_view_initialize(nuutils_console_view_t *view, nu_renderer_f
     memset(&rectangle_info, 0, sizeof(nu_renderer_rectangle_create_info_t));
     rectangle_info.color = 0xFFFFFFFF;
     if (nu_renderer_rectangle_create(&rectangle_info, &view->cursor) != NU_SUCCESS) {
-        nu_interrupt("Failed to create rectangle.\n");
+        nu_interrupt("Failed to create rectangle.");
     }
 }
 void nuutils_console_view_terminate(nuutils_console_view_t *view)

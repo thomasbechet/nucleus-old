@@ -121,7 +121,7 @@ static nu_result_t create_modules(
     result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_VERTEX_BIT,
         sources[NUVK_SDF_PIPELINE_SOURCE_GEOMETRY_TEMPLATE_VERT], "geometry.vert", &pipeline->vertex);
     if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create geometry vertex shader.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry vertex shader.");
         return result;
     }
 
@@ -140,7 +140,7 @@ static nu_result_t create_modules(
     nu_string_free(inject_instances_source);
     nu_string_free(fragment_source);
     if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create geometry pipeline layout.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry pipeline layout.");
         return result;
     }
 
@@ -162,7 +162,7 @@ static nu_result_t create_layout(
     layout_info.pSetLayouts            = &descriptors->low_frequency.layout;
 
     if (vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create geometry pipeline layout.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry pipeline layout.");
         return NU_FAILURE;
     }
 
@@ -257,7 +257,7 @@ static nu_result_t create_pipeline(
     pipeline_info.basePipelineHandle  = VK_NULL_HANDLE;
 
     if (vkCreateGraphicsPipelines(context->device, VK_NULL_HANDLE, 1, &pipeline_info, &context->allocator, &pipeline->pipeline) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create geometry pipeline.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry pipeline.");
         return NU_FAILURE;
     }
 

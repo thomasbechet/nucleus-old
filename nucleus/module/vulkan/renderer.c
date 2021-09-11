@@ -30,7 +30,7 @@ nu_result_t nuvk_renderer_initialize(void)
     _module.render_context_out_of_date = false;
 
     if (nuvk_glfw_get_interface() != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to get glfw interface.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to get glfw interface.");
         return NU_FAILURE;
     }
 
@@ -93,7 +93,7 @@ nu_result_t nuvk_renderer_render(void)
         nu_vec2u_t size;
         nu_window_get_size(size);
         if (size[0] != 0 && size[1] != 0) {
-            nu_info(NUVK_LOGGER_NAME"Swapchain updated (%ldx%ld) with %ld frame(s).\n", size[0], size[1], _module.swapchain.image_count);
+            nu_info(NUVK_LOGGER_NAME, "Swapchain updated (%ldx%ld) with %ld frame(s).", size[0], size[1], _module.swapchain.image_count);
 
             /* recreate swapchain */
             nuvk_swapchain_recreate(&_module.swapchain, &_module.context, size[0], size[1]);

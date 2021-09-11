@@ -25,7 +25,7 @@ nu_result_t nuvk_buffer_create(nuvk_buffer_t *buffer, const nuvk_memory_manager_
     allocation_info.usage = info->memory_usage;
 
     if (vmaCreateBuffer(manager->allocator, &buffer_info, &allocation_info, &buffer->buffer, &buffer->allocation, NULL) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create buffer.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create buffer.");
         return NU_SUCCESS;
     }
 
@@ -45,7 +45,7 @@ nu_result_t nuvk_buffer_destroy(nuvk_buffer_t *buffer, const nuvk_memory_manager
 nu_result_t nuvk_buffer_map(nuvk_buffer_t *buffer, const nuvk_memory_manager_t *manager)
 {
     if (vmaMapMemory(manager->allocator, buffer->allocation, &buffer->map) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to map memory.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to map memory.");
         return NU_FAILURE;
     }
 

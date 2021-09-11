@@ -14,7 +14,7 @@ nu_result_t nuvk_memory_manager_initialize(
     info.pAllocationCallbacks = &context->allocator;
 
     if (vmaCreateAllocator(&info, &manager->allocator) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create vma.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create vma.");
         return NU_FAILURE;
     }
 

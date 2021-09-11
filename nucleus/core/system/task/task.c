@@ -4,7 +4,7 @@
 #include <nucleus/core/coresystem/memory/interface.h>
 #include <nucleus/core/coresystem/logger/interface.h>
 
-#define NU_LOGGER_TASK_NAME "[TASK] "
+#define NU_LOGGER_TASK_NAME "TASK"
 
 typedef struct {
     nu_module_t module;
@@ -30,7 +30,7 @@ nu_result_t nu_task_initialize(void)
         /* get task interface */
         result = nu_module_get_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_TASK_NAME"Failed to get interface.\n");
+            nu_error(NU_LOGGER_TASK_NAME, "Failed to get interface.");
             return result;
         }
 
@@ -38,12 +38,12 @@ nu_result_t nu_task_initialize(void)
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_TASK_NAME"Failed to initialize task system.\n");
+                nu_error(NU_LOGGER_TASK_NAME, "Failed to initialize task system.");
                 return result;
             }
         }
     } else {
-        nu_info(NU_LOGGER_TASK_NAME"Running in passive mode.\n");
+        nu_info(NU_LOGGER_TASK_NAME, "Running in passive mode.");
     }
 
     return NU_SUCCESS;
@@ -100,7 +100,7 @@ nu_result_t nu_task_perform_parallel(nu_task_t task, nu_task_job_t job, uint32_t
     for (uint32_t i = 0; i < count; i++) {
         nu_result_t result = nu_task_perform(task, &job, 1);
         if (result != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_TASK_NAME"Failed to perform task.");
+            nu_warning(NU_LOGGER_TASK_NAME, "Failed to perform task.");
         }
     }
 

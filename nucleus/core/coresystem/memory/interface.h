@@ -1,7 +1,7 @@
 #ifndef NU_MEMORY_INTERFACE_H
 #define NU_MEMORY_INTERFACE_H
 
-#include <nucleus/core/common/common.h>
+#include <nucleus/core/utility/all.h>
 
 NU_API void *nu_malloc(size_t s);
 NU_API void *nu_malloc_aligned(size_t alignment, size_t s);

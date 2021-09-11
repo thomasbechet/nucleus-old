@@ -20,7 +20,7 @@ nu_result_t nuvk_sdf_pipeline_sources_load(nu_string_t *sources)
         nu_path_set_cstr(&path, glsl_sources[i]);
         if (nu_file_readall_string(path, &sources[i]) != NU_SUCCESS) {
             sources[i] = NU_NULL_HANDLE;
-            nu_warning(NUVK_LOGGER_NAME"Failed to read source: %s\n", glsl_sources[i]);
+            nu_warning(NUVK_LOGGER_NAME, "Failed to read source: %s.", glsl_sources[i]);
         }
     }
 

@@ -4,8 +4,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <nucleus/core/common/common.h>
 #include <nucleus/core/config/interface.h>
 #include <nucleus/core/context/context.h>
 #include <nucleus/core/coresystem/event/interface.h>
@@ -17,12 +15,7 @@ extern "C" {
 #include <nucleus/core/system/renderer/interface.h>
 #include <nucleus/core/system/task/interface.h>
 #include <nucleus/core/system/window/interface.h>
-#include <nucleus/core/utils/array.h>
-#include <nucleus/core/utils/indexed_array.h>
-#include <nucleus/core/utils/string.h>
-#include <nucleus/core/utils/timer.h>
-#include <nucleus/core/utils/io.h>
-#include <nucleus/core/utils/path.h>
+#include <nucleus/core/utility/all.h>
 
 #ifdef __cplusplus
 }

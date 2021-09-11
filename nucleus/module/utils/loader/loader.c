@@ -1,6 +1,6 @@
 #include <nucleus/module/utils/loader/loader.h>
 
-#define NUUTILS_LOGGER_NAME "[LOADER] "
+#define NUUTILS_LOGGER_NAME "LOADER"
 
 nu_result_t nuutils_load_mesh_from_obj(const char *filename, nu_renderer_mesh_t *handle)
 {    

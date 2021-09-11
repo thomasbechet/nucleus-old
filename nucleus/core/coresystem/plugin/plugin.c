@@ -2,8 +2,6 @@
 
 #include <nucleus/core/coresystem/module/interface.h>
 #include <nucleus/core/coresystem/logger/logger.h>
-#include <nucleus/core/utils/array.h>
-#include <nucleus/core/utils/string.h>
 
 typedef struct {
     nu_module_t module;
@@ -107,14 +105,14 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     nu_plugin_interface_t interface;
     result = nu_module_get_interface(module, NU_PLUGIN_INTERFACE_NAME, (nu_pfn_t*)&interface);
     if (result != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to get '%s' interface for plugin: %s.\n", NU_PLUGIN_INTERFACE_NAME, plugin_name);
+        nu_core_log(NU_WARNING, "Failed to get '%s' interface for plugin: %s.", NU_PLUGIN_INTERFACE_NAME, plugin_name);
         return result;
     }
 
     /* get callbacks */
     result = interface.get_callbacks(plugin_name, &plugin.callbacks);
     if (result != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to get plugin callbacks: %s.\n", plugin);
+        nu_core_log(NU_WARNING, "Failed to get plugin callbacks: %s.", plugin);
         return result;
     }
 
@@ -126,7 +124,7 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     if (plugin.callbacks.initialize) {
         result = plugin.callbacks.initialize();
         if (result != NU_SUCCESS) {
-            nu_core_log(NU_WARNING, "Failed to initialize plugin: %s.\n", plugin_name);
+            nu_core_log(NU_WARNING, "Failed to initialize plugin: %s.", plugin_name);
             return result;
         }
     }

@@ -32,7 +32,7 @@ nu_result_t nuvk_image_create(
     allocation_info.usage = info->memory_usage;
 
     if (vmaCreateImage(memory_manager->allocator, &image_info, &allocation_info, &image->image, &image->allocation, NULL) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create image.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create image.");
         return NU_FAILURE;
     }
 
@@ -51,7 +51,7 @@ nu_result_t nuvk_image_create(
 
     if (vkCreateImageView(context->device, &view_info, &context->allocator, &image->image_view) != VK_SUCCESS) {
         vmaDestroyImage(memory_manager->allocator, image->image, image->allocation);
-        nu_error(NUVK_LOGGER_NAME"Failed to create image view.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create image view.");
         return NU_FAILURE;
     }
 

@@ -18,7 +18,7 @@ nu_result_t nuvk_sdf_framebuffer_geometry_create(
     info.pAttachments    = &image->image.image_view;
 
     if (vkCreateFramebuffer(context->device, &info, &context->allocator, &framebuffer->framebuffer) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create geometry framebuffer.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry framebuffer.");
         return NU_FAILURE;
     }
 

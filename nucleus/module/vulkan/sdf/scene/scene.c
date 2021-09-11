@@ -71,7 +71,7 @@ nu_result_t nuvk_sdf_scene_register_instance_type(
 )
 {
     if (scene->type_count >= NUVK_SDF_MAX_INSTANCE_TYPE_COUNT) {
-        nu_error(NUVK_LOGGER_NAME"Max sdf type count reached.\n");
+        nu_error(NUVK_LOGGER_NAME, "Max sdf type count reached.");
         return NU_FAILURE;
     }
 
@@ -156,7 +156,7 @@ nu_result_t nuvk_sdf_scene_destroy_instance(
     nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)nu_indexed_array_get(scene->instance_handles, handle_id);
     (void)handle_data;
 
-    nu_warning(NUVK_LOGGER_NAME"Destroying instance has not been implemented yet.\n");
+    nu_warning(NUVK_LOGGER_NAME, "Destroying instance has not been implemented yet.");
 
     return NU_SUCCESS;
 }

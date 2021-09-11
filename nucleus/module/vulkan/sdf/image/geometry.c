@@ -18,7 +18,7 @@ nu_result_t nuvk_sdf_image_geometry_create(
     info.memory_usage  = VMA_MEMORY_USAGE_GPU_ONLY;
 
     if (nuvk_image_create(&geometry->image, context, memory_manager, &info) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create geometry image.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry image.");
         return NU_FAILURE;
     }
 

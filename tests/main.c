@@ -7,6 +7,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
 
+#define MAIN_LOGGER_NAME "MAIN"
+
 static nu_result_t load_monkey(nu_renderer_mesh_t *mesh)
 {
     nu_module_t module;
@@ -26,7 +28,7 @@ static void profile(void)
     avg += delta;
     avg_count++;
     if (avg_count > 50) {
-        nu_info("delta %f\n", avg / (float)avg_count);
+        nu_info(MAIN_LOGGER_NAME, "delta %f", avg / (float)avg_count);
         avg = 0.0;
         avg_count = 0;
     }
@@ -154,7 +156,7 @@ static nu_result_t on_start(void)
     texture_info.data    = ima_data;
     nu_renderer_texture_t brick_texture_id;
     if (nu_renderer_texture_create(&texture_info, &brick_texture_id) != NU_SUCCESS) {
-        nu_warning("Failed to create texture.\n");
+        nu_warning(MAIN_LOGGER_NAME, "Failed to create texture.");
     }
     stbi_image_free(ima_data);
 
@@ -166,7 +168,7 @@ static nu_result_t on_start(void)
     texture_info.data    = ima_data;
     nu_renderer_texture_t rdr2_texture_id;
     if (nu_renderer_texture_create(&texture_info, &rdr2_texture_id) != NU_SUCCESS) {
-        nu_warning("Failed to create texture.\n");
+        nu_warning(MAIN_LOGGER_NAME, "Failed to create texture.");
     }
     stbi_image_free(ima_data);
 
@@ -178,7 +180,7 @@ static nu_result_t on_start(void)
     texture_info.data = ima_data;
     nu_renderer_texture_t alfred_texture;
     if (nu_renderer_texture_create(&texture_info, &alfred_texture) != NU_SUCCESS) {
-        nu_warning("Failed to create texture.\n");
+        nu_warning(MAIN_LOGGER_NAME, "Failed to create texture.");
     }
     stbi_image_free(ima_data);
 
@@ -191,19 +193,19 @@ static nu_result_t on_start(void)
 
     nu_renderer_material_t material0 = {0};
     if (nu_renderer_material_create(&material_info, &material0) != NU_SUCCESS) {
-        nu_interrupt("Failed to create material0.\n");
+        nu_interrupt("Failed to create material0.");
     }
 
     nu_renderer_material_t material1 = {0};
     material_info.diffuse_texture = brick_texture_id;
     if (nu_renderer_material_create(&material_info, &material1) != NU_SUCCESS) {
-        nu_interrupt("Failed to create material1.\n");
+        nu_interrupt("Failed to create material1.");
     }
 
     nu_renderer_material_t alfred_material = {0};
     material_info.diffuse_texture = alfred_texture;
     if (nu_renderer_material_create(&material_info, &alfred_material) != NU_SUCCESS) {
-        nu_interrupt("Failed to create alfred_material.\n");
+        nu_interrupt("Failed to create alfred_material.");
     }
 
     /* load cube mesh */
@@ -256,7 +258,7 @@ static nu_result_t on_start(void)
     mesh_info.submesh_count = 1;
     nu_renderer_mesh_t mesh_id;
     if (nu_renderer_mesh_create(&mesh_info, &mesh_id) != NU_SUCCESS) {
-        nu_warning("Failed to create cube mesh.\n");
+        nu_warning(MAIN_LOGGER_NAME, "Failed to create cube mesh.");
     }
 
     /* create static meshes */
@@ -302,7 +304,7 @@ static nu_result_t on_start(void)
         nu_mat4f_scale(model_info.transform, scale2);
         nu_renderer_model_create(&model_info, &model_id);
     } else {
-        nu_warning("Failed to load monkey\n");
+        nu_warning(MAIN_LOGGER_NAME, "Failed to load monkey");
     }
 
     return NU_SUCCESS;

@@ -5,14 +5,14 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
     /* get surface capatibilities */
     VkSurfaceCapabilitiesKHR capatibilities;
     if (vkGetPhysicalDeviceSurfaceCapabilitiesKHR(context->physical_device, context->surface, &capatibilities) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to get physical device surface capatibilities.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to get physical device surface capatibilities.");
         return NU_FAILURE;
     }
 
     /* get present modes */
     uint32_t present_mode_count;
     if (vkGetPhysicalDeviceSurfacePresentModesKHR(context->physical_device, context->surface, &present_mode_count, NULL) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to get physical device surface present modes.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to get physical device surface present modes.");
         return NU_FAILURE;
     }
 
@@ -37,7 +37,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
     /* get surface format and color space */
     uint32_t surface_format_count;
     if (vkGetPhysicalDeviceSurfaceFormatsKHR(context->physical_device, context->surface, &surface_format_count, NULL) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to get physical device surface formats.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to get physical device surface formats.");
         return NU_FAILURE;
     }
 
@@ -102,7 +102,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
     info.compositeAlpha   = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
     if (vkCreateSwapchainKHR(context->device, &info, &context->allocator, &swapchain->swapchain) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create swapchain.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create swapchain.");
         return NU_FAILURE;
     }
 
@@ -118,7 +118,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
 
     /* recover images */
     if (vkGetSwapchainImagesKHR(context->device, swapchain->swapchain, &swapchain->image_count, NULL) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to get swapchain images.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to get swapchain images.");
         return NU_FAILURE;
     }
 
@@ -139,7 +139,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
         view_info.subresourceRange.levelCount = 1;
         view_info.image = swapchain->images[i];
         if (vkCreateImageView(context->device, &view_info, &context->allocator, &swapchain->image_views[i]) != VK_SUCCESS) {
-            nu_error(NUVK_LOGGER_NAME"Failed to create image view.\n");
+            nu_error(NUVK_LOGGER_NAME, "Failed to create image view.");
             return NU_FAILURE;
         }
     }

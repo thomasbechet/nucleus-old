@@ -3,7 +3,7 @@
 #include <nucleus/core/config/interface.h>
 #include <nucleus/module/glfw.h>
 
-#define NU_LOGGER_WINDOW_NAME "[WINDOW] "
+#define NU_LOGGER_WINDOW_NAME "WINDOW"
 
 static const char *nu_window_api_names[] = {
     "$MODULE_DIR/nucleus-window-none",
@@ -34,7 +34,7 @@ nu_result_t nu_window_initialize(void)
         /* get window interface */
         result = nu_module_get_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_WINDOW_NAME"Failed to get interface.\n");
+            nu_error(NU_LOGGER_WINDOW_NAME, "Failed to get interface.");
             return result;
         }
 
@@ -42,12 +42,12 @@ nu_result_t nu_window_initialize(void)
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_WINDOW_NAME"Failed to initialize window system.\n");
+                nu_error(NU_LOGGER_WINDOW_NAME, "Failed to initialize window system.");
                 return result;
             }
         }
     } else {
-        nu_info(NU_LOGGER_WINDOW_NAME"Running in passive mode.\n");
+        nu_info(NU_LOGGER_WINDOW_NAME, "Running in passive mode.");
     }
 
     return NU_SUCCESS;

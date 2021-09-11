@@ -20,7 +20,7 @@ static nuglfw_module_data_t _module;
 nu_result_t nuglfw_window_initialize(void)
 {
     if (!glfwInit()) {
-        nu_error(NUGLFW_LOGGER_NAME"Failed to initialize glfw.\n");
+        nu_error(NUGLFW_LOGGER_NAME, "Failed to initialize glfw.");
         return NU_FAILURE;
     }
 
@@ -34,7 +34,7 @@ nu_result_t nuglfw_window_initialize(void)
     } else if (api == NU_RENDERER_API_VULKAN) {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         if (!glfwVulkanSupported()) { /* TODO */
-            nu_error(NUGLFW_LOGGER_NAME"Vulkan not supported...\n");
+            nu_error(NUGLFW_LOGGER_NAME, "Vulkan not supported...");
             glfwTerminate();
             return NU_FAILURE;
         }
@@ -47,7 +47,7 @@ nu_result_t nuglfw_window_initialize(void)
     nuglfw_window_set_mode(nu_config_get().window.mode);
 
     if (!_module.window) {
-        nu_error(NUGLFW_LOGGER_NAME"Failed to create glfw window.\n");
+        nu_error(NUGLFW_LOGGER_NAME, "Failed to create glfw window.");
         glfwTerminate();
         return NU_FAILURE;
     }
@@ -148,7 +148,7 @@ nu_result_t nuglfw_create_window_surface(void *instance_ptr, void *surface_ptr, 
 
     VkResult result = glfwCreateWindowSurface(*instance, _module.window, allocator, surface);
     if (result != VK_SUCCESS) {
-        nu_error(NUGLFW_LOGGER_NAME"Failed to create surface.\n");
+        nu_error(NUGLFW_LOGGER_NAME, "Failed to create surface.");
         return NU_FAILURE; 
     }
 

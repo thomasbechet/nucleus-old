@@ -15,12 +15,12 @@ nu_result_t nuvk_sdf_buffer_environment_create(
     info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
     if (nuvk_buffer_create(&buffer->buffer, memory_manager, &info) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create environment buffer.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create environment buffer.");
         return NU_FAILURE;
     }
 
     if (nuvk_buffer_map(&buffer->buffer, memory_manager) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to map environment buffer.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to map environment buffer.");
         return NU_FAILURE;
     }
 

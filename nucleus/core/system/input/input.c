@@ -4,7 +4,7 @@
 #include <nucleus/core/coresystem/memory/interface.h>
 #include <nucleus/core/coresystem/logger/interface.h>
 
-#define NU_LOGGER_INPUT_NAME "[INPUT] "
+#define NU_LOGGER_INPUT_NAME "INPUT"
 
 typedef struct {
     nu_module_t module;
@@ -25,14 +25,14 @@ nu_result_t nu_input_initialize(void)
         if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
             _system.module = nu_window_get_module(); /* copy module handle */
         } else {
-            nu_error(NU_LOGGER_INPUT_NAME"Unsupported api.\n");
+            nu_error(NU_LOGGER_INPUT_NAME, "Unsupported api.");
             return NU_FAILURE;
         }
 
         /* get input interface */
         result = nu_module_get_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
         if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_INPUT_NAME"Failed to get interface.\n");
+            nu_error(NU_LOGGER_INPUT_NAME, "Failed to get interface.");
             return result;
         }
 
@@ -40,12 +40,12 @@ nu_result_t nu_input_initialize(void)
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_INPUT_NAME"Failed to initialize input system.\n");
+                nu_error(NU_LOGGER_INPUT_NAME, "Failed to initialize input system.");
                 return result;
             }
         }
     } else {
-        nu_info(NU_LOGGER_INPUT_NAME"Running in passive mode.\n");
+        nu_info(NU_LOGGER_INPUT_NAME, "Running in passive mode.");
     }
     
     return NU_SUCCESS;

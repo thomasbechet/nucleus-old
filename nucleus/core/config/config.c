@@ -2,7 +2,6 @@
 
 /* Dependencies with nu_core_log(), should be moved */
 #include <nucleus/core/coresystem/logger/logger.h>
-#include <nucleus/core/utils/path.h>
 
 #include <stdlib.h>
 #include <ini/ini.h>
@@ -123,13 +122,13 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
     memset(&_system.config, 0, sizeof(nu_config_t));
 
     if (load_ini_file() != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to load ini file.\n");
+        nu_core_log(NU_WARNING, "Failed to load ini file, using default configuration...");
         return NU_FAILURE;
     }
 
     if (callback) {
         if (callback(&_system.config) != NU_SUCCESS) {
-            nu_core_log(NU_WARNING, "Error during configuration check.\n");
+            nu_core_log(NU_WARNING, "Error during user defined configuration.");
             nu_config_unload();
             return NU_FAILURE;
         }
@@ -210,34 +209,50 @@ nu_result_t nu_config_get_float(const char *section, const char *name, float def
 
 static void log_transition_line(uint32_t max_section, uint32_t max_name, uint32_t max_value)
 {
-    nu_info("+");
-    for (uint32_t i = 0; i < max_section + 2; i++) nu_info("-");
-    nu_info("+");
-    for (uint32_t i = 0; i < max_name + 2; i++)    nu_info("-");
-    nu_info("+");
-    for (uint32_t i = 0; i < max_value + 2; i++)   nu_info("-");
-    nu_info("+\n");
+    nu_string_t line;
+    nu_string_allocate(&line);
+    nu_string_append_cstr(&line, "+");
+    for (uint32_t i = 0; i < max_section + 2; i++) nu_string_append_cstr(&line, "-");
+    nu_string_append_cstr(&line, "+");
+    for (uint32_t i = 0; i < max_name + 2; i++) nu_string_append_cstr(&line, "-");
+    nu_string_append_cstr(&line, "+");
+    for (uint32_t i = 0; i < max_value + 2; i++) nu_string_append_cstr(&line, "-");
+    nu_string_append_cstr(&line, "+");
+
+    nu_core_log(NU_INFO, "%s", nu_string_get_cstr(line));
+
+    nu_string_free(line);
 }
 static void log_line(
     uint32_t max_section, uint32_t max_name, uint32_t max_value,
     const char *section, const char *name, const char *value
 )
 {
+    nu_string_t line;
+    nu_string_allocate(&line);
+
     uint32_t section_len = 0;
     uint32_t name_len = strlen(name);
     uint32_t value_len = strlen(value);
     if (section) {
         section_len = strlen(section);
-        nu_info("| %s", section);
+        nu_string_append_cstr(&line, "| ");
+        nu_string_append_cstr(&line, section);
     } else {
-        nu_info("| ");
+       nu_string_append_cstr(&line, "| ");
     }
-    for (uint32_t i = 0; i < (max_section - section_len + 1); i++) nu_info(" ");
-    nu_info("| %s", name);
-    for (uint32_t i = 0; i < (max_name - name_len + 1); i++) nu_info(" ");
-    nu_info("| %s", value);
-    for (uint32_t i = 0; i < (max_value - value_len + 1); i++) nu_info(" ");
-    nu_info("|\n");
+    for (uint32_t i = 0; i < (max_section - section_len + 1); i++) nu_string_append_cstr(&line, " ");
+    nu_string_append_cstr(&line, "| ");
+    nu_string_append_cstr(&line, name);
+    for (uint32_t i = 0; i < (max_name - name_len + 1); i++) nu_string_append_cstr(&line, " ");
+    nu_string_append_cstr(&line, "| ");
+    nu_string_append_cstr(&line, value);
+    for (uint32_t i = 0; i < (max_value - value_len + 1); i++) nu_string_append_cstr(&line, " ");
+    nu_string_append_cstr(&line, "|");
+
+    nu_core_log(NU_INFO, nu_string_get_cstr(line));
+
+    nu_string_free(line);
 }
 
 nu_result_t nu_config_log(void)

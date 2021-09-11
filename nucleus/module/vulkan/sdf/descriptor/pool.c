@@ -21,7 +21,7 @@ nu_result_t nuvk_sdf_descriptor_pool_create(
     info.maxSets       = 3;
 
     if (vkCreateDescriptorPool(context->device, &info, &context->allocator, pool) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create descriptor pool.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create descriptor pool.");
         return NU_FAILURE;
     }
 

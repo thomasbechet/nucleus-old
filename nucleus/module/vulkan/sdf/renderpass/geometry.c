@@ -37,7 +37,7 @@ nu_result_t nuvk_sdf_renderpass_geometry_create(
     info.pSubpasses      = &subpass;
 
     if (vkCreateRenderPass(context->device, &info, &context->allocator, renderpass) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME"Failed to create geometry renderpass.\n");
+        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry renderpass.");
         return NU_FAILURE;
     }
 
