@@ -13,7 +13,7 @@
 
 #define _NU_CHECK(check, action, file, line, message, ...) \
     if (!(check)) { \
-        nu_error( "Invalid check: "file":"line"\n"); \
+        nu_error(NU_LOGGER_NAME, "Invalid check: "file":"line"\n"); \
         nu_error(message, ##__VA_ARGS__); \
         action; \
     }

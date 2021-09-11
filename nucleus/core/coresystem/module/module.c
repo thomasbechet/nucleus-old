@@ -44,7 +44,7 @@ static nu_result_t get_function(const nu_module_data_t *module, const char *func
 #endif
 
     if (!*function) {
-        nu_core_log(NU_WARNING, "Failed to get function named '%s'.", function_name);
+        nu_warning(NU_LOGGER_NAME, "Failed to get function named '%s'.", function_name);
         *function = NULL;
         return NU_FAILURE;
     }
@@ -106,20 +106,20 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
 
     if (!module->handle) {
         nu_path_free(module->path);
-        nu_core_log(NU_WARNING, "Failed to load module '%s'.", path_cstr);
+        nu_warning(NU_LOGGER_NAME, "Failed to load module '%s'.", path_cstr);
         return NU_FAILURE;
     }
 
     /* get module info */
     nu_module_info_loader_pfn_t module_get_info;
     if (get_function(module, NU_MODULE_INFO_NAME, (nu_pfn_t*)&module_get_info) != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "'%s' function is required to load the module '%s'.", NU_MODULE_INFO_NAME, path_cstr);
+        nu_warning(NU_LOGGER_NAME, "'%s' function is required to load the module '%s'.", NU_MODULE_INFO_NAME, path_cstr);
         unload_module(module);
         return NU_FAILURE;
     }
 
     if (module_get_info(&module->info) != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to retrieve info from module '%s'.", path_cstr);
+        nu_warning(NU_LOGGER_NAME, "Failed to retrieve info from module '%s'.", path_cstr);
         unload_module(module);
         return NU_FAILURE;
     }
@@ -127,7 +127,7 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
     /* get interface loader */
     if (module->info.interface_count > 0) {
         if (get_function(module, NU_MODULE_INTERFACE_NAME, (nu_pfn_t*)&module->interface_loader) != NU_SUCCESS) {
-            nu_core_log(NU_WARNING, "Module '%s' has interfaces but no interface loader.", module->info.name);
+            nu_warning(NU_LOGGER_NAME, "Module '%s' has interfaces but no interface loader.", module->info.name);
             unload_module(module);
             return NU_FAILURE;
         }
@@ -309,7 +309,7 @@ static void log_transition_line(uint32_t max_name, uint32_t max_id, uint32_t max
     for (uint32_t i = 0; i < max_interface + 2; i++) nu_string_append_cstr(&line, "-");
     nu_string_append_cstr(&line, "+");
 
-    nu_core_log(NU_INFO, nu_string_get_cstr(line));
+    nu_info(NU_LOGGER_NAME, nu_string_get_cstr(line));
 
     nu_string_free(line);
 }
@@ -339,7 +339,7 @@ static void log_line(
     for (uint32_t i = 0; i < (max_interface - interface_len + 1); i++) nu_string_append_cstr(&line, " ");
     nu_string_append_cstr(&line, "|");
 
-    nu_core_log(NU_INFO, nu_string_get_cstr(line));
+    nu_info(NU_LOGGER_NAME, nu_string_get_cstr(line));
 
     nu_string_free(line);
 }

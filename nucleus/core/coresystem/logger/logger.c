@@ -21,7 +21,7 @@ nu_result_t nu_logger_initialize(void)
         nu_path_allocate_cstr("nucleus.log", &filename);
         nu_path_join(&path, filename);
         if (nu_file_open(path, NU_IO_MODE_WRITE, &_system.log_file) != NU_SUCCESS) {
-            nu_core_log(NU_ERROR, NU_LOGGER_NAME, "Failed to open log file: %s.", nu_path_get_cstr(path));
+            nu_error(NU_LOGGER_NAME, "Failed to open log file: %s.", nu_path_get_cstr(path));
             return NU_FAILURE;
         }
         nu_path_free(path);
@@ -146,62 +146,4 @@ void nu_fatal(const char *id, const char *format, ...)
 void nu_vfatal(const char *id, const char *format, va_list args)
 {
     nu_vlog(NU_FATAL, id, format, args);
-}
-
-void nu_core_log(nu_severity_t severity, const char *format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    nu_core_vlog(severity, format, args);
-    va_end(args);
-}
-void nu_core_vlog(nu_severity_t severity, const char *format, va_list args)
-{
-    /* This function must not be used by any non core system */
-
-    if (_system.log_file) {
-        nu_file_write_printf(_system.log_file, "["NU_LOGGER_NAME"] ");
-        nu_file_write_vprintf(_system.log_file, format, args);
-        nu_file_write_printf(_system.log_file, "\n");
-    }
-
-#if defined(NU_PLATFORM_WINDOWS)
-    switch (severity) {
-        case NU_INFO:
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 3);
-            break;
-        case NU_WARNING:
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 6);
-            break;
-        case NU_ERROR:
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4);
-            break;
-        case NU_FATAL:
-            SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 4);
-            break;
-    }
-    fprintf(stdout, "["NU_LOGGER_NAME"] ");
-    vfprintf(stdout, format, args);
-    fprintf(stdout, "\n");
-    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), 7);
-#elif defined(NU_PLATFORM_UNIX)
-    switch (severity) {
-        case NU_INFO:
-            fprintf(stdout, "\x1B[34m");
-            break;
-        case NU_WARNING:
-            fprintf(stdout, "\033[0;33m");
-            break;
-        case NU_ERROR:
-            fprintf(stdout, "\x1B[31m");
-            break;
-        case NU_FATAL:
-            fprintf(stdout, "\x1B[31m");
-            break;
-    }
-    fprintf(stdout, "["NU_LOGGER_NAME"] ");
-    vfprintf(stdout, format, args);
-    fprintf(stdout, "\n");
-    fprintf(stdout, "\x1B[0m");
-#endif
 }

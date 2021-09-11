@@ -122,13 +122,12 @@ nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
     memset(&_system.config, 0, sizeof(nu_config_t));
 
     if (load_ini_file() != NU_SUCCESS) {
-        nu_core_log(NU_WARNING, "Failed to load ini file, using default configuration...");
-        return NU_FAILURE;
+        nu_warning(NU_LOGGER_NAME, "Failed to load ini file, using default configuration...");
     }
 
     if (callback) {
         if (callback(&_system.config) != NU_SUCCESS) {
-            nu_core_log(NU_WARNING, "Error during user defined configuration.");
+            nu_warning(NU_LOGGER_NAME, "Error during user defined configuration.");
             nu_config_unload();
             return NU_FAILURE;
         }
@@ -219,7 +218,7 @@ static void log_transition_line(uint32_t max_section, uint32_t max_name, uint32_
     for (uint32_t i = 0; i < max_value + 2; i++) nu_string_append_cstr(&line, "-");
     nu_string_append_cstr(&line, "+");
 
-    nu_core_log(NU_INFO, "%s", nu_string_get_cstr(line));
+    nu_info(NU_LOGGER_NAME, "%s", nu_string_get_cstr(line));
 
     nu_string_free(line);
 }
@@ -250,7 +249,7 @@ static void log_line(
     for (uint32_t i = 0; i < (max_value - value_len + 1); i++) nu_string_append_cstr(&line, " ");
     nu_string_append_cstr(&line, "|");
 
-    nu_core_log(NU_INFO, nu_string_get_cstr(line));
+    nu_info(NU_LOGGER_NAME, nu_string_get_cstr(line));
 
     nu_string_free(line);
 }

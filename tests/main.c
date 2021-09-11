@@ -149,7 +149,7 @@ static nu_result_t on_start(void)
     unsigned char *ima_data;
 
     ima_data = stbi_load("engine/texture/brick.jpg", &width, &height, &channel, STBI_rgb);
-    if (!ima_data) nu_interrupt("Failed to load brick texture.\n");
+    if (!ima_data) nu_interrupt(MAIN_LOGGER_NAME, "Failed to load brick texture.\n");
     texture_info.width   = (uint32_t)width;
     texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
@@ -161,7 +161,7 @@ static nu_result_t on_start(void)
     stbi_image_free(ima_data);
 
     ima_data = stbi_load("engine/texture/checkerboard.jpg", &width, &height, &channel, STBI_rgb);
-    if (!ima_data) nu_interrupt("Failed to load rdr2 texture.\n");
+    if (!ima_data) nu_interrupt(MAIN_LOGGER_NAME, "Failed to load rdr2 texture.\n");
     texture_info.width   = (uint32_t)width;
     texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
@@ -173,7 +173,7 @@ static nu_result_t on_start(void)
     stbi_image_free(ima_data);
 
     ima_data = stbi_load("engine/model/alfred/alfred.jpg", &width, &height, &channel, STBI_rgb);
-    if (!ima_data) nu_interrupt("Failed to load alfred texture.\n");
+    if (!ima_data) nu_interrupt(MAIN_LOGGER_NAME, "Failed to load alfred texture.\n");
     texture_info.width   = (uint32_t)width;
     texture_info.height  = (uint32_t)height;
     texture_info.channel = (uint32_t)channel;
@@ -193,19 +193,19 @@ static nu_result_t on_start(void)
 
     nu_renderer_material_t material0 = {0};
     if (nu_renderer_material_create(&material_info, &material0) != NU_SUCCESS) {
-        nu_interrupt("Failed to create material0.");
+        nu_interrupt(MAIN_LOGGER_NAME, "Failed to create material0.");
     }
 
     nu_renderer_material_t material1 = {0};
     material_info.diffuse_texture = brick_texture_id;
     if (nu_renderer_material_create(&material_info, &material1) != NU_SUCCESS) {
-        nu_interrupt("Failed to create material1.");
+        nu_interrupt(MAIN_LOGGER_NAME, "Failed to create material1.");
     }
 
     nu_renderer_material_t alfred_material = {0};
     material_info.diffuse_texture = alfred_texture;
     if (nu_renderer_material_create(&material_info, &alfred_material) != NU_SUCCESS) {
-        nu_interrupt("Failed to create alfred_material.");
+        nu_interrupt(MAIN_LOGGER_NAME, "Failed to create alfred_material.");
     }
 
     /* load cube mesh */
