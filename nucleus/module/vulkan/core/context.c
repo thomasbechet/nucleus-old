@@ -276,8 +276,8 @@ static nu_result_t nuvk_context_pick_physical_device(nuvk_context_t *context)
 
 static nu_result_t nuvk_context_pick_queue_family_indices(nuvk_context_t *context)
 {
-    context->graphics_queue_family_index = INT32_MAX;
-    context->present_queue_family_index  = INT32_MAX;
+    context->queues.graphics_compute_family_index = INT32_MAX;
+    context->queues.present_family_index          = INT32_MAX;
 
     uint32_t property_count;
     vkGetPhysicalDeviceQueueFamilyProperties(context->physical_device, &property_count, NULL);
@@ -289,36 +289,43 @@ static nu_result_t nuvk_context_pick_queue_family_indices(nuvk_context_t *contex
     VkQueueFamilyProperties *properties = (VkQueueFamilyProperties*)nu_malloc(sizeof(VkQueueFamilyProperties) * property_count);
     vkGetPhysicalDeviceQueueFamilyProperties(context->physical_device, &property_count, properties);
 
+    /* find graphics compute queue */
     for (uint32_t i = 0; i < property_count; i++) {
-        if (properties[i].queueCount > 0 && (properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)) {
-            context->graphics_queue_family_index = i;
+        bool has_graphics = (properties[i].queueFlags & VK_QUEUE_GRAPHICS_BIT);
+        bool has_compute  = (properties[i].queueFlags & VK_QUEUE_COMPUTE_BIT);
+        if (properties[i].queueCount > 0 && has_graphics && has_compute) {
+            context->queues.graphics_compute_family_index = i;
+            context->queues.graphics_compute_index        = 0; /* take the first queue */
+            break;
         }
+    }
 
+    /* find present queue */
+    context->queues.single_graphics_present_queue = false;
+    for (uint32_t i = 0; i < property_count; i++) {
         VkBool32 supported;
         vkGetPhysicalDeviceSurfaceSupportKHR(context->physical_device, i, context->surface, &supported);
         if (properties[i].queueCount > 0 && supported == VK_TRUE) {
-            context->present_queue_family_index = i;
-        }
-
-        if (context->graphics_queue_family_index != INT32_MAX && context->present_queue_family_index != INT32_MAX) {
-            if (context->graphics_queue_family_index == context->present_queue_family_index && properties[i].queueCount == 1) {
-                context->single_graphics_present_queue = true;
-            } else {
-                context->single_graphics_present_queue = false;
+            context->queues.present_family_index = i;
+            context->queues.present_index        = 0; /* first queue by default */
+            
+            if (context->queues.present_family_index == context->queues.graphics_compute_family_index) {
+                if (properties[i].queueCount == 1) {
+                    context->queues.single_graphics_present_queue = true;
+                    nu_warning(NUVK_LOGGER_NAME"Using single graphics/present queue mode.\n");
+                }
             }
-
-            break;
         }
     }
 
     nu_free(properties);
 
-    if (context->graphics_queue_family_index == INT32_MAX) {
-        nu_error(NUVK_LOGGER_NAME"Failed to find graphics queue family index.\n");
+    if (context->queues.graphics_compute_family_index == INT32_MAX) {
+        nu_error(NUVK_LOGGER_NAME"Failed to find graphics/compute queue family index.\n");
         return NU_FAILURE;
     }
 
-    if (context->present_queue_family_index == INT32_MAX) {
+    if (context->queues.present_family_index == INT32_MAX) {
         nu_error(NUVK_LOGGER_NAME"Failed to find present queue family index.\n");
         return NU_FAILURE;
     }
@@ -331,38 +338,23 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context)
     VkDeviceQueueCreateInfo queue_infos[2];
     memset(queue_infos, 0, sizeof(VkDeviceQueueCreateInfo) * 2);
 
-    float priorities[] = {0.0f, 0.0f};
+    float priorities[] = {0.0f, 0.0f, 0.0f};
     uint32_t queue_info_count = 0;
 
-    if (context->graphics_queue_family_index == context->present_queue_family_index) {
-        if (context->single_graphics_present_queue) {
-            queue_infos[0].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queue_infos[0].flags            = 0x0;
-            queue_infos[0].queueFamilyIndex = context->graphics_queue_family_index;
-            queue_infos[0].queueCount       = 1;
-            queue_infos[0].pQueuePriorities = priorities;
-        } else {
-            queue_infos[0].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-            queue_infos[0].flags            = 0x0;
-            queue_infos[0].queueFamilyIndex = context->graphics_queue_family_index;
-            queue_infos[0].queueCount       = 2;
-            queue_infos[0].pQueuePriorities = priorities;
-        }
-        queue_info_count = 1;
-    } else {
-        queue_infos[0].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queue_infos[0].flags            = 0x0;
-        queue_infos[0].queueFamilyIndex = context->graphics_queue_family_index;
-        queue_infos[0].queueCount       = 1;
-        queue_infos[0].pQueuePriorities = priorities;
+    uint32_t queue_per_family[8]; /* TODO: find max family queue count */
+    memset(queue_per_family, 0, sizeof(uint32_t) * 8);
+    queue_per_family[context->queues.graphics_compute_family_index]++;
+    queue_per_family[context->queues.present_family_index]++;
 
-        queue_infos[1].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queue_infos[1].flags            = 0x0;
-        queue_infos[1].queueFamilyIndex = context->present_queue_family_index;
-        queue_infos[1].queueCount       = 1;
-        queue_infos[1].pQueuePriorities = priorities;
-    
-        queue_info_count = 2;
+    for (uint32_t i = 0; i < 8; i++) {
+        if (queue_per_family[i]) {
+            queue_infos[queue_info_count].sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queue_infos[queue_info_count].flags            = 0x0;
+            queue_infos[queue_info_count].queueFamilyIndex = i;
+            queue_infos[queue_info_count].queueCount       = queue_per_family[i];
+            queue_infos[queue_info_count].pQueuePriorities = priorities;
+            queue_info_count++;
+        }
     }
 
     nu_array_t extensions;
@@ -399,18 +391,8 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context)
 
 static nu_result_t nuvk_context_pick_queues(nuvk_context_t *context)
 {
-    if (context->graphics_queue_family_index == context->present_queue_family_index) {
-        if (context->single_graphics_present_queue) {
-            vkGetDeviceQueue(context->device, context->graphics_queue_family_index, 0, &context->graphics_queue);
-            vkGetDeviceQueue(context->device, context->present_queue_family_index, 0, &context->present_queue);
-        } else {
-            vkGetDeviceQueue(context->device, context->graphics_queue_family_index, 0, &context->graphics_queue);
-            vkGetDeviceQueue(context->device, context->present_queue_family_index, 1, &context->present_queue);
-        }
-    } else {
-        vkGetDeviceQueue(context->device, context->graphics_queue_family_index, 0, &context->graphics_queue);
-        vkGetDeviceQueue(context->device, context->present_queue_family_index, 0, &context->present_queue);
-    }
+    vkGetDeviceQueue(context->device, context->queues.graphics_compute_family_index, 0, &context->queues.graphics_compute);
+    vkGetDeviceQueue(context->device, context->queues.present_family_index, 0, &context->queues.present);
 
     return NU_SUCCESS;
 }

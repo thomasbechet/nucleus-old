@@ -171,7 +171,7 @@ nu_result_t nuvk_sdf_pipeline_postprocess_create(
     result &= create_layout(pipeline, context, descriptors);
     result &= create_pipeline(pipeline, context, postprocess_renderpass);
 
-    return NU_SUCCESS;
+    return result;
 }
 nu_result_t nuvk_sdf_pipeline_postprocess_destroy(
     nuvk_sdf_pipeline_postprocess_t *pipeline,

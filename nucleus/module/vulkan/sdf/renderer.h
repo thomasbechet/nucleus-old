@@ -37,6 +37,7 @@ nu_result_t nuvk_sdf_renderer_terminate(
 );
 nu_result_t nuvk_sdf_renderer_render(
     nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
     const nuvk_swapchain_t *swapchain,
     const nuvk_render_context_t *render_context
 );

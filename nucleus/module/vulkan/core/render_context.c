@@ -134,7 +134,7 @@ bool nuvk_render_context_end(
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores    = &render_finished_semaphore;
 
-    if (vkQueueSubmit(context->graphics_queue, 1, &submit_info, inflight_fence) != VK_SUCCESS) {
+    if (vkQueueSubmit(context->queues.graphics_compute, 1, &submit_info, inflight_fence) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to submit command buffer.\n");
         return false;
     }
@@ -148,7 +148,7 @@ bool nuvk_render_context_end(
     present_info.pSwapchains        = &swapchain->swapchain;
     present_info.pImageIndices      = &render_context->active_swapchain_image_index;
 
-    VkResult result = vkQueuePresentKHR(context->present_queue, &present_info);
+    VkResult result = vkQueuePresentKHR(context->queues.present, &present_info);
     if (result != VK_SUCCESS) {
         if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
             return false;

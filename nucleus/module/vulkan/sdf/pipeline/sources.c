@@ -6,6 +6,7 @@ const char *glsl_sources[] = {
     "$ENGINE_DIR/shader/constants.glsl",
     "$ENGINE_DIR/shader/geometry_template.frag",
     "$ENGINE_DIR/shader/geometry_template.vert",
+    "$ENGINE_DIR/shader/light.comp",
     "$ENGINE_DIR/shader/postprocess.frag",
     "$ENGINE_DIR/shader/postprocess.vert"
 };

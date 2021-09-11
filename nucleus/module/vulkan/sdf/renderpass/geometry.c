@@ -15,7 +15,7 @@ nu_result_t nuvk_sdf_renderpass_geometry_create(
     attachment.stencilLoadOp  = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
     attachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
     attachment.initialLayout  = VK_IMAGE_LAYOUT_UNDEFINED;
-    attachment.finalLayout    = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    attachment.finalLayout    = VK_IMAGE_LAYOUT_GENERAL;
 
     VkAttachmentReference color_reference;
     memset(&color_reference, 0, sizeof(VkAttachmentReference));

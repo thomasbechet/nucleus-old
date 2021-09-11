@@ -3,7 +3,7 @@
 static void nuvk_sdf_descriptor_postprocess_write_descriptor(
     nuvk_sdf_descriptor_postprocess_t *descriptor,
     const nuvk_context_t *context,
-    const nuvk_sdf_image_geometry_t *image
+    const nuvk_sdf_image_light_t *image
 )
 {
     VkDescriptorImageInfo image_info;
@@ -29,7 +29,7 @@ static void nuvk_sdf_descriptor_postprocess_write_descriptor(
 nu_result_t nuvk_sdf_descriptor_postprocess_create(
     nuvk_sdf_descriptor_postprocess_t *descriptor,
     const nuvk_context_t *context,
-    const nuvk_sdf_image_geometry_t *image,
+    const nuvk_sdf_image_light_t *image,
     VkDescriptorPool pool
 )
 {
@@ -107,7 +107,7 @@ nu_result_t nuvk_sdf_descriptor_postprocess_destroy(
 nu_result_t nuvk_sdf_descriptor_postprocess_update_swapchain(
     nuvk_sdf_descriptor_postprocess_t *descriptor,
     const nuvk_context_t *context,
-    const nuvk_sdf_image_geometry_t *image
+    const nuvk_sdf_image_light_t *image
 )
 {
     nuvk_sdf_descriptor_postprocess_write_descriptor(descriptor, context, image);

@@ -106,6 +106,7 @@ nu_result_t nuvk_sdf_renderer_terminate(
 }
 nu_result_t nuvk_sdf_renderer_render(
     nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
     const nuvk_swapchain_t *swapchain,
     const nuvk_render_context_t *render_context
 )
@@ -165,6 +166,77 @@ nu_result_t nuvk_sdf_renderer_render(
 
     vkCmdEndRenderPass(cmd);
 
+    /* transition geometry and light image */
+    VkImageMemoryBarrier geometry_light_images[2];
+    memset(&geometry_light_images, 0, sizeof(VkImageMemoryBarrier) * 2);
+    geometry_light_images[0].sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    geometry_light_images[0].srcAccessMask                   = VK_ACCESS_SHADER_WRITE_BIT;
+    geometry_light_images[0].dstAccessMask                   = VK_ACCESS_SHADER_READ_BIT;
+    geometry_light_images[0].oldLayout                       = VK_IMAGE_LAYOUT_GENERAL;
+    geometry_light_images[0].newLayout                       = VK_IMAGE_LAYOUT_GENERAL;
+    geometry_light_images[0].srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    geometry_light_images[0].dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    geometry_light_images[0].image                           = renderer->images.geometry.image.image;
+    geometry_light_images[0].subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    geometry_light_images[0].subresourceRange.baseMipLevel   = 0;
+    geometry_light_images[0].subresourceRange.levelCount     = 1;
+    geometry_light_images[0].subresourceRange.baseArrayLayer = 0;
+    geometry_light_images[0].subresourceRange.layerCount     = 1;
+
+    geometry_light_images[1].sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    geometry_light_images[1].srcAccessMask                   = 0;
+    geometry_light_images[1].dstAccessMask                   = VK_ACCESS_SHADER_WRITE_BIT;
+    geometry_light_images[1].oldLayout                       = VK_IMAGE_LAYOUT_UNDEFINED;
+    geometry_light_images[1].newLayout                       = VK_IMAGE_LAYOUT_GENERAL;
+    geometry_light_images[1].srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    geometry_light_images[1].dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    geometry_light_images[1].image                           = renderer->images.light.image.image;
+    geometry_light_images[1].subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    geometry_light_images[1].subresourceRange.baseMipLevel   = 0;
+    geometry_light_images[1].subresourceRange.levelCount     = 1;
+    geometry_light_images[1].subresourceRange.baseArrayLayer = 0;
+    geometry_light_images[1].subresourceRange.layerCount     = 1;
+
+    vkCmdPipelineBarrier(
+        cmd, 
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+        0, 0, NULL, 0, NULL,
+        2, geometry_light_images
+    );
+
+    /* light pass */
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.geometry.layout,
+        0, 1, &renderer->descriptors.low_frequency.descriptor, 3, dynamic_offsets); 
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.layout,
+        1, 1, &renderer->descriptors.light.descriptor, 0, NULL);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.pipeline);
+    vkCmdDispatch(cmd, (swapchain->extent.width / 16), (swapchain->extent.height / 16), 1);
+
+    VkImageMemoryBarrier light_images;
+    memset(&light_images, 0, sizeof(VkImageMemoryBarrier));
+    light_images.sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    light_images.srcAccessMask                   = VK_ACCESS_SHADER_WRITE_BIT;
+    light_images.dstAccessMask                   = VK_ACCESS_SHADER_READ_BIT;
+    light_images.oldLayout                       = VK_IMAGE_LAYOUT_GENERAL;
+    light_images.newLayout                       = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    light_images.srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    light_images.dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    light_images.image                           = renderer->images.light.image.image;
+    light_images.subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    light_images.subresourceRange.baseMipLevel   = 0;
+    light_images.subresourceRange.levelCount     = 1;
+    light_images.subresourceRange.baseArrayLayer = 0;
+    light_images.subresourceRange.layerCount     = 1;
+
+    vkCmdPipelineBarrier(
+        cmd, 
+        VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, 
+        VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+        0, 0, NULL, 0, NULL,
+        1, &light_images
+    );
+
     /* postprocess pass */
     VkRenderPassBeginInfo postprocess_begin_info;
     memset(&postprocess_begin_info, 0, sizeof(VkRenderPassBeginInfo));
@@ -174,9 +246,9 @@ nu_result_t nuvk_sdf_renderer_render(
     postprocess_begin_info.renderArea  = render_area;
     vkCmdBeginRenderPass(cmd, &postprocess_begin_info, VK_SUBPASS_CONTENTS_INLINE);
 
-    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess.pipeline);
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess.layout,
         1, 1, &renderer->descriptors.postprocess.descriptor, 0, NULL);
+    vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.postprocess.pipeline);
     vkCmdDraw(cmd, 3, 1, 0, 0);
 
     vkCmdEndRenderPass(cmd);

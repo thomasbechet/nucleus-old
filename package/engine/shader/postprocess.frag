@@ -10,27 +10,28 @@ layout(set = 0, binding = 0) uniform EnvironmentUBO {
     vec3 eye;
 };
 
-__INJECT_CONSTANTS__
+layout(set = 1, binding = 0) uniform sampler2D lightText;
 
-layout(set = 1, binding = 0) uniform sampler2D normalDepthTex;
+__INJECT_CONSTANTS__
 
 void main() {
     vec2 uv = (pos + 1.0) * 0.5;
     uv.y = 1.0 - uv.y;
 
-    vec4 normalDepth = texture(normalDepthTex, uv);
+    vec4 light = texture(lightText, uv);
+    color = light;
 
-    // color = vec4(normalDepth.rgb, 1);
+    // // color = vec4(normalDepth.rgb, 1);
 
-    if (normalDepth.w < MAX_DISTANCE) {
-        const vec3 backgroundColor = vec3(1., 163., 236.) / vec3(500);
-        color = vec4(1.0) * max(0, dot(normalDepth.xyz, normalize(vec3(1, 1, 0))));
-        color += backgroundColor.xyzz * 0.2;
-    } else {
-        vec4 ptransform = invVPMatrix * vec4(pos, 1, 1);
-        vec3 dir = normalize((ptransform / ptransform.w).xyz - eye);
+    // if (normalDepth.w < MAX_DISTANCE) {
+    //     const vec3 backgroundColor = vec3(1., 163., 236.) / vec3(500);
+    //     color = vec4(1.0) * max(0, dot(normalDepth.xyz, normalize(vec3(1, 1, 0))));
+    //     color += backgroundColor.xyzz * 0.2;
+    // } else {
+    //     vec4 ptransform = invVPMatrix * vec4(pos, 1, 1);
+    //     vec3 dir = normalize((ptransform / ptransform.w).xyz - eye);
 
-        const vec3 backgroundColor = vec3(1., 163., 236.) / vec3(500);
-        color = vec4(backgroundColor + abs(1.0 - dir.y) * 0.4, 1.0);
-    }
+    //     const vec3 backgroundColor = vec3(1., 163., 236.) / vec3(500);
+    //     color = vec4(backgroundColor + abs(1.0 - dir.y) * 0.4, 1.0);
+    // }
 }

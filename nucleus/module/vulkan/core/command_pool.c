@@ -9,7 +9,7 @@ nu_result_t nuvk_command_pool_initialize(
     memset(&info, 0, sizeof(VkCommandPoolCreateInfo));
     info.sType            = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     info.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-    info.queueFamilyIndex = context->graphics_queue_family_index;
+    info.queueFamilyIndex = context->queues.graphics_compute_family_index;
 
     if (vkCreateCommandPool(context->device, &info, &context->allocator, &pool->graphics_command_pool) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create command pool.\n");

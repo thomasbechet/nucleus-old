@@ -10,6 +10,7 @@ nu_result_t nuvk_sdf_images_initialize(
     nu_result_t result = NU_SUCCESS;
 
     result &= nuvk_sdf_image_geometry_create(&images->geometry, context, memory_manager, swapchain);
+    result &= nuvk_sdf_image_light_create(&images->light, context, memory_manager, swapchain);
 
     return result;
 }
@@ -19,6 +20,7 @@ nu_result_t nuvk_sdf_images_terminate(
     const nuvk_memory_manager_t *memory_manager
 )
 {
+    nuvk_sdf_image_light_destroy(&images->light, context, memory_manager);
     nuvk_sdf_image_geometry_destroy(&images->geometry, context, memory_manager);
 
     return NU_SUCCESS;
@@ -30,6 +32,13 @@ nu_result_t nuvk_sdf_images_update_swapchain(
     const nuvk_swapchain_t *swapchain
 )
 {
+    nuvk_sdf_image_light_destroy(&images->light, context, memory_manager);
     nuvk_sdf_image_geometry_destroy(&images->geometry, context, memory_manager);
-    return nuvk_sdf_image_geometry_create(&images->geometry, context, memory_manager, swapchain);
+
+    nu_result_t result = NU_SUCCESS;
+
+    result &= nuvk_sdf_image_geometry_create(&images->geometry, context, memory_manager, swapchain);
+    result &= nuvk_sdf_image_light_create(&images->light, context, memory_manager, swapchain);
+
+    return result;
 }

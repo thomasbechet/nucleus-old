@@ -13,7 +13,7 @@ nu_result_t nuvk_sdf_image_geometry_create(
     info.extent.height = swapchain->extent.height;
     info.format        = VK_FORMAT_R16G16B16A16_SFLOAT;
     info.tiling        = VK_IMAGE_TILING_OPTIMAL;
-    info.image_usage   = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+    info.image_usage   = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
     info.aspectMask    = VK_IMAGE_ASPECT_COLOR_BIT;
     info.memory_usage  = VMA_MEMORY_USAGE_GPU_ONLY;
 

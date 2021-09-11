@@ -5,6 +5,7 @@
 
 typedef struct {
     VkCommandPool graphics_command_pool;
+    VkCommandPool compute_command_pool;
 } nuvk_command_pool_t;
 
 nu_result_t nuvk_command_pool_initialize(

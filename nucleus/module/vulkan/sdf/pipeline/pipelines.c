@@ -17,6 +17,8 @@ nu_result_t nuvk_sdf_pipelines_initialize(
 
     result &= nuvk_sdf_pipeline_geometry_create(&pipelines->geometry, context,
         shader_manager, descriptors, renderpasses->geometry, pipelines->sources);
+    result &= nuvk_sdf_pipeline_light_create(&pipelines->light, context,
+        shader_manager, descriptors, pipelines->sources);
     result &= nuvk_sdf_pipeline_postprocess_create(&pipelines->postprocess, context,
         shader_manager, descriptors, renderpasses->postprocess, pipelines->sources);
 
@@ -28,6 +30,7 @@ nu_result_t nuvk_sdf_pipelines_terminate(
 )
 {
     nuvk_sdf_pipeline_geometry_destroy(&pipelines->geometry, context);
+    nuvk_sdf_pipeline_light_destroy(&pipelines->light, context);
     nuvk_sdf_pipeline_postprocess_destroy(&pipelines->postprocess, context);
 
     nuvk_sdf_pipeline_sources_unload(pipelines->sources);

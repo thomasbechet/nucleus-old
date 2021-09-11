@@ -11,14 +11,14 @@ nu_result_t nuvk_sdf_descriptor_pool_create(
     pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     pool_sizes[0].descriptorCount = 3;
     pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pool_sizes[1].descriptorCount = 1;
+    pool_sizes[1].descriptorCount = 3;
 
     VkDescriptorPoolCreateInfo info;
     memset(&info, 0, sizeof(VkDescriptorPoolCreateInfo));
     info.sType         = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
     info.poolSizeCount = 2;
     info.pPoolSizes    = pool_sizes;
-    info.maxSets       = 2;
+    info.maxSets       = 3;
 
     if (vkCreateDescriptorPool(context->device, &info, &context->allocator, pool) != VK_SUCCESS) {
         nu_error(NUVK_LOGGER_NAME"Failed to create descriptor pool.\n");

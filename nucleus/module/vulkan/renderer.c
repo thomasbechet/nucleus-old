@@ -78,7 +78,7 @@ static bool nuvk_renderer_try_render(void)
 {
     if (!nuvk_render_context_begin(&_module.render_context, &_module.context, &_module.swapchain)) return false;
 
-    nuvk_sdf_renderer_render(&_module.sdf, &_module.swapchain, &_module.render_context);
+    nuvk_sdf_renderer_render(&_module.sdf, &_module.context, &_module.swapchain, &_module.render_context);
 
     if (!nuvk_render_context_end(&_module.render_context, &_module.context, &_module.swapchain)) return false;
 
