@@ -8,6 +8,22 @@ nu_result_t nuvk_render_context_initialize(
     uint32_t max_inflight_frame_count
 )
 {
+    // nu_string_t token;
+    // nu_string_array_t tokens;
+    // nu_string_array_allocate(&tokens);
+    // nu_string_split_cstr("set viewport\na123 321aaze\naze", "\n", tokens);
+    // uint32_t count = nu_string_array_get_length(tokens);
+    // for (uint32_t i = 0; i < count; i++) {
+    //     nu_string_allocate_cstr(nu_string_array_get(tokens, i), &token);
+    //     nu_info("main", "%ld %s",
+    //         nu_string_get_length(token), 
+    //         nu_string_get_cstr(token));
+    //     nu_string_free(token);
+    // }
+    // nu_string_array_free(tokens);
+
+    // nu_interrupt("main", "lol");
+
     /* initialize values */
     render_context->active_inflight_frame_index  = 0;
     render_context->active_swapchain_image_index = 0;
@@ -73,21 +89,15 @@ bool nuvk_render_context_begin(
     VkFence inflight_fence                = render_context->inflight_fences[render_context->active_inflight_frame_index];
     VkSemaphore image_available_semaphore = render_context->image_available_semaphores[render_context->active_inflight_frame_index];
 
-    if (vkWaitForFences(context->device, 1, &inflight_fence, VK_TRUE, UINT64_MAX) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to wait fence.");
-        return false;
-    }
+    VkResult result = vkWaitForFences(context->device, 1, &inflight_fence, VK_TRUE, UINT64_MAX);
+    NU_CHECK(result == VK_SUCCESS, return false, NUVK_LOGGER_NAME, "Failed to wait fence.");
     vkResetFences(context->device, 1, &inflight_fence);
 
-    VkResult result = vkAcquireNextImageKHR(context->device, swapchain->swapchain, UINT64_MAX,
+    result = vkAcquireNextImageKHR(context->device, swapchain->swapchain, UINT64_MAX,
         image_available_semaphore, VK_NULL_HANDLE, &render_context->active_swapchain_image_index);
     if (result != VK_SUCCESS) {
-        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-            return false;
-        } else {
-            nu_error(NUVK_LOGGER_NAME, "Failed to acquire next image KHR.");
-            return false;
-        }
+        NU_CHECK(result == VK_ERROR_OUT_OF_DATE_KHR, return false, NUVK_LOGGER_NAME, "Failed to acquire next image KHR.");
+        return false;
     }
 
     /* begin command buffer */
@@ -99,10 +109,8 @@ bool nuvk_render_context_begin(
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    if (vkBeginCommandBuffer(cmd, &begin_info) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to begin command buffer.");
-        return false;
-    }
+    result = vkBeginCommandBuffer(cmd, &begin_info);
+    NU_CHECK(result == VK_SUCCESS, return false, NUVK_LOGGER_NAME, "Failed to begin command buffer.");
 
     return true;
 }
@@ -134,10 +142,8 @@ bool nuvk_render_context_end(
     submit_info.signalSemaphoreCount = 1;
     submit_info.pSignalSemaphores    = &render_finished_semaphore;
 
-    if (vkQueueSubmit(context->queues.graphics_compute, 1, &submit_info, inflight_fence) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to submit command buffer.");
-        return false;
-    }
+    VkResult result = vkQueueSubmit(context->queues.graphics_compute, 1, &submit_info, inflight_fence);
+    NU_CHECK(result == VK_SUCCESS, return false, NUVK_LOGGER_NAME, "Failed to submit command buffer.");
 
     VkPresentInfoKHR present_info;
     memset(&present_info, 0, sizeof(VkPresentInfoKHR));
@@ -148,14 +154,10 @@ bool nuvk_render_context_end(
     present_info.pSwapchains        = &swapchain->swapchain;
     present_info.pImageIndices      = &render_context->active_swapchain_image_index;
 
-    VkResult result = vkQueuePresentKHR(context->queues.present, &present_info);
+    result = vkQueuePresentKHR(context->queues.present, &present_info);
     if (result != VK_SUCCESS) {
-        if (result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR) {
-            return false;
-        } else {
-            nu_error(NUVK_LOGGER_NAME, "Failed to present KHR.");
-            return false;
-        }
+        NU_CHECK(result == VK_SUBOPTIMAL_KHR || result == VK_ERROR_OUT_OF_DATE_KHR, return false, NUVK_LOGGER_NAME, "Failed to present KHR.");
+        return false;
     }
 
     /* next active frame */

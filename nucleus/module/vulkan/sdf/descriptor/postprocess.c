@@ -51,10 +51,8 @@ nu_result_t nuvk_sdf_descriptor_postprocess_create(
     sampler_info.minLod                  = 0.0f;
     sampler_info.maxLod                  = 0.0f;
 
-    if (vkCreateSampler(context->device, &sampler_info, &context->allocator, &descriptor->sampler) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create postprocess sampler.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreateSampler(context->device, &sampler_info, &context->allocator, &descriptor->sampler);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess sampler.");
 
     /* create layout */
     VkDescriptorSetLayoutBinding bindings[1];
@@ -71,10 +69,8 @@ nu_result_t nuvk_sdf_descriptor_postprocess_create(
     layout_info.bindingCount = 1;
     layout_info.pBindings    = bindings;
 
-    if (vkCreateDescriptorSetLayout(context->device, &layout_info, &context->allocator, &descriptor->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create postprocess descriptor set layout.");
-        return NU_FAILURE;
-    }
+    result = vkCreateDescriptorSetLayout(context->device, &layout_info, &context->allocator, &descriptor->layout);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess descriptor set layout.");
 
     /* create descriptor set */
     VkDescriptorSetAllocateInfo allocate_info;
@@ -84,10 +80,8 @@ nu_result_t nuvk_sdf_descriptor_postprocess_create(
     allocate_info.descriptorSetCount = 1;
     allocate_info.pSetLayouts        = &descriptor->layout;
 
-    if (vkAllocateDescriptorSets(context->device, &allocate_info, &descriptor->descriptor) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to allocate postprocess descriptor set.");
-        return NU_FAILURE;
-    }
+    result = vkAllocateDescriptorSets(context->device, &allocate_info, &descriptor->descriptor);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to allocate postprocess descriptor set.");
 
     /* write descriptor set */
     nuvk_sdf_descriptor_postprocess_write_descriptor(descriptor, context, image);

@@ -29,4 +29,7 @@
     #define NU_ASSERT(x) x
 #endif
 
+/* noop */
+#define NU_NOOP
+
 #endif

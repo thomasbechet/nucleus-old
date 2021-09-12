@@ -11,16 +11,20 @@ nu_result_t nuvk_sdf_pipelines_initialize(
     const nuvk_sdf_renderpasses_t *renderpasses
 )
 {
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
 
-    result &= nuvk_sdf_pipeline_sources_load(pipelines->sources);
+    result = nuvk_sdf_pipeline_sources_load(pipelines->sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to load sources.");
 
-    result &= nuvk_sdf_pipeline_geometry_create(&pipelines->geometry, context,
+    result = nuvk_sdf_pipeline_geometry_create(&pipelines->geometry, context,
         shader_manager, descriptors, renderpasses->geometry, pipelines->sources);
-    result &= nuvk_sdf_pipeline_light_create(&pipelines->light, context,
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry pipeline.");
+    result = nuvk_sdf_pipeline_light_create(&pipelines->light, context,
         shader_manager, descriptors, pipelines->sources);
-    result &= nuvk_sdf_pipeline_postprocess_create(&pipelines->postprocess, context,
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light pipeline.");
+    result = nuvk_sdf_pipeline_postprocess_create(&pipelines->postprocess, context,
         shader_manager, descriptors, renderpasses->postprocess, pipelines->sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess pipeline.");
 
     return result;
 }

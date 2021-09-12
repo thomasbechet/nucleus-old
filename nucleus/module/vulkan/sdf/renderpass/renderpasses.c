@@ -10,10 +10,12 @@ nu_result_t nuvk_sdf_renderpasses_initialize(
     const nuvk_sdf_images_t *images
 )
 {
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
 
-    result &= nuvk_sdf_renderpass_geometry_create(&renderpasses->geometry, context, &images->geometry);
-    result &= nuvk_sdf_renderpass_postprocess_create(&renderpasses->postprocess, context, swapchain);
+    result = nuvk_sdf_renderpass_geometry_create(&renderpasses->geometry, context, &images->geometry);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry renderpass.");
+    result = nuvk_sdf_renderpass_postprocess_create(&renderpasses->postprocess, context, swapchain);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess renderpass.");
 
     return result;
 }
@@ -37,10 +39,12 @@ nu_result_t nuvk_sdf_renderpasses_update_swapchain(
     vkDestroyRenderPass(context->device, renderpasses->postprocess, &context->allocator);
     vkDestroyRenderPass(context->device, renderpasses->geometry, &context->allocator);
 
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
 
-    result &= nuvk_sdf_renderpass_geometry_create(&renderpasses->geometry, context, &images->geometry);
-    result &= nuvk_sdf_renderpass_postprocess_create(&renderpasses->postprocess, context, swapchain);
+    result = nuvk_sdf_renderpass_geometry_create(&renderpasses->geometry, context, &images->geometry);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry renderpass.");
+    result = nuvk_sdf_renderpass_postprocess_create(&renderpasses->postprocess, context, swapchain);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess renderpass.");
 
     return result;
 }

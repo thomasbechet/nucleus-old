@@ -53,7 +53,7 @@ static const float uvs[] = {
     0, 0
 };
 
-static void create_quad_shader(void)
+static nu_result_t create_quad_shader(void)
 {
     GLuint vertex_shader, fragment_shader;
     GLint success;
@@ -62,36 +62,34 @@ static void create_quad_shader(void)
     glShaderSource(vertex_shader, 1, &quad_vertex, NULL);
     glCompileShader(vertex_shader);
     glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
-    if (success == GL_FALSE) {
-        nu_error(NUGLFW_LOGGER_NAME, "Failed to compile quad vertex shader.");
-        glDeleteShader(vertex_shader);
-    }
+    NU_CHECK(success != GL_FALSE, goto cleanup0, NUGLFW_LOGGER_NAME, "Failed to compile quad vertex shader.");
     
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &quad_fragment, 0);
     glCompileShader(fragment_shader);
     glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
-    if (success == GL_FALSE) {
-        nu_error(NUGLFW_LOGGER_NAME, "Failed to compile quad fragment shader.");
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-    }
+    NU_CHECK(success != GL_FALSE, goto cleanup1, NUGLFW_LOGGER_NAME, "Failed to compile quad fragment shader.");
 
     _module.quad_shader = glCreateProgram();
     glAttachShader(_module.quad_shader, vertex_shader);
     glAttachShader(_module.quad_shader, fragment_shader);
-
     glLinkProgram(_module.quad_shader);
     glGetProgramiv(_module.quad_shader, GL_LINK_STATUS, &success);
-    if (success == GL_FALSE) {
-        nu_error(NUGLFW_LOGGER_NAME, "Failed to link quad shader.");
-        glDeleteProgram(_module.quad_shader);
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-    }
+    NU_CHECK(success != GL_FALSE, goto cleanup2, NUGLFW_LOGGER_NAME, "Failed to link quad shader.");
 
-    glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
+    glDeleteShader(vertex_shader);
+
+    return NU_SUCCESS;
+
+cleanup2:
+    glDeleteProgram(_module.quad_shader);
+cleanup1:
+    glDeleteShader(fragment_shader);
+cleanup0:
+    glDeleteShader(vertex_shader);
+
+    return NU_FAILURE;
 }
 static void destroy_quad_shader(void)
 {
@@ -140,15 +138,16 @@ static void destroy_texture(void)
 
 nu_result_t nuglfw_surface_create(void)
 {
-    if (glewInit()) {
-        nu_error(NUGLFW_LOGGER_NAME, "Failed to initialize glew.");
-        return NU_FAILURE;
-    }
+    nu_result_t result;
+
+    GLenum status = glewInit();
+    NU_CHECK(status, return NU_FAILURE, NUGLFW_LOGGER_NAME, "Failed to initialize glew.");
 
     _module.width = 0;
     _module.height = 0;
 
-    create_quad_shader();
+    result = create_quad_shader();
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUGLFW_LOGGER_NAME, "Failed to create quad shader.");
     create_vao();
     create_texture();
 

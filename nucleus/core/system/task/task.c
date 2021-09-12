@@ -23,24 +23,16 @@ nu_result_t nu_task_initialize(void)
     if (api != NU_TASK_API_NONE) {
         /* get task module */
         result = nu_module_load("$MODULE_DIR/none", &_system.module);
-        if (result != NU_SUCCESS) {
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_TASK_NAME, "Failed to get module.");
 
         /* get task interface */
         result = nu_module_get_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
-        if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_TASK_NAME, "Failed to get interface.");
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_TASK_NAME, "Failed to get interface.");
 
         /* initialize task system */
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
-            if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_TASK_NAME, "Failed to initialize task system.");
-                return result;
-            }
+            NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_TASK_NAME, "Failed to initialize task system.");
         }
     } else {
         nu_info(NU_LOGGER_TASK_NAME, "Running in passive mode.");

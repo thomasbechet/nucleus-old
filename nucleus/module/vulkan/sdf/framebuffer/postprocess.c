@@ -21,10 +21,8 @@ nu_result_t nuvk_sdf_framebuffer_postprocess_create(
         info.attachmentCount = 1;
         info.pAttachments    = &swapchain->image_views[i];
     
-        if (vkCreateFramebuffer(context->device, &info, &context->allocator, &framebuffer->framebuffers[i]) != VK_SUCCESS) {
-            nu_error(NUVK_LOGGER_NAME, "Failed to create postprocess framebuffer.");
-            return NU_FAILURE;
-        }
+        VkResult result = vkCreateFramebuffer(context->device, &info, &context->allocator, &framebuffer->framebuffers[i]);
+        NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess framebuffer.");
     }
 
     return NU_SUCCESS;

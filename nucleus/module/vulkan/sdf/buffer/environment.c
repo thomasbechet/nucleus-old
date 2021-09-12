@@ -7,6 +7,8 @@ nu_result_t nuvk_sdf_buffer_environment_create(
     const nuvk_render_context_t *render_context
 )
 {
+    nu_result_t result;
+
     buffer->uniform_buffer_range = nuvk_buffer_pad_uniform_buffer_size(context, sizeof(nuvk_sdf_buffer_environment_data_t));
 
     nuvk_buffer_info_t info;
@@ -14,15 +16,11 @@ nu_result_t nuvk_sdf_buffer_environment_create(
     info.buffer_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-    if (nuvk_buffer_create(&buffer->buffer, memory_manager, &info) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create environment buffer.");
-        return NU_FAILURE;
-    }
+    result = nuvk_buffer_create(&buffer->buffer, memory_manager, &info);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create environment buffer.");
 
-    if (nuvk_buffer_map(&buffer->buffer, memory_manager) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to map environment buffer.");
-        return NU_FAILURE;
-    }
+    result = nuvk_buffer_map(&buffer->buffer, memory_manager);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to map environment buffer.");
 
     return NU_SUCCESS;
 }

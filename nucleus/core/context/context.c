@@ -47,87 +47,127 @@ static nu_result_t nu_context_terminate(void);
 
 static nu_result_t nu_context_initialize(const nu_context_init_info_t *info)
 {
-    nu_result_t result;
-    result = NU_SUCCESS;
+    nu_result_t result = NU_SUCCESS;
 
     memset(&_context, 0, sizeof(nu_context_data_t));
-    _context.should_stop     = false;
+    _context.should_stop = false;
 
     /* load configuration */
     if (info) _context.callback = info->callback;
     nu_info(NU_LOGGER_NAME, "Loading configuration...");
-    if (nu_config_load(_context.callback.config) != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE; }
+    result = nu_config_load(_context.callback.config);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to load configuration.");
     _context.states.config = NU_INIT_STATE_STARTED;
 
     /* initialize core systems */
     nu_info(NU_LOGGER_NAME, "========== Initializing core systems ==========");
+
     nu_info(NU_LOGGER_NAME, "Initializing core system: memory...");
-    if (nu_memory_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_memory_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize memory system.");
     _context.states.memory = NU_INIT_STATE_INITIALIZED;
+
     nu_info(NU_LOGGER_NAME, "Initializing core system: logger...");
-    if (nu_logger_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_logger_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize logger system.");
     _context.states.logger = NU_INIT_STATE_INITIALIZED;
+
     nu_info(NU_LOGGER_NAME, "Initializing core system: module...");
-    if (nu_module_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_module_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize module system.");
     _context.states.module = NU_INIT_STATE_INITIALIZED;
+
     nu_info(NU_LOGGER_NAME, "Initializing core system: plugin...");
-    if (nu_plugin_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_plugin_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize plugin system.");
     _context.states.plugin = NU_INIT_STATE_INITIALIZED;
+
     nu_info(NU_LOGGER_NAME, "Initializing core system: event...");
-    if (nu_event_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_event_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize event system.");
     _context.states.event = NU_INIT_STATE_INITIALIZED;
 
     /* initialize systems */
     nu_info(NU_LOGGER_NAME, "============== Initializing systems ===========");
+
     nu_info(NU_LOGGER_NAME, "Initializing system: task...");
-    if (nu_task_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_task_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize task system.");
     _context.states.task = NU_INIT_STATE_INITIALIZED;
+
     nu_info(NU_LOGGER_NAME, "Initializing system: window...");
-    if (nu_window_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_window_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize window system.");
     _context.states.window = NU_INIT_STATE_INITIALIZED;
+
     nu_info(NU_LOGGER_NAME, "Initializing system: input...");
-    if (nu_input_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_input_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize input system.");
     _context.states.input = NU_INIT_STATE_INITIALIZED;
+
     nu_info(NU_LOGGER_NAME, "Initializing system: renderer...");
-    if (nu_renderer_initialize() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_renderer_initialize();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to initialize renderer system.");
     _context.states.renderer = NU_INIT_STATE_INITIALIZED;
 
     /* start core systems */
     nu_info(NU_LOGGER_NAME, "============ Starting core systems ============");
+
     nu_info(NU_LOGGER_NAME, "Starting core system: memory...");
-    if (nu_memory_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_memory_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start memory system.");
     _context.states.memory = NU_INIT_STATE_STARTED;
+
     nu_info(NU_LOGGER_NAME, "Starting core system: logger...");
-    if (nu_logger_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_logger_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start logger system.");
     _context.states.logger = NU_INIT_STATE_STARTED;
+
     nu_info(NU_LOGGER_NAME, "Starting core system: module...");
-    if (nu_module_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_module_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start module system.");
     _context.states.module = NU_INIT_STATE_STARTED;
+
     nu_info(NU_LOGGER_NAME, "Starting core system: plugin...");
-    if (nu_plugin_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_plugin_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start plugin system.");
     _context.states.plugin = NU_INIT_STATE_STARTED;
+
     nu_info(NU_LOGGER_NAME, "Starting core system: event...");
-    if (nu_event_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_event_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start event system.");
     _context.states.event = NU_INIT_STATE_STARTED;
 
     /* start systems */
     nu_info(NU_LOGGER_NAME, "============== Starting systems ===============");
+
     nu_info(NU_LOGGER_NAME, "Starting system: task...");
-    if (nu_task_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_task_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start task system.");
     _context.states.task = NU_INIT_STATE_STARTED;
+
     nu_info(NU_LOGGER_NAME, "Starting system: window...");
-    if (nu_window_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_window_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start window system.");
     _context.states.window = NU_INIT_STATE_STARTED;
+
     nu_info(NU_LOGGER_NAME, "Starting system: input...");
-    if (nu_input_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_input_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start input system.");
     _context.states.input = NU_INIT_STATE_STARTED;
+
     nu_info(NU_LOGGER_NAME, "Starting system: renderer...");
-    if (nu_renderer_start() != NU_SUCCESS) {nu_context_terminate(); return NU_FAILURE;}
+    result = nu_renderer_start();
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to start renderer system.");
     _context.states.renderer = NU_INIT_STATE_STARTED;
 
     nu_info(NU_LOGGER_NAME, "===============================================");
     nu_info(NU_LOGGER_NAME, "Running context...");
 
+    return result;
+
+cleanup0:
+    nu_context_terminate();
     return result;
 }
 static nu_result_t nu_context_terminate(void)

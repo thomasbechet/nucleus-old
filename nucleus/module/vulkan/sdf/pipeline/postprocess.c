@@ -14,10 +14,7 @@ static nu_result_t create_modules(
     /* vertex shader */
     result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_VERTEX_BIT,
         sources[NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_VERT], "postprocess.vert", &pipeline->vertex);
-    if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create postprocess vertex shader.");
-        return result;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess vertex shader.");
 
     /* fragment shader */
     nu_string_t fragment_source;
@@ -26,10 +23,7 @@ static nu_result_t create_modules(
     result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_FRAGMENT_BIT, 
         fragment_source, "postprocess.frag", &pipeline->fragment);
     nu_string_free(fragment_source);
-    if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create postprocess fragment shader.");
-        return result;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess fragment shader.");
 
     return NU_SUCCESS;
 }
@@ -53,10 +47,8 @@ static nu_result_t create_layout(
     layout_info.setLayoutCount         = 2;
     layout_info.pSetLayouts            = set_layouts;
 
-    if (vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create postprocess pipeline layout.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess pipeline layout.");
 
     return NU_SUCCESS;
 }
@@ -148,10 +140,8 @@ static nu_result_t create_pipeline(
     pipeline_info.pDynamicState       = &dynamic_state;
     pipeline_info.basePipelineHandle  = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(context->device, VK_NULL_HANDLE, 1, &pipeline_info, &context->allocator, &pipeline->pipeline) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create postprocess pipeline.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreateGraphicsPipelines(context->device, VK_NULL_HANDLE, 1, &pipeline_info, &context->allocator, &pipeline->pipeline);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess pipeline.");
 
     return NU_SUCCESS;
 }
@@ -165,11 +155,14 @@ nu_result_t nuvk_sdf_pipeline_postprocess_create(
     const nu_string_t *sources
 )
 {
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
 
-    result &= create_modules(pipeline, context, shader_manager, sources);
-    result &= create_layout(pipeline, context, descriptors);
-    result &= create_pipeline(pipeline, context, postprocess_renderpass);
+    result = create_modules(pipeline, context, shader_manager, sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create modules.");
+    result = create_layout(pipeline, context, descriptors);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create layout.");
+    result = create_pipeline(pipeline, context, postprocess_renderpass);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create pipeline.");
 
     return result;
 }

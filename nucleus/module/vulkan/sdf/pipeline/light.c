@@ -18,10 +18,7 @@ static nu_result_t create_modules(
     result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_COMPUTE_BIT,
         compute_source, "light.comp", &pipeline->compute);
     nu_string_free(compute_source);
-    if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create light compute shader.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light compute shader.");
 
     return NU_SUCCESS;
 }
@@ -45,10 +42,8 @@ static nu_result_t create_layout(
     layout_info.setLayoutCount         = 2;
     layout_info.pSetLayouts            = set_layouts;
 
-    if (vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create light pipeline layout.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout);
+    NU_CHECK(result == VK_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light pipeline layout.");
 
     return NU_SUCCESS;
 }
@@ -68,10 +63,8 @@ static nu_result_t create_pipeline(
     info.stage.pName  = "main";
     info.stage.module = pipeline->compute;
 
-    if (vkCreateComputePipelines(context->device, VK_NULL_HANDLE, 1, &info, &context->allocator, &pipeline->pipeline) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create light pipeline.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreateComputePipelines(context->device, VK_NULL_HANDLE, 1, &info, &context->allocator, &pipeline->pipeline);
+    NU_CHECK(result == VK_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light pipeline.");
 
     return NU_SUCCESS;
 }
@@ -84,11 +77,14 @@ nu_result_t nuvk_sdf_pipeline_light_create(
     const nu_string_t *sources
 )
 {
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
     
-    result &= create_modules(pipeline, context, shader_manager, sources);
-    result &= create_layout(pipeline, context, descriptors);
-    result &= create_pipeline(pipeline, context);
+    result = create_modules(pipeline, context, shader_manager, sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create modules.");
+    result = create_layout(pipeline, context, descriptors);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create layout.");
+    result = create_pipeline(pipeline, context);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create pipeline.");
 
     return result;
 }

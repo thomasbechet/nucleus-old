@@ -9,6 +9,8 @@ nu_result_t nuvk_sdf_buffer_instances_create(
     const nuvk_render_context_t *render_context
 )
 {
+    nu_result_t result;
+
     /* index buffer */
     buffer->index_uniform_buffer_range = context->physical_device_properties.limits.maxUniformBufferRange;
     buffer->next_index_offset = 0;
@@ -20,15 +22,11 @@ nu_result_t nuvk_sdf_buffer_instances_create(
     index_buffer_info.buffer_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     index_buffer_info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-    if (nuvk_buffer_create(&buffer->index_buffer, memory_manager, &index_buffer_info) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create index buffer.");
-        return NU_FAILURE;
-    }
+    result = nuvk_buffer_create(&buffer->index_buffer, memory_manager, &index_buffer_info);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create index buffer.");
 
-    if (nuvk_buffer_map(&buffer->index_buffer, memory_manager) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to map index buffer.");
-        return NU_FAILURE;
-    }
+    result = nuvk_buffer_map(&buffer->index_buffer, memory_manager);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to map index buffer.");
  
     /* instances buffer */
     buffer->instance_uniform_buffer_range = context->physical_device_properties.limits.maxUniformBufferRange;
@@ -42,15 +40,11 @@ nu_result_t nuvk_sdf_buffer_instances_create(
     instance_buffer_info.buffer_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     instance_buffer_info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-    if (nuvk_buffer_create(&buffer->instance_buffer, memory_manager, &instance_buffer_info) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create instance buffer.");
-        return NU_FAILURE;
-    }
+    result = nuvk_buffer_create(&buffer->instance_buffer, memory_manager, &instance_buffer_info);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create instance buffer.");
 
-    if (nuvk_buffer_map(&buffer->instance_buffer, memory_manager) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to map instance buffer.");
-        return NU_FAILURE;
-    }
+    result = nuvk_buffer_map(&buffer->instance_buffer, memory_manager);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to map instance buffer.");
 
     return NU_SUCCESS;
 }
@@ -76,10 +70,7 @@ nu_result_t nuvk_sdf_buffer_instances_configure_instance_types(
     uint32_t type_count
 )
 {
-    if (type_count >= NUVK_SDF_MAX_INSTANCE_TYPE_COUNT) {
-        nu_error(NUVK_LOGGER_NAME, "Max instance type count reached.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(type_count < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT, return NU_FAILURE, NUVK_LOGGER_NAME, "Max instance type count reached.");
 
     buffer->next_index_offset    = 0;
     buffer->next_instance_offset = 0;
@@ -88,18 +79,14 @@ nu_result_t nuvk_sdf_buffer_instances_configure_instance_types(
         buffer->instance_offsets[i]   = buffer->next_instance_offset;
         buffer->next_instance_offset += info[i].max_instance_count * buffer->instance_sizes[i];
 
-        if (buffer->next_instance_offset >= buffer->instance_uniform_buffer_range) {
-            nu_error(NUVK_LOGGER_NAME, "Max instance uniform buffer range reached.");
-            return NU_FAILURE;
-        }
+        NU_CHECK(buffer->next_instance_offset < buffer->instance_uniform_buffer_range, return NU_FAILURE,
+            NUVK_LOGGER_NAME, "Max instance uniform buffer range reached.");
 
         buffer->index_offsets[i]   = buffer->next_index_offset;
         buffer->next_index_offset += sizeof(uint32_t) * 4 * (info[i].max_instance_count + 1); /* +1 with the index count */
 
-        if (buffer->next_index_offset >= buffer->index_uniform_buffer_range) {
-            nu_error(NUVK_LOGGER_NAME, "Max index uniform buffer range reached.");
-            return NU_FAILURE;
-        }
+        NU_CHECK(buffer->next_index_offset < buffer->index_uniform_buffer_range, return NU_FAILURE,
+            NUVK_LOGGER_NAME, "Max index uniform buffer range reached.");
     }
 
     return NU_SUCCESS;

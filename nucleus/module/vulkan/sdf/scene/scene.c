@@ -70,10 +70,8 @@ nu_result_t nuvk_sdf_scene_register_instance_type(
     nuvk_sdf_instance_type_t *handle
 )
 {
-    if (scene->type_count >= NUVK_SDF_MAX_INSTANCE_TYPE_COUNT) {
-        nu_error(NUVK_LOGGER_NAME, "Max sdf type count reached.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(scene->type_count < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT, return NU_FAILURE,
+        NUVK_LOGGER_NAME, "Max sdf type count reached.");
 
     NU_HANDLE_SET_ID(*handle, scene->type_count);
     nuvk_sdf_instance_type_data_t *type = &scene->types[scene->type_count++];

@@ -43,9 +43,8 @@ nu_result_t nuutils_console_plugin_initialize(void)
     memset(&font_info, 0, sizeof(nu_renderer_font_create_info_t));
     font_info.filename  = "$ENGINE_DIR/font/Coder's Crux.ttf";
     font_info.font_size = 16;
-    if (nu_renderer_font_create(&font_info, &_module.font) != NU_SUCCESS) {
-        nu_fatal(NUUTILS_LOGGER_NAME, "Failed to create font.");
-    }
+    result = nu_renderer_font_create(&font_info, &_module.font);
+    NU_CHECK(result == NU_SUCCESS, NU_NOOP, NUUTILS_LOGGER_NAME, "Failed to create font.");
 
     /* create controller */
     nuutils_console_controller_initialize(&_module.controller);

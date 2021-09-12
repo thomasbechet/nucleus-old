@@ -13,10 +13,8 @@ nu_result_t nuvk_memory_manager_initialize(
     info.device               = context->device;
     info.pAllocationCallbacks = &context->allocator;
 
-    if (vmaCreateAllocator(&info, &manager->allocator) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create vma.");
-        return NU_FAILURE;
-    }
+    VkResult result = vmaCreateAllocator(&info, &manager->allocator);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create vma.");
 
     return NU_SUCCESS;
 }

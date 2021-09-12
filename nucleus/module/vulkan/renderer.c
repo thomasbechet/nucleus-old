@@ -34,29 +34,15 @@ nu_result_t nuvk_renderer_initialize(void)
         return NU_FAILURE;
     }
 
-    if (nuvk_context_initialize(&_module.context) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-    if (nuvk_memory_manager_initialize(&_module.memory_manager, &_module.context) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-    if (nuvk_shader_manager_initialize(&_module.shader_manager) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-    if (nuvk_command_pool_initialize(&_module.command_pool, &_module.context) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-    if (nuvk_swapchain_initialize(&_module.swapchain, &_module.context, 1920, 1080) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
-    if (nuvk_render_context_initialize(&_module.render_context, &_module.context, &_module.swapchain, &_module.command_pool, 3) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
+    if (nuvk_context_initialize(&_module.context) != NU_SUCCESS) return NU_FAILURE;
+    if (nuvk_memory_manager_initialize(&_module.memory_manager, &_module.context) != NU_SUCCESS) return NU_FAILURE;
+    if (nuvk_shader_manager_initialize(&_module.shader_manager) != NU_SUCCESS) return NU_FAILURE;
+    if (nuvk_command_pool_initialize(&_module.command_pool, &_module.context) != NU_SUCCESS) return NU_FAILURE;
+    if (nuvk_swapchain_initialize(&_module.swapchain, &_module.context, 1920, 1080) != NU_SUCCESS) return NU_FAILURE;
+    if (nuvk_render_context_initialize(&_module.render_context, &_module.context, &_module.swapchain, &_module.command_pool, 3) != NU_SUCCESS) return NU_FAILURE;
 
     if (nuvk_sdf_renderer_initialize(&_module.sdf, &_module.context, &_module.memory_manager, 
-        &_module.shader_manager, &_module.swapchain, &_module.render_context) != NU_SUCCESS) {
-        return NU_FAILURE;
-    }
+        &_module.shader_manager, &_module.swapchain, &_module.render_context) != NU_SUCCESS) return NU_FAILURE;
 
     return NU_SUCCESS;
 }

@@ -22,15 +22,14 @@ static nu_system_data_t _system;
 
 static nu_result_t initialize_event(void)
 {
+    nu_result_t result;
     nu_event_register_info_t info;
 
     info.initialize = NULL;
     info.terminate  = NULL;
     info.size       = sizeof(nu_renderer_viewport_resize_event_t);
-    if (nu_event_register(&info, &_system.viewport_resize_event_id) != NU_SUCCESS) {
-        nu_error(NU_LOGGER_RENDERER_NAME, "Failed to register viewport resize event.");
-        return NU_FAILURE;
-    }
+    result = nu_event_register(&info, &_system.viewport_resize_event_id);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NU_LOGGER_RENDERER_NAME, "Failed to register viewport resize event.");
 
     return NU_SUCCESS;
 }
@@ -44,32 +43,21 @@ nu_result_t nu_renderer_initialize(void)
 
     /* initialize event */
     result = initialize_event();
-    if (result != NU_SUCCESS) {
-        nu_error(NU_LOGGER_RENDERER_NAME, "Failed to initialize event.");
-        return result;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to initialize event.");
 
     if (api != NU_RENDERER_API_NONE) {
         /* get renderer module */
         result = nu_module_load(nu_renderer_api_names[api], &_system.module);
-        if (result != NU_SUCCESS) {
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to get module.");
 
         /* get renderer interface */
         result = nu_module_get_interface(_system.module, NU_RENDERER_INTERFACE_NAME, &_system.interface);
-        if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_RENDERER_NAME, "Failed to get interface.");
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to get interface.");
 
         /* initialize renderer system */
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
-            if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_RENDERER_NAME, "Failed to initialize renderer system.");
-                return result;
-            }
+            NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to initialize renderer system.");
         }
     } else {
         nu_info(NU_LOGGER_RENDERER_NAME, "Running in passive mode.");

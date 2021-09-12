@@ -354,24 +354,22 @@ static inline void nu_string_split_ncstr(const char *cstr, uint32_t n, const cha
 
     if (len == 0) return;
 
-    for (i = 0; i < (len - dlen); i++) {
-        /* search separator */
-        if ((dlen == 1 && *(s + i) == delim[0]) || (memcmp(s + i, delim, dlen)) == 0) {
+    for (i = 0; i < len; i++) {
+        /* find separator */
+        if ((i <= (len - dlen)) && (memcmp(s + i, delim, dlen) == 0)) {
             tlen = i - start;
-            if (tlen == 0 || (tlen == dlen && memcmp(s + start, delim, dlen) == 0)) {
-                start = i + dlen;
-                i += dlen - 1;
-            } else {
+            if (tlen != 0) { /* valid token */
                 nu_string_array_add_ncstr(tokens, s + start, tlen);
-                start = i + dlen;
-                i += dlen - 1;
             }
+            start = i = i + dlen;
         }
     }
 
     /* add final token */
     tlen = len - start;
-    nu_string_array_add_ncstr(tokens, s + start, tlen);
+    if (tlen > 0) {
+        nu_string_array_add_ncstr(tokens, s + start, tlen);
+    }
 }
 void nu_string_split_cstr(const char *cstr, const char *delim, nu_string_array_t tokens)
 {
@@ -427,7 +425,7 @@ void nu_string_array_add_ncstr(nu_string_array_t array, const char *cstr, uint32
     nu_string_array_header_t *header = (nu_string_array_header_t*)array;
     /* realloc data */
     if (header->head + n + 1 > header->data_capacity) {
-        header->data_capacity *= 2;
+        header->data_capacity = (header->head + n + 1) * 2;
         header->data = (char*)nu_realloc(header->data, header->data_capacity);
     }
     /* realloc indexes */

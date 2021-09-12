@@ -25,24 +25,18 @@ nu_result_t nu_input_initialize(void)
         if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
             _system.module = nu_window_get_module(); /* copy module handle */
         } else {
-            nu_error(NU_LOGGER_INPUT_NAME, "Unsupported api.");
-            return NU_FAILURE;
+            _system.module = NU_NULL_HANDLE;
         }
+        NU_CHECK(_system.module != NU_NULL_HANDLE, return NU_FAILURE, NU_LOGGER_INPUT_NAME, "Unsupported api.");
 
         /* get input interface */
         result = nu_module_get_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
-        if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_INPUT_NAME, "Failed to get interface.");
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_INPUT_NAME, "Failed to get interface.");
 
         /* initialize input system */
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
-            if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_INPUT_NAME, "Failed to initialize input system.");
-                return result;
-            }
+            NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_INPUT_NAME, "Failed to initialize input system.");
         }
     } else {
         nu_info(NU_LOGGER_INPUT_NAME, "Running in passive mode.");

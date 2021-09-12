@@ -7,12 +7,14 @@ nu_result_t nuvk_sdf_buffers_initialize(
     const nuvk_render_context_t *render_context
 )
 {
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
 
-    result &= nuvk_sdf_buffer_environment_create(&buffers->environment, context, memory_manager, render_context);
-    result &= nuvk_sdf_buffer_instances_create(&buffers->instances, context, memory_manager, render_context);
+    result =  nuvk_sdf_buffer_environment_create(&buffers->environment, context, memory_manager, render_context);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create environment buffer.");
+    result = nuvk_sdf_buffer_instances_create(&buffers->instances, context, memory_manager, render_context);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create instances buffer.")
 
-    return result;
+    return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_buffers_terminate(
     nuvk_sdf_buffers_t *buffers,

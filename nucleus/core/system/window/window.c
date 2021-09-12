@@ -27,24 +27,16 @@ nu_result_t nu_window_initialize(void)
     if (api != NU_WINDOW_API_NONE) {
         /* get module */
         result = nu_module_load(nu_window_api_names[api], &_system.module);
-        if (result != NU_SUCCESS) {
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_WINDOW_NAME, "Failed to get module.");
 
         /* get window interface */
         result = nu_module_get_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
-        if (result != NU_SUCCESS) {
-            nu_error(NU_LOGGER_WINDOW_NAME, "Failed to get interface.");
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_WINDOW_NAME, "Failed to get interface.");
 
         /* initialize window system */
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
-            if (result != NU_SUCCESS) {
-                nu_error(NU_LOGGER_WINDOW_NAME, "Failed to initialize window system.");
-                return result;
-            }
+            NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_WINDOW_NAME, "Failed to initialize window system.");
         }
     } else {
         nu_info(NU_LOGGER_WINDOW_NAME, "Running in passive mode.");

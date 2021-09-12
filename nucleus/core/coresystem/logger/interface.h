@@ -11,15 +11,22 @@
 #define _NU_S_(x) _NU_S(x)
 #define _NU_S__LINE__ _NU_S_(__LINE__)
 
-#define _NU_CHECK(check, action, file, line, message, ...) \
-    if (!(check)) { \
-        nu_error(NU_LOGGER_NAME, "Invalid check: "file":"line"\n"); \
-        nu_error(message, ##__VA_ARGS__); \
-        action; \
-    }
+#ifdef NU_DEBUG
+    #define _NU_CHECK(check, action, file, line, id, message, ...) \
+        if (!(check)) { \
+            nu_error(id, "Invalid check ("file":"line"): "message, ##__VA_ARGS__); \
+            action; \
+        }
+#else
+    #define _NU_CHECK(check, action, file, line, id, message, ...) \
+        if (!(check)) { \
+            nu_error(id, "Invalid check: "message, ##__VA_ARGS__); \
+            action; \
+        }
+#endif
 
-#define NU_CHECK(check, action, message, ...) \
-    _NU_CHECK(check, action, __FILE__, _NU_S__LINE__, message, ##__VA_ARGS__)
+#define NU_CHECK(check, action, id, message, ...) \
+    _NU_CHECK(check, action, __FILE__, _NU_S__LINE__, id, message, ##__VA_ARGS__)
 
 typedef enum {
     NU_INFO     = 0x1 << 0,

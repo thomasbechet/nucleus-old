@@ -64,10 +64,8 @@ nu_result_t nuvk_sdf_descriptor_light_create(
     layout_info.bindingCount = 2;
     layout_info.pBindings    = bindings;
 
-    if (vkCreateDescriptorSetLayout(context->device, &layout_info, &context->allocator, &descriptor->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create light descriptor set layout.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreateDescriptorSetLayout(context->device, &layout_info, &context->allocator, &descriptor->layout);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create light descriptor set layout.");
 
     /* create descriptor set */
     VkDescriptorSetAllocateInfo allocate_info;
@@ -77,10 +75,8 @@ nu_result_t nuvk_sdf_descriptor_light_create(
     allocate_info.descriptorSetCount = 1;
     allocate_info.pSetLayouts        = &descriptor->layout;
 
-    if (vkAllocateDescriptorSets(context->device, &allocate_info, &descriptor->descriptor) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to allocate light descriptor set.");
-        return NU_FAILURE;
-    }
+    result = vkAllocateDescriptorSets(context->device, &allocate_info, &descriptor->descriptor);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to allocate light descriptor set.");
 
     /* write descriptor set */
     nuvk_sdf_descriptor_light_write_descriptor(descriptor, context, geometry_image, light_image);

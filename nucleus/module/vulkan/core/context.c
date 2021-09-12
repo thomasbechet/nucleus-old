@@ -113,19 +113,17 @@ static nu_result_t nuvk_context_create_instance(nuvk_context_t *context)
     instance_info.ppEnabledExtensionNames = (const char *const *)nu_array_get_data_const(required_extensions);  
 
     VkResult error = vkCreateInstance(&instance_info, &context->allocator, &context->instance);
-
     nu_array_free(required_layers);
     nu_array_free(required_extensions);
+    NU_CHECK(error == VK_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to create instance.");
 
+    return NU_SUCCESS;
+
+cleanup0:
     if (error == VK_ERROR_EXTENSION_NOT_PRESENT) {
         nu_error(NUVK_LOGGER_NAME, "Missing instance extension, failed to create instance.");
-        return NU_FAILURE;
     } else if (error == VK_ERROR_LAYER_NOT_PRESENT) {
         nu_error(NUVK_LOGGER_NAME, "Missing instance layer, failed to create instance.");
-        return NU_FAILURE;
-    } else if (error != 0) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create instance.");
-        return NU_FAILURE;
     }
 
     return NU_SUCCESS;
@@ -169,16 +167,10 @@ static nu_result_t nuvk_context_create_debug_report_callback(nuvk_context_t *con
 
     PFN_vkCreateDebugReportCallbackEXT create_debug_report_callback = VK_NULL_HANDLE;
     create_debug_report_callback = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(context->instance, "vkCreateDebugReportCallbackEXT");
-    if (create_debug_report_callback == VK_NULL_HANDLE) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to recover the vkCreateDebutReportCallbackEXT function.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(create_debug_report_callback != VK_NULL_HANDLE, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to recover the vkCreateDebutReportCallbackEXT function.");
 
-    VkResult error = create_debug_report_callback(context->instance, &debug_info, &context->allocator, &context->debug_report_callback);
-    if (error != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create debug report callback.");
-        return NU_FAILURE;
-    }
+    VkResult result = create_debug_report_callback(context->instance, &debug_info, &context->allocator, &context->debug_report_callback);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create debug report callback.");
 
     return NU_SUCCESS;
 }
@@ -241,15 +233,9 @@ static bool nuvk_context_is_physical_device_suitable(VkPhysicalDevice physical_d
 static nu_result_t nuvk_context_pick_physical_device(nuvk_context_t *context)
 {
     uint32_t physical_device_count;
-    VkResult error = vkEnumeratePhysicalDevices(context->instance, &physical_device_count, NULL);
-    if (error != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to enumerate physical devices.");
-        return NU_FAILURE;
-    }
-
-    if (physical_device_count == 0) {
-        nu_error(NUVK_LOGGER_NAME, "No physical device accessible.");
-    }
+    VkResult result = vkEnumeratePhysicalDevices(context->instance, &physical_device_count, NULL);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to enumerate physical devices.");
+    NU_CHECK(physical_device_count > 0, return NU_FAILURE, NUVK_LOGGER_NAME, "No physical device accessible.");
 
     VkPhysicalDevice *physical_devices = (VkPhysicalDevice*)nu_malloc(sizeof(VkPhysicalDevice) * physical_device_count);
     vkEnumeratePhysicalDevices(context->instance, &physical_device_count, physical_devices);
@@ -261,14 +247,11 @@ static nu_result_t nuvk_context_pick_physical_device(nuvk_context_t *context)
         }
     }
 
-    if (context->physical_device == VK_NULL_HANDLE) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to find suitable physical device.");
-        nu_free(physical_devices);
-        return NU_FAILURE;
-    }
+    NU_CHECK(context->physical_device != VK_NULL_HANDLE, goto cleanup0, NUVK_LOGGER_NAME, "Failed to find suitable physical device.");
 
     vkGetPhysicalDeviceProperties(context->physical_device, &context->physical_device_properties);
 
+cleanup0:
     nu_free(physical_devices);
 
     return NU_SUCCESS;
@@ -281,10 +264,7 @@ static nu_result_t nuvk_context_pick_queue_family_indices(nuvk_context_t *contex
 
     uint32_t property_count;
     vkGetPhysicalDeviceQueueFamilyProperties(context->physical_device, &property_count, NULL);
-    if (property_count == 0) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to find queue family properties.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(property_count > 0, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to find queue family properties.");
 
     VkQueueFamilyProperties *properties = (VkQueueFamilyProperties*)nu_malloc(sizeof(VkQueueFamilyProperties) * property_count);
     vkGetPhysicalDeviceQueueFamilyProperties(context->physical_device, &property_count, properties);
@@ -320,15 +300,8 @@ static nu_result_t nuvk_context_pick_queue_family_indices(nuvk_context_t *contex
 
     nu_free(properties);
 
-    if (context->queues.graphics_compute_family_index == INT32_MAX) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to find graphics/compute queue family index.");
-        return NU_FAILURE;
-    }
-
-    if (context->queues.present_family_index == INT32_MAX) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to find present queue family index.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(context->queues.graphics_compute_family_index != INT32_MAX, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to find graphics/compute queue family index.");
+    NU_CHECK(context->queues.present_family_index != INT32_MAX, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to find present queue family index.");
 
     return NU_SUCCESS;
 }
@@ -377,14 +350,9 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context)
     device_info.ppEnabledExtensionNames = (const char *const *)nu_array_get_data_const(extensions);
     device_info.pEnabledFeatures        = &features;
 
-    VkResult error = vkCreateDevice(context->physical_device, &device_info, &context->allocator, &context->device);
-
+    VkResult result = vkCreateDevice(context->physical_device, &device_info, &context->allocator, &context->device);
     nu_array_free(extensions);
-
-    if (error != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create device.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create device.");
 
     return NU_SUCCESS;
 }

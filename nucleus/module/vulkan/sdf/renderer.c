@@ -11,35 +11,25 @@ nu_result_t nuvk_sdf_renderer_initialize(
     const nuvk_render_context_t *render_context
 )
 {
-    if (nuvk_sdf_buffers_initialize(&renderer->buffers, context, memory_manager, render_context) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create buffers.");
-        return NU_FAILURE;
-    }
+    nu_result_t result;
 
-    if (nuvk_sdf_images_initialize(&renderer->images, context, memory_manager, swapchain) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create images.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_buffers_initialize(&renderer->buffers, context, memory_manager, render_context);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create buffers.");
 
-    if (nuvk_sdf_renderpasses_initialize(&renderer->renderpasses, context, swapchain, &renderer->images) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create renderpasses.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_images_initialize(&renderer->images, context, memory_manager, swapchain);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create images.");
 
-    if (nuvk_sdf_framebuffers_initialize(&renderer->framebuffers, context, swapchain, &renderer->images, &renderer->renderpasses) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create framebuffers.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_renderpasses_initialize(&renderer->renderpasses, context, swapchain, &renderer->images);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create renderpasses.");
 
-    if (nuvk_sdf_descriptors_initialize(&renderer->descriptors, context, &renderer->buffers, &renderer->images) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create descriptors.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_framebuffers_initialize(&renderer->framebuffers, context, swapchain, &renderer->images, &renderer->renderpasses);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create framebuffers.");
 
-    if (nuvk_sdf_pipelines_initialize(&renderer->pipelines, context, shader_manager, &renderer->descriptors, &renderer->renderpasses) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create pipelines.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_descriptors_initialize(&renderer->descriptors, context, &renderer->buffers, &renderer->images);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create descriptors.");
+
+    result = nuvk_sdf_pipelines_initialize(&renderer->pipelines, context, shader_manager, &renderer->descriptors, &renderer->renderpasses);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create pipelines.");
 
     nuvk_sdf_scene_initialize(&renderer->scene);
 
@@ -265,25 +255,19 @@ nu_result_t nuvk_sdf_renderer_update_swapchain(
     const nuvk_swapchain_t *swapchain
 )
 {
-    if (nuvk_sdf_images_update_swapchain(&renderer->images, context, memory_manager, swapchain) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to update swapchain for images.");
-        return NU_FAILURE;
-    }
+    nu_result_t result;
 
-    if (nuvk_sdf_renderpasses_update_swapchain(&renderer->renderpasses, context, swapchain, &renderer->images) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to update swapchain for pipelines.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_images_update_swapchain(&renderer->images, context, memory_manager, swapchain);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for images.");
 
-    if (nuvk_sdf_framebuffers_update_swapchain(&renderer->framebuffers, context, swapchain, &renderer->images, &renderer->renderpasses) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to update swapchain for framebuffers.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_renderpasses_update_swapchain(&renderer->renderpasses, context, swapchain, &renderer->images);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for pipelines.");
 
-    if (nuvk_sdf_descriptor_update_swapchain(&renderer->descriptors, context, &renderer->images) != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to update swapchain for descriptors.");
-        return NU_FAILURE;
-    }
+    result = nuvk_sdf_framebuffers_update_swapchain(&renderer->framebuffers, context, swapchain, &renderer->images, &renderer->renderpasses);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for framebuffers.");
+
+    result = nuvk_sdf_descriptor_update_swapchain(&renderer->descriptors, context, &renderer->images);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for descriptors.");
 
     return NU_SUCCESS;
 }

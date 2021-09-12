@@ -25,15 +25,15 @@ static nu_result_t nuutils_command_event_terminate(void *data)
 
 nu_result_t nuutils_command_plugin_initialize(void)
 {
+    nu_result_t result;
+
     /* register command event */
     nu_event_register_info_t info;
     info.initialize = nuutils_command_event_initialize;
     info.terminate  = nuutils_command_event_terminate;
     info.size       = sizeof(nuutils_command_event_t);
-    if (nu_event_register(&info, &_module.event_id) != NU_SUCCESS) {
-        nu_error(NUUTILS_LOGGER_NAME, "Failed to initialize command event.");
-        return NU_FAILURE;
-    }
+    result = nu_event_register(&info, &_module.event_id);
+    NU_CHECK(result == NU_SUCCESS, return result, NUUTILS_LOGGER_NAME, "Failed to initialize command event.");
 
     return NU_SUCCESS;
 }

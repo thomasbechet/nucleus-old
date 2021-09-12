@@ -14,18 +14,21 @@ static nu_system_data_t _system;
 
 nu_result_t nu_logger_initialize(void)
 {
-    _system.log_file = NULL;
+    _system.log_file = NU_NULL_HANDLE;
     if (nu_config_get().logger.enable_log_file) {
         nu_path_t path, filename;
+        nu_result_t result;
+        
         nu_path_allocate_cstr(nu_config_get().logger.log_file_directory, &path);
         nu_path_allocate_cstr("nucleus.log", &filename);
         nu_path_join(&path, filename);
-        if (nu_file_open(path, NU_IO_MODE_WRITE, &_system.log_file) != NU_SUCCESS) {
-            nu_error(NU_LOGGER_NAME, "Failed to open log file: %s.", nu_path_get_cstr(path));
-            return NU_FAILURE;
-        }
+        result = nu_file_open(path, NU_IO_MODE_WRITE, &_system.log_file);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to open log file: %s.", nu_path_get_cstr(path));
+    
+    cleanup0:
         nu_path_free(path);
         nu_path_free(filename);
+        return result;
     }
 
     return NU_SUCCESS;

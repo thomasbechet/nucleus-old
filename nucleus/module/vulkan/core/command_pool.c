@@ -11,10 +11,8 @@ nu_result_t nuvk_command_pool_initialize(
     info.flags            = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
     info.queueFamilyIndex = context->queues.graphics_compute_family_index;
 
-    if (vkCreateCommandPool(context->device, &info, &context->allocator, &pool->graphics_command_pool) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create command pool.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreateCommandPool(context->device, &info, &context->allocator, &pool->graphics_command_pool);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create command pool.");
 
     return NU_SUCCESS;
 }
@@ -34,20 +32,16 @@ nu_result_t nuvk_command_buffer_begin_single(VkDevice device, VkCommandPool comm
     allocate_info.level              = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocate_info.commandBufferCount = 1;
 
-    if (vkAllocateCommandBuffers(device, &allocate_info, command_buffer) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to allocate single command buffer.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkAllocateCommandBuffers(device, &allocate_info, command_buffer);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to allocate single command buffer.");
 
     VkCommandBufferBeginInfo begin_info;
     memset(&begin_info, 0, sizeof(VkCommandBufferBeginInfo));
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 
-    if (vkBeginCommandBuffer(*command_buffer, &begin_info) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to begin single command buffer.");
-        return NU_FAILURE;
-    }
+    result = vkBeginCommandBuffer(*command_buffer, &begin_info);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to begin single command buffer.");
 
     return NU_SUCCESS;
 }

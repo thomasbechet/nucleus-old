@@ -104,17 +104,11 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     /* get plugin interface */
     nu_plugin_interface_t interface;
     result = nu_module_get_interface(module, NU_PLUGIN_INTERFACE_NAME, (nu_pfn_t*)&interface);
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_NAME, "Failed to get '%s' interface for plugin: %s.", NU_PLUGIN_INTERFACE_NAME, plugin_name);
-        return result;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_NAME, "Failed to get '%s' interface for plugin: %s.", NU_PLUGIN_INTERFACE_NAME, plugin_name);
 
     /* get callbacks */
     result = interface.get_callbacks(plugin_name, &plugin.callbacks);
-    if (result != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_NAME, "Failed to get plugin callbacks: %s.", plugin);
-        return result;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_NAME, "Failed to get plugin callbacks: %s.", plugin);
 
     /* save plugin name and module*/
     plugin.module = module;
@@ -123,10 +117,7 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     /* initialize plugin */
     if (plugin.callbacks.initialize) {
         result = plugin.callbacks.initialize();
-        if (result != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_NAME, "Failed to initialize plugin: %s.", plugin_name);
-            return result;
-        }
+        NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_NAME, "Failed to initialize plugin: %s.", plugin_name);
     }
 
     /* add the plugin */

@@ -120,10 +120,7 @@ static nu_result_t create_modules(
     /* vertex module */
     result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_VERTEX_BIT,
         sources[NUVK_SDF_PIPELINE_SOURCE_GEOMETRY_TEMPLATE_VERT], "geometry.vert", &pipeline->vertex);
-    if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry vertex shader.");
-        return result;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry vertex shader.");
 
     /* create fragment module with injected code */
     nu_string_t inject_instances_source;
@@ -139,10 +136,7 @@ static nu_result_t create_modules(
         VK_SHADER_STAGE_FRAGMENT_BIT, fragment_source, "geometry.frag", &pipeline->fragment);
     nu_string_free(inject_instances_source);
     nu_string_free(fragment_source);
-    if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry pipeline layout.");
-        return result;
-    }
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry pipeline layout.");
 
     return NU_SUCCESS;
 }
@@ -161,10 +155,8 @@ static nu_result_t create_layout(
     layout_info.setLayoutCount         = 1;
     layout_info.pSetLayouts            = &descriptors->low_frequency.layout;
 
-    if (vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry pipeline layout.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreatePipelineLayout(context->device, &layout_info, &context->allocator, &pipeline->layout);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create geometry pipeline layout.");
 
     return NU_SUCCESS;
 }
@@ -256,10 +248,8 @@ static nu_result_t create_pipeline(
     pipeline_info.pDynamicState       = &dynamic_state;
     pipeline_info.basePipelineHandle  = VK_NULL_HANDLE;
 
-    if (vkCreateGraphicsPipelines(context->device, VK_NULL_HANDLE, 1, &pipeline_info, &context->allocator, &pipeline->pipeline) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create geometry pipeline.");
-        return NU_FAILURE;
-    }
+    VkResult result = vkCreateGraphicsPipelines(context->device, VK_NULL_HANDLE, 1, &pipeline_info, &context->allocator, &pipeline->pipeline);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create geometry pipeline.");
 
     return NU_SUCCESS;
 }
@@ -273,11 +263,14 @@ nu_result_t nuvk_sdf_pipeline_geometry_create(
     const nu_string_t *sources
 )
 {
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
 
-    result &= create_modules(pipeline, context, shader_manager, sources, NULL, 0);
-    result &= create_layout(pipeline, context, descriptors);
-    result &= create_pipeline(pipeline, context, geometry_renderpass);
+    result = create_modules(pipeline, context, shader_manager, sources, NULL, 0);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create modules.");
+    result = create_layout(pipeline, context, descriptors);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create layout.");
+    result = create_pipeline(pipeline, context, geometry_renderpass);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create pipeline.");
 
     return NU_SUCCESS;
 }
@@ -309,10 +302,12 @@ nu_result_t nuvk_sdf_pipeline_geometry_recompile(
     vkDestroyShaderModule(context->device, pipeline->fragment, &context->allocator);
 
     /* recreate modules and shaders */
-    nu_result_t result = NU_SUCCESS;
+    nu_result_t result;
     
-    result &= create_modules(pipeline, context, shader_manager, sources, types, type_count);
-    result &= create_pipeline(pipeline, context, geometry_renderpass);
+    result = create_modules(pipeline, context, shader_manager, sources, types, type_count);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create modules.");
+    result = create_pipeline(pipeline, context, geometry_renderpass);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create pipeline.");
 
     return result;
 }

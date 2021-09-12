@@ -133,15 +133,8 @@ static nu_result_t glsl_source_to_spirv_code(
     }
 
     /* check errors */
-    if (compilation_result == NULL) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to compile glsl source to spirv code (internal error).");
-        return NU_FAILURE;
-    } else if (shaderc_result_get_compilation_status(compilation_result) != shaderc_compilation_status_success) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to compile glsl source to spirv code :");
-        nu_error(NUVK_LOGGER_NAME, "%s", shaderc_result_get_error_message(compilation_result));
-        shaderc_result_release(compilation_result);
-        return NU_FAILURE;
-    }
+    NU_CHECK(compilation_result != NULL, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to compile glsl source to spirv code (internal error).");
+    NU_CHECK(shaderc_result_get_compilation_status(compilation_result) == shaderc_compilation_status_success, goto cleanup0, NUVK_LOGGER_NAME, "Failed to compile glsl source to spirv code.");
 
     /* recover spirv code */
     *code_size = shaderc_result_get_length(compilation_result);
@@ -150,6 +143,22 @@ static nu_result_t glsl_source_to_spirv_code(
     shaderc_result_release(compilation_result);
 
     return NU_SUCCESS;
+
+cleanup0: ;
+    nu_string_t error_message;
+    nu_string_array_t error_lines;
+    nu_string_array_allocate(&error_lines);
+    nu_string_allocate_cstr(shaderc_result_get_error_message(compilation_result), &error_message);
+    nu_string_split(error_message, "\n", error_lines);
+    for (uint32_t i = 0; i < nu_string_array_get_length(error_lines); i++) {
+        nu_error(NUVK_LOGGER_NAME, nu_string_array_get(error_lines, i));
+    }
+    nu_string_array_free(error_lines);
+    nu_string_free(error_message);
+
+    shaderc_result_release(compilation_result);
+
+    return NU_FAILURE;
 }
 
 nu_result_t nuvk_shader_module_create_from_glsl_source(
@@ -165,10 +174,7 @@ nu_result_t nuvk_shader_module_create_from_glsl_source(
     uint32_t code_size;
     uint32_t *code;
     nu_result_t result = glsl_source_to_spirv_code(manager, stage, glsl_source, identifier, &code_size, &code);
-    if (result != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to convert glsl source to spirv code.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to convert glsl source to spirv code.");
 
     /* create shader module */
     VkShaderModuleCreateInfo info;
@@ -179,10 +185,7 @@ nu_result_t nuvk_shader_module_create_from_glsl_source(
     
     VkResult res = vkCreateShaderModule(context->device, &info, &context->allocator, module);
     nu_free(code);
-    if (res != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create shader module.");
-        return NU_FAILURE;
-    }
+    NU_CHECK(res == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create shader module.");
 
     return NU_SUCCESS;
 }

@@ -67,6 +67,8 @@ static nu_result_t unload_module(const nu_module_data_t *module)
 }
 static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
 {
+    nu_result_t result;
+
     /* reset memory */
     memset(module, 0, sizeof(nu_module_data_t));
     nu_path_allocate_cstr(path_cstr, &module->path);
@@ -104,36 +106,30 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
     nu_path_free(directory);
     nu_string_free(filename);
 
-    if (!module->handle) {
-        nu_path_free(module->path);
-        nu_warning(NU_LOGGER_NAME, "Failed to load module '%s'.", path_cstr);
-        return NU_FAILURE;
-    }
+    NU_CHECK(module->handle, goto cleanup0, NU_LOGGER_NAME, "Failed to load module '%s'.", path_cstr);
 
     /* get module info */
     nu_module_info_loader_pfn_t module_get_info;
-    if (get_function(module, NU_MODULE_INFO_NAME, (nu_pfn_t*)&module_get_info) != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_NAME, "'%s' function is required to load the module '%s'.", NU_MODULE_INFO_NAME, path_cstr);
-        unload_module(module);
-        return NU_FAILURE;
-    }
+    result = get_function(module, NU_MODULE_INFO_NAME, (nu_pfn_t*)&module_get_info);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME, "'%s' function is required to load the module '%s'.", NU_MODULE_INFO_NAME, path_cstr);
 
-    if (module_get_info(&module->info) != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_NAME, "Failed to retrieve info from module '%s'.", path_cstr);
-        unload_module(module);
-        return NU_FAILURE;
-    }
+    result = module_get_info(&module->info);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME, "Failed to retrieve info from module '%s'.", path_cstr);
 
     /* get interface loader */
     if (module->info.interface_count > 0) {
-        if (get_function(module, NU_MODULE_INTERFACE_NAME, (nu_pfn_t*)&module->interface_loader) != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_NAME, "Module '%s' has interfaces but no interface loader.", module->info.name);
-            unload_module(module);
-            return NU_FAILURE;
-        }
+        result = get_function(module, NU_MODULE_INTERFACE_NAME, (nu_pfn_t*)&module->interface_loader);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME, "Module '%s' has interfaces but no interface loader.", module->info.name);
     }
 
     return NU_SUCCESS;
+
+cleanup1:
+    unload_module(module);
+    return NU_FAILURE;
+cleanup0:
+    nu_path_free(module->path);
+    return NU_FAILURE;
 }
 
 nu_result_t nu_module_initialize(void)

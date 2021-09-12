@@ -41,9 +41,8 @@ static nu_result_t load_ini_file(void)
 {
     _system.parameter_count = 0;
 
-    if (ini_parse("engine/nucleus.ini", handler, NULL) < 0) {
-        return NU_FAILURE;
-    }
+    int code = ini_parse("engine/nucleus.ini", handler, NULL);
+    NU_CHECK(code >= 0, return NU_FAILURE, NU_LOGGER_NAME, "Failed to parse ini file.");
 
     /* context */
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, 0, &_system.config.context.version_major);
@@ -119,21 +118,23 @@ static nu_result_t load_ini_file(void)
 
 nu_result_t nu_config_load(nu_config_callback_pfn_t callback)
 {
+    nu_result_t result;
+
     memset(&_system.config, 0, sizeof(nu_config_t));
 
-    if (load_ini_file() != NU_SUCCESS) {
-        nu_warning(NU_LOGGER_NAME, "Failed to load ini file, using default configuration...");
-    }
+    result = load_ini_file();
+    NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_NAME, "Failed to load configuration.");
 
     if (callback) {
-        if (callback(&_system.config) != NU_SUCCESS) {
-            nu_warning(NU_LOGGER_NAME, "Error during user defined configuration.");
-            nu_config_unload();
-            return NU_FAILURE;
-        }
+        result = callback(&_system.config);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Error during user defined configuration.");
     }
 
     return NU_SUCCESS;
+
+cleanup0:
+    nu_config_unload();
+    return NU_FAILURE;
 }
 nu_result_t nu_config_unload(void)
 {

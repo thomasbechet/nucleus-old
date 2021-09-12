@@ -31,10 +31,8 @@ nu_result_t nuvk_image_create(
     memset(&allocation_info, 0, sizeof(VmaAllocationCreateInfo));
     allocation_info.usage = info->memory_usage;
 
-    if (vmaCreateImage(memory_manager->allocator, &image_info, &allocation_info, &image->image, &image->allocation, NULL) != VK_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to create image.");
-        return NU_FAILURE;
-    }
+    VkResult result = vmaCreateImage(memory_manager->allocator, &image_info, &allocation_info, &image->image, &image->allocation, NULL);
+    NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create image.");
 
     /* create image view */
     VkImageViewCreateInfo view_info;
@@ -49,13 +47,14 @@ nu_result_t nuvk_image_create(
     view_info.subresourceRange.baseArrayLayer = 0;
     view_info.subresourceRange.layerCount     = 1;
 
-    if (vkCreateImageView(context->device, &view_info, &context->allocator, &image->image_view) != VK_SUCCESS) {
-        vmaDestroyImage(memory_manager->allocator, image->image, image->allocation);
-        nu_error(NUVK_LOGGER_NAME, "Failed to create image view.");
-        return NU_FAILURE;
-    }
+    result = vkCreateImageView(context->device, &view_info, &context->allocator, &image->image_view);
+    NU_CHECK(result == VK_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to create image view.");
 
     return NU_SUCCESS;
+
+cleanup0:
+    vmaDestroyImage(memory_manager->allocator, image->image, image->allocation);
+    return NU_FAILURE;
 }
 nu_result_t nuvk_image_destroy(
     nuvk_image_t *image, 
