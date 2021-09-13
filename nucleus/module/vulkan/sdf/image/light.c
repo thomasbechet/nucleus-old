@@ -4,13 +4,13 @@ nu_result_t nuvk_sdf_image_light_create(
     nuvk_sdf_image_light_t *light,
     const nuvk_context_t *context,
     const nuvk_memory_manager_t *memory_manager,
-    const nuvk_swapchain_t *swapchain
+    const nu_vec2u_t resolution
 )
 {
     nuvk_image_info_t info;
     memset(&info, 0, sizeof(nuvk_image_info_t));
-    info.extent.width  = swapchain->extent.width;
-    info.extent.height = swapchain->extent.height;
+    info.extent.width  = resolution[0];
+    info.extent.height = resolution[1];
     info.format        = VK_FORMAT_R16G16B16A16_SFLOAT;
     info.tiling        = VK_IMAGE_TILING_OPTIMAL;
     info.image_usage   = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;

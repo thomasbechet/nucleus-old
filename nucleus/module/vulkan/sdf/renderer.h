@@ -8,18 +8,17 @@
 #include <nucleus/module/vulkan/sdf/pipeline/pipelines.h>
 #include <nucleus/module/vulkan/sdf/image/images.h>
 #include <nucleus/module/vulkan/sdf/framebuffer/framebuffers.h>
-#include <nucleus/module/vulkan/sdf/scene/camera.h>
 #include <nucleus/module/vulkan/sdf/scene/scene.h>
 
 typedef struct {
-    nuvk_sdf_scene_t scene;
-
     nuvk_sdf_buffers_t buffers;
     nuvk_sdf_renderpasses_t renderpasses;
     nuvk_sdf_descriptors_t descriptors;
     nuvk_sdf_pipelines_t pipelines;
     nuvk_sdf_images_t images;
     nuvk_sdf_framebuffers_t framebuffers;
+    nuvk_sdf_scene_t scene;
+    nu_vec2u_t viewport_size;
 } nuvk_sdf_renderer_t;
 
 nu_result_t nuvk_sdf_renderer_initialize(
@@ -35,25 +34,30 @@ nu_result_t nuvk_sdf_renderer_terminate(
     const nuvk_context_t *context,
     const nuvk_memory_manager_t *memory_manager
 );
-nu_result_t nuvk_sdf_renderer_render(
-    nuvk_sdf_renderer_t *renderer,
-    const nuvk_context_t *context,
-    const nuvk_swapchain_t *swapchain,
-    const nuvk_render_context_t *render_context
-);
 nu_result_t nuvk_sdf_renderer_update_swapchain(
     nuvk_sdf_renderer_t *renderer,
     const nuvk_context_t *context,
     const nuvk_memory_manager_t *memory_manager,
     const nuvk_swapchain_t *swapchain
 );
+nu_result_t nuvk_sdf_renderer_update_viewport_size(
+    nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
+    const nuvk_memory_manager_t *memory_manager,
+    const nu_vec2u_t size
+);
 nu_result_t nuvk_sdf_renderer_register_instance_type(
     nuvk_sdf_renderer_t *renderer,
     const nuvk_context_t *context,
     const nuvk_shader_manager_t *shader_manager,
-    const nuvk_swapchain_t *swapchain,
     const nuvk_sdf_instance_type_info_t *info,
     nuvk_sdf_instance_type_t *handle
+);
+nu_result_t nuvk_sdf_renderer_render(
+    nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
+    const nuvk_swapchain_t *swapchain,
+    const nuvk_render_context_t *render_context
 );
 
 #endif

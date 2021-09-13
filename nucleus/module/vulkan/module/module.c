@@ -30,6 +30,8 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->camera_set_fov  = nuvk_renderer_camera_set_fov;
         i->camera_set_view = nuvk_renderer_camera_set_view;
 
+        i->viewport_set_size = nuvk_renderer_viewport_set_size;
+
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUVK_SDF_INTERFACE_NAME)) {
         nuvk_sdf_interface_t *i = (nuvk_sdf_interface_t*)interface;

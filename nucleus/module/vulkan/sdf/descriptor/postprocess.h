@@ -20,7 +20,7 @@ nu_result_t nuvk_sdf_descriptor_postprocess_destroy(
     nuvk_sdf_descriptor_postprocess_t *descriptor,
     const nuvk_context_t *context
 );
-nu_result_t nuvk_sdf_descriptor_postprocess_update_swapchain(
+nu_result_t nuvk_sdf_descriptor_postprocess_update_images(
     nuvk_sdf_descriptor_postprocess_t *descriptor,
     const nuvk_context_t *context,
     const nuvk_sdf_image_light_t *image

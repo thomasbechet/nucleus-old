@@ -12,7 +12,7 @@ nu_result_t nuvk_sdf_image_geometry_create(
     nuvk_sdf_image_geometry_t *geometry,
     const nuvk_context_t *context,
     const nuvk_memory_manager_t *memory_manager,
-    const nuvk_swapchain_t *swapchain
+    const nu_vec2u_t resolution
 );
 nu_result_t nuvk_sdf_image_geometry_destroy(
     nuvk_sdf_image_geometry_t *geometry,

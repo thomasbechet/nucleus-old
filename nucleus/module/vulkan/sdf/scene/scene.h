@@ -41,8 +41,6 @@ typedef struct {
     nu_indexed_array_t instance_handles;
 } nuvk_sdf_scene_t;
 
-/* Note: use voxel rendering with instanced rendering */
-
 nu_result_t nuvk_sdf_scene_initialize(nuvk_sdf_scene_t *scene);
 nu_result_t nuvk_sdf_scene_terminate(nuvk_sdf_scene_t *scene);
 nu_result_t nuvk_sdf_scene_update_buffers(

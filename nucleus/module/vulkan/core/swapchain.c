@@ -56,7 +56,7 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
 
     /* find extent */
     VkExtent2D extent = capatibilities.currentExtent;
-    if (extent.width != INT32_MAX) {
+    if (width == UINT32_MAX || height == UINT32_MAX) {
         swapchain->extent = extent;
     } else {
         VkExtent2D min = capatibilities.minImageExtent;

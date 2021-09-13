@@ -92,7 +92,7 @@ nu_result_t nuvk_sdf_descriptor_light_destroy(
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_descriptor_light_update_swapchain(
+nu_result_t nuvk_sdf_descriptor_light_update_images(
     nuvk_sdf_descriptor_light_t *descriptor,
     const nuvk_context_t *context,
     const nuvk_sdf_image_geometry_t *geometry_image,

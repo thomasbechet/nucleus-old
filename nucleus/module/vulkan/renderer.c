@@ -29,16 +29,14 @@ nu_result_t nuvk_renderer_initialize(void)
 {
     _module.render_context_out_of_date = false;
 
-    if (nuvk_glfw_get_interface() != NU_SUCCESS) {
-        nu_error(NUVK_LOGGER_NAME, "Failed to get glfw interface.");
-        return NU_FAILURE;
-    }
+    nu_result_t result = nuvk_glfw_get_interface();
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to get glfw interface.");
 
     if (nuvk_context_initialize(&_module.context) != NU_SUCCESS) return NU_FAILURE;
     if (nuvk_memory_manager_initialize(&_module.memory_manager, &_module.context) != NU_SUCCESS) return NU_FAILURE;
     if (nuvk_shader_manager_initialize(&_module.shader_manager) != NU_SUCCESS) return NU_FAILURE;
     if (nuvk_command_pool_initialize(&_module.command_pool, &_module.context) != NU_SUCCESS) return NU_FAILURE;
-    if (nuvk_swapchain_initialize(&_module.swapchain, &_module.context, 1920, 1080) != NU_SUCCESS) return NU_FAILURE;
+    if (nuvk_swapchain_initialize(&_module.swapchain, &_module.context, UINT32_MAX, UINT32_MAX) != NU_SUCCESS) return NU_FAILURE;
     if (nuvk_render_context_initialize(&_module.render_context, &_module.context, &_module.swapchain, &_module.command_pool, 3) != NU_SUCCESS) return NU_FAILURE;
 
     if (nuvk_sdf_renderer_initialize(&_module.sdf, &_module.context, &_module.memory_manager, 
@@ -111,9 +109,14 @@ nu_result_t nuvk_renderer_camera_set_view(nu_renderer_camera_t handle, const nu_
     return NU_SUCCESS;
 }
 
+nu_result_t nuvk_renderer_viewport_set_size(const nu_vec2u_t size)
+{
+    return nuvk_sdf_renderer_update_viewport_size(&_module.sdf, &_module.context, &_module.memory_manager, size);
+}
+
 nu_result_t nuvk_sdf_instance_type_register(const nuvk_sdf_instance_type_info_t *info, nuvk_sdf_instance_type_t *handle)
 {
-    return nuvk_sdf_renderer_register_instance_type(&_module.sdf, &_module.context, &_module.shader_manager, &_module.swapchain, info, handle);
+    return nuvk_sdf_renderer_register_instance_type(&_module.sdf, &_module.context, &_module.shader_manager, info, handle);
 }
 nu_result_t nuvk_sdf_instance_create(const nuvk_sdf_instance_info_t *info, nuvk_sdf_instance_t *handle)
 {

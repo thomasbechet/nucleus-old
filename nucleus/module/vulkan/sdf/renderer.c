@@ -13,23 +13,57 @@ nu_result_t nuvk_sdf_renderer_initialize(
 {
     nu_result_t result;
 
-    result = nuvk_sdf_buffers_initialize(&renderer->buffers, context, memory_manager, render_context);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create buffers.");
+    nu_vec2u_copy((nu_vec2u_t){1024, 576}, renderer->viewport_size); /* default internal resolution */
 
-    result = nuvk_sdf_images_initialize(&renderer->images, context, memory_manager, swapchain);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create images.");
+    /* buffers */
+    result =  nuvk_sdf_buffer_environment_create(&renderer->buffers.environment, context, memory_manager, render_context);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create environment buffer.");
+    result = nuvk_sdf_buffer_instances_create(&renderer->buffers.instances, context, memory_manager, render_context);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create instances buffer.");
 
-    result = nuvk_sdf_renderpasses_initialize(&renderer->renderpasses, context, swapchain, &renderer->images);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create renderpasses.");
+    /* images */
+    result = nuvk_sdf_image_geometry_create(&renderer->images.geometry, context, memory_manager, renderer->viewport_size);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry image.");
+    result = nuvk_sdf_image_light_create(&renderer->images.light, context, memory_manager, renderer->viewport_size);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light image.");
 
-    result = nuvk_sdf_framebuffers_initialize(&renderer->framebuffers, context, swapchain, &renderer->images, &renderer->renderpasses);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create framebuffers.");
+    /* renderpasses */
+    result = nuvk_sdf_renderpass_geometry_create(&renderer->renderpasses.geometry, context, &renderer->images.geometry);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry renderpass.");
+    result = nuvk_sdf_renderpass_postprocess_create(&renderer->renderpasses.postprocess, context, swapchain);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess renderpass.");
 
-    result = nuvk_sdf_descriptors_initialize(&renderer->descriptors, context, &renderer->buffers, &renderer->images);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create descriptors.");
+    /* framebuffers */
+    result = nuvk_sdf_framebuffer_geometry_create(&renderer->framebuffers.geometry, context, &renderer->images.geometry, renderer->renderpasses.geometry);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create geometry framebuffer.");
+    result = nuvk_sdf_framebuffer_postprocess_create(&renderer->framebuffers.postprocess, context, swapchain, renderer->renderpasses.postprocess);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess framebuffer.");
 
-    result = nuvk_sdf_pipelines_initialize(&renderer->pipelines, context, shader_manager, &renderer->descriptors, &renderer->renderpasses);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create pipelines.");
+    /* descriptors */
+    result = nuvk_sdf_descriptor_pool_create(&renderer->descriptors.pool, context, 2);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create descriptor pool.");
+    result = nuvk_sdf_descriptor_low_frequency_create(&renderer->descriptors.low_frequency, context, 
+        &renderer->buffers.environment, &renderer->buffers.instances, renderer->descriptors.pool);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create low frequency descriptor.");
+    result = nuvk_sdf_descriptor_light_create(&renderer->descriptors.light, context,
+        &renderer->images.geometry, &renderer->images.light, renderer->descriptors.pool);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create light descriptor.");
+    result = nuvk_sdf_descriptor_postprocess_create(&renderer->descriptors.postprocess, context,
+        &renderer->images.light, renderer->descriptors.pool);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess descriptor.");
+
+    /* pipelines */
+    result = nuvk_sdf_pipeline_sources_load(renderer->pipelines.sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to load pipeline sources.");
+    result = nuvk_sdf_pipeline_geometry_create(&renderer->pipelines.geometry, context,
+        shader_manager, &renderer->descriptors, renderer->renderpasses.geometry, renderer->pipelines.sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry pipeline.");
+    result = nuvk_sdf_pipeline_light_create(&renderer->pipelines.light, context,
+        shader_manager, &renderer->descriptors, renderer->pipelines.sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light pipeline.");
+    result = nuvk_sdf_pipeline_postprocess_create(&renderer->pipelines.postprocess, context,
+        shader_manager, &renderer->descriptors, renderer->renderpasses.postprocess, renderer->pipelines.sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess pipeline.");
 
     nuvk_sdf_scene_initialize(&renderer->scene);
 
@@ -85,14 +119,126 @@ nu_result_t nuvk_sdf_renderer_terminate(
 
     nuvk_sdf_scene_terminate(&renderer->scene);
 
-    nuvk_sdf_pipelines_terminate(&renderer->pipelines, context);
-    nuvk_sdf_descriptors_terminate(&renderer->descriptors, context);
-    nuvk_sdf_framebuffers_terminate(&renderer->framebuffers, context);
-    nuvk_sdf_renderpasses_terminate(&renderer->renderpasses, context);
-    nuvk_sdf_images_terminate(&renderer->images, context, memory_manager);
-    nuvk_sdf_buffers_terminate(&renderer->buffers, memory_manager);
+    /* pipelines */
+    nuvk_sdf_pipeline_geometry_destroy(&renderer->pipelines.geometry, context);
+    nuvk_sdf_pipeline_light_destroy(&renderer->pipelines.light, context);
+    nuvk_sdf_pipeline_postprocess_destroy(&renderer->pipelines.postprocess, context);
+    nuvk_sdf_pipeline_sources_unload(renderer->pipelines.sources);
+
+    /* descriptors */
+    nuvk_sdf_descriptor_light_destroy(&renderer->descriptors.light, context);
+    nuvk_sdf_descriptor_postprocess_destroy(&renderer->descriptors.postprocess, context);
+    nuvk_sdf_descriptor_low_frequency_destroy(&renderer->descriptors.low_frequency, context);
+    vkDestroyDescriptorPool(context->device, renderer->descriptors.pool, &context->allocator);
+    
+    /* framebuffers */
+    nuvk_sdf_framebuffer_postprocess_destroy(&renderer->framebuffers.postprocess, context);
+    nuvk_sdf_framebuffer_geometry_destroy(&renderer->framebuffers.geometry, context);
+    
+    /* renderpasses */
+    vkDestroyRenderPass(context->device, renderer->renderpasses.postprocess, &context->allocator);
+    vkDestroyRenderPass(context->device, renderer->renderpasses.geometry, &context->allocator);
+    
+    /* images */
+    nuvk_sdf_image_light_destroy(&renderer->images.light, context, memory_manager);
+    nuvk_sdf_image_geometry_destroy(&renderer->images.geometry, context, memory_manager);
+    
+    /* buffers */
+    nuvk_sdf_buffer_instances_destroy(&renderer->buffers.instances, memory_manager);
+    nuvk_sdf_buffer_environment_destroy(&renderer->buffers.environment, memory_manager);
 
     return NU_SUCCESS;
+}
+nu_result_t nuvk_sdf_renderer_update_swapchain(
+    nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
+    const nuvk_memory_manager_t *memory_manager,
+    const nuvk_swapchain_t *swapchain
+)
+{
+    nu_result_t result;
+
+    /* renderpasses */
+    vkDestroyRenderPass(context->device, renderer->renderpasses.postprocess, &context->allocator);
+    result = nuvk_sdf_renderpass_postprocess_create(&renderer->renderpasses.postprocess, context, swapchain);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to recreate postprocess renderpass.");
+
+    /* framebuffers */
+    nuvk_sdf_framebuffer_postprocess_destroy(&renderer->framebuffers.postprocess, context);
+    result = nuvk_sdf_framebuffer_postprocess_create(&renderer->framebuffers.postprocess, context, swapchain, renderer->renderpasses.postprocess);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to recreate postprocess framebuffer.");
+
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_sdf_renderer_update_viewport_size(
+    nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
+    const nuvk_memory_manager_t *memory_manager,
+    const nu_vec2u_t size
+)
+{
+    nu_result_t result;
+
+    vkDeviceWaitIdle(context->device);
+
+    nu_vec2u_copy(size, renderer->viewport_size);
+
+    /* images */
+    nuvk_sdf_image_geometry_destroy(&renderer->images.geometry, context, memory_manager);
+    result = nuvk_sdf_image_geometry_create(&renderer->images.geometry, context, memory_manager, renderer->viewport_size);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry image.");
+
+    nuvk_sdf_image_light_destroy(&renderer->images.light, context, memory_manager);
+    result = nuvk_sdf_image_light_create(&renderer->images.light, context, memory_manager, renderer->viewport_size);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light image.");
+
+    /* framebuffers */
+    nuvk_sdf_framebuffer_geometry_destroy(&renderer->framebuffers.geometry, context);
+    result = nuvk_sdf_framebuffer_geometry_create(&renderer->framebuffers.geometry, context, &renderer->images.geometry, renderer->renderpasses.geometry);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create geometry framebuffer.");
+
+    /* descriptors */
+    result = nuvk_sdf_descriptor_light_update_images(&renderer->descriptors.light, context, &renderer->images.geometry, &renderer->images.light);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to update light descriptor.");
+
+    result = nuvk_sdf_descriptor_postprocess_update_images(&renderer->descriptors.postprocess, context, &renderer->images.light);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to update postprocess descriptor.");
+    
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_sdf_renderer_register_instance_type(
+    nuvk_sdf_renderer_t *renderer,
+    const nuvk_context_t *context,
+    const nuvk_shader_manager_t *shader_manager,
+    const nuvk_sdf_instance_type_info_t *info,
+    nuvk_sdf_instance_type_t *handle
+)
+{
+    vkDeviceWaitIdle(context->device);
+
+    /* add type to the scene */
+    nuvk_sdf_scene_register_instance_type(&renderer->scene, info, handle);
+
+    /* build new list of types */
+    nuvk_sdf_instance_type_info_t *types = (nuvk_sdf_instance_type_info_t*)nu_malloc(sizeof(nuvk_sdf_instance_type_info_t) * renderer->scene.type_count);
+    for (uint32_t i = 0; i < renderer->scene.type_count; i++) {
+        types[i] = renderer->scene.types[i].info;
+    }
+
+    nu_result_t result;
+
+    /* reconfigure buffers */
+    result = nuvk_sdf_buffer_instances_configure_instance_types(&renderer->buffers.instances, types, renderer->scene.type_count);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to reconfigure buffers.");
+    
+    /* recompile pipeline */
+    result = nuvk_sdf_pipeline_geometry_recompile(&renderer->pipelines.geometry, context, shader_manager, renderer->renderpasses.geometry, 
+        renderer->pipelines.sources, types, renderer->scene.type_count);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to recompile pipeline.");
+
+cleanup0:
+    nu_free(types);
+    return result;
 }
 nu_result_t nuvk_sdf_renderer_render(
     nuvk_sdf_renderer_t *renderer,
@@ -110,26 +256,27 @@ nu_result_t nuvk_sdf_renderer_render(
     /* update scene */
     nuvk_sdf_scene_update_buffers(&renderer->scene, render_context, &renderer->buffers.environment, &renderer->buffers.instances);
 
-    /* screen render area */
+    /* viewport render area */
     VkRect2D render_area;
-    render_area.offset.x = 0;
-    render_area.offset.y = 0;
-    render_area.extent   = swapchain->extent;
+    render_area.offset.x      = 0;
+    render_area.offset.y      = 0;
+    render_area.extent.width  = renderer->viewport_size[0];
+    render_area.extent.height = renderer->viewport_size[1];
 
     VkViewport viewport;
     viewport.x        = 0;
-    viewport.y        = swapchain->extent.height;
-    viewport.width    = swapchain->extent.width;
-    viewport.height   = -(int32_t)swapchain->extent.height;
+    viewport.y        = renderer->viewport_size[1];
+    viewport.width    = renderer->viewport_size[0];
+    viewport.height   = -(int32_t)renderer->viewport_size[1];
     viewport.minDepth = 0.0;
     viewport.maxDepth = 1.0;
 
     VkRect2D scissor;
-    scissor.offset.x = 0;
-    scissor.offset.y = 0;
-    scissor.extent   = swapchain->extent;
+    scissor.offset.x      = 0;
+    scissor.offset.y      = 0;
+    scissor.extent.width  = renderer->viewport_size[0];
+    scissor.extent.height = renderer->viewport_size[1];
 
-    /* set viewport */
     vkCmdSetViewport(cmd, 0, 1, &viewport);
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
@@ -201,7 +348,7 @@ nu_result_t nuvk_sdf_renderer_render(
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.layout,
         1, 1, &renderer->descriptors.light.descriptor, 0, NULL);
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.pipeline);
-    vkCmdDispatch(cmd, (swapchain->extent.width / 16), (swapchain->extent.height / 16), 1);
+    vkCmdDispatch(cmd, (renderer->viewport_size[0] / 16), (renderer->viewport_size[1] / 16), 1);
 
     VkImageMemoryBarrier light_images;
     memset(&light_images, 0, sizeof(VkImageMemoryBarrier));
@@ -227,6 +374,23 @@ nu_result_t nuvk_sdf_renderer_render(
         1, &light_images
     );
 
+    /* screen render area */
+    render_area.offset.x = 0;
+    render_area.offset.y = 0;
+    render_area.extent   = swapchain->extent;
+
+    viewport.x        = 0;
+    viewport.y        = swapchain->extent.height;
+    viewport.width    = swapchain->extent.width;
+    viewport.height   = -(int32_t)swapchain->extent.height;
+    viewport.minDepth = 0.0;
+    viewport.maxDepth = 1.0;
+
+    scissor = render_area;
+
+    vkCmdSetViewport(cmd, 0, 1, &viewport);
+    vkCmdSetScissor(cmd, 0, 1, &scissor);
+
     /* postprocess pass */
     VkRenderPassBeginInfo postprocess_begin_info;
     memset(&postprocess_begin_info, 0, sizeof(VkRenderPassBeginInfo));
@@ -247,60 +411,4 @@ nu_result_t nuvk_sdf_renderer_render(
     nuvk_sdf_camera_end_frame(&renderer->scene.camera);
 
     return NU_SUCCESS;
-}
-nu_result_t nuvk_sdf_renderer_update_swapchain(
-    nuvk_sdf_renderer_t *renderer,
-    const nuvk_context_t *context,
-    const nuvk_memory_manager_t *memory_manager,
-    const nuvk_swapchain_t *swapchain
-)
-{
-    nu_result_t result;
-
-    result = nuvk_sdf_images_update_swapchain(&renderer->images, context, memory_manager, swapchain);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for images.");
-
-    result = nuvk_sdf_renderpasses_update_swapchain(&renderer->renderpasses, context, swapchain, &renderer->images);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for pipelines.");
-
-    result = nuvk_sdf_framebuffers_update_swapchain(&renderer->framebuffers, context, swapchain, &renderer->images, &renderer->renderpasses);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for framebuffers.");
-
-    result = nuvk_sdf_descriptor_update_swapchain(&renderer->descriptors, context, &renderer->images);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update swapchain for descriptors.");
-
-    return NU_SUCCESS;
-}
-nu_result_t nuvk_sdf_renderer_register_instance_type(
-    nuvk_sdf_renderer_t *renderer,
-    const nuvk_context_t *context,
-    const nuvk_shader_manager_t *shader_manager,
-    const nuvk_swapchain_t *swapchain,
-    const nuvk_sdf_instance_type_info_t *info,
-    nuvk_sdf_instance_type_t *handle
-)
-{
-    vkDeviceWaitIdle(context->device);
-
-    /* add type to the scene */
-    nuvk_sdf_scene_register_instance_type(&renderer->scene, info, handle);
-
-    /* build new list of types */
-    nuvk_sdf_instance_type_info_t *types = (nuvk_sdf_instance_type_info_t*)nu_malloc(sizeof(nuvk_sdf_instance_type_info_t) * renderer->scene.type_count);
-    for (uint32_t i = 0; i < renderer->scene.type_count; i++) {
-        types[i] = renderer->scene.types[i].info;
-    }
-
-    nu_result_t result = NU_SUCCESS;
-
-    /* reconfigure buffers */
-    result &= nuvk_sdf_buffer_instances_configure_instance_types(&renderer->buffers.instances, types, renderer->scene.type_count);
-    /* recompile pipeline */
-    result &= nuvk_sdf_pipeline_geometry_recompile(&renderer->pipelines.geometry, context, shader_manager, renderer->renderpasses.geometry, 
-        renderer->pipelines.sources, types, renderer->scene.type_count);
-
-    /* free resources */
-    nu_free(types);
-
-    return result;
 }
