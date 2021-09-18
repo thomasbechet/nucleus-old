@@ -81,7 +81,7 @@ nu_result_t nu_file_close(nu_file_t file)
     fclose((FILE*)file);
     return NU_SUCCESS;
 }
-nu_result_t nu_file_readall_bytes(nu_path_t path, uint32_t *nbytes, char **buf)
+nu_result_t nu_io_readall_bytes(nu_path_t path, uint32_t *nbytes, int8_t **buf)
 {
     if (!nu_path_is_filename(path)) return NU_FAILURE;
 
@@ -94,14 +94,14 @@ nu_result_t nu_file_readall_bytes(nu_path_t path, uint32_t *nbytes, char **buf)
 
     if (*nbytes == 0) return NU_FAILURE;
 
-    *buf = (char*)nu_malloc(*nbytes * sizeof(char));
+    *buf = (int8_t*)nu_malloc(*nbytes * sizeof(int8_t));
     fread(*buf, *nbytes, 1, fp);
 
     fclose(fp);
 
     return NU_SUCCESS;
 }
-nu_result_t nu_file_readall_string(nu_path_t path, nu_string_t *str)
+nu_result_t nu_io_readall_string(nu_path_t path, nu_string_t *str)
 {
     FILE *fp = fopen(nu_path_get_cstr(path), "rb");
     if (!fp) return NU_FAILURE;

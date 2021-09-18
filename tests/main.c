@@ -3,6 +3,7 @@
 
 #include <nucleus/nucleus.h>
 #include <nucleus/module/utils.h>
+#include <nucleus/module/lua.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -144,6 +145,10 @@ static nu_result_t on_start(void)
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
     nu_plugin_require(module, NUUTILS_CONSOLE_PLUGIN_NAME);
     nu_plugin_require(module, NUUTILS_SPECTATOR_PLUGIN_NAME);
+
+    nu_module_t lua_module;
+    NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
+    nu_plugin_require(lua_module, NULUA_PLUGIN_NAME);
 
     /* load texture */
     nu_renderer_texture_create_info_t texture_info = {0};
