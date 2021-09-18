@@ -22,7 +22,7 @@ typedef nu_result_t (*nu_module_interface_loader_pfn_t)(const char*, void*);
 
 typedef struct {
     nu_module_info_t info;
-    nu_path_t path;
+    nu_string_t path;
     void *handle;
     nu_module_interface_loader_pfn_t interface_loader;
 } nu_module_data_t;
@@ -61,7 +61,7 @@ static nu_result_t unload_module(const nu_module_data_t *module)
     dlclose(module->handle);
 #endif
 
-    nu_path_free(module->path);
+    nu_string_free(module->path);
 
     return NU_SUCCESS;
 }
@@ -71,23 +71,23 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
 
     /* reset memory */
     memset(module, 0, sizeof(nu_module_data_t));
-    nu_path_allocate_cstr(path_cstr, &module->path);
+    nu_string_allocate_cstr(&module->path, path_cstr);
+    nu_string_resolve_path(&module->path);
 
     /* extract directory and filename */
-    nu_string_t filename;
-    nu_path_t directory;
-    nu_path_get_directory(module->path, &directory);
-    nu_path_get_filename(module->path, &filename);
+    nu_string_t filename, directory;
+    nu_string_get_directory(module->path, &directory);
+    nu_string_get_filename(module->path, &filename);
 
     /* loading module */
 #if defined(NU_PLATFORM_WINDOWS)
     nu_string_t final_path;
     
     #if defined(__MINGW32__)
-        nu_string_allocate_format(&final_path, "%slib%s.dll", nu_path_get_cstr(directory),
+        nu_string_allocate_format(&final_path, "%slib%s.dll", nu_string_get_cstr(directory),
             nu_string_get_cstr(filename));
     #else
-        nu_string_allocate_format(&final_path, "%s%s.dll", nu_path_get_cstr(directory),
+        nu_string_allocate_format(&final_path, "%s%s.dll", nu_string_get_cstr(directory),
             nu_string_get_cstr(filename));
     #endif
 
@@ -103,7 +103,7 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
     nu_string_free(final_path);
 #endif
 
-    nu_path_free(directory);
+    nu_string_free(directory);
     nu_string_free(filename);
 
     NU_CHECK(module->handle, goto cleanup0, NU_LOGGER_NAME, "Failed to load module '%s'.", path_cstr);
@@ -128,7 +128,7 @@ cleanup1:
     unload_module(module);
     return NU_FAILURE;
 cleanup0:
-    nu_path_free(module->path);
+    nu_string_free(module->path);
     return NU_FAILURE;
 }
 

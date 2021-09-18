@@ -52,7 +52,7 @@ nu_result_t nuutils_command_execute(const char *cstr_command)
     /* split command */
     nu_string_array_t tokens;
     nu_string_array_allocate(&tokens);
-    nu_string_split_cstr(cstr_command, " ", tokens);
+    nu_string_cstr_split(cstr_command, " ", tokens);
 
     /* post event */
     nuutils_command_event_t event;

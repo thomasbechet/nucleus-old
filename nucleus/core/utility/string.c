@@ -255,6 +255,14 @@ static uint32_t nu_string_find_last_ncstr(const char *str, uint32_t nstr, const 
     }
     return nstr;
 }
+uint32_t nu_string_cstr_find_first_cstr(const char *cstr, const char *token)
+{
+    return nu_string_find_last_ncstr(cstr, strlen(cstr), token, strlen(token));
+}
+uint32_t nu_string_cstr_find_first(const char *cstr, nu_string_t token)
+{
+    return nu_string_find_last_ncstr(cstr, strlen(cstr), nu_string_get_str_(token), nu_string_get_length_(token));
+}
 uint32_t nu_string_find_last_cstr(nu_string_t str, const char *token)
 {
     return nu_string_find_last_ncstr(nu_string_get_str_(str), nu_string_get_length_(str), token, strlen(token));
@@ -370,7 +378,7 @@ static inline void nu_string_split_ncstr(const char *cstr, uint32_t n, const cha
         nu_string_array_add_ncstr(tokens, s + start, tlen);
     }
 }
-void nu_string_split_cstr(const char *cstr, const char *delim, nu_string_array_t tokens)
+void nu_string_cstr_split(const char *cstr, const char *delim, nu_string_array_t tokens)
 {
     nu_string_split_ncstr(cstr, strlen(cstr), delim, tokens);
 }
@@ -446,4 +454,71 @@ void nu_string_array_clear(nu_string_array_t array)
     nu_string_array_header_t *header = (nu_string_array_header_t*)array;
     header->length = 0;
     header->head = 0;
+}
+
+void nu_string_resolve_path(nu_string_t *path)
+{
+    nu_string_replace_cstr(path, "$ENGINE_DIR", NU_PATH_ENGINE_DIRECTORY);
+    nu_string_replace_cstr(path, "$MODULE_DIR", NU_PATH_MODULE_DIRECTORY);
+    nu_string_replace_cstr(path, "$ROOT_DIR", NU_PATH_ROOT_DIRECTORY);
+
+    nu_string_replace_cstr(path, "\\", NU_PATH_SEPARATOR);
+    nu_string_replace_cstr(path, "//", NU_PATH_SEPARATOR);
+    if (nu_string_get_cstr(*path)[0] == NU_PATH_SEPARATOR[0]) {
+        nu_string_erase(path, 0, 1);
+    }
+}
+void nu_string_get_filename(nu_string_t path, nu_string_t *filename)
+{
+    nu_string_allocate_copy(filename, path);
+
+    uint32_t index_back = nu_string_find_last_cstr(path, NU_PATH_SEPARATOR);
+    if (index_back != nu_string_get_length(path)) {
+        nu_string_erase(filename, 0, index_back + 1);
+    }
+
+    uint32_t index_dot = nu_string_find_last_cstr(*filename, ".");
+    if (index_dot != nu_string_get_length(*filename)) {
+        nu_string_erase(filename, index_dot, nu_string_get_length(*filename) - index_dot);
+    }
+}
+void nu_string_get_directory(nu_string_t path, nu_string_t *directory)
+{
+    uint32_t index = nu_string_find_last_cstr(path, NU_PATH_SEPARATOR);
+    if (index != nu_string_get_length(path)) {
+        nu_string_allocate_substr(directory, path, 0, index + 1);
+    } else {
+        nu_string_allocate(directory);
+    }
+}
+void nu_string_cstr_get_directory(const char *path, nu_string_t *directory)
+{
+    uint32_t index = nu_string_cstr_find_first_cstr(path, NU_PATH_SEPARATOR);
+    if (index != strlen(path)) {
+        nu_string_allocate_substr_cstr(directory, path, 0, index + 1);
+    } else {
+        nu_string_allocate(directory);
+    }
+}
+void nu_string_get_extension(nu_string_t path, nu_string_t *extension)
+{
+    uint32_t index_dot = nu_string_find_last_cstr(path, ".");
+    uint32_t index_back = nu_string_find_last_cstr(path, NU_PATH_SEPARATOR);
+    if (index_dot == nu_string_get_length(path) ||
+        (index_back != nu_string_get_length(path) && index_back > index_dot)) {
+        nu_string_allocate(extension);
+    } else {
+        nu_string_allocate_substr(extension, path, index_dot + 1, nu_string_get_length(path) - index_dot - 1);
+    }
+}
+bool nu_string_is_directory(nu_string_t path)
+{
+    uint32_t len = nu_string_get_length(path);
+    if (len == 0) return true;
+    char back = nu_string_get_cstr(path)[len - 1];
+    return back == NU_PATH_SEPARATOR[0];
+}
+bool nu_string_is_filename(nu_string_t path)
+{
+    return !nu_string_is_directory(path);
 }

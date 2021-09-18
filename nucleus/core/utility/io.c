@@ -1,4 +1,4 @@
-#include <nucleus/core/utility/io/io.h>
+#include <nucleus/core/utility/io.h>
 
 #include <nucleus/core/coresystem/memory/memory.h>
 
@@ -48,26 +48,24 @@ static nu_result_t create_directory(const char *dir)
 }
 #endif
 
-nu_result_t nu_file_open(nu_path_t path, nu_io_mode_t mode, nu_file_t *file)
+nu_result_t nu_file_open(nu_file_t *file, const char *filename, nu_io_mode_t mode)
 {
-    if (!nu_path_is_filename(path)) return NU_FAILURE;
-
     FILE *fp;
     switch (mode) {
         case NU_IO_MODE_READ:
-            fp = fopen(nu_path_get_cstr(path), "rb");
+            fp = fopen(filename, "rb");
             break;
         case NU_IO_MODE_WRITE: {
-            nu_path_t directory;
-            nu_path_get_directory(path, &directory);
-            nu_result_t result = create_directory(nu_path_get_cstr(directory));
-            nu_path_free(directory);
+            nu_string_t directory;
+            nu_string_cstr_get_directory(filename, &directory);
+            nu_result_t result = create_directory(nu_string_get_cstr(directory));
+            nu_string_free(directory);
             if (result != NU_SUCCESS) return NU_FAILURE;
-            fp = fopen(nu_path_get_cstr(path), "wb");
+            fp = fopen(filename, "wb");
             break;
         }
         case NU_IO_MODE_APPEND:
-            fp = fopen(nu_path_get_cstr(path), "wb+");
+            fp = fopen(filename, "wb+");
             break;
         default:
             break;
@@ -81,11 +79,9 @@ nu_result_t nu_file_close(nu_file_t file)
     fclose((FILE*)file);
     return NU_SUCCESS;
 }
-nu_result_t nu_io_readall_bytes(nu_path_t path, uint32_t *nbytes, int8_t **buf)
+nu_result_t nu_io_readall_bytes(const char* filename, uint32_t *nbytes, int8_t **buf)
 {
-    if (!nu_path_is_filename(path)) return NU_FAILURE;
-
-    FILE *fp = fopen(nu_path_get_cstr(path), "rb");
+    FILE *fp = fopen(filename, "rb");
     if (!fp) return NU_FAILURE;
 
     fseek(fp, 0, SEEK_END);
@@ -101,9 +97,9 @@ nu_result_t nu_io_readall_bytes(nu_path_t path, uint32_t *nbytes, int8_t **buf)
 
     return NU_SUCCESS;
 }
-nu_result_t nu_io_readall_string(nu_path_t path, nu_string_t *str)
+nu_result_t nu_io_readall_string(const char* filename, nu_string_t *str)
 {
-    FILE *fp = fopen(nu_path_get_cstr(path), "rb");
+    FILE *fp = fopen(filename, "rb");
     if (!fp) return NU_FAILURE;
 
     fseek(fp, 0, SEEK_END);

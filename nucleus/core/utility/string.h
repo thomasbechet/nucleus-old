@@ -5,6 +5,11 @@
 #include <nucleus/core/utility/macro.h>
 #include <nucleus/core/utility/result.h>
 
+#define NU_PATH_SEPARATOR        "/"
+#define NU_PATH_ENGINE_DIRECTORY "engine/"
+#define NU_PATH_MODULE_DIRECTORY "engine/module/"
+#define NU_PATH_ROOT_DIRECTORY   ""
+
 NU_DECLARE_HANDLE(nu_string_t);
 NU_DECLARE_HANDLE(nu_string_array_t);
 
@@ -35,15 +40,15 @@ NU_API void nu_string_append_cstr(nu_string_t *str, const char *cstr);
 NU_API void nu_string_append(nu_string_t *str, nu_string_t other);
 NU_API void nu_string_insert_cstr(nu_string_t *str, const char *cstr, uint32_t index);
 NU_API void nu_string_insert(nu_string_t *str, nu_string_t other, uint32_t index);
-NU_API uint32_t nu_string_find_first_cstr(nu_string_t str, const char *token);
-NU_API uint32_t nu_string_find_first(nu_string_t str, nu_string_t token);
+NU_API uint32_t nu_string_cstr_find_first_cstr(const char *cstr, const char *token);
+NU_API uint32_t nu_string_cstr_find_first(const char *cstr, nu_string_t token);
 NU_API uint32_t nu_string_find_last_cstr(nu_string_t str, const char *token);
 NU_API uint32_t nu_string_find_last(nu_string_t str, nu_string_t token);
 NU_API uint32_t nu_string_replace_cstr(nu_string_t *str, const char *token, const char *other);
 NU_API uint32_t nu_string_replace(nu_string_t *str, const char *token, nu_string_t other);
 NU_API void nu_string_erase(nu_string_t *str, uint32_t index, uint32_t len);
 NU_API void nu_string_trim(nu_string_t *str);
-NU_API void nu_string_split_cstr(const char *cstr, const char *delim, nu_string_array_t tokens);
+NU_API void nu_string_cstr_split(const char *cstr, const char *delim, nu_string_array_t tokens);
 NU_API void nu_string_split(nu_string_t str, const char *delim, nu_string_array_t tokens);
 
 NU_API void nu_string_array_allocate(nu_string_array_t *array);
@@ -52,5 +57,13 @@ NU_API const char *nu_string_array_get(nu_string_array_t array, uint32_t index);
 NU_API uint32_t nu_string_array_get_length(nu_string_array_t array);
 NU_API void nu_string_array_add_ncstr(nu_string_array_t array, const char *cstr, uint32_t n);
 NU_API void nu_string_array_clear(nu_string_array_t array);
+
+NU_API void nu_string_resolve_path(nu_string_t *path);
+NU_API void nu_string_get_filename(nu_string_t path, nu_string_t *filename);
+NU_API void nu_string_get_directory(nu_string_t path, nu_string_t *directory);
+NU_API void nu_string_cstr_get_directory(const char *path, nu_string_t *directory);
+NU_API void nu_string_get_extension(nu_string_t path, nu_string_t *extension);
+NU_API bool nu_string_is_directory(nu_string_t path);
+NU_API bool nu_string_is_filename(nu_string_t path);
 
 #endif

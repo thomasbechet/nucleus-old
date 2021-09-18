@@ -39,19 +39,20 @@ static nu_result_t nulua_stack_dump_types(void)
 
 static nu_result_t nulua_load_plugin(const char *filename)
 {
-    nu_path_t path;
-    nu_path_allocate_cstr(filename, &path);
-    NU_CHECK(nu_path_is_filename(path), goto cleanup0, NULUA_LOGGER_NAME, "'%s' is not a valid script.");
+    nu_string_t path;
+    nu_string_allocate_cstr(&path, filename);
+    nu_string_resolve_path(&path);
+    NU_CHECK(nu_string_is_filename(path), goto cleanup0, NULUA_LOGGER_NAME, "'%s' is not a valid script.");
     
     /* load chunk */
-    int error = luaL_loadfile(_module.L, nu_path_get_cstr(path));
+    int error = luaL_loadfile(_module.L, nu_string_get_cstr(path));
     NU_CHECK(!error, goto cleanup0, NULUA_LOGGER_NAME, "Failed to load script '%s': %s.", 
-        nu_path_get_cstr(path), lua_tostring(_module.L, -1));
+        nu_string_get_cstr(path), lua_tostring(_module.L, -1));
     
     /* call chunk */
     error = lua_pcall(_module.L, 0, 1, 0);
     NU_CHECK(!error, goto cleanup0, NULUA_LOGGER_NAME, "Failed to execute script '%s': %s.", 
-        nu_path_get_cstr(path), lua_tostring(_module.L, -1));
+        nu_string_get_cstr(path), lua_tostring(_module.L, -1));
     
     /* check return value */
     NU_CHECK(lua_istable(_module.L, -1), goto cleanup0, NULUA_LOGGER_NAME, "Return value is not a table.");
@@ -66,11 +67,11 @@ static nu_result_t nulua_load_plugin(const char *filename)
     data.table_ref  = luaL_ref(_module.L, LUA_REGISTRYINDEX);
     nu_array_push(_module.plugins, &data);
 
-    nu_path_free(path);
+    nu_string_free(path);
     return NU_SUCCESS;
 
 cleanup0:
-    nu_path_free(path);
+    nu_string_free(path);
     return NU_FAILURE;
 }
 

@@ -104,32 +104,33 @@ static nu_result_t glsl_source_to_spirv_code(
     uint32_t **code
 )
 {
-    nu_path_t filename = NU_NULL_HANDLE;
+    nu_string_t filename = NU_NULL_HANDLE;
 
     if (NUVK_SHADER_DUMP_SOURCES) {        
         nu_file_t file;
         nu_result_t result;
 
-        nu_path_allocate_format(&filename, "$ENGINE_DIR/shader/dump/%s.dump", identifier);
-        result = nu_file_open(filename, NU_IO_MODE_WRITE, &file);
+        nu_string_allocate_format(&filename, "$ENGINE_DIR/shader/dump/%s.dump", identifier);
+        nu_string_resolve_path(&filename);
+        result = nu_file_open(&file, nu_string_get_cstr(filename), NU_IO_MODE_WRITE);
         if (result == NU_SUCCESS) {
             if (nu_file_write_string(file, glsl_source) != NU_SUCCESS) {
-                nu_warning(NUVK_LOGGER_NAME, "Failed to write shader source: %s.", nu_path_get_cstr(filename));
+                nu_warning(NUVK_LOGGER_NAME, "Failed to write shader source: %s.", nu_string_get_cstr(filename));
             }
             nu_file_close(file);
         } else {
-            nu_warning(NUVK_LOGGER_NAME, "Failed to open file to write shader cache: %s.", nu_path_get_cstr(filename));
+            nu_warning(NUVK_LOGGER_NAME, "Failed to open file to write shader cache: %s.", nu_string_get_cstr(filename));
         }
     }
 
     /* compile to spirv */
-    const char *input_filename = (filename == NU_NULL_HANDLE) ? "" : nu_path_get_cstr(filename);
+    const char *input_filename = (filename == NU_NULL_HANDLE) ? "" : nu_string_get_cstr(filename);
     shaderc_compilation_result_t compilation_result;
     compilation_result = shaderc_compile_into_spv(manager->compiler, nu_string_get_cstr(glsl_source),
         nu_string_get_length(glsl_source), vulkan_stage_to_shaderc_kind(stage), input_filename, "main", manager->options);
 
     if (NUVK_SHADER_DUMP_SOURCES) {
-        nu_path_free(filename);
+        nu_string_free(filename);
     }
 
     /* check errors */

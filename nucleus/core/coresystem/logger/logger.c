@@ -16,18 +16,19 @@ nu_result_t nu_logger_initialize(void)
 {
     _system.log_file = NU_NULL_HANDLE;
     if (nu_config_get().logger.enable_log_file) {
-        nu_path_t path, filename;
-        nu_result_t result;
+        nu_string_t path;
+        nu_result_t result = NU_SUCCESS;
         
-        nu_path_allocate_cstr(nu_config_get().logger.log_file_directory, &path);
-        nu_path_allocate_cstr("nucleus.log", &filename);
-        nu_path_join(&path, filename);
-        result = nu_file_open(path, NU_IO_MODE_WRITE, &_system.log_file);
-        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to open log file: %s.", nu_path_get_cstr(path));
+        nu_string_allocate_cstr(&path, nu_config_get().logger.log_file_directory);
+        nu_string_resolve_path(&path);
+        if (!nu_string_is_directory(path)) result = NU_FAILURE;
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Log file directory is not a directory: %s.", nu_string_get_cstr(path));
+        nu_string_append_cstr(&path, "nucleus.log");
+        result = nu_file_open(&_system.log_file, nu_string_get_cstr(path), NU_IO_MODE_WRITE);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME, "Failed to open log file: %s.", nu_string_get_cstr(path));
     
     cleanup0:
-        nu_path_free(path);
-        nu_path_free(filename);
+        nu_string_free(path);
         return result;
     }
 
