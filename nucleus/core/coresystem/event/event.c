@@ -19,7 +19,7 @@ static nu_system_data_t _system;
 nu_result_t nu_event_initialize(void)
 {
     /* allocate resources */
-    nu_array_allocate(sizeof(nu_event_data_t), &_system.events);
+    nu_array_allocate(&_system.events, sizeof(nu_event_data_t));
 
     return NU_SUCCESS;
 }
@@ -60,8 +60,8 @@ nu_result_t nu_event_register(const nu_event_register_info_t *info, nu_event_id_
 {
     /* create event */
     nu_event_data_t event;
-    nu_array_allocate(info->size, &event.messages);
-    nu_array_allocate(sizeof(nu_event_callback_pfn_t), &event.subscribers);
+    nu_array_allocate(&event.messages, info->size);
+    nu_array_allocate(&event.subscribers, sizeof(nu_event_callback_pfn_t));
     event.initialize = info->initialize;
     event.terminate  = info->terminate;
 

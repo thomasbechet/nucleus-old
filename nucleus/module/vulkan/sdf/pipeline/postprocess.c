@@ -18,7 +18,7 @@ static nu_result_t create_modules(
 
     /* fragment shader */
     nu_string_t fragment_source;
-    nu_string_allocate_copy(sources[NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_FRAG], &fragment_source);
+    nu_string_allocate_copy(&fragment_source, sources[NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_FRAG]);
     nu_string_replace(&fragment_source, NUVK_SDF_PIPELINE_INJECT_CONSTANTS, sources[NUVK_SDF_PIPELINE_SOURCE_CONSTANTS_GLSL]);
     result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_FRAGMENT_BIT, 
         fragment_source, "postprocess.frag", &pipeline->fragment);

@@ -19,7 +19,7 @@ void nu_path_allocate(nu_path_t *handle)
 }
 void nu_path_allocate_cstr(const char *path, nu_path_t *handle)
 {
-    nu_string_allocate_cstr(path, (nu_string_t*)handle);
+    nu_string_allocate_cstr((nu_string_t*)handle, path);
     nu_path_sanatize((nu_string_t*)handle);
 }
 void nu_path_allocate_format(nu_path_t *handle, const char *format, ...)
@@ -49,7 +49,7 @@ uint32_t nu_path_get_length(nu_path_t path)
 }
 void nu_path_get_filename(nu_path_t path, nu_string_t *filename)
 {
-    nu_string_allocate_copy((nu_string_t)path, filename);
+    nu_string_allocate_copy(filename, (nu_string_t)path);
 
     uint32_t index_back = nu_string_find_last_cstr((nu_string_t)path, NU_PATH_SEPARATOR);
     if (index_back != nu_string_get_length((nu_string_t)path)) {
@@ -65,7 +65,7 @@ void nu_path_get_directory(nu_path_t path, nu_path_t *directory)
 {
     uint32_t index = nu_string_find_last_cstr((nu_string_t)path, NU_PATH_SEPARATOR);
     if (index != nu_string_get_length((nu_string_t)path)) {
-        nu_string_allocate_substr((nu_string_t)path, 0, index + 1, (nu_string_t*)directory);
+        nu_string_allocate_substr((nu_string_t*)directory, (nu_string_t)path, 0, index + 1);
     } else {
         nu_string_allocate((nu_string_t*)directory);
     }
@@ -78,7 +78,7 @@ void nu_path_get_extension(nu_path_t path, nu_string_t *extension)
         (index_back != nu_string_get_length((nu_string_t)path) && index_back > index_dot)) {
         nu_string_allocate(extension);
     } else {
-        nu_string_allocate_substr((nu_string_t)path, index_dot + 1, nu_string_get_length((nu_string_t)path) - index_dot - 1, extension);
+        nu_string_allocate_substr(extension, (nu_string_t)path, index_dot + 1, nu_string_get_length((nu_string_t)path) - index_dot - 1);
     }
 }
 bool nu_path_is_directory(nu_path_t path)

@@ -56,7 +56,7 @@ static inline uint32_t nu_string_get_capacity_(nu_string_t str)
 {
     return nu_string_get_header_(str)->capacity;
 }
-static inline void nu_string_allocate_(uint32_t capacity, nu_string_t *str)
+static inline void nu_string_allocate_(nu_string_t *str, uint32_t capacity)
 {
     *str = (nu_string_t)nu_malloc(sizeof(nu_string_header_t) + capacity + 1);
     nu_string_get_header_(*str)->capacity = capacity;
@@ -76,47 +76,46 @@ static inline void nu_string_set_length_(nu_string_t *str, uint32_t len)
 
 void nu_string_allocate(nu_string_t *str)
 {    
-    nu_string_allocate_(0, str);
+    nu_string_allocate_(str, 0);
 }
 void nu_string_allocate_capacity(nu_string_t *str, uint32_t capacity)
 {
-    nu_string_allocate_(capacity, str);
+    nu_string_allocate_(str, capacity);
 }
 void nu_string_allocate_length(nu_string_t *str, uint32_t length)
 {
-    nu_string_allocate_(length, str);
+    nu_string_allocate_(str, length);
     nu_string_set_length_(str, length);
 }
-static inline void nu_string_allocate_ncstr(const char *cstr, uint32_t n, nu_string_t *str)
+static inline void nu_string_allocate_ncstr(nu_string_t *str, const char *cstr, uint32_t n)
 {
-    nu_string_allocate_(n, str);
+    nu_string_allocate_(str, n);
     memcpy(nu_string_get_str_(*str), cstr, n);
     nu_string_set_length_(str, n);
 }
-void nu_string_allocate_cstr(const char *cstr, nu_string_t *str)
+void nu_string_allocate_cstr(nu_string_t *str, const char *cstr)
 {
-    nu_string_allocate_ncstr(cstr, strlen(cstr), str);
+    nu_string_allocate_ncstr(str, cstr, strlen(cstr));
 }
-void nu_string_allocate_copy(nu_string_t other, nu_string_t *str)
+void nu_string_allocate_copy(nu_string_t *str, nu_string_t other)
 {
-    nu_string_allocate_ncstr(nu_string_get_str_(other), nu_string_get_length_(other), str);
+    nu_string_allocate_ncstr(str, nu_string_get_str_(other), nu_string_get_length_(other));
 }
-static inline void nu_string_allocate_substr_ncstr(const char *cstr, uint32_t n, uint32_t index, uint32_t len, nu_string_t *str)
+static inline void nu_string_allocate_substr_ncstr(nu_string_t *str, const char *cstr, uint32_t n, uint32_t index, uint32_t len)
 {
     NU_ASSERT(index < n);
     NU_ASSERT(n > 0 && index + len <= n);
-    nu_string_allocate_(len, str);
+    nu_string_allocate_(str, len);
     memcpy(nu_string_get_str_(*str), cstr + index, len);
     nu_string_set_length_(str, len);
 }
-void nu_string_allocate_substr_cstr(const char *cstr, uint32_t index, uint32_t len, nu_string_t *str)
+void nu_string_allocate_substr_cstr(nu_string_t *str, const char *cstr, uint32_t index, uint32_t len)
 {
-    nu_string_allocate_substr_ncstr(cstr, strlen(cstr), index, len, str);
+    nu_string_allocate_substr_ncstr(str, cstr, strlen(cstr), index, len);
 }
-void nu_string_allocate_substr(nu_string_t other, uint32_t index, uint32_t len, nu_string_t *str)
+void nu_string_allocate_substr(nu_string_t *str, nu_string_t other, uint32_t index, uint32_t len)
 {
-    nu_string_allocate_substr_ncstr(nu_string_get_str_(other), nu_string_get_length_(other),
-        index, len, str);
+    nu_string_allocate_substr_ncstr(str, nu_string_get_str_(other), nu_string_get_length_(other), index, len);
 }
 void nu_string_allocate_format(nu_string_t *str, const char *format, ...)
 {
@@ -131,7 +130,7 @@ void nu_string_allocate_vformat(nu_string_t *str, const char *format, va_list ar
     va_copy(args_temp, args);
     uint32_t n = vsnprintf(NULL, 0, format, args);
     va_end(args_temp);
-    nu_string_allocate_(n, str);
+    nu_string_allocate_(str, n);
     va_copy(args_temp, args);
     vsnprintf(nu_string_get_str_(*str), n + 1, format, args);
     va_end(args_temp);

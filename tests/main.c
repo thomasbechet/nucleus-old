@@ -62,7 +62,7 @@ static nu_result_t on_start(void)
     
     // nu_array_t ar;
     // uint32_t v = 555;
-    // nu_array_allocate_capacity(sizeof(uint32_t), 50000000, &ar);
+    // nu_array_allocate_capacity(&ar, sizeof(uint32_t), 50000000);
     // nu_timer_start(&t);
     // for (uint32_t i = 50000000; i--;) {
     //     nu_array_push(ar, &v);
@@ -83,7 +83,7 @@ static nu_result_t on_start(void)
     // stest v0, v1;
     // v0.v = 6;
     // v1.v = 2;
-    // nu_array_allocate_capacity(sizeof(stest), 5, &ar);
+    // nu_array_allocate_capacity(&ar, sizeof(stest), 5);
     // nu_array_push(ar, &v0);
     // nu_array_push(ar, &v1);
     // nu_array_swap_last(ar, 0);
@@ -107,7 +107,7 @@ static nu_result_t on_start(void)
     // nu_array_t ids;
     // stest s;
     // nu_indexed_array_allocate(sizeof(uint32_t), &iar);
-    // nu_array_allocate(sizeof(stest), &ids);
+    // nu_array_allocate(&ids, sizeof(stest));
 
     // for (uint32_t i = 0; i < 10000000; i++) {
     //     uint32_t len = nu_array_get_size(ids);

@@ -26,8 +26,8 @@ void nuutils_console_view_initialize(nuutils_console_view_t *view, nu_renderer_f
     /* command buffer */
     view->command_buffer_head = 0;
     view->command_buffer_tail = 0;
-    nu_array_allocate_capacity(sizeof(nu_renderer_label_t), COMMAND_BUFFER_MAX, &view->command_buffer_labels);
-    nu_array_allocate_capacity(sizeof(nu_string_t), COMMAND_BUFFER_MAX, &view->command_buffer_strings);
+    nu_array_allocate_capacity(&view->command_buffer_labels, sizeof(nu_renderer_label_t), COMMAND_BUFFER_MAX);
+    nu_array_allocate_capacity(&view->command_buffer_strings, sizeof(nu_string_t), COMMAND_BUFFER_MAX);
     for (uint32_t i = 0; i < COMMAND_BUFFER_MAX; i++) {
         /* create labels */
         nu_renderer_label_t label;

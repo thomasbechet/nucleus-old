@@ -59,7 +59,7 @@ nu_result_t nuvk_shader_manager_initialize(nuvk_shader_manager_t *manager)
     // shaderc_compile_options_set_include_callbacks(manager->options, resolver, releaser, NULL);
 
     /* allocate resources */
-    nu_array_allocate(sizeof(nu_string_t), &manager->injectors);
+    nu_array_allocate(&manager->injectors, sizeof(nu_string_t));
     nu_string_allocate(&manager->placeholder_source);
 
     return NU_SUCCESS;
@@ -148,7 +148,7 @@ cleanup0: ;
     nu_string_t error_message;
     nu_string_array_t error_lines;
     nu_string_array_allocate(&error_lines);
-    nu_string_allocate_cstr(shaderc_result_get_error_message(compilation_result), &error_message);
+    nu_string_allocate_cstr(&error_message, shaderc_result_get_error_message(compilation_result));
     nu_string_split(error_message, "\n", error_lines);
     for (uint32_t i = 0; i < nu_string_array_get_length(error_lines); i++) {
         nu_error(NUVK_LOGGER_NAME, nu_string_array_get(error_lines, i));

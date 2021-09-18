@@ -12,7 +12,7 @@ static nu_result_t create_modules(
     nu_result_t result;
 
     nu_string_t compute_source;
-    nu_string_allocate_copy(sources[NUVK_SDF_PIPELINE_SOURCE_LIGHT_COMP], &compute_source);
+    nu_string_allocate_copy(&compute_source, sources[NUVK_SDF_PIPELINE_SOURCE_LIGHT_COMP]);
     nu_string_replace(&compute_source, NUVK_SDF_PIPELINE_INJECT_CONSTANTS, sources[NUVK_SDF_PIPELINE_SOURCE_CONSTANTS_GLSL]);
 
     result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_COMPUTE_BIT,

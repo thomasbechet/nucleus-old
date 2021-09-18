@@ -3,7 +3,7 @@
 nu_result_t nuvk_sdf_scene_initialize(nuvk_sdf_scene_t *scene)
 {
     nuvk_sdf_camera_initialize(&scene->camera);
-    nu_indexed_array_allocate(sizeof(nuvk_sdf_instance_handle_data_t), &scene->instance_handles);
+    nu_indexed_array_allocate(&scene->instance_handles, sizeof(nuvk_sdf_instance_handle_data_t));
     scene->type_count = 0;
 
     return NU_SUCCESS;
@@ -82,7 +82,7 @@ nu_result_t nuvk_sdf_scene_register_instance_type(
     type->instances      = (nuvk_sdf_instance_data_t*)nu_malloc(sizeof(nuvk_sdf_instance_data_t) * info->max_instance_count);
     type->data           = nu_malloc(info->data_size * info->max_instance_count);
     type->instance_count = 0;
-    nu_array_allocate_capacity(sizeof(uint32_t), info->max_instance_count, &type->free_instance_indices);
+    nu_array_allocate_capacity(&type->free_instance_indices, sizeof(uint32_t), info->max_instance_count);
 
     type->indices     = (uint32_t*)nu_malloc(sizeof(uint32_t) * info->max_instance_count);
     type->index_count = 0;

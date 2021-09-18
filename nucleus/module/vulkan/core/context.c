@@ -86,11 +86,11 @@ static nu_result_t nuvk_context_fill_required_instance_extensions(nu_array_t ext
 static nu_result_t nuvk_context_create_instance(nuvk_context_t *context)
 {
     nu_array_t required_layers;
-    nu_array_allocate(sizeof(const char*), &required_layers);
+    nu_array_allocate(&required_layers, sizeof(const char*));
     nuvk_context_fill_required_instance_layers(required_layers);
 
     nu_array_t required_extensions;
-    nu_array_allocate(sizeof(const char*), &required_extensions);
+    nu_array_allocate(&required_extensions, sizeof(const char*));
     nuvk_context_fill_required_instance_extensions(required_extensions);
 
     VkApplicationInfo application_info;
@@ -206,7 +206,7 @@ static bool nuvk_context_is_physical_device_suitable(VkPhysicalDevice physical_d
     vkEnumerateDeviceExtensionProperties(physical_device, NULL, &property_count, properties);
 
     nu_array_t required_extensions;
-    nu_array_allocate(sizeof(const char *), &required_extensions);
+    nu_array_allocate(&required_extensions, sizeof(const char *));
     nuvk_context_fill_required_device_extensions(required_extensions);
     
     bool missing_extension = false;
@@ -331,7 +331,7 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context)
     }
 
     nu_array_t extensions;
-    nu_array_allocate(sizeof(const char *), &extensions);
+    nu_array_allocate(&extensions, sizeof(const char *));
     nuvk_context_fill_required_device_extensions(extensions);
 
     VkPhysicalDeviceFeatures features;

@@ -78,7 +78,7 @@ nu_result_t nulua_plugin_initialize(void)
 {
     /* initialize resources */
     memset(&_module, 0, sizeof(nulua_module_data_t));
-    nu_array_allocate(sizeof(nulua_plugin_data_t), &_module.plugins);
+    nu_array_allocate(&_module.plugins, sizeof(nulua_plugin_data_t));
 
     /* create state */
     _module.L = lua_newstate(nulua_allocator, NULL);

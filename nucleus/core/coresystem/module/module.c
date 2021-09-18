@@ -135,7 +135,7 @@ cleanup0:
 nu_result_t nu_module_initialize(void)
 {
     /* allocate module array */
-    nu_indexed_array_allocate(sizeof(nu_module_data_t), &_system.modules);
+    nu_indexed_array_allocate(&_system.modules, sizeof(nu_module_data_t));
 
     return NU_SUCCESS;
 }

@@ -21,7 +21,7 @@ typedef struct {
     char *data;
 } nu_array_header_t;
 
-void nu_array_allocate(uint32_t object_size, nu_array_t *array)
+void nu_array_allocate(nu_array_t *array, uint32_t object_size)
 {
     NU_ASSERT(object_size > 0);
     *array = (nu_array_t)nu_malloc(sizeof(nu_array_header_t) + object_size);
@@ -31,7 +31,7 @@ void nu_array_allocate(uint32_t object_size, nu_array_t *array)
     header->object_size = object_size;
     header->data        = nu_malloc(object_size * ARRAY_DEFAULT_CAPACITY);
 }
-void nu_array_allocate_capacity(uint32_t object_size, uint32_t capacity, nu_array_t *array)
+void nu_array_allocate_capacity(nu_array_t *array, uint32_t object_size, uint32_t capacity)
 {
     NU_ASSERT(object_size > 0);
     NU_ASSERT(capacity > 0);
@@ -43,11 +43,11 @@ void nu_array_allocate_capacity(uint32_t object_size, uint32_t capacity, nu_arra
     header->object_size = object_size;
     header->data        = nu_malloc(object_size * capacity);
 }
-void nu_array_allocate_from(const void *data, uint32_t object_count, uint32_t object_size, nu_array_t *array)
+void nu_array_allocate_from(nu_array_t *array, const void *data, uint32_t object_count, uint32_t object_size)
 {
     NU_ASSERT(object_count > 0 && object_size > 0);
 
-    nu_array_allocate_capacity(object_size, object_count, array);
+    nu_array_allocate_capacity(array, object_size, object_count);
     nu_array_header_t *header = (nu_array_header_t*)(*array);
     header->size = object_count;
 

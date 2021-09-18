@@ -127,7 +127,7 @@ static nu_result_t create_modules(
     nu_string_t fragment_source;
     nu_string_allocate(&inject_instances_source);
     generate_global_geometry_glsl_source(types, type_count, &inject_instances_source);
-    nu_string_allocate_copy(sources[NUVK_SDF_PIPELINE_SOURCE_GEOMETRY_TEMPLATE_FRAG], &fragment_source);
+    nu_string_allocate_copy(&fragment_source, sources[NUVK_SDF_PIPELINE_SOURCE_GEOMETRY_TEMPLATE_FRAG]);
     nu_string_replace(&fragment_source, NUVK_SDF_PIPELINE_INJECT_CONSTANTS, sources[NUVK_SDF_PIPELINE_SOURCE_CONSTANTS_GLSL]);
     nu_string_replace(&fragment_source, NUVK_SDF_PIPELINE_INJECT_INSTANCES, inject_instances_source);
     

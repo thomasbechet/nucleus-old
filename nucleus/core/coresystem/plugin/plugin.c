@@ -18,7 +18,7 @@ static nu_system_data_t _system;
 nu_result_t nu_plugin_initialize(void)
 {
     /* allocate memory */
-    nu_array_allocate(sizeof(nu_plugin_data_t), &_system.plugins);
+    nu_array_allocate(&_system.plugins, sizeof(nu_plugin_data_t));
 
     return NU_SUCCESS;
 }
@@ -112,7 +112,7 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
 
     /* save plugin name and module*/
     plugin.module = module;
-    nu_string_allocate_cstr(plugin_name, &plugin.name);
+    nu_string_allocate_cstr(&plugin.name, plugin_name);
 
     /* initialize plugin */
     if (plugin.callbacks.initialize) {
