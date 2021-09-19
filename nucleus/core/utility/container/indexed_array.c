@@ -151,6 +151,11 @@ void *nu_indexed_array_get_data(nu_indexed_array_t array)
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
     return nu_array_get_data(header->data);
 }
+const void *nu_indexed_array_get_data_const(nu_indexed_array_t array)
+{
+    nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
+    return nu_array_get_data_const(header->data);
+}
 uint32_t nu_indexed_array_get_allocated_memory(nu_indexed_array_t array)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;

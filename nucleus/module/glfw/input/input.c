@@ -100,6 +100,7 @@ typedef struct {
     uint32_t text_size;
     
     nu_button_state_t keyboard_button_states[GLFW_KEY_LAST];
+    nu_button_state_t mouse_button_states[GLFW_MOUSE_BUTTON_LAST];
 } nuglfw_module_data_t;
 
 static nuglfw_module_data_t _module;
@@ -123,6 +124,27 @@ static void nuglfw_keyboard_callback(GLFWwindow *window, int key, int scancode, 
                 if (was_pressed) {
                     _module.keyboard_button_states[key] |= NU_BUTTON_JUST_RELEASED;
                 }
+            }
+        }
+    }
+}
+static void nuglfw_mouse_button_callback(GLFWwindow *window, int button, int action, int mode)
+{
+    if (action == GLFW_REPEAT) {
+        _module.mouse_button_states[button] |= NU_BUTTON_REPEATED;
+    } else {
+        bool was_pressed = (_module.mouse_button_states[button] & NU_BUTTON_PRESSED);
+        if (action == GLFW_PRESS) {
+            _module.mouse_button_states[button] |= NU_BUTTON_PRESSED;
+            _module.mouse_button_states[button] &= ~NU_BUTTON_RELEASED;
+            if (!was_pressed) {
+                _module.mouse_button_states[button] |= NU_BUTTON_JUST_PRESSED;
+            }
+        } else if (action == GLFW_RELEASE) {
+            _module.mouse_button_states[button] |= NU_BUTTON_RELEASED;
+            _module.mouse_button_states[button] &= ~NU_BUTTON_PRESSED;
+            if (was_pressed) {
+                _module.mouse_button_states[button] |= NU_BUTTON_JUST_RELEASED;
             }
         }
     }
@@ -152,6 +174,9 @@ nu_result_t nuglfw_input_initialize(void)
     for (uint32_t i = 0; i < GLFW_KEY_LAST; i++) {
         _module.keyboard_button_states[i] = 0x0;
     }
+    for (uint32_t i = 0; i < GLFW_MOUSE_BUTTON_LAST; i++) {
+        _module.mouse_button_states[i] = 0x0;
+    }
 
     /* initialize keyboard text */
     _module.text_size = 0;
@@ -165,6 +190,7 @@ nu_result_t nuglfw_input_initialize(void)
 
     /* setup callbacks */
     glfwSetKeyCallback(_module.window, nuglfw_keyboard_callback);
+    glfwSetMouseButtonCallback(_module.window, nuglfw_mouse_button_callback);
     glfwSetCursorPosCallback(_module.window, nuglfw_cursor_position_callback);
     glfwSetCharCallback(_module.window, nuglfw_character_callback);
     glfwSetScrollCallback(_module.window, nuglfw_mouse_scroll_callback);
@@ -212,7 +238,7 @@ nu_result_t nuglfw_input_get_keyboard_text(const char **text, uint32_t *length)
 }
 nu_result_t nuglfw_input_get_mouse_state(nu_mouse_t button, nu_button_state_t *state)
 {
-    *state = (glfwGetMouseButton(_module.window, glfw_mouse_buttons[(uint32_t)button]) == GLFW_PRESS) ? NU_BUTTON_PRESSED : NU_BUTTON_RELEASED;
+    *state = _module.mouse_button_states[glfw_mouse_buttons[(uint32_t)button]];
     return NU_SUCCESS;
 }
 nu_result_t nuglfw_input_get_mouse_motion(nu_vec2f_t motion)

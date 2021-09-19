@@ -150,6 +150,12 @@ static nu_result_t on_start(void)
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
     nu_plugin_require(lua_module, NULUA_PLUGIN_NAME);
 
+    /* load lua plugin */
+    nulua_plugin_interface_t lua_interface;
+    NU_ASSERT(nu_module_get_interface(lua_module, NULUA_PLUGIN_INTERFACE_NAME, &lua_interface) == NU_SUCCESS);
+    nulua_plugin_t plugin;
+    NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/test.lua", &plugin));
+
     /* load texture */
     nu_renderer_texture_create_info_t texture_info = {0};
     int width, height, channel;

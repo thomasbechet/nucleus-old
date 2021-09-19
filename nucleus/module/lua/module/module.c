@@ -50,6 +50,12 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->get_list           = nulua_plugin_get_list;
 
         return NU_SUCCESS;
+    } else if (NU_MATCH(name, NULUA_PLUGIN_INTERFACE_NAME)) {
+        nulua_plugin_interface_t *i = (nulua_plugin_interface_t*)interface;
+
+        i->load_plugin = nulua_plugin_load;
+
+        return NU_SUCCESS;
     }
 
     return NU_FAILURE;

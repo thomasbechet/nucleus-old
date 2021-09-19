@@ -1,4 +1,4 @@
-#include <nucleus/module/lua/plugin/allocator.h>
+#include <nucleus/module/lua/common/allocator.h>
 
 void *nulua_allocator(void *ud, void *ptr, size_t osize, size_t nsize)
 {

@@ -16,6 +16,7 @@ NU_API bool nu_indexed_array_find_id(nu_indexed_array_t array, nu_array_find_pfn
 NU_API void nu_indexed_array_clear(nu_indexed_array_t array);
 NU_API uint32_t nu_indexed_array_get_size(nu_indexed_array_t array);
 NU_API void *nu_indexed_array_get_data(nu_indexed_array_t array);
+NU_API const void *nu_indexed_array_get_data_const(nu_indexed_array_t array);
 NU_API uint32_t nu_indexed_array_get_allocated_memory(nu_indexed_array_t array);
 NU_API uint32_t nu_indexed_array_get_capacity(nu_indexed_array_t array);
 NU_API uint32_t nu_indexed_array_get_index_capacity(nu_indexed_array_t array);
