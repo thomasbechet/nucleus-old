@@ -165,7 +165,7 @@ nu_result_t nulua_register_input_api(lua_State *L)
     lua_newtable(L);
     luaL_setfuncs(L, input_functions, 0);
     nulua_register_constants(L);
-    lua_setglobal(L, "input");
+    lua_setglobal(L, "Input");
 
     return NU_SUCCESS;
 }

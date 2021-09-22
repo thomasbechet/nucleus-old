@@ -24,6 +24,6 @@ nu_result_t nulua_register_context_api(lua_State *L)
 {
     lua_newtable(L);
     luaL_setfuncs(L, context_functions, 0);
-    lua_setglobal(L, "context");
+    lua_setglobal(L, "Context");
     return NU_SUCCESS;
 }
