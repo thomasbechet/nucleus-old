@@ -12,7 +12,7 @@ nu_result_t nuvk_sdf_buffer_instances_create(
     nu_result_t result;
 
     /* index buffer */
-    buffer->index_uniform_buffer_range = context->physical_device_properties.limits.maxUniformBufferRange;
+    buffer->index_uniform_buffer_range = NU_MIN(context->physical_device_properties.limits.maxUniformBufferRange, 1 << 16);
     buffer->next_index_offset = 0;
     buffer->index_offsets = (uint32_t*)nu_malloc(sizeof(uint32_t) * NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
 
@@ -29,7 +29,7 @@ nu_result_t nuvk_sdf_buffer_instances_create(
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to map index buffer.");
  
     /* instances buffer */
-    buffer->instance_uniform_buffer_range = context->physical_device_properties.limits.maxUniformBufferRange;
+    buffer->instance_uniform_buffer_range = NU_MIN(context->physical_device_properties.limits.maxUniformBufferRange, 1 << 16);
     buffer->next_instance_offset = 0;
     buffer->instance_offsets = (uint32_t*)nu_malloc(sizeof(uint32_t) * NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
     buffer->instance_sizes   = (uint32_t*)nu_malloc(sizeof(uint32_t) * NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);

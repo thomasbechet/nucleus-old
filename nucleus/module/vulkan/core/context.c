@@ -316,8 +316,13 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context)
 
     uint32_t queue_per_family[8]; /* TODO: find max family queue count */
     memset(queue_per_family, 0, sizeof(uint32_t) * 8);
-    queue_per_family[context->queues.graphics_compute_family_index]++;
-    queue_per_family[context->queues.present_family_index]++;
+
+    if (context->queues.single_graphics_present_queue) {
+        queue_per_family[context->queues.graphics_compute_family_index]++;
+    } else {
+        queue_per_family[context->queues.graphics_compute_family_index]++;
+        queue_per_family[context->queues.present_family_index]++;
+    }
 
     for (uint32_t i = 0; i < 8; i++) {
         if (queue_per_family[i]) {

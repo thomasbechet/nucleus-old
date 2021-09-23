@@ -95,7 +95,7 @@ bool nuvk_render_context_begin(
 
     result = vkAcquireNextImageKHR(context->device, swapchain->swapchain, UINT64_MAX,
         image_available_semaphore, VK_NULL_HANDLE, &render_context->active_swapchain_image_index);
-    if (result != VK_SUCCESS) {
+    if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) { /* continue frame when suboptimal */
         NU_CHECK(result == VK_ERROR_OUT_OF_DATE_KHR, return false, NUVK_LOGGER_NAME, "Failed to acquire next image KHR.");
         return false;
     }

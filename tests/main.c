@@ -320,7 +320,9 @@ static nu_result_t on_start(void)
         nu_warning(MAIN_LOGGER_NAME, "Failed to load monkey");
     }
 
-    nu_renderer_viewport_set_size((const nu_vec2u_t){1280, 720});
+    // nu_renderer_viewport_set_size((const nu_vec2u_t){1280, 720});
+    // nu_renderer_viewport_set_size((const nu_vec2u_t){1024, 576});
+    nu_renderer_viewport_set_size((const nu_vec2u_t){640, 360});
 
     return NU_SUCCESS;
 }
