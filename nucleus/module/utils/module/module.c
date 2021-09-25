@@ -4,7 +4,6 @@
 #include <nucleus/module/utils/console/console.h>
 #include <nucleus/module/utils/command/command.h>
 #include <nucleus/module/utils/loader/loader.h>
-#include <nucleus/module/utils/spectator/spectator.h>
 
 static const uint32_t interface_count = 3;
 static const char *interfaces[] = {
@@ -16,8 +15,7 @@ static const char *interfaces[] = {
 static const uint32_t plugin_count = 3;
 static const char *plugins[] = {
     NUUTILS_CONSOLE_PLUGIN_NAME,
-    NUUTILS_COMMAND_PLUGIN_NAME,
-    NUUTILS_SPECTATOR_PLUGIN_NAME
+    NUUTILS_COMMAND_PLUGIN_NAME
 };
 
 static nu_result_t nuutils_plugin_get_list(uint32_t *count, const char ***plugin_list)
@@ -37,12 +35,6 @@ static nu_result_t nuutils_plugin_get_callbacks(const char *name, nu_plugin_call
     } else if (NU_MATCH(name, NUUTILS_COMMAND_PLUGIN_NAME)) {
         callbacks->initialize = nuutils_command_plugin_initialize;
         callbacks->terminate  = nuutils_command_plugin_terminate;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUUTILS_SPECTATOR_PLUGIN_NAME)) {
-        callbacks->initialize = nuutils_spectator_plugin_initialize;
-        callbacks->terminate  = nuutils_spectator_plugin_terminate;
-        callbacks->update     = nuutils_spectator_plugin_update;
 
         return NU_SUCCESS;
     }

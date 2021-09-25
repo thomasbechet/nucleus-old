@@ -2,7 +2,7 @@
 
 #include <lauxlib.h>
 
-static int nulua_input_keyboard_pressed(lua_State *L)
+static int Input_keyboard_pressed(lua_State *L)
 {
     nu_keyboard_t key = (nu_keyboard_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -10,7 +10,7 @@ static int nulua_input_keyboard_pressed(lua_State *L)
     lua_pushboolean(L, state & NU_BUTTON_JUST_PRESSED ? 1 : 0);
     return 1;
 }
-static int nulua_input_keyboard_released(lua_State *L)
+static int Input_keyboard_released(lua_State *L)
 {
     nu_keyboard_t key = (nu_keyboard_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -18,7 +18,7 @@ static int nulua_input_keyboard_released(lua_State *L)
     lua_pushboolean(L, state & NU_BUTTON_JUST_RELEASED ? 1 : 0);
     return 1;
 }
-static int nulua_input_keyboard_is_pressed(lua_State *L)
+static int Input_keyboard_is_pressed(lua_State *L)
 {
     nu_keyboard_t key = (nu_keyboard_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -26,7 +26,7 @@ static int nulua_input_keyboard_is_pressed(lua_State *L)
     lua_pushboolean(L, state & NU_BUTTON_PRESSED ? 1 : 0);
     return 1;
 }
-static int nulua_input_keyboard_is_released(lua_State *L)
+static int Input_keyboard_is_released(lua_State *L)
 {
     nu_keyboard_t key = (nu_keyboard_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -35,7 +35,7 @@ static int nulua_input_keyboard_is_released(lua_State *L)
     return 1;
 }
 
-static int nulua_input_mouse_pressed(lua_State *L)
+static int Input_mouse_pressed(lua_State *L)
 {
     nu_mouse_t mouse = (nu_mouse_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -43,7 +43,7 @@ static int nulua_input_mouse_pressed(lua_State *L)
     lua_pushboolean(L, state & NU_BUTTON_JUST_PRESSED ? 1 : 0);
     return 1;
 }
-static int nulua_input_mouse_released(lua_State *L)
+static int Input_mouse_released(lua_State *L)
 {
     nu_mouse_t mouse = (nu_mouse_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -51,7 +51,7 @@ static int nulua_input_mouse_released(lua_State *L)
     lua_pushboolean(L, state & NU_BUTTON_JUST_RELEASED ? 1 : 0);
     return 1;
 }
-static int nulua_input_mouse_is_pressed(lua_State *L)
+static int Input_mouse_is_pressed(lua_State *L)
 {
     nu_mouse_t mouse = (nu_mouse_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -59,7 +59,7 @@ static int nulua_input_mouse_is_pressed(lua_State *L)
     lua_pushboolean(L, state & NU_BUTTON_PRESSED ? 1 : 0);
     return 1;
 }
-static int nulua_input_mouse_is_released(lua_State *L)
+static int Input_mouse_is_released(lua_State *L)
 {
     nu_mouse_t mouse = (nu_mouse_t)luaL_checkinteger(L, -1);
     nu_button_state_t state;
@@ -68,22 +68,59 @@ static int nulua_input_mouse_is_released(lua_State *L)
     return 1;
 }
 
-static const struct luaL_Reg input_functions[] = {
-    {"keyboard_pressed",     nulua_input_keyboard_pressed},
-    {"keyboard_released",    nulua_input_keyboard_released},
-    {"keyboard_is_pressed",  nulua_input_keyboard_is_pressed},
-    {"keyboard_is_released", nulua_input_keyboard_is_released},
-
-    {"mouse_pressed",     nulua_input_mouse_pressed},
-    {"mouse_released",    nulua_input_mouse_released},
-    {"mouse_is_pressed",  nulua_input_mouse_is_pressed},
-    {"mouse_is_released", nulua_input_mouse_is_released},
-
-    {NULL, NULL}
-};
-
-static nu_result_t nulua_register_constants(lua_State *L)
+static int Input_get_mouse_motion(lua_State *L)
 {
+    nu_vec2f_t motion;
+    nu_input_get_mouse_motion(motion);
+    lua_pushnumber(L, motion[0]);
+    lua_pushnumber(L, motion[1]);
+    return 2;
+}
+static int Input_get_mouse_scroll(lua_State *L)
+{
+    nu_vec2f_t scroll;
+    nu_input_get_mouse_scroll(scroll);
+    lua_pushnumber(L, scroll[0]);
+    lua_pushnumber(L, scroll[1]);
+    return 2;
+}
+static int Input_get_cursor_mode(lua_State *L)
+{
+    nu_cursor_mode_t mode;
+    nu_input_get_cursor_mode(&mode);
+    lua_pushinteger(L, (lua_Integer)mode);
+    return 1;
+}
+static int Input_set_cursor_mode(lua_State *L)
+{
+    nu_cursor_mode_t mode = (nu_cursor_mode_t)luaL_checkinteger(L, -1);
+    nu_input_set_cursor_mode(mode);
+    return 0;
+}
+
+nu_result_t nulua_register_input_api(lua_State *L)
+{
+    static const struct luaL_Reg Input_methods[] = {
+        {"keyboard_pressed",     Input_keyboard_pressed},
+        {"keyboard_released",    Input_keyboard_released},
+        {"keyboard_is_pressed",  Input_keyboard_is_pressed},
+        {"keyboard_is_released", Input_keyboard_is_released},
+
+        {"mouse_pressed",     Input_mouse_pressed},
+        {"mouse_released",    Input_mouse_released},
+        {"mouse_is_pressed",  Input_mouse_is_pressed},
+        {"mouse_is_released", Input_mouse_is_released},
+
+        {"get_mouse_motion", Input_get_mouse_motion},
+        {"get_mouse_scroll", Input_get_mouse_scroll},
+        {"get_cursor_mode",  Input_get_cursor_mode},
+        {"set_cursor_mode",  Input_set_cursor_mode},
+
+        {NULL, NULL}
+    };
+
+    luaL_newlib(L, Input_methods);
+
     lua_pushinteger(L, NU_KEYBOARD_A); lua_setfield(L, -2, "KEYBOARD_A");
     lua_pushinteger(L, NU_KEYBOARD_B); lua_setfield(L, -2, "KEYBOARD_B");
     lua_pushinteger(L, NU_KEYBOARD_C); lua_setfield(L, -2, "KEYBOARD_C");
@@ -140,7 +177,7 @@ static nu_result_t nulua_register_constants(lua_State *L)
     lua_pushinteger(L, NU_KEYBOARD_ENTER);     lua_setfield(L, -2, "KEYBOARD_ENTER");
     lua_pushinteger(L, NU_KEYBOARD_TAB);       lua_setfield(L, -2, "KEYBOARD_TAB");
     lua_pushinteger(L, NU_KEYBOARD_BACKSPACE); lua_setfield(L, -2, "KEYBOARD_BACKSPACE");
-    lua_pushinteger(L, NU_KEYBOARD_LSHIT);     lua_setfield(L, -2, "KEYBOARD_LSHIT");
+    lua_pushinteger(L, NU_KEYBOARD_LSHIFT);    lua_setfield(L, -2, "KEYBOARD_LSHIFT");
     lua_pushinteger(L, NU_KEYBOARD_LCONTROL);  lua_setfield(L, -2, "KEYBOARD_LCONTROL");
     lua_pushinteger(L, NU_KEYBOARD_LEFT);      lua_setfield(L, -2, "KEYBOARD_LEFT");
     lua_pushinteger(L, NU_KEYBOARD_RIGHT);     lua_setfield(L, -2, "KEYBOARD_RIGHT");
@@ -157,14 +194,10 @@ static nu_result_t nulua_register_constants(lua_State *L)
     lua_pushinteger(L, NU_MOUSE_BUTTON5); lua_setfield(L, -2, "MOUSE_BUTTON5");
     lua_pushinteger(L, NU_MOUSE_BUTTON6); lua_setfield(L, -2, "MOUSE_BUTTON6");
 
-    return NU_SUCCESS;
-}
+    lua_pushinteger(L, NU_CURSOR_MODE_NORMAL);  lua_setfield(L, -2, "CURSOR_MODE_NORMAL");
+    lua_pushinteger(L, NU_CURSOR_MODE_HIDDEN);  lua_setfield(L, -2, "CURSOR_MODE_HIDDEN");
+    lua_pushinteger(L, NU_CURSOR_MODE_DISABLE); lua_setfield(L, -2, "CURSOR_MODE_DISABLE");
 
-nu_result_t nulua_register_input_api(lua_State *L)
-{
-    lua_newtable(L);
-    luaL_setfuncs(L, input_functions, 0);
-    nulua_register_constants(L);
     lua_setglobal(L, "Input");
 
     return NU_SUCCESS;

@@ -10,46 +10,44 @@ void nu_transform_identity(nu_transform_t *transform)
     nu_vec3f_one(transform->scale);
     nu_quatf_identity(transform->rotation);
 }
-void nu_transform_get_matrix(const nu_transform_t *transform, nu_mat4f_t matrix)
+void nu_transform_build_matrix(const nu_vec3f_t translation, const nu_quatf_t rotation, const nu_vec3f_t scale, nu_mat4f_t matrix)
 {
     nu_mat4f_identity(matrix);
-    nu_mat4f_scale(matrix, transform->scale);
-    nu_mat4f_rotate(matrix, transform->rotation);
-    nu_mat4f_translate(matrix, transform->translation);
+    nu_mat4f_scale(matrix, scale);
+    nu_mat4f_rotate(matrix, rotation);
+    nu_mat4f_translate(matrix, translation);
+}
+void nu_transform_build_direction(const nu_quatf_t rotation, const nu_vec3f_t direction, nu_vec3f_t dest)
+{
+    nu_vec3f_copy(direction, dest);
+    nu_quatf_mulv(rotation, dest, dest);
+    nu_vec3f_normalize(dest);
+}
+void nu_transform_get_matrix(const nu_transform_t *transform, nu_mat4f_t matrix)
+{
+    nu_transform_build_matrix(transform->translation, transform->rotation, transform->scale, matrix);
 }
 void nu_transform_get_forward(const nu_transform_t *transform, nu_vec3f_t vec)
 {
-    nu_vec3f_copy(NU_VEC3F_FORWARD, vec);
-    nu_quatf_mulv(transform->rotation, vec, vec);
-    nu_vec3f_normalize(vec);
+    nu_transform_build_direction(transform->rotation, NU_VEC3F_FORWARD, vec);
 }
 void nu_transform_get_backward(const nu_transform_t *transform, nu_vec3f_t vec)
 {
-    nu_vec3f_copy(NU_VEC3F_BACKWARD, vec);
-    nu_quatf_mulv(transform->rotation, vec, vec);
-    nu_vec3f_normalize(vec);
+    nu_transform_build_direction(transform->rotation, NU_VEC3F_BACKWARD, vec);
 }
 void nu_transform_get_left(const nu_transform_t *transform, nu_vec3f_t vec)
 {
-    nu_vec3f_copy(NU_VEC3F_LEFT, vec);
-    nu_quatf_mulv(transform->rotation, vec, vec);
-    nu_vec3f_normalize(vec);
+    nu_transform_build_direction(transform->rotation, NU_VEC3F_LEFT, vec);
 }
 void nu_transform_get_right(const nu_transform_t *transform, nu_vec3f_t vec)
 {
-    nu_vec3f_copy(NU_VEC3F_RIGHT, vec);
-    nu_quatf_mulv(transform->rotation, vec, vec);
-    nu_vec3f_normalize(vec);
+    nu_transform_build_direction(transform->rotation, NU_VEC3F_RIGHT, vec);
 }
 void nu_transform_get_up(const nu_transform_t *transform, nu_vec3f_t vec)
 {
-    nu_vec3f_copy(NU_VEC3F_UP, vec);
-    nu_quatf_mulv(transform->rotation, vec, vec);
-    nu_vec3f_normalize(vec);
+    nu_transform_build_direction(transform->rotation, NU_VEC3F_UP, vec);
 }
 void nu_transform_get_down(const nu_transform_t *transform, nu_vec3f_t vec)
 {
-    nu_vec3f_copy(NU_VEC3F_DOWN, vec);
-    nu_quatf_mulv(transform->rotation, vec, vec);
-    nu_vec3f_normalize(vec);
+    nu_transform_build_direction(transform->rotation, NU_VEC3F_DOWN, vec);
 }

@@ -144,7 +144,7 @@ static nu_result_t on_start(void)
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
     nu_plugin_require(module, NUUTILS_CONSOLE_PLUGIN_NAME);
-    nu_plugin_require(module, NUUTILS_SPECTATOR_PLUGIN_NAME);
+    // nu_plugin_require(module, NUUTILS_SPECTATOR_PLUGIN_NAME);
 
     nu_module_t lua_module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
@@ -155,6 +155,7 @@ static nu_result_t on_start(void)
     NU_ASSERT(nu_module_get_interface(lua_module, NULUA_PLUGIN_INTERFACE_NAME, &lua_interface) == NU_SUCCESS);
     nulua_plugin_t plugin;
     NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/test.lua", &plugin));
+    NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/spectator.lua", &plugin));
 
     /* load texture */
     nu_renderer_texture_create_info_t texture_info = {0};
@@ -320,9 +321,10 @@ static nu_result_t on_start(void)
         nu_warning(MAIN_LOGGER_NAME, "Failed to load monkey");
     }
 
+    nu_renderer_viewport_set_size((const nu_vec2u_t){1920, 1080});
     // nu_renderer_viewport_set_size((const nu_vec2u_t){1280, 720});
     // nu_renderer_viewport_set_size((const nu_vec2u_t){1024, 576});
-    nu_renderer_viewport_set_size((const nu_vec2u_t){640, 360});
+    // nu_renderer_viewport_set_size((const nu_vec2u_t){640, 360});
 
     return NU_SUCCESS;
 }

@@ -10,6 +10,8 @@ typedef struct {
 } nu_transform_t;
 
 NU_API void nu_transform_identity(nu_transform_t *transform);
+NU_API void nu_transform_build_matrix(const nu_vec3f_t translation, const nu_quatf_t rotation, const nu_vec3f_t scale, nu_mat4f_t matrix);
+NU_API void nu_transform_build_direction(const nu_quatf_t rotation, const nu_vec3f_t direction, nu_vec3f_t dest);
 NU_API void nu_transform_get_matrix(const nu_transform_t *transform, nu_mat4f_t matrix);
 NU_API void nu_transform_get_forward(const nu_transform_t *transform, nu_vec3f_t vec);
 NU_API void nu_transform_get_backward(const nu_transform_t *transform, nu_vec3f_t vec);

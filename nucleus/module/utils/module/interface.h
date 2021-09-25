@@ -8,6 +8,5 @@
 #include <nucleus/module/utils/console/interface.h>
 #include <nucleus/module/utils/command/interface.h>
 #include <nucleus/module/utils/loader/interface.h>
-#include <nucleus/module/utils/spectator/interface.h>
 
 #endif

@@ -1,6 +1,0 @@
-#ifndef NUUTILS_SPECTATOR_INTERFACE_H
-#define NUUTILS_SPECTATOR_INTERFACE_H
-
-#define NUUTILS_SPECTATOR_PLUGIN_NAME "nuutils_spectator_plugin"
-
-#endif
