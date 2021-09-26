@@ -1,6 +1,7 @@
 #version 450 core
 
 layout(location = 0) out vec4 normalDepthTex;
+layout(location = 1) out vec4 positionMaterialTex;
 
 layout(location = 0) in vec2 pos;
 layout(location = 1) in flat mat4 invVPMatrix;
@@ -18,6 +19,7 @@ void main() {
     vec3 dir = normalize((ptransform / ptransform.w).xyz - eye);
 
     vec3 normal;
-    float depth = tracePrimary(eye, dir, normal);
-    normalDepthTex.rgba = vec4(normal, depth);
+    float depth              = trace(eye, dir, normal);
+    normalDepthTex.rgba      = vec4(normal, depth);
+    positionMaterialTex.rgba = vec4(eye + dir * depth, 1.0);
 }

@@ -26,7 +26,7 @@ nu_result_t nuvk_sdf_camera_start_frame(
 
     nu_mat4f_t view, projection;
     nu_mat4f_lookat(camera->eye, camera->center, camera->up, view);
-    nu_mat4f_perspective(camera->fov, camera->ratio, 0.01f, 100.0f, projection);
+    nu_mat4f_perspective(camera->fov, camera->ratio, 0.1f, 100.0f, projection);
     nu_mat4f_mul(projection, view, camera->vp_matrix);
 
     return NU_SUCCESS;

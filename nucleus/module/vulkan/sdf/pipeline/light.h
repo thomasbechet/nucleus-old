@@ -21,5 +21,14 @@ nu_result_t nuvk_sdf_pipeline_light_destroy(
     nuvk_sdf_pipeline_light_t *pipeline,
     const nuvk_context_t *context
 );
+nu_result_t nuvk_sdf_pipeline_light_recompile(
+    nuvk_sdf_pipeline_light_t *pipeline,
+    const nuvk_context_t *context,
+    const nuvk_shader_manager_t *shader_manager,
+    const nuvk_sdf_descriptors_t *descriptors,
+    const nu_string_t *sources,
+    const nuvk_sdf_instance_type_info_t *types,
+    uint32_t type_count
+);
 
 #endif

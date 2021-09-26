@@ -231,10 +231,13 @@ nu_result_t nuvk_sdf_renderer_register_instance_type(
     result = nuvk_sdf_buffer_instances_configure_instance_types(&renderer->buffers.instances, types, renderer->scene.type_count);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to reconfigure buffers.");
     
-    /* recompile pipeline */
+    /* recompile pipelines */
     result = nuvk_sdf_pipeline_geometry_recompile(&renderer->pipelines.geometry, context, shader_manager, renderer->renderpasses.geometry, 
         renderer->pipelines.sources, types, renderer->scene.type_count);
-    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to recompile pipeline.");
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to recompile geometry pipeline.");
+    result = nuvk_sdf_pipeline_light_recompile(&renderer->pipelines.light, context, shader_manager, &renderer->descriptors,
+        renderer->pipelines.sources, types, renderer->scene.type_count);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to recompile light pipeline.");
 
 cleanup0:
     nu_free(types);
@@ -304,8 +307,9 @@ nu_result_t nuvk_sdf_renderer_render(
     vkCmdEndRenderPass(cmd);
 
     /* transition geometry and light image */
-    VkImageMemoryBarrier geometry_light_images[2];
-    memset(&geometry_light_images, 0, sizeof(VkImageMemoryBarrier) * 2);
+    VkImageMemoryBarrier geometry_light_images[3];
+    memset(&geometry_light_images, 0, sizeof(VkImageMemoryBarrier) * 3);
+
     geometry_light_images[0].sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     geometry_light_images[0].srcAccessMask                   = VK_ACCESS_SHADER_WRITE_BIT;
     geometry_light_images[0].dstAccessMask                   = VK_ACCESS_SHADER_READ_BIT;
@@ -313,7 +317,7 @@ nu_result_t nuvk_sdf_renderer_render(
     geometry_light_images[0].newLayout                       = VK_IMAGE_LAYOUT_GENERAL;
     geometry_light_images[0].srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
     geometry_light_images[0].dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
-    geometry_light_images[0].image                           = renderer->images.geometry.image.image;
+    geometry_light_images[0].image                           = renderer->images.geometry.normal_depth.image;
     geometry_light_images[0].subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
     geometry_light_images[0].subresourceRange.baseMipLevel   = 0;
     geometry_light_images[0].subresourceRange.levelCount     = 1;
@@ -321,29 +325,43 @@ nu_result_t nuvk_sdf_renderer_render(
     geometry_light_images[0].subresourceRange.layerCount     = 1;
 
     geometry_light_images[1].sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-    geometry_light_images[1].srcAccessMask                   = 0;
-    geometry_light_images[1].dstAccessMask                   = VK_ACCESS_SHADER_WRITE_BIT;
-    geometry_light_images[1].oldLayout                       = VK_IMAGE_LAYOUT_UNDEFINED;
+    geometry_light_images[1].srcAccessMask                   = VK_ACCESS_SHADER_WRITE_BIT;
+    geometry_light_images[1].dstAccessMask                   = VK_ACCESS_SHADER_READ_BIT;
+    geometry_light_images[1].oldLayout                       = VK_IMAGE_LAYOUT_GENERAL;
     geometry_light_images[1].newLayout                       = VK_IMAGE_LAYOUT_GENERAL;
     geometry_light_images[1].srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
     geometry_light_images[1].dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
-    geometry_light_images[1].image                           = renderer->images.light.image.image;
+    geometry_light_images[1].image                           = renderer->images.geometry.position_material.image;
     geometry_light_images[1].subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
     geometry_light_images[1].subresourceRange.baseMipLevel   = 0;
     geometry_light_images[1].subresourceRange.levelCount     = 1;
     geometry_light_images[1].subresourceRange.baseArrayLayer = 0;
     geometry_light_images[1].subresourceRange.layerCount     = 1;
 
+    geometry_light_images[2].sType                           = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+    geometry_light_images[2].srcAccessMask                   = 0;
+    geometry_light_images[2].dstAccessMask                   = VK_ACCESS_SHADER_WRITE_BIT;
+    geometry_light_images[2].oldLayout                       = VK_IMAGE_LAYOUT_UNDEFINED;
+    geometry_light_images[2].newLayout                       = VK_IMAGE_LAYOUT_GENERAL;
+    geometry_light_images[2].srcQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    geometry_light_images[2].dstQueueFamilyIndex             = VK_QUEUE_FAMILY_IGNORED;
+    geometry_light_images[2].image                           = renderer->images.light.image.image;
+    geometry_light_images[2].subresourceRange.aspectMask     = VK_IMAGE_ASPECT_COLOR_BIT;
+    geometry_light_images[2].subresourceRange.baseMipLevel   = 0;
+    geometry_light_images[2].subresourceRange.levelCount     = 1;
+    geometry_light_images[2].subresourceRange.baseArrayLayer = 0;
+    geometry_light_images[2].subresourceRange.layerCount     = 1;
+
     vkCmdPipelineBarrier(
         cmd, 
         VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 
         VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
         0, 0, NULL, 0, NULL,
-        2, geometry_light_images
+        3, geometry_light_images
     );
 
     /* light pass */
-    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.geometry.layout,
+    vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.layout,
         0, 1, &renderer->descriptors.low_frequency.descriptor, 3, dynamic_offsets); 
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.layout,
         1, 1, &renderer->descriptors.light.descriptor, 0, NULL);

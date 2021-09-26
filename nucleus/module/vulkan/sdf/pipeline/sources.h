@@ -1,7 +1,7 @@
 #ifndef NUVK_SDF_PIPELINE_SOURCES_H
 #define NUVK_SDF_PIPELINE_SOURCES_H
 
-#include <nucleus/nucleus.h>
+#include <nucleus/module/vulkan/sdf/scene/interface.h>
 
 typedef enum {
     NUVK_SDF_PIPELINE_SOURCE_CONSTANTS_GLSL         = 0,
@@ -18,5 +18,11 @@ typedef enum {
 
 nu_result_t nuvk_sdf_pipeline_sources_load(nu_string_t *sources);
 nu_result_t nuvk_sdf_pipeline_sources_unload(nu_string_t *sources);
+
+nu_result_t nuvk_sdf_pipeline_generate_instance_source(
+    const nuvk_sdf_instance_type_info_t *types,
+    uint32_t type_count,
+    nu_string_t *source
+);
 
 #endif

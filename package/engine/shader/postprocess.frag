@@ -10,15 +10,21 @@ layout(set = 0, binding = 0) uniform EnvironmentUBO {
     vec3 eye;
 };
 
-layout(set = 1, binding = 0) uniform sampler2D lightText;
+layout(set = 1, binding = 0) uniform sampler2D imageLight;
 
 __INJECT_CONSTANTS__
+
+vec3 tonemapFilmic(vec3 x) {
+	vec3 X = max(vec3(0.0), x - 0.004);
+	vec3 result = (X * (6.2 * X + 0.5)) / (X * (6.2 * X + 1.7) + 0.06);
+	return pow(result, vec3(2.2));
+}
 
 void main() {
     vec2 uv = (pos + 1.0) * 0.5;
     uv.y = 1.0 - uv.y;
 
-    vec4 light = texture(lightText, uv);
+    vec4 light = texture(imageLight, uv);
     color = light;
 
     // // color = vec4(normalDepth.rgb, 1);

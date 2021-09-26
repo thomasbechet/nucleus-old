@@ -55,7 +55,7 @@ static const char *menger_sponge_glsl_data_code =
 
 static const char *menger_sponge_glsl_sdf_code = 
     "const float scale = 30.0f;\n"
-    "vec3 q = abs(p / scale) - vec3(0, -0.5, 0) - vec3(5, 0.6, 5);\n"
+    "vec3 q = abs(p / scale) - vec3(0, -0.5, 0) - vec3(5, 1, 5);\n"
     "float d = length(max(q, 0)) + min(max(q.x, max(q.y, q.z)), 0);\n"
     "float s = 2.67;\n"
     "for (int m = 0; m < 6; m++) {\n"

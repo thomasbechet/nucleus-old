@@ -5,7 +5,8 @@
 #include <nucleus/module/vulkan/core/swapchain.h>
 
 typedef struct {
-    nuvk_image_t image;
+    nuvk_image_t normal_depth;
+    nuvk_image_t position_material;
 } nuvk_sdf_image_geometry_t;
 
 nu_result_t nuvk_sdf_image_geometry_create(
