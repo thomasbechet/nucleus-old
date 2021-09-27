@@ -6,6 +6,7 @@ layout(location = 1) out flat mat4 invVPMatrix;
 layout(set = 0, binding = 0) uniform EnvironmentUBO {
     mat4 VPMatrix;
     vec3 eye;
+    float pixelRadiusFactor;
 };
 
 void main() {

@@ -9,6 +9,7 @@ layout(location = 1) in flat mat4 invVPMatrix;
 layout(set = 0, binding = 0) uniform EnvironmentUBO {
     mat4 VPMatrix;
     vec3 eye;
+    float pixelRadiusFactor;
 };
 
 __INJECT_CONSTANTS__
@@ -19,7 +20,8 @@ void main() {
     vec3 dir = normalize((ptransform / ptransform.w).xyz - eye);
 
     vec3 normal;
-    float depth              = trace(eye, dir, normal);
+    uint stepCount;
+    float depth              = tracePrimary(eye, dir, pixelRadiusFactor, normal);
     normalDepthTex.rgba      = vec4(normal, depth);
     positionMaterialTex.rgba = vec4(eye + dir * depth, 1.0);
 }

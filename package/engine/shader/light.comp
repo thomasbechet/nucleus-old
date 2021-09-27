@@ -3,6 +3,7 @@
 layout(set = 0, binding = 0) uniform EnvironmentUBO {
     mat4 VPMatrix;
     vec3 eye;
+    float pixelRadiusFactor;
 };
 
 layout(set = 1, binding = 0, rgba32f) uniform readonly image2D imageNormalDepth;

@@ -8,6 +8,7 @@ layout(location = 1) in flat mat4 invVPMatrix;
 layout(set = 0, binding = 0) uniform EnvironmentUBO {
     mat4 VPMatrix;
     vec3 eye;
+    float pixelRadiusFactor;
 };
 
 layout(set = 1, binding = 0) uniform sampler2D imageLight;

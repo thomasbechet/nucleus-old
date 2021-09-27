@@ -254,7 +254,7 @@ nu_result_t nuvk_sdf_renderer_render(
     VkCommandBuffer cmd = render_context->command_buffers[render_context->active_inflight_frame_index];
 
     /* start camera */
-    nuvk_sdf_camera_start_frame(&renderer->scene.camera, swapchain);
+    nuvk_sdf_camera_start_frame(&renderer->scene.camera, renderer->viewport_size);
 
     /* update scene */
     nuvk_sdf_scene_update_buffers(&renderer->scene, render_context, &renderer->buffers.environment, &renderer->buffers.instances);

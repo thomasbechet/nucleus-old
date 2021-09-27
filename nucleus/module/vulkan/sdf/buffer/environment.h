@@ -8,6 +8,7 @@
 typedef struct {
     nu_mat4f_t vp_matrix;
     nu_vec3f_t eye;
+    float pixel_radius_factor;
 } nuvk_sdf_buffer_environment_data_t;
 
 typedef struct {

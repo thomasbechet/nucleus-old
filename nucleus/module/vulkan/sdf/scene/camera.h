@@ -6,6 +6,8 @@
 typedef struct {
     float fov;
     float ratio;
+    float focal_length;
+    nu_vec2u_t resolution;
 
     nu_vec3f_t eye;
     nu_vec3f_t center;
@@ -21,7 +23,7 @@ typedef struct {
 nu_result_t nuvk_sdf_camera_initialize(nuvk_sdf_camera_t *camera);
 nu_result_t nuvk_sdf_camera_start_frame(
     nuvk_sdf_camera_t *camera,
-    const nuvk_swapchain_t *swapchain
+    const nu_vec2u_t viewport_resolution
 );
 nu_result_t nuvk_sdf_camera_end_frame(nuvk_sdf_camera_t *camera);
 

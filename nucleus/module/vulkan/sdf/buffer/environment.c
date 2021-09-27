@@ -46,5 +46,7 @@ nu_result_t nuvk_sdf_buffer_environment_write_camera(
     nu_mat4f_copy(camera->vp_matrix, data->vp_matrix);
     nu_vec3f_copy(camera->eye, data->eye);
 
+    data->pixel_radius_factor = ((1.0f / NU_MIN(camera->resolution[0], camera->resolution[1])) * 0.5f) / camera->focal_length;
+
     return NU_SUCCESS;
 }

@@ -1,5 +1,7 @@
 #include <nucleus/module/vulkan/sdf/scene/camera.h>
 
+#include <math.h>
+
 nu_result_t nuvk_sdf_camera_initialize(nuvk_sdf_camera_t *camera)
 {
     camera->fov   = 90.0f;
@@ -19,10 +21,12 @@ nu_result_t nuvk_sdf_camera_initialize(nuvk_sdf_camera_t *camera)
 }
 nu_result_t nuvk_sdf_camera_start_frame(
     nuvk_sdf_camera_t *camera,
-    const nuvk_swapchain_t *swapchain
+    const nu_vec2u_t viewport_resolution
 )
 {
-    camera->ratio = (float)swapchain->extent.width / (float)swapchain->extent.height; 
+    camera->ratio = (float)viewport_resolution[0] / (float)viewport_resolution[1]; 
+    camera->focal_length = 1.0f / tanf(camera->fov * 0.5f);
+    nu_vec2u_copy(viewport_resolution, camera->resolution);
 
     nu_mat4f_t view, projection;
     nu_mat4f_lookat(camera->eye, camera->center, camera->up, view);
