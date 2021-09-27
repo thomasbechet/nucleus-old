@@ -11,7 +11,7 @@ nu_result_t nuvk_sdf_descriptor_pool_create(
     pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     pool_sizes[0].descriptorCount = 3;
     pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-    pool_sizes[1].descriptorCount = 3;
+    pool_sizes[1].descriptorCount = 4;
 
     VkDescriptorPoolCreateInfo info;
     memset(&info, 0, sizeof(VkDescriptorPoolCreateInfo));
