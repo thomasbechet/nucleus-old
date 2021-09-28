@@ -18,12 +18,22 @@ static int Renderer_camera_set_fov(lua_State *L)
     nu_renderer_camera_set_fov(NU_NULL_HANDLE, fov);
     return 0;
 }
+static int Renderer_viewport_set_size(lua_State *L)
+{
+    nu_vec2u_t size = {
+        luaL_checkinteger(L, 1),
+        luaL_checkinteger(L, 2)
+    };
+    nu_renderer_viewport_set_size(size);
+    return 0;
+}
 
 nu_result_t nulua_register_renderer_api(lua_State *L)
 {
     static const struct luaL_Reg Renderer_methods[] = {
-        {"camera_set_view", Renderer_camera_set_view},
-        {"camera_set_fov",  Renderer_camera_set_fov},
+        {"camera_set_view",   Renderer_camera_set_view},
+        {"camera_set_fov",    Renderer_camera_set_fov},
+        {"viewport_set_size", Renderer_viewport_set_size},
         {NULL, NULL}
     };
 

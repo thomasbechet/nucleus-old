@@ -31,7 +31,7 @@ void main() {
         vec3 normal;
         float sunRay = trace(positionMaterial.xyz + normalDepth.xyz * EPSILON, sunDir, normal);
         if (sunRay != MAX_DISTANCE) {
-            color = backgroundColor.xyzz * 0.2;
+            color = color * 0.08;
         }
         
     } else {  

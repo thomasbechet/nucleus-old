@@ -1,6 +1,6 @@
 local plugin = {
     -- constants
-    NORMAL_SPEED         = 20.0 / 1000.0,
+    NORMAL_SPEED         = 10.0 / 1000.0,
     SLOW_SPEED           = 2.0 / 1000.0,
     FAST_SPEED           = 100.0 / 1000.0,
     ROLL_SPEED           = 90.0 / 1000,

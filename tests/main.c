@@ -322,7 +322,7 @@ static nu_result_t on_start(void)
     }
 
     // nu_renderer_viewport_set_size((const nu_vec2u_t){2560, 1440});
-    nu_renderer_viewport_set_size((const nu_vec2u_t){1920, 1080});
+    // nu_renderer_viewport_set_size((const nu_vec2u_t){1920, 1080});
     // nu_renderer_viewport_set_size((const nu_vec2u_t){1600, 900});
     // nu_renderer_viewport_set_size((const nu_vec2u_t){1280, 720});
     // nu_renderer_viewport_set_size((const nu_vec2u_t){1024, 576});

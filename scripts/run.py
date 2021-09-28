@@ -1,3 +1,9 @@
 import subprocess
+import platform
+from platform import uname
 
-subprocess.call(['../build/bin/nucleus_test'], cwd='../build/bin/')
+print(uname())
+if platform.system() == 'Windows' or ('Microsoft' in uname()[2]):
+    subprocess.call(['./nucleus_test.exe'], cwd='../build/bin/')
+else:
+    subprocess.call(['./nucleus_test'], cwd='../build/bin/')
