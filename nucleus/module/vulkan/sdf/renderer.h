@@ -18,6 +18,7 @@ typedef struct {
     nuvk_sdf_images_t images;
     nuvk_sdf_framebuffers_t framebuffers;
     nuvk_sdf_scene_t scene;
+    nuvk_sdf_instance_type_t primitives[32];
     nu_vec2u_t viewport_size;
 } nuvk_sdf_renderer_t;
 

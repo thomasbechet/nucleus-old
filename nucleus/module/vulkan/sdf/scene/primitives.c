@@ -1,5 +1,7 @@
 #include <nucleus/module/vulkan/sdf/scene/primitives.h>
 
+#include <nucleus/module/vulkan/renderer.h>
+
 /* sphere */
 
 static const char *sphere_glsl_data_code =
@@ -55,10 +57,10 @@ static const char *menger_sponge_glsl_data_code =
 
 static const char *menger_sponge_glsl_sdf_code = 
     "const float scale = 30.0f;\n"
-    "vec3 q = abs(p / scale) - vec3(0, -0.5, 0) - vec3(5, 1, 5);\n"
+    "vec3 q = abs(p / scale) - vec3(0, -0.5, 0) - vec3(100, 1, 100);\n"
     "float d = length(max(q, 0)) + min(max(q.x, max(q.y, q.z)), 0);\n"
     "float s = 2.67;\n"
-    "for (int m = 0; m < 6; m++) {\n"
+    "for (int m = 0; m < 7; m++) {\n"
     "    vec3 a = mod(q * s, 2.0) - 1.0;\n"
     "    s *= 3.0;\n"
     "    vec3 r = abs(1.0 - 3.0 * abs(a));\n"
@@ -121,7 +123,7 @@ static void plane_c_aabb_code(const void *d, nu_aabb_t *aabb)
     nu_vec3f_zero(aabb->max);
 }
 
-nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_primitives_t *primitives)
+nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_instance_type_t *types)
 {
     nu_result_t result = NU_SUCCESS;
     nuvk_sdf_instance_type_info_t info;
@@ -134,7 +136,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_primitives_t *primitives)
     info.c_aabb_code        = sphere_c_aabb_code;
     info.max_instance_count = 128;
 
-    result &= nuvk_sdf_instance_type_register(&info, &primitives->sphere);
+    result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_SPHERE]);
 
     memset(&info, 0, sizeof(nuvk_sdf_instance_type_info_t));
     info.data_size          = sizeof(nuvk_sdf_cube_data_t);
@@ -144,7 +146,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_primitives_t *primitives)
     info.c_aabb_code        = cube_c_aabb_code;
     info.max_instance_count = 128;
 
-    result &= nuvk_sdf_instance_type_register(&info, &primitives->cube);
+    result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_CUBE]);
 
     memset(&info, 0, sizeof(nuvk_sdf_instance_type_info_t));
     info.data_size          = sizeof(nuvk_sdf_menger_sponge_data_t);
@@ -154,7 +156,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_primitives_t *primitives)
     info.c_aabb_code        = menger_sponge_c_aabb_code;
     info.max_instance_count = 128;
 
-    result &= nuvk_sdf_instance_type_register(&info, &primitives->menger_sponge);
+    result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_MENGER_SPONGE]);
 
     memset(&info, 0, sizeof(nuvk_sdf_instance_type_info_t));
     info.data_size          = sizeof(nuvk_sdf_torus_data_t);
@@ -164,7 +166,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_primitives_t *primitives)
     info.c_aabb_code        = torus_c_aabb_code;
     info.max_instance_count = 128;
 
-    result &= nuvk_sdf_instance_type_register(&info, &primitives->torus);
+    result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_TORUS]);
 
     memset(&info, 0, sizeof(nuvk_sdf_instance_type_info_t));
     info.data_size          = sizeof(nuvk_sdf_plane_data_t);
@@ -174,7 +176,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_primitives_t *primitives)
     info.c_aabb_code        = plane_c_aabb_code;
     info.max_instance_count = 128;
 
-    result &= nuvk_sdf_instance_type_register(&info, &primitives->plane);
+    result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_PLANE]);
 
     return NU_SUCCESS;
 }

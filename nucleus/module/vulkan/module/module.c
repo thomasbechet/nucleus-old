@@ -36,11 +36,12 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, NUVK_SDF_INTERFACE_NAME)) {
         nuvk_sdf_interface_t *i = (nuvk_sdf_interface_t*)interface;
 
-        i->instance_type_register    = nuvk_sdf_instance_type_register;
-        i->instance_create           = nuvk_sdf_instance_create;
-        i->instance_destroy          = nuvk_sdf_instance_destroy;
-        i->instance_update_transform = nuvk_sdf_instance_update_transform;
-        i->instance_update_data      = nuvk_sdf_instance_update_data;
+        i->register_instance_type    = nuvk_sdf_instance_type_register;
+        i->get_instance_type         = nuvk_sdf_instance_type_get;
+        i->create_instance           = nuvk_sdf_instance_create;
+        i->destroy_instance          = nuvk_sdf_instance_destroy;
+        i->update_instance_transform = nuvk_sdf_instance_update_transform;
+        i->update_instance_data      = nuvk_sdf_instance_update_data;
 
         return NU_SUCCESS;
     }

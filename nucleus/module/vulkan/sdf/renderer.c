@@ -65,31 +65,30 @@ nu_result_t nuvk_sdf_renderer_initialize(
         shader_manager, &renderer->descriptors, renderer->renderpasses.postprocess, renderer->pipelines.sources);
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess pipeline.");
 
+    /* create scene and primitives */
     nuvk_sdf_scene_initialize(&renderer->scene);
-
-    nuvk_sdf_primitives_t primitives;
-    nuvk_sdf_primitives_register(&primitives);
+    nuvk_sdf_primitives_register(renderer->primitives);
     
-    nuvk_sdf_instance_info_t info;
-    info.type  = primitives.sphere;
-    info.flags = 0x0;
-    nu_transform_identity(&info.transform);
-    nuvk_sdf_sphere_data_t data;
-    data.radius = 1.0f;
-    info.data = &data;
-    nuvk_sdf_instance_t handle;
+    // nuvk_sdf_instance_info_t info;
+    // info.type  = primitives.sphere;
+    // info.flags = 0x0;
+    // nu_transform_identity(&info.transform);
+    // nuvk_sdf_sphere_data_t data;
+    // data.radius = 1.0f;
+    // info.data = &data;
+    // nuvk_sdf_instance_t handle;
     
-    nu_vec3f_copy(NU_VEC3F_UP, info.transform.translation);
-    nu_vec3f_muls(info.transform.translation, 10.0f, info.transform.translation);
-    nuvk_sdf_instance_create(&info, &handle);
-    nu_vec3f_copy(NU_VEC3F_RIGHT, info.transform.translation);
-    nu_vec3f_muls(info.transform.translation, 10.0f, info.transform.translation);
-    nuvk_sdf_instance_create(&info, &handle);
-    nu_vec3f_copy(NU_VEC3F_BACKWARD, info.transform.translation);
-    nu_vec3f_muls(info.transform.translation, 10.0f, info.transform.translation);
-    nuvk_sdf_instance_create(&info, &handle);
+    // nu_vec3f_copy(NU_VEC3F_UP, info.transform.translation);
+    // nu_vec3f_muls(info.transform.translation, 10.0f, info.transform.translation);
+    // nuvk_sdf_instance_create(&info, &handle);
+    // nu_vec3f_copy(NU_VEC3F_RIGHT, info.transform.translation);
+    // nu_vec3f_muls(info.transform.translation, 10.0f, info.transform.translation);
+    // nuvk_sdf_instance_create(&info, &handle);
+    // nu_vec3f_copy(NU_VEC3F_BACKWARD, info.transform.translation);
+    // nu_vec3f_muls(info.transform.translation, 10.0f, info.transform.translation);
+    // nuvk_sdf_instance_create(&info, &handle);
     
-    nu_vec3f_zero(info.transform.translation);
+    // nu_vec3f_zero(info.transform.translation);
 
     // nuvk_sdf_torus_data_t torus_data;
     // torus_data.x = 1.0f;
@@ -99,13 +98,13 @@ nu_result_t nuvk_sdf_renderer_initialize(
     // nu_quatf_from_axis(nu_radian(45.0f), NU_VEC3F_LEFT, info.transform.rotation);
     // nuvk_sdf_instance_create(&info, &handle);
 
-    nuvk_sdf_plane_data_t plane_data;
-    nu_vec3f_copy((nu_vec3f_t){0.0f, 1.0f, 0.0f}, plane_data.normal);
-    plane_data.height = -5.0f;
-    info.type                     = primitives.menger_sponge;
-    info.data                     = &plane_data;
-    // nu_quatf_from_axis(nu_radian(45.0f), NU_VEC3F_LEFT, info.transform.rotation);
-    nuvk_sdf_instance_create(&info, &handle);
+    // nuvk_sdf_plane_data_t plane_data;
+    // nu_vec3f_copy((nu_vec3f_t){0.0f, 1.0f, 0.0f}, plane_data.normal);
+    // plane_data.height = -5.0f;
+    // info.type                     = primitives.menger_sponge;
+    // info.data                     = &plane_data;
+    // // nu_quatf_from_axis(nu_radian(45.0f), NU_VEC3F_LEFT, info.transform.rotation);
+    // nuvk_sdf_instance_create(&info, &handle);
 
     return NU_SUCCESS;
 }

@@ -4,6 +4,7 @@
 #include <nucleus/nucleus.h>
 #include <nucleus/module/utils.h>
 #include <nucleus/module/lua.h>
+#include <nucleus/module/vulkan.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -38,6 +39,8 @@ typedef struct {
     uint32_t id;
     uint32_t v;
 } stest;
+
+static nuvk_sdf_interface_t SDF;
 
 static nu_result_t on_start(void)
 {
@@ -149,6 +152,10 @@ static nu_result_t on_start(void)
     nu_module_t lua_module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
     nu_plugin_require(lua_module, NULUA_PLUGIN_NAME);
+
+    /* load sdf interface */
+    nu_module_t renderer_module = nu_renderer_get_module();
+    nu_module_get_interface(renderer_module, NUVK_SDF_INTERFACE_NAME, &SDF);
 
     /* load lua plugin */
     nulua_plugin_interface_t lua_interface;
@@ -321,21 +328,39 @@ static nu_result_t on_start(void)
         nu_warning(MAIN_LOGGER_NAME, "Failed to load monkey");
     }
 
-    // nu_renderer_viewport_set_size((const nu_vec2u_t){2560, 1440});
-    // nu_renderer_viewport_set_size((const nu_vec2u_t){1920, 1080});
-    // nu_renderer_viewport_set_size((const nu_vec2u_t){1600, 900});
-    // nu_renderer_viewport_set_size((const nu_vec2u_t){1280, 720});
-    // nu_renderer_viewport_set_size((const nu_vec2u_t){1024, 576});
-    // nu_renderer_viewport_set_size((const nu_vec2u_t){640, 360});
-
     return NU_SUCCESS;
 }
 static nu_result_t on_stop(void)
 {
     return NU_SUCCESS;
 }
+nuvk_sdf_instance_t instance;
+nu_transform_t instance_transform;
 static nu_result_t on_update(void)
 {
+    static int once = 1;
+    if (once) {
+
+        /* create sdf scene */
+        nuvk_sdf_instance_type_t sphere_type;
+        nuvk_sdf_instance_type_t sponge_type;
+        SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_SPHERE, &sphere_type);
+        SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_MENGER_SPONGE, &sponge_type);
+
+        nuvk_sdf_menger_sponge_data_t data;
+        nuvk_sdf_instance_info_t instance_info;
+        instance_info.data = &data;
+        instance_info.type = sponge_type;
+        nu_transform_identity(&instance_info.transform);
+        SDF.create_instance(&instance_info, &instance);
+        nu_transform_identity(&instance_transform);
+        once = 0;
+    }
+
+    nu_quatf_mul_axis(instance_transform.rotation, nu_radian(0.1f) * nu_context_get_delta_time() / 1000.0f, NU_VEC3F_LEFT, instance_transform.rotation);
+    nu_quatf_mul_axis(instance_transform.rotation, nu_radian(0.1f) * nu_context_get_delta_time() / 1000.0f, NU_VEC3F_UP, instance_transform.rotation);
+    SDF.update_instance_transform(instance, &instance_transform);
+
     /* quit handling */
     nu_button_state_t escape_state;
     nu_input_get_keyboard_state(NU_KEYBOARD_ESCAPE, &escape_state);

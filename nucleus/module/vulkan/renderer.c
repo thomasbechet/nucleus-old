@@ -17,10 +17,9 @@ typedef struct {
     nuvk_command_pool_t command_pool;
     nuvk_swapchain_t swapchain;
     nuvk_render_context_t render_context;
+    bool render_context_out_of_date;
 
     nuvk_sdf_renderer_t sdf;
-
-    bool render_context_out_of_date;
 } nuvk_module_data_t;
 
 static nuvk_module_data_t _module;
@@ -117,6 +116,11 @@ nu_result_t nuvk_renderer_viewport_set_size(const nu_vec2u_t size)
 nu_result_t nuvk_sdf_instance_type_register(const nuvk_sdf_instance_type_info_t *info, nuvk_sdf_instance_type_t *handle)
 {
     return nuvk_sdf_renderer_register_instance_type(&_module.sdf, &_module.context, &_module.shader_manager, info, handle);
+}
+nu_result_t nuvk_sdf_instance_type_get(nuvk_sdf_instance_type_primitives_t type, nuvk_sdf_instance_type_t *handle)
+{
+    *handle = _module.sdf.primitives[type];
+    return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_instance_create(const nuvk_sdf_instance_info_t *info, nuvk_sdf_instance_t *handle)
 {

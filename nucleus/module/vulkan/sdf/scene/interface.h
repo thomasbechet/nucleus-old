@@ -33,4 +33,39 @@ typedef struct {
     void *data;
 } nuvk_sdf_instance_info_t;
 
+/* primitives */
+
+typedef struct {
+    float radius;
+    float _pad0[3];
+} nuvk_sdf_sphere_data_t;
+
+typedef struct {
+    nu_vec3f_t box;
+    float radius;
+} nuvk_sdf_cube_data_t;
+
+typedef struct {
+    float _pad0[4];
+} nuvk_sdf_menger_sponge_data_t;
+
+typedef struct {
+    float x;
+    float y;
+    float _pad0[2];
+} nuvk_sdf_torus_data_t;
+
+typedef struct {
+    nu_vec3f_t normal;
+    float height;
+} nuvk_sdf_plane_data_t;
+
+typedef enum {
+    NUVK_SDF_INSTANCE_TYPE_SPHERE        = 0,
+    NUVK_SDF_INSTANCE_TYPE_CUBE          = 1,
+    NUVK_SDF_INSTANCE_TYPE_MENGER_SPONGE = 2,
+    NUVK_SDF_INSTANCE_TYPE_TORUS         = 3,
+    NUVK_SDF_INSTANCE_TYPE_PLANE         = 4
+} nuvk_sdf_instance_type_primitives_t;
+
 #endif
