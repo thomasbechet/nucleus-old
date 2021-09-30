@@ -20,6 +20,7 @@ endif()
 INCLUDE_DIRECTORIES(
     ../../extlibs/cglm/include/
     ../../extlibs/ini/include/
+    ../../extlibs/json/include/
     ../../
 )
 

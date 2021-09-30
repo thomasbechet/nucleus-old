@@ -5,6 +5,7 @@
 #include <nucleus/core/utility/container/hashmap.h>
 #include <nucleus/core/utility/container/indexed_array.h>
 #include <nucleus/core/utility/io.h>
+#include <nucleus/core/utility/json.h>
 #include <nucleus/core/utility/math/math.h>
 #include <nucleus/core/utility/macro.h>
 #include <nucleus/core/utility/platform.h>

@@ -1,0 +1,11 @@
+{
+    "type": "scene",
+    "instances": [
+        {
+            "type": "sphere",
+            "transform": {
+                "translation": [0, 0, 0]
+            }
+        }
+    ]
+}
