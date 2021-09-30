@@ -11,6 +11,8 @@
 
 #define MAIN_LOGGER_NAME "MAIN"
 
+#include <json.h>
+
 static nu_result_t load_monkey(nu_renderer_mesh_t *mesh)
 {
     nu_module_t module;
@@ -385,6 +387,13 @@ static nu_result_t on_update(void)
 
 int main(int argc, char *argv[])
 {
+    const char *json = "{\"a\" : true, \"b\" : [false, null, \"foo\"]}";
+    struct json_value_s *root = json_parse(json, strlen(json));
+    NU_ASSERT(root->type == json_type_object);
+    struct json_object_s *o = (struct json_object_s*)root->payload;
+    // o->
+    free(root);
+
     nu_context_init_info_t info;
     memset(&info, 0, sizeof(nu_context_init_info_t));
     info.callback.start  = on_start;

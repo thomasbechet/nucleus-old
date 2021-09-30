@@ -9,6 +9,7 @@ INCLUDE_DIRECTORIES(
     ../
     ../extlibs/stb/include/
     ../extlibs/tinyobjloader/include/
+    ../extlibs/json/include/
 )
 
 ADD_EXECUTABLE(
