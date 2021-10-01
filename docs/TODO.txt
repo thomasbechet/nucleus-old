@@ -10,3 +10,4 @@
 [ ] support headless systems
 [ ] LUA memory alignment (currently using a patched version)
 [ ] LUA use custom memory pool (based on a general pool ?)
+[ ] LUA : ajouter Json API

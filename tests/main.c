@@ -44,11 +44,6 @@ static nuvk_sdf_interface_t SDF;
 
 static nu_result_t on_start(void)
 {
-    nu_json_t json;
-    nu_json_allocate_from_file(&json, "engine/script/map.json");
-    nu_info("test", "%d", nu_json_get_type(json));
-    nu_json_free(json);
-
     // nu_string_t token;
     // nu_string_array_t tokens;
     // nu_string_array_allocate(&tokens);

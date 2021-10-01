@@ -297,8 +297,10 @@ static nu_result_t nu_context_run(void)
     nu_timer_allocate(&_context.timer);
     nu_timer_start(_context.timer);
 
-    if (_context.callback.start)
-        _context.callback.start();
+    if (_context.callback.start) {
+        NU_CHECK(_context.callback.start() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to call 'start' application callback.");
+    }
 
     /* log initial module table */
     nu_module_log();
@@ -314,44 +316,61 @@ static nu_result_t nu_context_run(void)
         accumulator += delta;
 
         /* process window */
-        nu_window_update();
+        NU_CHECK(nu_window_update() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to update window system.");
 
         /* process inputs */
-        nu_input_update();
+        NU_CHECK(nu_input_update() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to update input system.");
 
         /* dispatch events */
-        nu_event_dispatch_all();
+        NU_CHECK(nu_event_dispatch_all() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to dispatch events.");
 
         _context.delta_time = FIXED_TIMESTEP;
         while (accumulator >= FIXED_TIMESTEP) {
             accumulator -= FIXED_TIMESTEP;
 
             /* process fixed update */
-            if (_context.callback.fixed_update) 
-                _context.callback.fixed_update();
-            nu_plugin_fixed_update();
+            if (_context.callback.fixed_update) {
+                NU_CHECK(_context.callback.fixed_update() == NU_SUCCESS, goto cleanup0,
+                    NU_LOGGER_NAME, "Failed to call 'fixed_update' application callback.");
+            }
+            
+            NU_CHECK(nu_plugin_fixed_update() == NU_SUCCESS, goto cleanup0,
+                NU_LOGGER_NAME, "Failed to fixed update plugins.");
         }
 
         _context.delta_time = delta;
 
         /* process frame update */
-        if (_context.callback.update) 
-            _context.callback.update();
-        nu_plugin_update();
+        if (_context.callback.update) {
+            NU_CHECK(_context.callback.update() == NU_SUCCESS, goto cleanup0,
+                NU_LOGGER_NAME, "Failed to call 'update' application callback.");
+        }
+        NU_CHECK(nu_plugin_update() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to update plugins.");
 
         /* process late update */
-        if (_context.callback.late_update) 
-            _context.callback.late_update();
-        nu_plugin_late_update();
+        if (_context.callback.late_update) {
+            NU_CHECK(_context.callback.late_update() == NU_SUCCESS, goto cleanup0,
+                NU_LOGGER_NAME, "Failed to call 'late_update' application callback.");
+        }
+        NU_CHECK(nu_plugin_late_update() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to late update plugins.");
 
         /* process render */
-        nu_renderer_render();
+        NU_CHECK(nu_renderer_render() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to render renderer.");
     }
 
-    if (_context.callback.stop) 
-        _context.callback.stop();
+    if (_context.callback.stop) {
+        NU_CHECK(_context.callback.stop() == NU_SUCCESS, goto cleanup0,
+            NU_LOGGER_NAME, "Failed to call 'stop' application callback.");
+    }
 
     /* free resources */
+cleanup0:
     nu_timer_free(_context.timer);
 
     return NU_SUCCESS;

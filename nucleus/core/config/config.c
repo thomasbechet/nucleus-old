@@ -53,16 +53,16 @@ static nu_result_t load_ini_file(void)
     /* logger */
     nu_config_get_bool(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_ENABLE_LOG_FILE, false, &_system.config.logger.enable_log_file);
     nu_config_get_bool(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_ENABLE_CORE_LOG_FILE, false, &_system.config.logger.enable_core_log_file);
-    nu_config_get_string(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_LOG_FILE_DIRECTORY, NU_PATH_ROOT_DIRECTORY, &_system.config.logger.log_file_directory);
+    nu_config_get_cstr(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_LOG_FILE_DIRECTORY, NU_PATH_ROOT_DIRECTORY, &_system.config.logger.log_file_directory);
 
     /* task */
     const char *task_api;
-    nu_config_get_string(NU_CONFIG_TASK_SECTION, NU_CONFIG_TASK_API, NULL, &task_api);
+    nu_config_get_cstr(NU_CONFIG_TASK_SECTION, NU_CONFIG_TASK_API, NULL, &task_api);
     _system.config.task.api = NU_TASK_API_NONE;
 
     /* window */
     const char *window_api;
-    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, NULL, &window_api);
+    nu_config_get_cstr(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, NULL, &window_api);
     if (NU_MATCH(window_api, "glfw")) {
         _system.config.window.api = NU_WINDOW_API_GLFW;
     } else {
@@ -70,7 +70,7 @@ static nu_result_t load_ini_file(void)
     }
 
     const char *window_mode;
-    nu_config_get_string(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_MODE, "windowed", &window_mode);
+    nu_config_get_cstr(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_MODE, "windowed", &window_mode);
     if (NU_MATCH(window_mode, "fullscreen")) {
         _system.config.window.mode = NU_WINDOW_MODE_FULLSCREEN;
     } else if (NU_MATCH(window_mode, "windowed")) {
@@ -85,7 +85,7 @@ static nu_result_t load_ini_file(void)
 
     /* input */
     const char *input_api;
-    nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_API, "", &input_api);
+    nu_config_get_cstr(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_API, "", &input_api);
     if (NU_MATCH(input_api, "glfw")) {
         _system.config.input.api = NU_INPUT_API_GLFW;
     } else {
@@ -93,7 +93,7 @@ static nu_result_t load_ini_file(void)
     }
 
     const char *input_cursor_mode;
-    nu_config_get_string(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_CURSOR_MODE, "normal", &input_cursor_mode);
+    nu_config_get_cstr(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_CURSOR_MODE, "normal", &input_cursor_mode);
     if (NU_MATCH(input_cursor_mode, "normal")) {
         _system.config.input.cursor_mode = NU_CURSOR_MODE_NORMAL;
     } else if (NU_MATCH(input_cursor_mode, "hidden")) {
@@ -104,7 +104,7 @@ static nu_result_t load_ini_file(void)
 
     /* renderer */
     const char *renderer_api;
-    nu_config_get_string(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, "", &renderer_api);
+    nu_config_get_cstr(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, "", &renderer_api);
     if (NU_MATCH(renderer_api, "softrast")) {
         _system.config.renderer.api = NU_RENDERER_API_SOFTRAST;
     } else if (NU_MATCH(renderer_api, "vulkan")) {
@@ -145,7 +145,7 @@ nu_config_t nu_config_get(void)
 {
     return _system.config;
 }
-nu_result_t nu_config_get_string(const char *section, const char *name, const char *default_value, const char **value)
+nu_result_t nu_config_get_cstr(const char *section, const char *name, const char *default_value, const char **value)
 {
     const char *str = NULL;
     for (uint32_t i = 0; i < _system.parameter_count; i++) {
@@ -161,7 +161,7 @@ nu_result_t nu_config_get_string(const char *section, const char *name, const ch
 nu_result_t nu_config_get_int(const char *section, const char *name, int32_t default_value, int32_t *value)
 {
     const char *str;
-    nu_config_get_string(section, name, NULL, &str);
+    nu_config_get_cstr(section, name, NULL, &str);
     if (str) {
         return nu_strtoi(str, value);
     } else {
@@ -173,7 +173,7 @@ nu_result_t nu_config_get_int(const char *section, const char *name, int32_t def
 nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t default_value, uint32_t *value)
 {
     const char *str;
-    nu_config_get_string(section, name, NULL, &str);
+    nu_config_get_cstr(section, name, NULL, &str);
     if (str) {
         return nu_strtou(str, value);
     } else {
@@ -185,7 +185,7 @@ nu_result_t nu_config_get_uint(const char *section, const char *name, uint32_t d
 nu_result_t nu_config_get_bool(const char *section, const char *name, bool default_value, bool *value)
 {
     const char *str;
-    nu_config_get_string(section, name, NULL, &str);
+    nu_config_get_cstr(section, name, NULL, &str);
     if (str) {
         *value = (NU_MATCH(str, "true") || NU_MATCH(str, "True") || NU_MATCH(str, "1"));
     } else {
@@ -197,7 +197,7 @@ nu_result_t nu_config_get_bool(const char *section, const char *name, bool defau
 nu_result_t nu_config_get_float(const char *section, const char *name, float default_value, float *value)
 {
     const char *str;
-    nu_config_get_string(section, name, NULL, &str);
+    nu_config_get_cstr(section, name, NULL, &str);
     if (str) {
         return nu_strtof(str, value);
     } else {
