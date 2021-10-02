@@ -63,8 +63,7 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
             "};\n"
             "struct Instance%ld {\n"
             "	mat3 invRotation;\n"
-            "	vec3 translation;\n"
-            "	vec3 scale;\n"
+            "	vec4 translationScale;\n"
             "	InstanceData%ld data;\n"
             "};\n"
             "float sdf%ld(in vec3 p, in InstanceData%ld data) {\n"
@@ -116,19 +115,20 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
         nu_string_allocate_format(&instance_code,
             "   for (uint i = 0; i < indexCount%ld; i++) {\n"
             "       uint index = indices%ld[i];\n"
-            "       vec3 relPos = instances%ld[index].invRotation * (pos - instances%ld[index].translation);\n"
+            "       vec3 relPos = instances%ld[index].invRotation * (pos - instances%ld[index].translationScale.xyz);\n"
             "       vec3 relDir = normalize(instances%ld[index].invRotation * dir);\n"
+            "       float s     = instances%ld[index].translationScale.w;\n"
             "       InstanceData%ld data = instances%ld[index].data;\n"
             "       float depth = 0.0;\n"
             "       for (uint step = 0; depth < hitDepth && step < MAX_RAYMARCH_STEP; step++) {\n"
             "           vec3 p = relPos + depth * relDir;\n"
-            "           float sd = sdf%ld(p, data);\n"
+            "           float sd = sdf%ld(p / s, data) * s;\n"
             "           if (sd < depth * radiusFactor) {\n"
             "               const vec2 e = vec2(EPSILON, 0);\n"
             "               normal = normalize(vec3(\n"
-            "                   sd - sdf%ld(vec3(p - e.xyy), data),\n"
-            "                   sd - sdf%ld(vec3(p - e.yxy), data),\n"
-            "                   sd - sdf%ld(vec3(p - e.yyx), data)\n"
+            "                   sd - sdf%ld(vec3(p - e.xyy) / s, data) * s,\n"
+            "                   sd - sdf%ld(vec3(p - e.yxy) / s, data) * s,\n"
+            "                   sd - sdf%ld(vec3(p - e.yyx) / s, data) * s\n"
             "               ));\n"
             "               normal = transpose(instances%ld[index].invRotation) * normal;\n"
             "               hitDepth = depth;\n"
@@ -137,7 +137,7 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
             "           depth += sd;\n"
             "       }\n"
             "    }\n",
-            i, i, i, i, i, i, i, i, i, i, i, i);
+            i, i, i, i, i, i, i, i, i, i, i, i, i);
         nu_string_append(source, instance_code);
         nu_string_free(instance_code);
     }
@@ -155,19 +155,20 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
         nu_string_allocate_format(&instance_code,
             "   for (uint i = 0; i < indexCount%ld; i++) {\n"
             "       uint index = indices%ld[i];\n"
-            "       vec3 relPos = instances%ld[index].invRotation * (pos - instances%ld[index].translation);\n"
+            "       vec3 relPos = instances%ld[index].invRotation * (pos - instances%ld[index].translationScale.xyz);\n"
             "       vec3 relDir = normalize(instances%ld[index].invRotation * dir);\n"
+            "       float s     = instances%ld[index].translationScale.w;\n"
             "       InstanceData%ld data = instances%ld[index].data;\n"
             "       float depth = 0.0;\n"
             "       for (int step = 0; depth < hitDepth && step < MAX_RAYMARCH_STEP; step++) {\n"
             "           vec3 p = relPos + depth * relDir;\n"
-            "           float sd = sdf%ld(p, data);\n"
+            "           float sd = sdf%ld(p / s, data) * s;\n"
             "           if (sd < MIN_HIT_DISTANCE) {\n"
             "               const vec2 e = vec2(EPSILON, 0);\n"
             "               normal = normalize(vec3(\n"
-            "                   sd - sdf%ld(vec3(p - e.xyy), data),\n"
-            "                   sd - sdf%ld(vec3(p - e.yxy), data),\n"
-            "                   sd - sdf%ld(vec3(p - e.yyx), data)\n"
+            "                   sd - sdf%ld(vec3(p - e.xyy) / s, data) * s,\n"
+            "                   sd - sdf%ld(vec3(p - e.yxy) / s, data) * s,\n"
+            "                   sd - sdf%ld(vec3(p - e.yyx) / s, data) * s\n"
             "               ));\n"
             "               normal = transpose(instances%ld[index].invRotation) * normal;\n"
             "               hitDepth = depth;\n"
@@ -176,7 +177,7 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
             "           depth += sd;\n"
             "       }\n"
             "    }\n",
-            i, i, i, i, i, i, i, i, i, i, i, i);
+            i, i, i, i, i, i, i, i, i, i, i, i, i);
         nu_string_append(source, instance_code);
         nu_string_free(instance_code);
     }

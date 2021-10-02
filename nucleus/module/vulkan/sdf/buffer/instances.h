@@ -54,8 +54,7 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_transform(
     uint32_t type_index,
     uint32_t instance_index,
     const nu_mat3f_t inv_rotation,
-    const nu_vec3f_t translation,
-    const nu_vec3f_t scale
+    const nu_vec4f_t translation_scale
 );
 nu_result_t nuvk_sdf_buffer_instances_write_instance_data(
     nuvk_sdf_buffer_instances_t *buffer,

@@ -8,10 +8,9 @@
 
 typedef struct {
     nu_aabb_t aabb;
-    nu_transform_t transform;
+    nuvk_sdf_transform_t transform;
     nu_mat3f_t inv_rotation;
-    nu_vec3f_t translation;
-    nu_vec3f_t scale;
+    nu_vec4f_t translation_scale;
     uint32_t index_position;
 } nuvk_sdf_instance_data_t;
 
@@ -70,7 +69,7 @@ nu_result_t nuvk_sdf_scene_update_instance_transform(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
     nuvk_sdf_instance_t handle,
-    const nu_transform_t *transform
+    const nuvk_sdf_transform_t *transform
 );
 nu_result_t nuvk_sdf_scene_update_instance_data(
     nuvk_sdf_scene_t *scene,

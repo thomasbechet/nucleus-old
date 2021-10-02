@@ -16,7 +16,7 @@ nu_result_t nuvk_sdf_instance_type_register(const nuvk_sdf_instance_type_info_t 
 nu_result_t nuvk_sdf_instance_type_get(nuvk_sdf_instance_type_primitives_t type, nuvk_sdf_instance_type_t *handle);
 nu_result_t nuvk_sdf_instance_create(const nuvk_sdf_instance_info_t *info, nuvk_sdf_instance_t *handle);
 nu_result_t nuvk_sdf_instance_destroy(nuvk_sdf_instance_t handle);
-nu_result_t nuvk_sdf_instance_update_transform(nuvk_sdf_instance_t handle, const nu_transform_t *transform);
+nu_result_t nuvk_sdf_instance_update_transform(nuvk_sdf_instance_t handle, const nuvk_sdf_transform_t *transform);
 nu_result_t nuvk_sdf_instance_update_data(nuvk_sdf_instance_t handle, const void *data);
 
 #endif

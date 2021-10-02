@@ -27,7 +27,13 @@ typedef enum {
 } nuvk_sdf_instance_flags_t;
 
 typedef struct {
-    nu_transform_t transform;
+    nu_vec3f_t translation;
+    nu_quatf_t rotation;
+    float scale;
+} nuvk_sdf_transform_t;
+
+typedef struct {
+    nuvk_sdf_transform_t transform;
     nuvk_sdf_instance_type_t type;
     nuvk_sdf_instance_flags_t flags;
     void *data;

@@ -51,7 +51,7 @@ nu_result_t nuvk_sdf_scene_update_buffers(
                     t, i, instance_index);
 
                 nuvk_sdf_buffer_instances_write_instance_transform(instances_buffer, render_context->active_inflight_frame_index,
-                    t, instance_index, instance->inv_rotation, instance->translation, instance->scale);
+                    t, instance_index, instance->inv_rotation, instance->translation_scale);
 
                 nuvk_sdf_buffer_instances_write_instance_data(instances_buffer, render_context->active_inflight_frame_index,
                     t, instance_index, (char*)type->data + instance_index * type->info.data_size);
@@ -120,8 +120,8 @@ nu_result_t nuvk_sdf_scene_create_instance(
     
     nu_quatf_to_mat3(info->transform.rotation, instance->inv_rotation);
     nu_mat3f_transpose(instance->inv_rotation);
-    nu_vec3f_copy(info->transform.translation, instance->translation);
-    nu_vec3f_copy(info->transform.scale, instance->scale);
+    nu_vec3f_copy(info->transform.translation, instance->translation_scale);
+    instance->translation_scale[3] = info->transform.scale;
 
     /* update indices and notify buffer */
     instance->index_position                      = type->index_count;
@@ -162,7 +162,7 @@ nu_result_t nuvk_sdf_scene_update_instance_transform(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
     nuvk_sdf_instance_t handle,
-    const nu_transform_t *transform
+    const nuvk_sdf_transform_t *transform
 )
 {
     uint32_t handle_id;
@@ -175,8 +175,8 @@ nu_result_t nuvk_sdf_scene_update_instance_transform(
 
     nu_quatf_to_mat3(transform->rotation, instance->inv_rotation);
     nu_mat3f_transpose(instance->inv_rotation);
-    nu_vec3f_copy(transform->translation, instance->translation);
-    nu_vec3f_copy(transform->scale, instance->scale);
+    nu_vec3f_copy(transform->translation, instance->translation_scale);
+    instance->translation_scale[3] = transform->scale;
 
     type->index_updates[instance->index_position] = render_context->max_inflight_frame_count;
 

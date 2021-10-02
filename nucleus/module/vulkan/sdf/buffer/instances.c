@@ -1,6 +1,6 @@
 #include <nucleus/module/vulkan/sdf/buffer/instances.h>
 
-#define INSTANCE_HEADER_SIZE (sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t) + sizeof(nu_vec4f_t))
+#define INSTANCE_HEADER_SIZE (sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t))
 
 nu_result_t nuvk_sdf_buffer_instances_create(
     nuvk_sdf_buffer_instances_t *buffer,
@@ -129,8 +129,7 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_transform(
     uint32_t type_index,
     uint32_t instance_index,
     const nu_mat3f_t inv_rotation,
-    const nu_vec3f_t translation,
-    const nu_vec3f_t scale
+    const nu_vec4f_t translation_scale
 )
 {
     NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
@@ -142,8 +141,7 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_transform(
     memcpy(data + sizeof(nu_vec4f_t) * 0, inv_rotation[0], sizeof(nu_vec3f_t));
     memcpy(data + sizeof(nu_vec4f_t) * 1, inv_rotation[1], sizeof(nu_vec3f_t));
     memcpy(data + sizeof(nu_vec4f_t) * 2, inv_rotation[2], sizeof(nu_vec3f_t));
-    memcpy(data + sizeof(nu_vec4f_t) * 3, translation, sizeof(nu_vec3f_t));
-    memcpy(data + sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t), scale, sizeof(nu_vec3f_t));
+    memcpy(data + sizeof(nu_vec4f_t) * 3, translation_scale, sizeof(nu_vec4f_t));
 
     return NU_SUCCESS;
 }

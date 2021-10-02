@@ -8,7 +8,7 @@
             },
             "transform": {
                 "translation": [0, 0, 0],
-                "scale": [0.5, 1, 1]
+                "scale": 0.5
             }
         },
         {
@@ -18,7 +18,7 @@
             },
             "transform": {
                 "translation": [10, 0, 0],
-                "scale": [1, 1, 1]
+                "scale": 1.0
             }
         },
         {
@@ -29,7 +29,7 @@
             },
             "transform": {
                 "translation": [15, 0, 0],
-                "scale": [1, 1, 1]
+                "scale": 1.0
             }
         },
         {
@@ -40,7 +40,7 @@
             },
             "transform": {
                 "translation": [-15, 0, 0],
-                "scale": [1, 1, 1]
+                "scale": 5.0
             }
         }
     ]

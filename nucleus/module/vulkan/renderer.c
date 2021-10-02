@@ -130,7 +130,7 @@ nu_result_t nuvk_sdf_instance_destroy(nuvk_sdf_instance_t handle)
 {
     return nuvk_sdf_scene_destroy_instance(&_module.sdf.scene, &_module.render_context, handle);
 }
-nu_result_t nuvk_sdf_instance_update_transform(nuvk_sdf_instance_t handle, const nu_transform_t *transform)
+nu_result_t nuvk_sdf_instance_update_transform(nuvk_sdf_instance_t handle, const nuvk_sdf_transform_t *transform)
 {
     return nuvk_sdf_scene_update_instance_transform(&_module.sdf.scene, &_module.render_context, handle, transform);
 }

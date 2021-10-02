@@ -66,12 +66,19 @@ static nu_result_t parse_scene(void)
         result = nu_json_value_as_cstr(nu_json_object_get_by_name(j_instance, "type"), &type);
         NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get type.");
 
-        nu_transform_t transform;
-        nu_transform_identity(&transform);
+        nuvk_sdf_transform_t transform;
+        nu_quatf_identity(transform.rotation);
         nu_json_value_t j_tranform = nu_json_object_get_by_name(j_instance, "transform");
         if (j_tranform != NU_NULL_HANDLE) {
-            result = nu_json_value_as_transform(j_tranform, &transform);
-            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to parse tranform.");
+            nu_json_object_t j_transform_object;
+            result = nu_json_value_as_object(j_tranform, &j_transform_object);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Transform is not an object.");
+            
+            result = nu_json_value_as_vec3f(nu_json_object_get_by_name(j_transform_object, "translation"), transform.translation);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to parse translation tranform.");
+
+            result = nu_json_value_as_float(nu_json_object_get_by_name(j_transform_object, "scale"), &transform.scale);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to parse scale tranform.");
         }
 
         nuvk_sdf_instance_t instance;
