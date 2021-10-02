@@ -8,7 +8,7 @@ static const char *sphere_glsl_data_code =
     "float radius;";
 
 static const char *sphere_glsl_sdf_code = 
-    "return length(p) - 1.0;";
+    "return length(p) - data.radius;";
 
 static float sphere_c_sdf_code(const nu_vec3f_t p, const void *d)
 {

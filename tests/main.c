@@ -42,6 +42,107 @@ typedef struct {
 
 static nuvk_sdf_interface_t SDF;
 
+static nu_result_t parse_scene(void)
+{
+    nu_json_t json;
+    nu_json_object_t root;
+    nu_json_array_t instances;
+    nu_result_t result;
+
+    result = nu_json_allocate_from_file(&json, "$ENGINE_DIR/script/map.json");
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, "MAIN", "Failed to parse json.");
+    result = nu_json_value_as_object(nu_json_get_root(json), &root);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get root object.");
+    result = nu_json_value_as_array(nu_json_object_get_by_name(root, "instances"), &instances);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get instances.");
+
+    nu_json_array_iterator_t it = NU_NULL_HANDLE;
+    while (nu_json_array_next(instances, &it)) {
+        nu_json_object_t j_instance;
+        result = nu_json_value_as_object(nu_json_array_iterator_get_value(it), &j_instance);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Instance is not a transform");
+
+        const char *type;
+        result = nu_json_value_as_cstr(nu_json_object_get_by_name(j_instance, "type"), &type);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get type.");
+
+        nu_transform_t transform;
+        nu_transform_identity(&transform);
+        nu_json_value_t j_tranform = nu_json_object_get_by_name(j_instance, "transform");
+        if (j_tranform != NU_NULL_HANDLE) {
+            result = nu_json_value_as_transform(j_tranform, &transform);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to parse tranform.");
+        }
+
+        nuvk_sdf_instance_t instance;
+        nuvk_sdf_instance_info_t info;
+        memset(&info, 0, sizeof(nuvk_sdf_instance_info_t));
+        info.transform = transform;
+
+        if (NU_MATCH(type, "sphere")) {
+            nu_json_object_t j_data;
+            result = nu_json_value_as_object(nu_json_object_get_by_name(j_instance, "data"), &j_data);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get data.");
+
+            nuvk_sdf_sphere_data_t data;
+            result = nu_json_value_as_float(nu_json_object_get_by_name(j_data, "radius"), &data.radius);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get radius.");
+
+            nuvk_sdf_instance_type_t sphere_type;
+            result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_SPHERE, &sphere_type);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to sphere type.");
+
+            info.data = &data;
+            info.type = sphere_type;
+            result = SDF.create_instance(&info, &instance);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create sphere instance.");
+        } else if (NU_MATCH(type, "cube")) {
+            nu_json_object_t j_data;
+            result = nu_json_value_as_object(nu_json_object_get_by_name(j_instance, "data"), &j_data);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get data.");
+
+            nuvk_sdf_cube_data_t data;
+            result = nu_json_value_as_float(nu_json_object_get_by_name(j_data, "radius"), &data.radius);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get radius.");
+            result = nu_json_value_as_vec3f(nu_json_object_get_by_name(j_data, "box"), data.box);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get box.");
+
+            nuvk_sdf_instance_type_t cube_type;
+            result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_CUBE, &cube_type);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to cube type.");
+
+            info.data = &data;
+            info.type = cube_type;
+            result = SDF.create_instance(&info, &instance);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create cube instance.");
+        } else if (NU_MATCH(type, "torus")) {
+            nu_json_object_t j_data;
+            result = nu_json_value_as_object(nu_json_object_get_by_name(j_instance, "data"), &j_data);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get data.");
+
+            nuvk_sdf_torus_data_t data;
+            result = nu_json_value_as_float(nu_json_object_get_by_name(j_data, "x"), &data.x);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get x.");
+            result = nu_json_value_as_float(nu_json_object_get_by_name(j_data, "y"), &data.y);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get y.");
+
+            nuvk_sdf_instance_type_t torus_type;
+            result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_TORUS, &torus_type);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to torus type.");
+
+            info.data = &data;
+            info.type = torus_type;
+            result = SDF.create_instance(&info, &instance);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create torus instance.");
+        }
+    }
+
+cleanup0:
+    nu_json_free(json);
+
+    return NU_SUCCESS;
+}
+
 static nu_result_t on_start(void)
 {
     // nu_string_t token;
@@ -334,32 +435,18 @@ static nu_result_t on_stop(void)
 {
     return NU_SUCCESS;
 }
-nuvk_sdf_instance_t instance;
-nu_transform_t instance_transform;
 static nu_result_t on_update(void)
 {
     static int once = 1;
     if (once) {
 
-        /* create sdf scene */
-        nuvk_sdf_instance_type_t sphere_type;
-        nuvk_sdf_instance_type_t sponge_type;
-        SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_SPHERE, &sphere_type);
-        SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_MENGER_SPONGE, &sponge_type);
+        nu_result_t result = parse_scene();
+        if (result != NU_SUCCESS) {
+            nu_interrupt("MAIN", "Failed to parse scene.");
+        }   
 
-        nuvk_sdf_menger_sponge_data_t data;
-        nuvk_sdf_instance_info_t instance_info;
-        instance_info.data = &data;
-        instance_info.type = sponge_type;
-        nu_transform_identity(&instance_info.transform);
-        SDF.create_instance(&instance_info, &instance);
-        nu_transform_identity(&instance_transform);
         once = 0;
     }
-
-    nu_quatf_mul_axis(instance_transform.rotation, nu_radian(0.1f) * nu_context_get_delta_time() / 1000.0f, NU_VEC3F_LEFT, instance_transform.rotation);
-    nu_quatf_mul_axis(instance_transform.rotation, nu_radian(0.1f) * nu_context_get_delta_time() / 1000.0f, NU_VEC3F_UP, instance_transform.rotation);
-    SDF.update_instance_transform(instance, &instance_transform);
 
     /* quit handling */
     nu_button_state_t escape_state;

@@ -4,6 +4,7 @@
 #include <nucleus/core/utility/platform.h>
 #include <nucleus/core/utility/macro.h>
 #include <nucleus/core/utility/result.h>
+#include <nucleus/core/utility/math/math.h>
 
 NU_DECLARE_HANDLE(nu_json_t);
 NU_DECLARE_HANDLE(nu_json_value_t);
@@ -34,6 +35,8 @@ NU_API nu_result_t nu_json_value_as_int(nu_json_value_t value, int32_t *i);
 NU_API nu_result_t nu_json_value_as_uint(nu_json_value_t value, uint32_t *u);
 NU_API nu_result_t nu_json_value_as_bool(nu_json_value_t value, bool *b);
 NU_API nu_result_t nu_json_value_as_float(nu_json_value_t value, float *f);
+NU_API nu_result_t nu_json_value_as_vec3f(nu_json_value_t value, nu_vec3f_t v);
+NU_API nu_result_t nu_json_value_as_transform(nu_json_value_t value, nu_transform_t *transform);
 
 NU_API nu_json_value_t nu_json_object_get_by_name(nu_json_object_t object, const char *name);
 NU_API uint32_t nu_json_object_get_length(nu_json_object_t object);

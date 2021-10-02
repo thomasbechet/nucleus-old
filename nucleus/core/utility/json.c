@@ -108,6 +108,50 @@ nu_result_t nu_json_value_as_float(nu_json_value_t value, float *f)
     if (value == NU_NULL_HANDLE || nu_json_value_get_type(value) != NU_JSON_TYPE_NUMBER) return NU_FAILURE;
     return nu_strtof(json_value_as_number(((struct json_value_s*)value))->number, f);
 }
+nu_result_t nu_json_value_as_vec3f(nu_json_value_t value, nu_vec3f_t v)
+{
+    if (value == NU_NULL_HANDLE || nu_json_value_get_type(value) != NU_JSON_TYPE_ARRAY) return NU_FAILURE;
+    
+    nu_json_array_t array;
+    nu_result_t result;
+    
+    result = nu_json_value_as_array(value, &array);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NU_LOGGER_NAME, "Json value is not an array.");
+    
+    nu_vec3f_zero(v);
+
+    nu_json_array_iterator_t it = NU_NULL_HANDLE;
+    uint32_t index = 0;
+    while (nu_json_array_next(array, &it) && index <= 2) {
+        result = nu_json_value_as_float(nu_json_array_iterator_get_value(it), &v[index]);
+        NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NU_LOGGER_NAME, "Json vec3f %d component is not a float.", index);
+        index++;
+    }
+
+    return NU_SUCCESS;
+}
+nu_result_t nu_json_value_as_transform(nu_json_value_t value, nu_transform_t *transform)
+{
+    if (value == NU_NULL_HANDLE || nu_json_value_get_type(value) != NU_JSON_TYPE_OBJECT) return NU_FAILURE;
+
+    nu_result_t result;
+    nu_json_object_t object;
+    nu_json_value_as_object(value, &object);
+
+    nu_json_value_t j_translation = nu_json_object_get_by_name(object, "translation");
+    if (j_translation != NU_NULL_HANDLE) {
+        result = nu_json_value_as_vec3f(j_translation, transform->translation);
+        NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NU_LOGGER_NAME, "Failed to parse translation component for transform.");
+    }
+
+    nu_json_value_t j_scale = nu_json_object_get_by_name(object, "scale");
+    if (j_scale != NU_NULL_HANDLE) {
+        result = nu_json_value_as_vec3f(j_scale, transform->scale);
+        NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NU_LOGGER_NAME, "Failed to parse scale component for transform.");
+    }
+
+    return NU_SUCCESS;
+}
 
 nu_json_value_t nu_json_object_get_by_name(nu_json_object_t object, const char *name)
 {
