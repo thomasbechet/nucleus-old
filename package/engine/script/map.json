@@ -42,6 +42,13 @@
                 "translation": [-15, 0, 0],
                 "scale": 5.0
             }
+        },
+        {
+            "type": "plane",
+            "data": {
+                "height": -5.0,
+                "normal": [0, 1, 0]
+            }
         }
     ]
 }

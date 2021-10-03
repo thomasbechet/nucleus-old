@@ -26,7 +26,8 @@ static nu_result_t nuvk_swapchain_create(nuvk_swapchain_t *swapchain, const nuvk
             break;
         }
     }
-    present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    // present_mode = VK_PRESENT_MODE_IMMEDIATE_KHR;
+    present_mode = VK_PRESENT_MODE_FIFO_KHR;
 
     nu_free(present_modes);
 

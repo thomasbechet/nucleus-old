@@ -141,6 +141,25 @@ static nu_result_t parse_scene(void)
             info.type = torus_type;
             result = SDF.create_instance(&info, &instance);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create torus instance.");
+        } else if (NU_MATCH(type, "plane")) {
+            nu_json_object_t j_data;
+            result = nu_json_value_as_object(nu_json_object_get_by_name(j_instance, "data"), &j_data);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get data.");
+
+            nuvk_sdf_plane_data_t data;
+            result = nu_json_value_as_float(nu_json_object_get_by_name(j_data, "height"), &data.height);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get height.");
+            result = nu_json_value_as_vec3f(nu_json_object_get_by_name(j_data, "normal"), data.normal);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get normal.");
+
+            nuvk_sdf_instance_type_t plane_type;
+            result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_PLANE, &plane_type);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to plane type.");
+
+            info.data = &data;
+            info.type = plane_type;
+            result = SDF.create_instance(&info, &instance);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create plane instance.");
         }
     }
 

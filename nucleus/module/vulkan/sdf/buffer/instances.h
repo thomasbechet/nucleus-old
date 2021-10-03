@@ -17,6 +17,9 @@ typedef struct {
     uint32_t next_instance_offset;
     uint32_t *instance_offsets;
     uint32_t *instance_sizes;
+    /* material buffer */
+    nuvk_buffer_t material_buffer;
+    uint32_t material_uniform_buffer_range;
 } nuvk_sdf_buffer_instances_t;
 
 nu_result_t nuvk_sdf_buffer_instances_create(

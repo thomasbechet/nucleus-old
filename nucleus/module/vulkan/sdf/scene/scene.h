@@ -12,6 +12,7 @@ typedef struct {
     nu_mat3f_t inv_rotation;
     nu_vec4f_t translation_scale;
     uint32_t index_position;
+    uint32_t material_position;
 } nuvk_sdf_instance_data_t;
 
 typedef struct {
@@ -25,7 +26,7 @@ typedef struct {
     uint32_t *indices;
     uint32_t index_count;
 
-    uint32_t *index_updates;
+    uint32_t *instance_update_table;
 } nuvk_sdf_instance_type_data_t;
 
 typedef struct {
@@ -35,9 +36,14 @@ typedef struct {
 
 typedef struct {
     nuvk_sdf_camera_t camera;
+    nu_indexed_array_t instance_handles;
+
     nuvk_sdf_instance_type_data_t types[NUVK_SDF_MAX_INSTANCE_TYPE_COUNT];
     uint32_t type_count;
-    nu_indexed_array_t instance_handles;
+
+    nuvk_sdf_material_info_t materials[NUVK_SDF_MAX_MATERIAL_COUNT];
+    uint32_t material_update_table[NUVK_SDF_MAX_MATERIAL_COUNT];
+    uint32_t material_count;
 } nuvk_sdf_scene_t;
 
 nu_result_t nuvk_sdf_scene_initialize(nuvk_sdf_scene_t *scene);
@@ -47,6 +53,16 @@ nu_result_t nuvk_sdf_scene_update_buffers(
     const nuvk_render_context_t *render_context,
     nuvk_sdf_buffer_environment_t *environment_buffer,
     nuvk_sdf_buffer_instances_t *instances_buffer
+);
+
+nu_result_t nuvk_sdf_scene_create_material(
+    nuvk_sdf_scene_t *scene,
+    const nuvk_sdf_material_info_t *info,
+    nuvk_sdf_material_t *handle
+);
+nu_result_t nuvk_sdf_scene_destroy_material(
+    nuvk_sdf_scene_t *scene,
+    nuvk_sdf_material_t handle
 );
 
 nu_result_t nuvk_sdf_scene_register_instance_type(
@@ -76,6 +92,12 @@ nu_result_t nuvk_sdf_scene_update_instance_data(
     const nuvk_render_context_t *render_context,
     nuvk_sdf_instance_t handle,
     const void *data
+);
+nu_result_t nuvk_sdf_scene_update_instance_material(
+    nuvk_sdf_scene_t *scene,
+    const nuvk_render_context_t *render_context,
+    nuvk_sdf_instance_t handle,
+    nuvk_sdf_material_t material
 );
 
 #endif
