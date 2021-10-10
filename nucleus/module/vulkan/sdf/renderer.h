@@ -51,6 +51,7 @@ nu_result_t nuvk_sdf_renderer_register_instance_type(
     nuvk_sdf_renderer_t *renderer,
     const nuvk_context_t *context,
     const nuvk_shader_manager_t *shader_manager,
+    const nuvk_render_context_t *render_context,
     const nuvk_sdf_instance_type_info_t *info,
     nuvk_sdf_instance_type_t *handle
 );

@@ -22,29 +22,29 @@ nu_result_t nuvk_sdf_buffer_instances_create(
     index_buffer_info.buffer_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
     index_buffer_info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
 
-    result = nuvk_buffer_create(&buffer->index_buffer, memory_manager, &index_buffer_info);
+    result = nuvk_dynamic_range_buffer_create(
+        &buffer->index_buffer, memory_manager,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+        buffer->index_uniform_buffer_range,
+        render_context->max_inflight_frame_count,
+        128
+    );
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create index buffer.");
 
-    result = nuvk_buffer_map(&buffer->index_buffer, memory_manager);
-    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to map index buffer.");
- 
     /* instances buffer */
     buffer->instance_uniform_buffer_range = NU_MIN(context->physical_device_properties.limits.maxUniformBufferRange, 1 << 16);
     buffer->next_instance_offset = 0;
     buffer->instance_offsets = (uint32_t*)nu_malloc(sizeof(uint32_t) * NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
     buffer->instance_sizes   = (uint32_t*)nu_malloc(sizeof(uint32_t) * NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
 
-    nuvk_buffer_info_t instance_buffer_info;
-    memset(&instance_buffer_info, 0, sizeof(nuvk_buffer_info_t));
-    instance_buffer_info.size         = buffer->instance_uniform_buffer_range * render_context->max_inflight_frame_count;
-    instance_buffer_info.buffer_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    instance_buffer_info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-
-    result = nuvk_buffer_create(&buffer->instance_buffer, memory_manager, &instance_buffer_info);
+    result = nuvk_dynamic_range_buffer_create(
+        &buffer->instance_buffer, memory_manager,
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, 
+        buffer->instance_uniform_buffer_range,
+        render_context->max_inflight_frame_count,
+        128
+    );
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create instance buffer.");
-
-    result = nuvk_buffer_map(&buffer->instance_buffer, memory_manager);
-    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to map instance buffer.");
 
     return NU_SUCCESS;
 }
@@ -53,11 +53,9 @@ nu_result_t nuvk_sdf_buffer_instances_destroy(
     const nuvk_memory_manager_t *memory_manager
 )
 {
-    nuvk_buffer_unmap(&buffer->index_buffer, memory_manager);
-    nuvk_buffer_destroy(&buffer->index_buffer, memory_manager);
+    nuvk_dynamic_range_buffer_destroy(&buffer->index_buffer, memory_manager);
     nu_free(buffer->index_offsets);
-    nuvk_buffer_unmap(&buffer->instance_buffer, memory_manager);
-    nuvk_buffer_destroy(&buffer->instance_buffer, memory_manager);
+    nuvk_dynamic_range_buffer_destroy(&buffer->instance_buffer, memory_manager);
     nu_free(buffer->instance_offsets);
     nu_free(buffer->instance_sizes);
 
@@ -83,7 +81,7 @@ nu_result_t nuvk_sdf_buffer_instances_configure_instance_types(
             NUVK_LOGGER_NAME, "Max instance uniform buffer range reached.");
 
         buffer->index_offsets[i]   = buffer->next_index_offset;
-        buffer->next_index_offset += sizeof(uint32_t) * 4 * (info[i].max_instance_count + 1); /* +1 with the index count */
+        buffer->next_index_offset += sizeof(uint32_t) * 4 * info[i].max_instance_count;
 
         NU_CHECK(buffer->next_index_offset < buffer->index_uniform_buffer_range, return NU_FAILURE,
             NUVK_LOGGER_NAME, "Max index uniform buffer range reached.");
@@ -91,35 +89,32 @@ nu_result_t nuvk_sdf_buffer_instances_configure_instance_types(
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_buffer_instances_write_index_count(
+nu_result_t nuvk_sdf_buffer_instances_write_indices(
     nuvk_sdf_buffer_instances_t *buffer,
     uint32_t active_inflight_frame_index,
     uint32_t type_index,
-    uint32_t count
+    uint32_t *indices,
+    uint32_t index_count
 )
 {
-    NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
+    NU_ASSERT(index_count < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
 
-    char *data = (char*)buffer->index_buffer.map + buffer->index_uniform_buffer_range * active_inflight_frame_index
-        + buffer->index_offsets[type_index];
-    *((uint32_t*)data) = count;
+    const uint32_t end_value = (uint32_t)0xFFFFFFFF;
 
-    return NU_SUCCESS;
-}
-nu_result_t nuvk_sdf_buffer_instances_write_index(
-    nuvk_sdf_buffer_instances_t *buffer,
-    uint32_t active_inflight_frame_index,
-    uint32_t type_index,
-    uint32_t index_position,
-    uint32_t index
-)
-{
-    NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
+    if (index_count > 0) {
+        uint32_t buf[4 * (index_count + 1)];
+        memset(buf, 0, sizeof(uint32_t) * 4 * index_count);
+        for (uint32_t i = 0; i < index_count; i++) {
+            buf[i * 4] = indices[i];
+        }
+        buf[4 * index_count] = end_value;
 
-    char *data = (char*)buffer->index_buffer.map + buffer->index_uniform_buffer_range * active_inflight_frame_index
-        + buffer->index_offsets[type_index] 
-        + sizeof(uint32_t) * 4 * (index_position + 1); /* using std140 */
-    *((uint32_t*)data) = index;
+        nuvk_dynamic_range_buffer_write(&buffer->index_buffer, active_inflight_frame_index,
+            buffer->index_offsets[type_index], sizeof(uint32_t) * 4 * (index_count + 1), buf);
+    } else {
+        nuvk_dynamic_range_buffer_write(&buffer->index_buffer, active_inflight_frame_index,
+            buffer->index_offsets[type_index], sizeof(uint32_t), &end_value);
+    }
 
     return NU_SUCCESS;
 }
@@ -134,14 +129,16 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_transform(
 {
     NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
 
-    char *data = (char*)buffer->instance_buffer.map + (buffer->instance_uniform_buffer_range * active_inflight_frame_index)
-        + buffer->instance_offsets[type_index]
-        + buffer->instance_sizes[type_index] * instance_index;
+    uint32_t offset = buffer->instance_offsets[type_index] + buffer->instance_sizes[type_index] * instance_index;
 
-    memcpy(data + sizeof(nu_vec4f_t) * 0, inv_rotation[0], sizeof(nu_vec3f_t));
-    memcpy(data + sizeof(nu_vec4f_t) * 1, inv_rotation[1], sizeof(nu_vec3f_t));
-    memcpy(data + sizeof(nu_vec4f_t) * 2, inv_rotation[2], sizeof(nu_vec3f_t));
-    memcpy(data + sizeof(nu_vec4f_t) * 3, translation_scale, sizeof(nu_vec4f_t));
+    uint8_t buf[INSTANCE_HEADER_SIZE];
+    memcpy(buf + sizeof(nu_vec4f_t) * 0, inv_rotation[0], sizeof(nu_vec3f_t));
+    memcpy(buf + sizeof(nu_vec4f_t) * 1, inv_rotation[1], sizeof(nu_vec3f_t));
+    memcpy(buf + sizeof(nu_vec4f_t) * 2, inv_rotation[2], sizeof(nu_vec3f_t));
+    memcpy(buf + sizeof(nu_vec4f_t) * 3, translation_scale, sizeof(nu_vec4f_t));
+
+    nuvk_dynamic_range_buffer_write(&buffer->instance_buffer, active_inflight_frame_index,
+        offset, INSTANCE_HEADER_SIZE, buf);
 
     return NU_SUCCESS;
 }
@@ -150,17 +147,19 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_data(
     uint32_t active_inflight_frame_index,
     uint32_t type_index,
     uint32_t instance_index,
-    void *data
+    const void *data
 )
 {
     NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
 
-    char *pdata = (char*)buffer->instance_buffer.map + (buffer->instance_uniform_buffer_range * active_inflight_frame_index)
-        + buffer->instance_offsets[type_index]
+    uint32_t offset = buffer->instance_offsets[type_index]
         + buffer->instance_sizes[type_index] * instance_index
         + INSTANCE_HEADER_SIZE;
+
     uint32_t data_size = (buffer->instance_sizes[type_index] - INSTANCE_HEADER_SIZE);
-    memcpy(pdata, data, data_size);
+
+    nuvk_dynamic_range_buffer_write(&buffer->instance_buffer, active_inflight_frame_index,
+        offset, data_size, data);
 
     return NU_SUCCESS;
 }

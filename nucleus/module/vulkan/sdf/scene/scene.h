@@ -25,8 +25,6 @@ typedef struct {
 
     uint32_t *indices;
     uint32_t index_count;
-
-    uint32_t *instance_update_table;
 } nuvk_sdf_instance_type_data_t;
 
 typedef struct {
@@ -42,7 +40,6 @@ typedef struct {
     uint32_t type_count;
 
     nuvk_sdf_material_info_t materials[NUVK_SDF_MAX_MATERIAL_COUNT];
-    uint32_t material_update_table[NUVK_SDF_MAX_MATERIAL_COUNT];
     uint32_t material_count;
 } nuvk_sdf_scene_t;
 
@@ -73,29 +70,34 @@ nu_result_t nuvk_sdf_scene_register_instance_type(
 nu_result_t nuvk_sdf_scene_create_instance(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     const nuvk_sdf_instance_info_t *info,
     nuvk_sdf_instance_t *handle
 );
 nu_result_t nuvk_sdf_scene_destroy_instance(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     nuvk_sdf_instance_t handle
 );
 nu_result_t nuvk_sdf_scene_update_instance_transform(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     nuvk_sdf_instance_t handle,
     const nuvk_sdf_transform_t *transform
 );
 nu_result_t nuvk_sdf_scene_update_instance_data(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     nuvk_sdf_instance_t handle,
     const void *data
 );
 nu_result_t nuvk_sdf_scene_update_instance_material(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     nuvk_sdf_instance_t handle,
     nuvk_sdf_material_t material
 );

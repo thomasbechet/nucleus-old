@@ -11,16 +11,14 @@ nu_result_t nuvk_sdf_buffer_environment_create(
 
     buffer->uniform_buffer_range = nuvk_buffer_pad_uniform_buffer_size(context, sizeof(nuvk_sdf_buffer_environment_data_t));
 
-    nuvk_buffer_info_t info;
-    info.size         = buffer->uniform_buffer_range * render_context->max_inflight_frame_count;
-    info.buffer_usage = VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT;
-    info.memory_usage = VMA_MEMORY_USAGE_CPU_TO_GPU;
-
-    result = nuvk_buffer_create(&buffer->buffer, memory_manager, &info);
+    result = nuvk_dynamic_range_buffer_create(
+        &buffer->dynamic_range_buffer, memory_manager, 
+        VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+        buffer->uniform_buffer_range,
+        render_context->max_inflight_frame_count,
+        32
+    );
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create environment buffer.");
-
-    result = nuvk_buffer_map(&buffer->buffer, memory_manager);
-    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to map environment buffer.");
 
     return NU_SUCCESS;
 }
@@ -29,8 +27,7 @@ nu_result_t nuvk_sdf_buffer_environment_destroy(
     const nuvk_memory_manager_t *memory_manager
 )
 {
-    nuvk_buffer_unmap(&buffer->buffer, memory_manager);
-    nuvk_buffer_destroy(&buffer->buffer, memory_manager);
+    nuvk_dynamic_range_buffer_destroy(&buffer->dynamic_range_buffer, memory_manager);
 
     return NU_SUCCESS;
 }
@@ -41,12 +38,14 @@ nu_result_t nuvk_sdf_buffer_environment_write_camera(
     uint32_t active_inflight_frame_index
 )
 {
-    char *pdata = (char*)buffer->buffer.map + buffer->uniform_buffer_range * active_inflight_frame_index;
-    nuvk_sdf_buffer_environment_data_t *data = (nuvk_sdf_buffer_environment_data_t*)pdata;
-    nu_mat4f_copy(camera->vp_matrix, data->vp_matrix);
-    nu_vec3f_copy(camera->eye, data->eye);
+    nuvk_sdf_buffer_environment_data_t buf;
+    nu_mat4f_copy(camera->vp_matrix, buf.vp_matrix);
+    nu_vec3f_copy(camera->eye, buf.eye);
+    buf.pixel_radius_factor = ((1.0f / NU_MIN(camera->resolution[0], camera->resolution[1])) * 0.5f) / camera->focal_length;
 
-    data->pixel_radius_factor = ((1.0f / NU_MIN(camera->resolution[0], camera->resolution[1])) * 0.5f) / camera->focal_length;
+    nuvk_dynamic_range_buffer_write(
+        &buffer->dynamic_range_buffer, active_inflight_frame_index,
+        0, sizeof(nuvk_sdf_buffer_environment_data_t), &buf);
 
     return NU_SUCCESS;
 }

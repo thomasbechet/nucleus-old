@@ -115,7 +115,7 @@ nu_result_t nuvk_renderer_viewport_set_size(const nu_vec2u_t size)
 
 nu_result_t nuvk_sdf_instance_type_register(const nuvk_sdf_instance_type_info_t *info, nuvk_sdf_instance_type_t *handle)
 {
-    return nuvk_sdf_renderer_register_instance_type(&_module.sdf, &_module.context, &_module.shader_manager, info, handle);
+    return nuvk_sdf_renderer_register_instance_type(&_module.sdf, &_module.context, &_module.shader_manager, &_module.render_context, info, handle);
 }
 nu_result_t nuvk_sdf_instance_type_get(nuvk_sdf_instance_type_primitives_t type, nuvk_sdf_instance_type_t *handle)
 {
@@ -124,17 +124,17 @@ nu_result_t nuvk_sdf_instance_type_get(nuvk_sdf_instance_type_primitives_t type,
 }
 nu_result_t nuvk_sdf_instance_create(const nuvk_sdf_instance_info_t *info, nuvk_sdf_instance_t *handle)
 {
-    return nuvk_sdf_scene_create_instance(&_module.sdf.scene, &_module.render_context, info, handle);
+    return nuvk_sdf_scene_create_instance(&_module.sdf.scene, &_module.render_context, &_module.sdf.buffers.instances, info, handle);
 }
 nu_result_t nuvk_sdf_instance_destroy(nuvk_sdf_instance_t handle)
 {
-    return nuvk_sdf_scene_destroy_instance(&_module.sdf.scene, &_module.render_context, handle);
+    return nuvk_sdf_scene_destroy_instance(&_module.sdf.scene, &_module.render_context, &_module.sdf.buffers.instances, handle);
 }
 nu_result_t nuvk_sdf_instance_update_transform(nuvk_sdf_instance_t handle, const nuvk_sdf_transform_t *transform)
 {
-    return nuvk_sdf_scene_update_instance_transform(&_module.sdf.scene, &_module.render_context, handle, transform);
+    return nuvk_sdf_scene_update_instance_transform(&_module.sdf.scene, &_module.render_context, &_module.sdf.buffers.instances, handle, transform);
 }
 nu_result_t nuvk_sdf_instance_update_data(nuvk_sdf_instance_t handle, const void *data)
 {
-    return nuvk_sdf_scene_update_instance_data(&_module.sdf.scene, &_module.render_context, handle, data);
+    return nuvk_sdf_scene_update_instance_data(&_module.sdf.scene, &_module.render_context, &_module.sdf.buffers.instances, handle, data);
 }

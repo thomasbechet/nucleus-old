@@ -6,7 +6,6 @@ nu_result_t nuvk_sdf_scene_initialize(nuvk_sdf_scene_t *scene)
     nu_indexed_array_allocate(&scene->instance_handles, sizeof(nuvk_sdf_instance_handle_data_t));
     scene->type_count     = 0;
     scene->material_count = 0;
-    memset(scene->material_update_table, 0, sizeof(uint32_t) * NUVK_SDF_MAX_MATERIAL_COUNT);
 
     return NU_SUCCESS;
 }
@@ -17,7 +16,6 @@ nu_result_t nuvk_sdf_scene_terminate(nuvk_sdf_scene_t *scene)
         nu_free(scene->types[t].data);
         nu_array_free(scene->types[t].free_instance_indices);
         nu_free(scene->types[t].indices);
-        nu_free(scene->types[t].instance_update_table);
     }
 
     nu_indexed_array_free(scene->instance_handles);
@@ -31,37 +29,19 @@ nu_result_t nuvk_sdf_scene_update_buffers(
     nuvk_sdf_buffer_instances_t *instances_buffer
 )
 {
-    /* update camera buffer */
+    /* update buffers */
     nuvk_sdf_buffer_environment_write_camera(environment_buffer, &scene->camera,
         render_context->active_inflight_frame_index);
 
-    /* update indice and instance buffers */
-    for (uint32_t t = 0; t < scene->type_count; t++) {
-        nuvk_sdf_instance_type_data_t *type = &scene->types[t];
-        
-        /* update index count */
-        nuvk_sdf_buffer_instances_write_index_count(instances_buffer, render_context->active_inflight_frame_index,
-            t, type->index_count);
+    // for (uint32_t t = 0; t < scene->type_count; t++) {
+    //     nuvk_sdf_buffer_instances_write_indices(instances_buffer, render_context->active_inflight_frame_index,
+    //         t, scene->types[t].indices, scene->types[t].index_count);
+    // }
 
-        /* update index, transform and instance data if needed */
-        for (uint32_t i = 0; i < type->index_count; i++) {
-            if (type->instance_update_table[i]) {
-                uint32_t instance_index            = type->indices[i];
-                nuvk_sdf_instance_data_t *instance = &type->instances[instance_index];
-                
-                nuvk_sdf_buffer_instances_write_index(instances_buffer, render_context->active_inflight_frame_index,
-                    t, i, instance_index);
-
-                nuvk_sdf_buffer_instances_write_instance_transform(instances_buffer, render_context->active_inflight_frame_index,
-                    t, instance_index, instance->inv_rotation, instance->translation_scale);
-
-                nuvk_sdf_buffer_instances_write_instance_data(instances_buffer, render_context->active_inflight_frame_index,
-                    t, instance_index, (char*)type->data + instance_index * type->info.data_size);
-
-                type->instance_update_table[i]--;
-            }
-        }
-    }
+    /* transfer buffers */
+    nuvk_dynamic_range_buffer_transfer(&environment_buffer->dynamic_range_buffer, render_context->active_inflight_frame_index);
+    nuvk_dynamic_range_buffer_transfer(&instances_buffer->index_buffer, render_context->active_inflight_frame_index);
+    nuvk_dynamic_range_buffer_transfer(&instances_buffer->instance_buffer, render_context->active_inflight_frame_index);
 
     return NU_SUCCESS;
 }
@@ -109,14 +89,12 @@ nu_result_t nuvk_sdf_scene_register_instance_type(
     type->indices     = (uint32_t*)nu_malloc(sizeof(uint32_t) * info->max_instance_count);
     type->index_count = 0;
 
-    type->instance_update_table = (uint32_t*)nu_malloc(sizeof(uint32_t) * info->max_instance_count);
-    memset(type->instance_update_table, 0, sizeof(uint32_t) * info->max_instance_count);
-
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_scene_create_instance(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     const nuvk_sdf_instance_info_t *info,
     nuvk_sdf_instance_t *handle
 )
@@ -146,15 +124,22 @@ nu_result_t nuvk_sdf_scene_create_instance(
     nu_vec3f_copy(info->transform.translation, instance->translation_scale);
     instance->translation_scale[3] = info->transform.scale;
 
-    /* update indices and notify buffer */
+    /* update indices */
     instance->index_position = type->index_count;
     type->indices[instance->index_position] = instance_index;
     type->index_count++;
-    type->instance_update_table[instance->index_position] = render_context->max_inflight_frame_count;
 
     /* save data */
     void *pdata = (char*)type->data + instance->index_position * type->info.data_size;
     memcpy(pdata, info->data, type->info.data_size);
+
+    /* update buffers */
+    nuvk_sdf_buffer_instances_write_indices(instances_buffer, render_context->active_inflight_frame_index,
+        type_index, type->indices, type->index_count);
+    nuvk_sdf_buffer_instances_write_instance_transform(instances_buffer, render_context->active_inflight_frame_index,
+        type_index, instance_index, instance->inv_rotation, instance->translation_scale);
+    nuvk_sdf_buffer_instances_write_instance_data(instances_buffer, render_context->active_inflight_frame_index,
+        type_index, instance_index, info->data);
 
     /* setup handle */
     nuvk_sdf_instance_handle_data_t handle_data;
@@ -169,6 +154,7 @@ nu_result_t nuvk_sdf_scene_create_instance(
 nu_result_t nuvk_sdf_scene_destroy_instance(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     nuvk_sdf_instance_t handle
 )
 {
@@ -184,6 +170,7 @@ nu_result_t nuvk_sdf_scene_destroy_instance(
 nu_result_t nuvk_sdf_scene_update_instance_transform(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     nuvk_sdf_instance_t handle,
     const nuvk_sdf_transform_t *transform
 )
@@ -196,18 +183,22 @@ nu_result_t nuvk_sdf_scene_update_instance_transform(
     NU_ASSERT(handle_data->instance_index < type->instance_count);    
     nuvk_sdf_instance_data_t *instance = &type->instances[handle_data->instance_index];
 
+    /* compute new data */
     nu_quatf_to_mat3(transform->rotation, instance->inv_rotation);
     nu_mat3f_transpose(instance->inv_rotation);
     nu_vec3f_copy(transform->translation, instance->translation_scale);
     instance->translation_scale[3] = transform->scale;
 
-    type->instance_update_table[instance->index_position] = render_context->max_inflight_frame_count;
+    /* write buffer */
+    nuvk_sdf_buffer_instances_write_instance_transform(instances_buffer, render_context->active_inflight_frame_index,
+        handle_data->type_index, handle_data->instance_index, instance->inv_rotation, instance->translation_scale);
 
     return NU_SUCCESS;
 }
 nu_result_t nuvk_sdf_scene_update_instance_data(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_instances_t *instances_buffer,
     nuvk_sdf_instance_t handle,
     const void *data
 )
@@ -218,11 +209,13 @@ nu_result_t nuvk_sdf_scene_update_instance_data(
     NU_ASSERT(handle_data->type_index < scene->type_count);
     nuvk_sdf_instance_type_data_t *type = &scene->types[handle_data->type_index];
     NU_ASSERT(handle_data->instance_index < type->instance_count);    
-    nuvk_sdf_instance_data_t *instance = &type->instances[handle_data->instance_index];
 
+    /* copy to local scene data */
     memcpy((char*)type->data + type->info.data_size * handle_data->instance_index, data, type->info.data_size);
 
-    type->instance_update_table[instance->index_position] = render_context->max_inflight_frame_count;
+    /* write buffer */
+    nuvk_sdf_buffer_instances_write_instance_data(instances_buffer, render_context->active_inflight_frame_index,
+        handle_data->type_index, handle_data->instance_index, data);
 
     return NU_SUCCESS;
 }

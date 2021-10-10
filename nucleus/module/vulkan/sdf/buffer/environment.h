@@ -1,7 +1,7 @@
 #ifndef NUVK_SDF_BUFFER_ENVIRONMENT_H
 #define NUVK_SDF_BUFFER_ENVIRONMENT_H
 
-#include <nucleus/module/vulkan/core/buffer.h>
+#include <nucleus/module/vulkan/core/dynamic_range_buffer.h>
 #include <nucleus/module/vulkan/core/render_context.h>
 #include <nucleus/module/vulkan/sdf/scene/camera.h>
 
@@ -13,7 +13,7 @@ typedef struct {
 
 typedef struct {
     uint32_t uniform_buffer_range;
-    nuvk_buffer_t buffer;
+    nuvk_dynamic_range_buffer_t dynamic_range_buffer;
 } nuvk_sdf_buffer_environment_t;
 
 nu_result_t nuvk_sdf_buffer_environment_create(

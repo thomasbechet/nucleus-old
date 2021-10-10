@@ -51,15 +51,15 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
     VkDescriptorBufferInfo buffer_info[3];
     memset(buffer_info, 0, sizeof(VkDescriptorBufferInfo) * 3);
 
-    buffer_info[0].buffer = environment_buffer->buffer.buffer;
+    buffer_info[0].buffer = environment_buffer->dynamic_range_buffer.buffer.buffer;
     buffer_info[0].offset = 0;
     buffer_info[0].range  = environment_buffer->uniform_buffer_range;
 
-    buffer_info[1].buffer = instances_buffer->index_buffer.buffer;
+    buffer_info[1].buffer = instances_buffer->index_buffer.buffer.buffer;
     buffer_info[1].offset = 0;
     buffer_info[1].range  = instances_buffer->index_uniform_buffer_range;
 
-    buffer_info[2].buffer = instances_buffer->instance_buffer.buffer;
+    buffer_info[2].buffer = instances_buffer->instance_buffer.buffer.buffer;
     buffer_info[2].offset = 0;
     buffer_info[2].range  = instances_buffer->instance_uniform_buffer_range;
 

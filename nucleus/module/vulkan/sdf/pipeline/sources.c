@@ -79,9 +79,8 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
     for (uint32_t i = 0; i < type_count; i++) {
         nu_string_t instance_block;
         nu_string_allocate_format(&instance_block,
-            "   uint indexCount%ld;\n"
             "   uint indices%ld[%ld];\n",
-            i, i, types[i].max_instance_count);
+            i, types[i].max_instance_count);
         nu_string_append(source, instance_block);
         nu_free(instance_block);
     }
@@ -113,8 +112,9 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
     for (uint32_t i = 0; i < type_count; i++) {
         nu_string_t instance_code;
         nu_string_allocate_format(&instance_code,
-            "   for (uint i = 0; i < indexCount%ld; i++) {\n"
+            "   for (uint i = 0; i < %ld; i++) {\n"
             "       uint index = indices%ld[i];\n"
+            "       if (index == 0xFFFFFFFF) break;\n"
             "       vec3 relPos = instances%ld[index].invRotation * (pos - instances%ld[index].translationScale.xyz);\n"
             "       vec3 relDir = normalize(instances%ld[index].invRotation * dir);\n"
             "       float s     = instances%ld[index].translationScale.w;\n"
@@ -137,7 +137,7 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
             "           depth += sd;\n"
             "       }\n"
             "    }\n",
-            i, i, i, i, i, i, i, i, i, i, i, i, i);
+            types[i].max_instance_count, i, i, i, i, i, i, i, i, i, i, i, i);
         nu_string_append(source, instance_code);
         nu_string_free(instance_code);
     }
@@ -153,8 +153,9 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
     for (uint32_t i = 0; i < type_count; i++) {
         nu_string_t instance_code;
         nu_string_allocate_format(&instance_code,
-            "   for (uint i = 0; i < indexCount%ld; i++) {\n"
+            "   for (uint i = 0; i < %ld; i++) {\n"
             "       uint index = indices%ld[i];\n"
+            "       if (index == 0xFFFFFFFF) break;\n"
             "       vec3 relPos = instances%ld[index].invRotation * (pos - instances%ld[index].translationScale.xyz);\n"
             "       vec3 relDir = normalize(instances%ld[index].invRotation * dir);\n"
             "       float s     = instances%ld[index].translationScale.w;\n"
@@ -177,7 +178,7 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
             "           depth += sd;\n"
             "       }\n"
             "    }\n",
-            i, i, i, i, i, i, i, i, i, i, i, i, i);
+            types[i].max_instance_count, i, i, i, i, i, i, i, i, i, i, i, i);
         nu_string_append(source, instance_code);
         nu_string_free(instance_code);
     }

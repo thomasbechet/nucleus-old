@@ -209,6 +209,7 @@ nu_result_t nuvk_sdf_renderer_register_instance_type(
     nuvk_sdf_renderer_t *renderer,
     const nuvk_context_t *context,
     const nuvk_shader_manager_t *shader_manager,
+    const nuvk_render_context_t *render_context,
     const nuvk_sdf_instance_type_info_t *info,
     nuvk_sdf_instance_type_t *handle
 )
@@ -229,6 +230,10 @@ nu_result_t nuvk_sdf_renderer_register_instance_type(
     /* reconfigure buffers */
     result = nuvk_sdf_buffer_instances_configure_instance_types(&renderer->buffers.instances, types, renderer->scene.type_count);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to reconfigure buffers.");
+
+    /* write initial buffer value length to 0 */
+    nuvk_sdf_buffer_instances_write_indices(&renderer->buffers.instances, render_context->active_inflight_frame_index, 
+        renderer->scene.type_count - 1, NULL, 0);
     
     /* recompile pipelines */
     result = nuvk_sdf_pipeline_geometry_recompile(&renderer->pipelines.geometry, context, shader_manager, renderer->renderpasses.geometry, 

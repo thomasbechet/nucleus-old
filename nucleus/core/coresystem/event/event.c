@@ -121,7 +121,7 @@ nu_result_t nu_event_dispatch_all(void)
 {
     uint32_t event_count = nu_array_get_size(_system.events);
     for (uint32_t ei = 0; ei < event_count; ei++) {
-        nu_event_dispatch(ei); /* id are indexes */
+        nu_event_dispatch(ei); /* id are indices */
     }
 
     return NU_SUCCESS;

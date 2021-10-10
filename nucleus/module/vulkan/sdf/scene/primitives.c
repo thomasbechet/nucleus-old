@@ -134,7 +134,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_instance_type_t *types)
     info.glsl_sdf_code      = sphere_glsl_sdf_code;
     info.c_sdf_code         = sphere_c_sdf_code;
     info.c_aabb_code        = sphere_c_aabb_code;
-    info.max_instance_count = 128;
+    info.max_instance_count = 8;
 
     result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_SPHERE]);
 
@@ -144,7 +144,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_instance_type_t *types)
     info.glsl_sdf_code      = cube_glsl_sdf_code;
     info.c_sdf_code         = cube_c_sdf_code;
     info.c_aabb_code        = cube_c_aabb_code;
-    info.max_instance_count = 128;
+    info.max_instance_count = 8;
 
     result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_CUBE]);
 
@@ -154,7 +154,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_instance_type_t *types)
     info.glsl_sdf_code      = menger_sponge_glsl_sdf_code;
     info.c_sdf_code         = menger_sponge_c_sdf_code;
     info.c_aabb_code        = menger_sponge_c_aabb_code;
-    info.max_instance_count = 128;
+    info.max_instance_count = 8;
 
     result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_MENGER_SPONGE]);
 
@@ -164,7 +164,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_instance_type_t *types)
     info.glsl_sdf_code      = torus_glsl_sdf_code;
     info.c_sdf_code         = torus_c_sdf_code;
     info.c_aabb_code        = torus_c_aabb_code;
-    info.max_instance_count = 128;
+    info.max_instance_count = 8;
 
     result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_TORUS]);
 
@@ -174,7 +174,7 @@ nu_result_t nuvk_sdf_primitives_register(nuvk_sdf_instance_type_t *types)
     info.glsl_sdf_code      = plane_glsl_sdf_code;
     info.c_sdf_code         = plane_c_sdf_code;
     info.c_aabb_code        = plane_c_aabb_code;
-    info.max_instance_count = 128;
+    info.max_instance_count = 8;
 
     result &= nuvk_sdf_instance_type_register(&info, &types[NUVK_SDF_INSTANCE_TYPE_PLANE]);
 
