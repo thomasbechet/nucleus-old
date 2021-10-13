@@ -44,10 +44,19 @@ static nuvk_sdf_interface_t SDF;
 
 static nu_result_t parse_scene(void)
 {
+    nu_result_t result;
+
+    nuvk_sdf_material_info_t material_info;
+    memset(&material_info, 0, sizeof(nuvk_sdf_material_info_t));
+    nu_vec3f_copy((nu_vec3f_t){1, 1, 1}, material_info.color);
+
+    nuvk_sdf_material_t material0;
+    result = SDF.create_material(&material_info, &material0);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, "MAIN", "Failed to create material 0.");
+
     nu_json_t json;
     nu_json_object_t root;
     nu_json_array_t instances;
-    nu_result_t result;
 
     result = nu_json_allocate_from_file(&json, "$ENGINE_DIR/script/map.json");
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, "MAIN", "Failed to parse json.");
@@ -99,8 +108,9 @@ static nu_result_t parse_scene(void)
             result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_SPHERE, &sphere_type);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to sphere type.");
 
-            info.data = &data;
-            info.type = sphere_type;
+            info.data     = &data;
+            info.type     = sphere_type;
+            info.material = material0;
             result = SDF.create_instance(&info, &instance);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create sphere instance.");
         } else if (NU_MATCH(type, "cube")) {
@@ -118,8 +128,9 @@ static nu_result_t parse_scene(void)
             result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_CUBE, &cube_type);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to cube type.");
 
-            info.data = &data;
-            info.type = cube_type;
+            info.data     = &data;
+            info.type     = cube_type;
+            info.material = material0;
             result = SDF.create_instance(&info, &instance);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create cube instance.");
         } else if (NU_MATCH(type, "torus")) {
@@ -137,8 +148,9 @@ static nu_result_t parse_scene(void)
             result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_TORUS, &torus_type);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to torus type.");
 
-            info.data = &data;
-            info.type = torus_type;
+            info.data     = &data;
+            info.type     = torus_type;
+            info.material = material0;
             result = SDF.create_instance(&info, &instance);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create torus instance.");
         } else if (NU_MATCH(type, "plane")) {
@@ -156,8 +168,9 @@ static nu_result_t parse_scene(void)
             result = SDF.get_instance_type(NUVK_SDF_INSTANCE_TYPE_PLANE, &plane_type);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to plane type.");
 
-            info.data = &data;
-            info.type = plane_type;
+            info.data     = &data;
+            info.type     = plane_type;
+            info.material = material0;
             result = SDF.create_instance(&info, &instance);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to create plane instance.");
         }

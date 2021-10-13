@@ -1,9 +1,8 @@
-#include <nucleus/module/vulkan/sdf/pipeline/sources.h>
+#include <nucleus/module/vulkan/sdf/pipeline/generator.h>
 
 #include <nucleus/module/vulkan/core/context.h>
 
-const char *glsl_sources[] = {
-    "$ENGINE_DIR/shader/constants.glsl",
+static const char *glsl_sources[] = {
     "$ENGINE_DIR/shader/geometry_template.frag",
     "$ENGINE_DIR/shader/geometry_template.vert",
     "$ENGINE_DIR/shader/light.comp",
@@ -11,7 +10,7 @@ const char *glsl_sources[] = {
     "$ENGINE_DIR/shader/postprocess.vert"
 };
 
-nu_result_t nuvk_sdf_pipeline_sources_load(nu_string_t *sources)
+static nu_result_t nuvk_sdf_pipeline_sources_load(nu_string_t *sources)
 {
     nu_string_t path;
     nu_string_allocate(&path);
@@ -29,18 +28,8 @@ nu_result_t nuvk_sdf_pipeline_sources_load(nu_string_t *sources)
 
     return NU_SUCCESS;
 }
-nu_result_t nuvk_sdf_pipeline_sources_unload(nu_string_t *sources)
-{
-    for (uint32_t i = 0; i < NUVK_SDF_PIPELINE_SOURCE_COUNT; i++) {
-        if (sources[i] != NU_NULL_HANDLE) {
-            nu_string_free(sources[i]);
-        }
-    }
 
-    return NU_SUCCESS;
-}
-
-nu_result_t nuvk_sdf_pipeline_generate_instance_source(
+static nu_result_t nuvk_sdf_pipeline_generate_instance_source(
     const nuvk_sdf_instance_type_info_t *types,
     uint32_t type_count,
     nu_string_t *source
@@ -64,6 +53,7 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
             "struct Instance%ld {\n"
             "	mat3 invRotation;\n"
             "	vec4 translationScale;\n"
+            "   uint materialIndex;\n"
             "	InstanceData%ld data;\n"
             "};\n"
             "float sdf%ld(in vec3 p, in InstanceData%ld data) {\n"
@@ -106,7 +96,7 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
 
     /* trace primary function */
     nu_string_append_cstr(source,
-        "float tracePrimary(in vec3 pos, in vec3 dir, in float radiusFactor, out vec3 normal) {\n"
+        "float tracePrimary(in vec3 pos, in vec3 dir, in float radiusFactor, out vec3 normal, out uint materialIndex) {\n"
         "   normal = dir;\n"
         "   float hitDepth = MAX_DISTANCE;\n");
     for (uint32_t i = 0; i < type_count; i++) {
@@ -131,13 +121,14 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
             "                   sd - sdf%ld(vec3(p - e.yyx) / s, data) * s\n"
             "               ));\n"
             "               normal = transpose(instances%ld[index].invRotation) * normal;\n"
+            "               materialIndex = instances%ld[index].materialIndex;\n"
             "               hitDepth = depth;\n"
             "               break;\n"
             "           }\n"
             "           depth += sd;\n"
             "       }\n"
             "    }\n",
-            types[i].max_instance_count, i, i, i, i, i, i, i, i, i, i, i, i);
+            types[i].max_instance_count, i, i, i, i, i, i, i, i, i, i, i, i, i);
         nu_string_append(source, instance_code);
         nu_string_free(instance_code);
     }
@@ -185,6 +176,142 @@ nu_result_t nuvk_sdf_pipeline_generate_instance_source(
     nu_string_append_cstr(source,
         "   return hitDepth;\n"
         "}\n");
+
+    return NU_SUCCESS;
+}
+static nu_result_t nuvk_sdf_pipeline_generate_materials_source(nu_string_t *source)
+{
+    /* clear source */
+    nu_string_clear(source);
+
+    /* generate source code */
+    nu_string_t material_definition;
+    nu_string_allocate_format(&material_definition,
+        "struct MaterialData {\n"
+        "   vec4 color;\n"
+        "};\n"
+        "layout(set = 0, binding = 3) uniform MaterialsUBO {\n"
+        "   MaterialData materials[%d];\n"
+        "};\n",
+        NUVK_SDF_MAX_MATERIAL_COUNT
+    );
+    nu_string_append(source, material_definition);
+    nu_string_free(material_definition);
+
+    return NU_SUCCESS;
+}
+static nu_result_t nuvk_sdf_pipeline_generate_environment_source(nu_string_t *source)
+{
+    nu_string_clear(source);
+    nu_string_append_cstr(source,
+        "layout(set = 0, binding = 0) uniform EnvironmentUBO {\n"
+        "    mat4 VPMatrix;\n"
+        "    vec3 eye;\n"
+        "    float pixelRadiusFactor;\n"
+        "};\n"
+    );
+    return NU_SUCCESS;
+}
+static nu_result_t nuvk_sdf_pipeline_generate_constants_source(nu_string_t *source)
+{
+    nu_string_clear(source);
+    nu_string_append_cstr(source,
+        "#define MAX_RAYMARCH_STEP 512\n"
+        "#define MAX_DISTANCE      5000.0\n"
+        "#define MIN_HIT_DISTANCE  0.0005\n"
+        "#define EPSILON           0.001\n"
+    );
+    return NU_SUCCESS;
+}
+
+nu_result_t nuvk_sdf_pipeline_generator_initialize(nuvk_sdf_pipeline_generator_t *generator)
+{
+    /* load sources */
+    nu_result_t result = nuvk_sdf_pipeline_sources_load(generator->sources);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to load sources.");
+
+    /* allocate injections */
+    nu_string_allocate(&generator->inject_constants);
+    nu_string_allocate(&generator->inject_environment);
+    nu_string_allocate(&generator->inject_instances);
+    nu_string_allocate(&generator->inject_materials);
+
+    /* initial injection code */
+    nuvk_sdf_pipeline_generate_constants_source(&generator->inject_constants);
+    nuvk_sdf_pipeline_generate_environment_source(&generator->inject_environment);
+    nuvk_sdf_pipeline_generate_instance_source(NULL, 0, &generator->inject_instances);
+    nuvk_sdf_pipeline_generate_materials_source(&generator->inject_materials);
+
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_sdf_pipeline_generator_terminate(nuvk_sdf_pipeline_generator_t *generator)
+{
+    /* free sources */
+    for (uint32_t i = 0; i < NUVK_SDF_PIPELINE_SOURCE_COUNT; i++) {
+        if (generator->sources[i] != NU_NULL_HANDLE) {
+            nu_string_free(generator->sources[i]);
+        }
+    }
+
+    /* free injections */
+    nu_string_free(generator->inject_constants);
+    nu_string_free(generator->inject_environment);
+    nu_string_free(generator->inject_instances);
+    nu_string_free(generator->inject_materials);
+
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_sdf_pipeline_generator_update_instance_types(
+    nuvk_sdf_pipeline_generator_t *generator,
+    const nuvk_sdf_instance_type_info_t *types,
+    uint32_t type_count
+)
+{
+    nuvk_sdf_pipeline_generate_instance_source(types, type_count, &generator->inject_instances);
+    return NU_SUCCESS;
+}
+
+nu_result_t nuvk_sdf_pipeline_generator_get_source(
+    const nuvk_sdf_pipeline_generator_t *generator,
+    nuvk_sdf_pipeline_source_name_t name,
+    nu_string_t *source
+)
+{
+    nu_string_clear(source);
+    switch (name)
+    {
+    case NUVK_SDF_PIPELINE_SOURCE_GEOMETRY_TEMPLATE_FRAG:
+        nu_string_set(source, generator->sources[name]);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_CONSTANTS, generator->inject_constants);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_INSTANCES, generator->inject_instances);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_ENVIRONMENT, generator->inject_environment);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_MATERIALS, generator->inject_materials);
+        break;
+    case NUVK_SDF_PIPELINE_SOURCE_GEOMETRY_TEMPLATE_VERT:
+        nu_string_set(source, generator->sources[name]);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_ENVIRONMENT, generator->inject_environment);
+        break;
+    case NUVK_SDF_PIPELINE_SOURCE_LIGHT_COMP:
+        nu_string_set(source, generator->sources[name]);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_CONSTANTS, generator->inject_constants);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_INSTANCES, generator->inject_instances);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_ENVIRONMENT, generator->inject_environment);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_MATERIALS, generator->inject_materials);
+        break;
+    case NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_FRAG:
+        nu_string_set(source, generator->sources[name]);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_INSTANCES, generator->inject_instances);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_ENVIRONMENT, generator->inject_environment);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_CONSTANTS, generator->inject_constants);
+        break;
+    case NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_VERT:
+        nu_string_set(source, generator->sources[name]);
+        nu_string_replace(source, NUVK_SDF_PIPELINE_INJECT_ENVIRONMENT, generator->inject_environment);
+        break;
+    default:
+        nu_warning(NUVK_LOGGER_NAME, "Unknown source.");
+        break;
+    }
 
     return NU_SUCCESS;
 }

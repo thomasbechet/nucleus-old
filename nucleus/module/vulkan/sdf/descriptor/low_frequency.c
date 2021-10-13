@@ -5,12 +5,13 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
     const nuvk_context_t *context,
     const nuvk_sdf_buffer_environment_t *environment_buffer,
     const nuvk_sdf_buffer_instances_t *instances_buffer,
+    const nuvk_sdf_buffer_materials_t *materials_buffer,
     VkDescriptorPool pool
 )
 {
     /* create layout */
-    VkDescriptorSetLayoutBinding bindings[3];
-    memset(bindings, 0, sizeof(VkDescriptorSetLayoutBinding) * 3);
+    VkDescriptorSetLayoutBinding bindings[4];
+    memset(bindings, 0, sizeof(VkDescriptorSetLayoutBinding) * 4);
 
     bindings[0].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
     bindings[0].binding         = 0;
@@ -27,10 +28,15 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
     bindings[2].descriptorCount = 1;
     bindings[2].stageFlags      = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
 
+    bindings[3].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    bindings[3].binding         = 3;
+    bindings[3].descriptorCount = 1;
+    bindings[3].stageFlags      = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_COMPUTE_BIT;
+
     VkDescriptorSetLayoutCreateInfo layout_info;
     memset(&layout_info, 0, sizeof(VkDescriptorSetLayoutCreateInfo));
     layout_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
-    layout_info.bindingCount = 3;
+    layout_info.bindingCount = 4;
     layout_info.pBindings    = bindings;
 
     VkResult result = vkCreateDescriptorSetLayout(context->device, &layout_info, &context->allocator, &descriptor->layout);
@@ -48,8 +54,8 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
     NU_CHECK(result == VK_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to allocate low frequency descriptor set.");
 
     /* write descriptor set */
-    VkDescriptorBufferInfo buffer_info[3];
-    memset(buffer_info, 0, sizeof(VkDescriptorBufferInfo) * 3);
+    VkDescriptorBufferInfo buffer_info[4];
+    memset(buffer_info, 0, sizeof(VkDescriptorBufferInfo) * 4);
 
     buffer_info[0].buffer = environment_buffer->dynamic_range_buffer.buffer.buffer;
     buffer_info[0].offset = 0;
@@ -63,8 +69,12 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
     buffer_info[2].offset = 0;
     buffer_info[2].range  = instances_buffer->instance_uniform_buffer_range;
 
-    VkWriteDescriptorSet writes[3];
-    memset(writes, 0, sizeof(VkWriteDescriptorSet) * 3);
+    buffer_info[3].buffer = materials_buffer->dynamic_range_buffer.buffer.buffer;
+    buffer_info[3].offset = 0;
+    buffer_info[3].range  = materials_buffer->uniform_buffer_range;
+
+    VkWriteDescriptorSet writes[4];
+    memset(writes, 0, sizeof(VkWriteDescriptorSet) * 4);
 
     writes[0].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
     writes[0].dstBinding      = 0;
@@ -87,7 +97,14 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
     writes[2].dstSet          = descriptor->descriptor;
     writes[2].pBufferInfo     = &buffer_info[2];
 
-    vkUpdateDescriptorSets(context->device, 3, writes, 0, NULL);
+    writes[3].sType           = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    writes[3].dstBinding      = 3;
+    writes[3].descriptorCount = 1;
+    writes[3].descriptorType  = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
+    writes[3].dstSet          = descriptor->descriptor;
+    writes[3].pBufferInfo     = &buffer_info[3];
+
+    vkUpdateDescriptorSets(context->device, 4, writes, 0, NULL);
 
     return NU_SUCCESS;
 }

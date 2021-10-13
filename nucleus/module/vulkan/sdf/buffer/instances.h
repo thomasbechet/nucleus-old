@@ -60,5 +60,12 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_data(
     uint32_t instance_index,
     const void *data
 );
+nu_result_t nuvk_sdf_buffer_instances_write_instance_material(
+    nuvk_sdf_buffer_instances_t *buffer,
+    uint32_t active_inflight_frame_index,
+    uint32_t type_index,
+    uint32_t instance_index,
+    uint32_t material_index
+);
 
 #endif

@@ -6,12 +6,6 @@
 #include <nucleus/module/vulkan/sdf/scene/camera.h>
 
 typedef struct {
-    nu_mat4f_t vp_matrix;
-    nu_vec3f_t eye;
-    float pixel_radius_factor;
-} nuvk_sdf_buffer_environment_data_t;
-
-typedef struct {
     uint32_t uniform_buffer_range;
     nuvk_dynamic_range_buffer_t dynamic_range_buffer;
 } nuvk_sdf_buffer_environment_t;

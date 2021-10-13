@@ -38,6 +38,8 @@ nu_result_t nu_module_interface(const char *name, void *interface)
 
         i->register_instance_type    = nuvk_sdf_instance_type_register;
         i->get_instance_type         = nuvk_sdf_instance_type_get;
+        i->create_material           = nuvk_sdf_material_create;
+        i->destroy_material          = nuvk_sdf_material_destroy;
         i->create_instance           = nuvk_sdf_instance_create;
         i->destroy_instance          = nuvk_sdf_instance_destroy;
         i->update_instance_transform = nuvk_sdf_instance_update_transform;

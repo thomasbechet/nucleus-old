@@ -3,11 +3,7 @@
 layout(location = 0) out vec2 pos;
 layout(location = 1) out flat mat4 invVPMatrix;
 
-layout(set = 0, binding = 0) uniform EnvironmentUBO {
-    mat4 VPMatrix;
-    vec3 eye;
-    float pixelRadiusFactor;
-};
+__INJECT_ENVIRONMENT__
 
 void main() {
     pos = vec2(

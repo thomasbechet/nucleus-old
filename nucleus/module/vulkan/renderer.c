@@ -113,6 +113,15 @@ nu_result_t nuvk_renderer_viewport_set_size(const nu_vec2u_t size)
     return nuvk_sdf_renderer_update_viewport_size(&_module.sdf, &_module.context, &_module.memory_manager, size);
 }
 
+nu_result_t nuvk_sdf_material_create(const nuvk_sdf_material_info_t *info, nuvk_sdf_material_t *handle)
+{
+    return nuvk_sdf_scene_create_material(&_module.sdf.scene, &_module.render_context, &_module.sdf.buffers.materials, info, handle);
+}
+nu_result_t nuvk_sdf_material_destroy(nuvk_sdf_material_t handle)
+{
+    return nuvk_sdf_scene_destroy_material(&_module.sdf.scene, handle);
+}
+
 nu_result_t nuvk_sdf_instance_type_register(const nuvk_sdf_instance_type_info_t *info, nuvk_sdf_instance_type_t *handle)
 {
     return nuvk_sdf_renderer_register_instance_type(&_module.sdf, &_module.context, &_module.shader_manager, &_module.render_context, info, handle);

@@ -6,6 +6,7 @@ nu_result_t nuvk_sdf_scene_initialize(nuvk_sdf_scene_t *scene)
     nu_indexed_array_allocate(&scene->instance_handles, sizeof(nuvk_sdf_instance_handle_data_t));
     scene->type_count     = 0;
     scene->material_count = 0;
+    nu_array_allocate(&scene->free_material_indices, sizeof(uint32_t));
 
     return NU_SUCCESS;
 }
@@ -19,6 +20,7 @@ nu_result_t nuvk_sdf_scene_terminate(nuvk_sdf_scene_t *scene)
     }
 
     nu_indexed_array_free(scene->instance_handles);
+    nu_array_free(scene->free_material_indices);
 
     return NU_SUCCESS;
 }
@@ -26,33 +28,47 @@ nu_result_t nuvk_sdf_scene_update_buffers(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
     nuvk_sdf_buffer_environment_t *environment_buffer,
-    nuvk_sdf_buffer_instances_t *instances_buffer
+    nuvk_sdf_buffer_instances_t *instances_buffer,
+    nuvk_sdf_buffer_materials_t *materials_buffer
 )
 {
     /* update buffers */
     nuvk_sdf_buffer_environment_write_camera(environment_buffer, &scene->camera,
         render_context->active_inflight_frame_index);
 
-    // for (uint32_t t = 0; t < scene->type_count; t++) {
-    //     nuvk_sdf_buffer_instances_write_indices(instances_buffer, render_context->active_inflight_frame_index,
-    //         t, scene->types[t].indices, scene->types[t].index_count);
-    // }
-
     /* transfer buffers */
     nuvk_dynamic_range_buffer_transfer(&environment_buffer->dynamic_range_buffer, render_context->active_inflight_frame_index);
     nuvk_dynamic_range_buffer_transfer(&instances_buffer->index_buffer, render_context->active_inflight_frame_index);
     nuvk_dynamic_range_buffer_transfer(&instances_buffer->instance_buffer, render_context->active_inflight_frame_index);
+    nuvk_dynamic_range_buffer_transfer(&materials_buffer->dynamic_range_buffer, render_context->active_inflight_frame_index);
 
     return NU_SUCCESS;
 }
 
 nu_result_t nuvk_sdf_scene_create_material(
     nuvk_sdf_scene_t *scene,
+    const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_materials_t *material_buffer,
     const nuvk_sdf_material_info_t *info,
     nuvk_sdf_material_t *handle
 )
 {
+    /* recover material index */
+    uint32_t material_index;
+    if (!nu_array_is_empty(scene->free_material_indices)) {
+        material_index = *(uint32_t*)nu_array_get_last(scene->free_material_indices);
+        nu_array_pop(scene->free_material_indices);
+    } else {
+        material_index = scene->material_count++;
+    }
 
+    /* update buffer */
+    scene->materials[material_index] = *info;
+    nuvk_sdf_buffer_materials_write_material(material_buffer, render_context->active_inflight_frame_index,
+        material_index, info);
+
+    /* save handle */
+    NU_HANDLE_SET_ID(*handle, material_index);
 
     return NU_SUCCESS;
 }
@@ -61,7 +77,7 @@ nu_result_t nuvk_sdf_scene_destroy_material(
     nuvk_sdf_material_t handle
 )
 {
-
+    nu_warning(NUVK_LOGGER_NAME, "Destroying material has not been implemented yet.");
 
     return NU_SUCCESS;
 }
@@ -124,6 +140,11 @@ nu_result_t nuvk_sdf_scene_create_instance(
     nu_vec3f_copy(info->transform.translation, instance->translation_scale);
     instance->translation_scale[3] = info->transform.scale;
 
+    /* get material index */
+    uint32_t material_index;
+    NU_HANDLE_GET_ID(info->material, material_index);
+    instance->material_index = material_index;
+
     /* update indices */
     instance->index_position = type->index_count;
     type->indices[instance->index_position] = instance_index;
@@ -140,6 +161,8 @@ nu_result_t nuvk_sdf_scene_create_instance(
         type_index, instance_index, instance->inv_rotation, instance->translation_scale);
     nuvk_sdf_buffer_instances_write_instance_data(instances_buffer, render_context->active_inflight_frame_index,
         type_index, instance_index, info->data);
+    nuvk_sdf_buffer_instances_write_instance_material(instances_buffer, render_context->active_inflight_frame_index,
+        type_index, instance_index, instance->material_index);
 
     /* setup handle */
     nuvk_sdf_instance_handle_data_t handle_data;

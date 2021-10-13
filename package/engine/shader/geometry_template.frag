@@ -6,13 +6,8 @@ layout(location = 1) out vec4 positionMaterialTex;
 layout(location = 0) in vec2 pos;
 layout(location = 1) in flat mat4 invVPMatrix;
 
-layout(set = 0, binding = 0) uniform EnvironmentUBO {
-    mat4 VPMatrix;
-    vec3 eye;
-    float pixelRadiusFactor;
-};
-
 __INJECT_CONSTANTS__
+__INJECT_ENVIRONMENT__
 __INJECT_INSTANCES__
 
 void main() {
@@ -21,7 +16,8 @@ void main() {
 
     vec3 normal;
     uint stepCount;
-    float depth              = tracePrimary(eye, dir, pixelRadiusFactor, normal);
+    uint materialIndex;
+    float depth              = tracePrimary(eye, dir, pixelRadiusFactor, normal, materialIndex);
     normalDepthTex.rgba      = vec4(normal, depth);
-    positionMaterialTex.rgba = vec4(eye + dir * depth, 1.0);
+    positionMaterialTex.rgba = vec4(eye + dir * depth,  uintBitsToFloat(materialIndex));
 }

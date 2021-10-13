@@ -20,6 +20,8 @@ nu_result_t nuvk_sdf_renderer_initialize(
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create environment buffer.");
     result = nuvk_sdf_buffer_instances_create(&renderer->buffers.instances, context, memory_manager, render_context);
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create instances buffer.");
+    result = nuvk_sdf_buffer_materials_create(&renderer->buffers.materials, context, memory_manager, render_context);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create materials buffer.");
 
     /* images */
     result = nuvk_sdf_image_geometry_create(&renderer->images.geometry, context, memory_manager, renderer->viewport_size);
@@ -43,7 +45,7 @@ nu_result_t nuvk_sdf_renderer_initialize(
     result = nuvk_sdf_descriptor_pool_create(&renderer->descriptors.pool, context, 2);
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create descriptor pool.");
     result = nuvk_sdf_descriptor_low_frequency_create(&renderer->descriptors.low_frequency, context, 
-        &renderer->buffers.environment, &renderer->buffers.instances, renderer->descriptors.pool);
+        &renderer->buffers.environment, &renderer->buffers.instances, &renderer->buffers.materials, renderer->descriptors.pool);
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create low frequency descriptor.");
     result = nuvk_sdf_descriptor_light_create(&renderer->descriptors.light, context,
         &renderer->images.geometry, &renderer->images.light, renderer->descriptors.pool);
@@ -53,16 +55,16 @@ nu_result_t nuvk_sdf_renderer_initialize(
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to create postprocess descriptor.");
 
     /* pipelines */
-    result = nuvk_sdf_pipeline_sources_load(renderer->pipelines.sources);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to load pipeline sources.");
+    result = nuvk_sdf_pipeline_generator_initialize(&renderer->pipelines.generator);
+    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create pipeline generator.");
     result = nuvk_sdf_pipeline_geometry_create(&renderer->pipelines.geometry, context,
-        shader_manager, &renderer->descriptors, renderer->renderpasses.geometry, renderer->pipelines.sources);
+        shader_manager, &renderer->descriptors, renderer->renderpasses.geometry, &renderer->pipelines.generator);
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create geometry pipeline.");
     result = nuvk_sdf_pipeline_light_create(&renderer->pipelines.light, context,
-        shader_manager, &renderer->descriptors, renderer->pipelines.sources);
+        shader_manager, &renderer->descriptors, &renderer->pipelines.generator);
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create light pipeline.");
     result = nuvk_sdf_pipeline_postprocess_create(&renderer->pipelines.postprocess, context,
-        shader_manager, &renderer->descriptors, renderer->renderpasses.postprocess, renderer->pipelines.sources);
+        shader_manager, &renderer->descriptors, renderer->renderpasses.postprocess, &renderer->pipelines.generator);
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess pipeline.");
 
     /* create scene and primitives */
@@ -122,7 +124,7 @@ nu_result_t nuvk_sdf_renderer_terminate(
     nuvk_sdf_pipeline_geometry_destroy(&renderer->pipelines.geometry, context);
     nuvk_sdf_pipeline_light_destroy(&renderer->pipelines.light, context);
     nuvk_sdf_pipeline_postprocess_destroy(&renderer->pipelines.postprocess, context);
-    nuvk_sdf_pipeline_sources_unload(renderer->pipelines.sources);
+    nuvk_sdf_pipeline_generator_terminate(&renderer->pipelines.generator);
 
     /* descriptors */
     nuvk_sdf_descriptor_light_destroy(&renderer->descriptors.light, context);
@@ -143,6 +145,7 @@ nu_result_t nuvk_sdf_renderer_terminate(
     nuvk_sdf_image_geometry_destroy(&renderer->images.geometry, context, memory_manager);
     
     /* buffers */
+    nuvk_sdf_buffer_materials_destroy(&renderer->buffers.materials, memory_manager);
     nuvk_sdf_buffer_instances_destroy(&renderer->buffers.instances, memory_manager);
     nuvk_sdf_buffer_environment_destroy(&renderer->buffers.environment, memory_manager);
 
@@ -236,11 +239,13 @@ nu_result_t nuvk_sdf_renderer_register_instance_type(
         renderer->scene.type_count - 1, NULL, 0);
     
     /* recompile pipelines */
-    result = nuvk_sdf_pipeline_geometry_recompile(&renderer->pipelines.geometry, context, shader_manager, renderer->renderpasses.geometry, 
-        renderer->pipelines.sources, types, renderer->scene.type_count);
+    result = nuvk_sdf_pipeline_generator_update_instance_types(&renderer->pipelines.generator, types, renderer->scene.type_count);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to update pipeline generator.");
+    result = nuvk_sdf_pipeline_geometry_recompile(&renderer->pipelines.geometry, context, shader_manager, 
+        renderer->renderpasses.geometry, &renderer->pipelines.generator);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to recompile geometry pipeline.");
-    result = nuvk_sdf_pipeline_light_recompile(&renderer->pipelines.light, context, shader_manager, &renderer->descriptors,
-        renderer->pipelines.sources, types, renderer->scene.type_count);
+    result = nuvk_sdf_pipeline_light_recompile(&renderer->pipelines.light, context, shader_manager, 
+        &renderer->descriptors, &renderer->pipelines.generator);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to recompile light pipeline.");
 
 cleanup0:
@@ -261,7 +266,8 @@ nu_result_t nuvk_sdf_renderer_render(
     nuvk_sdf_camera_start_frame(&renderer->scene.camera, renderer->viewport_size);
 
     /* update scene */
-    nuvk_sdf_scene_update_buffers(&renderer->scene, render_context, &renderer->buffers.environment, &renderer->buffers.instances);
+    nuvk_sdf_scene_update_buffers(&renderer->scene, render_context, 
+        &renderer->buffers.environment, &renderer->buffers.instances, &renderer->buffers.materials);
 
     /* viewport render area */
     VkRect2D render_area;
@@ -288,13 +294,14 @@ nu_result_t nuvk_sdf_renderer_render(
     vkCmdSetScissor(cmd, 0, 1, &scissor);
 
     /* bind low frequency descriptor set */
-    uint32_t dynamic_offsets[3] = {
+    uint32_t dynamic_offsets[4] = {
         renderer->buffers.environment.uniform_buffer_range        * render_context->active_inflight_frame_index,
         renderer->buffers.instances.index_uniform_buffer_range    * render_context->active_inflight_frame_index,
-        renderer->buffers.instances.instance_uniform_buffer_range * render_context->active_inflight_frame_index
+        renderer->buffers.instances.instance_uniform_buffer_range * render_context->active_inflight_frame_index,
+        renderer->buffers.materials.uniform_buffer_range          * render_context->active_inflight_frame_index
     };
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, renderer->pipelines.geometry.layout,
-        0, 1, &renderer->descriptors.low_frequency.descriptor, 3, dynamic_offsets);
+        0, 1, &renderer->descriptors.low_frequency.descriptor, 4, dynamic_offsets);
 
     /* geometry pass */
     VkRenderPassBeginInfo geometry_begin_info;
@@ -366,7 +373,7 @@ nu_result_t nuvk_sdf_renderer_render(
 
     /* light pass */
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.layout,
-        0, 1, &renderer->descriptors.low_frequency.descriptor, 3, dynamic_offsets); 
+        0, 1, &renderer->descriptors.low_frequency.descriptor, 4, dynamic_offsets); 
     vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.layout,
         1, 1, &renderer->descriptors.light.descriptor, 0, NULL);
     vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, renderer->pipelines.light.pipeline);

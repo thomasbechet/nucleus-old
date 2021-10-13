@@ -5,15 +5,10 @@ layout(location = 0) out vec4 color;
 layout(location = 0) in vec2 pos;
 layout(location = 1) in flat mat4 invVPMatrix;
 
-layout(set = 0, binding = 0) uniform EnvironmentUBO {
-    mat4 VPMatrix;
-    vec3 eye;
-    float pixelRadiusFactor;
-};
-
 layout(set = 1, binding = 0) uniform sampler2D imageLight;
 
 __INJECT_CONSTANTS__
+__INJECT_ENVIRONMENT__
 
 vec3 tonemapFilmic(vec3 x) {
 	vec3 X = max(vec3(0.0), x - 0.004);

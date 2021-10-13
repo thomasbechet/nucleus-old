@@ -11,6 +11,8 @@
 typedef struct {
     nu_result_t (*register_instance_type)(const nuvk_sdf_instance_type_info_t*, nuvk_sdf_instance_type_t*);
     nu_result_t (*get_instance_type)(nuvk_sdf_instance_type_primitives_t, nuvk_sdf_instance_type_t*);
+    nu_result_t (*create_material)(const nuvk_sdf_material_info_t*, nuvk_sdf_material_t*);
+    nu_result_t (*destroy_material)(nuvk_sdf_material_t);
     nu_result_t (*create_instance)(const nuvk_sdf_instance_info_t*, nuvk_sdf_instance_t*);
     nu_result_t (*destroy_instance)(nuvk_sdf_instance_t);
     nu_result_t (*update_instance_transform)(nuvk_sdf_instance_t, const nuvk_sdf_transform_t*);

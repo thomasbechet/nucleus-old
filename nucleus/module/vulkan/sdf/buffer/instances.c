@@ -1,6 +1,6 @@
 #include <nucleus/module/vulkan/sdf/buffer/instances.h>
 
-#define INSTANCE_HEADER_SIZE (sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t))
+#define INSTANCE_HEADER_SIZE (sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t) + sizeof(uint32_t) * 4)
 
 nu_result_t nuvk_sdf_buffer_instances_create(
     nuvk_sdf_buffer_instances_t *buffer,
@@ -160,6 +160,25 @@ nu_result_t nuvk_sdf_buffer_instances_write_instance_data(
 
     nuvk_dynamic_range_buffer_write(&buffer->instance_buffer, active_inflight_frame_index,
         offset, data_size, data);
+
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_sdf_buffer_instances_write_instance_material(
+    nuvk_sdf_buffer_instances_t *buffer,
+    uint32_t active_inflight_frame_index,
+    uint32_t type_index,
+    uint32_t instance_index,
+    uint32_t material_index
+)
+{
+    NU_ASSERT(type_index < NUVK_SDF_MAX_INSTANCE_TYPE_COUNT);
+
+    uint32_t offset = buffer->instance_offsets[type_index]
+        + buffer->instance_sizes[type_index] * instance_index
+        + sizeof(nu_vec4f_t) * 3 + sizeof(nu_vec4f_t);
+
+    nuvk_dynamic_range_buffer_write(&buffer->instance_buffer, active_inflight_frame_index,
+        offset, sizeof(uint32_t), &material_index);
 
     return NU_SUCCESS;
 }

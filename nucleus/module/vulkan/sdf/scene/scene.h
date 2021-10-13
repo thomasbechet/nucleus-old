@@ -5,6 +5,7 @@
 #include <nucleus/module/vulkan/sdf/scene/camera.h>
 #include <nucleus/module/vulkan/sdf/buffer/environment.h>
 #include <nucleus/module/vulkan/sdf/buffer/instances.h>
+#include <nucleus/module/vulkan/sdf/buffer/materials.h>
 
 typedef struct {
     nu_aabb_t aabb;
@@ -12,7 +13,7 @@ typedef struct {
     nu_mat3f_t inv_rotation;
     nu_vec4f_t translation_scale;
     uint32_t index_position;
-    uint32_t material_position;
+    uint32_t material_index;
 } nuvk_sdf_instance_data_t;
 
 typedef struct {
@@ -41,6 +42,7 @@ typedef struct {
 
     nuvk_sdf_material_info_t materials[NUVK_SDF_MAX_MATERIAL_COUNT];
     uint32_t material_count;
+    nu_array_t free_material_indices;
 } nuvk_sdf_scene_t;
 
 nu_result_t nuvk_sdf_scene_initialize(nuvk_sdf_scene_t *scene);
@@ -49,11 +51,14 @@ nu_result_t nuvk_sdf_scene_update_buffers(
     nuvk_sdf_scene_t *scene,
     const nuvk_render_context_t *render_context,
     nuvk_sdf_buffer_environment_t *environment_buffer,
-    nuvk_sdf_buffer_instances_t *instances_buffer
+    nuvk_sdf_buffer_instances_t *instances_buffer,
+    nuvk_sdf_buffer_materials_t *materials_buffer
 );
 
 nu_result_t nuvk_sdf_scene_create_material(
     nuvk_sdf_scene_t *scene,
+    const nuvk_render_context_t *render_context,
+    nuvk_sdf_buffer_materials_t *material_buffer,
     const nuvk_sdf_material_info_t *info,
     nuvk_sdf_material_t *handle
 );

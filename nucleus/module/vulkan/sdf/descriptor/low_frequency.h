@@ -4,6 +4,7 @@
 #include <nucleus/module/vulkan/core/context.h>
 #include <nucleus/module/vulkan/sdf/buffer/environment.h>
 #include <nucleus/module/vulkan/sdf/buffer/instances.h>
+#include <nucleus/module/vulkan/sdf/buffer/materials.h>
 
 typedef struct {
     VkDescriptorSet descriptor;
@@ -15,6 +16,7 @@ nu_result_t nuvk_sdf_descriptor_low_frequency_create(
     const nuvk_context_t *context,
     const nuvk_sdf_buffer_environment_t *environment_buffer,
     const nuvk_sdf_buffer_instances_t *instances_buffer,
+    const nuvk_sdf_buffer_materials_t *materials_buffer,
     VkDescriptorPool pool
 );
 nu_result_t nuvk_sdf_descriptor_low_frequency_destroy(

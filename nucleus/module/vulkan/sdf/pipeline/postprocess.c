@@ -1,31 +1,36 @@
 #include <nucleus/module/vulkan/sdf/pipeline/postprocess.h>
 
-#include <nucleus/module/vulkan/sdf/pipeline/sources.h>
-
 static nu_result_t create_modules(
     nuvk_sdf_pipeline_postprocess_t *pipeline,
     const nuvk_context_t *context,
     const nuvk_shader_manager_t *shader_manager,
-    const nu_string_t *sources
+    const nuvk_sdf_pipeline_generator_t *generator
 )
 {
-    nu_result_t result;
+    nu_result_t result = NU_SUCCESS;
 
-    /* vertex shader */
-    result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_VERTEX_BIT,
-        sources[NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_VERT], "postprocess.vert", &pipeline->vertex);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess vertex shader.");
+    /* generate source code */
+    nu_string_t vert_source, frag_source;
+    nu_string_allocate(&vert_source);
+    nu_string_allocate(&frag_source);
+    nuvk_sdf_pipeline_generator_get_source(generator, NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_VERT, &vert_source);
+    nuvk_sdf_pipeline_generator_get_source(generator, NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_FRAG, &frag_source);
 
-    /* fragment shader */
-    nu_string_t fragment_source;
-    nu_string_allocate_copy(&fragment_source, sources[NUVK_SDF_PIPELINE_SOURCE_POSTPROCESS_FRAG]);
-    nu_string_replace(&fragment_source, NUVK_SDF_PIPELINE_INJECT_CONSTANTS, sources[NUVK_SDF_PIPELINE_SOURCE_CONSTANTS_GLSL]);
-    result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, VK_SHADER_STAGE_FRAGMENT_BIT, 
-        fragment_source, "postprocess.frag", &pipeline->fragment);
-    nu_string_free(fragment_source);
-    NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create postprocess fragment shader.");
+    /* vertex module */    
+    result = nuvk_shader_module_create_from_glsl_source(context, shader_manager,
+        VK_SHADER_STAGE_VERTEX_BIT, vert_source, "postprocess.vert", &pipeline->vertex);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to create postprocess vertex shader.");
 
-    return NU_SUCCESS;
+    /* fragment module */
+    result = nuvk_shader_module_create_from_glsl_source(context, shader_manager, 
+        VK_SHADER_STAGE_FRAGMENT_BIT, frag_source, "postprocess.frag", &pipeline->fragment);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUVK_LOGGER_NAME, "Failed to create postprocess fragment shader.");
+
+cleanup0:
+    nu_string_free(vert_source);
+    nu_string_free(frag_source);
+
+    return result;
 }
 
 static nu_result_t create_layout(
@@ -152,12 +157,12 @@ nu_result_t nuvk_sdf_pipeline_postprocess_create(
     const nuvk_shader_manager_t *shader_manager,
     const nuvk_sdf_descriptors_t *descriptors,
     VkRenderPass postprocess_renderpass,
-    const nu_string_t *sources
+    const nuvk_sdf_pipeline_generator_t *generator
 )
 {
     nu_result_t result;
 
-    result = create_modules(pipeline, context, shader_manager, sources);
+    result = create_modules(pipeline, context, shader_manager, generator);
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create modules.");
     result = create_layout(pipeline, context, descriptors);
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create layout.");

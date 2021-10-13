@@ -3,6 +3,7 @@
 
 #include <nucleus/module/vulkan/core/shader.h>
 #include <nucleus/module/vulkan/sdf/descriptor/descriptors.h>
+#include <nucleus/module/vulkan/sdf/pipeline/generator.h>
 
 typedef struct {
     VkShaderModule compute;
@@ -15,7 +16,7 @@ nu_result_t nuvk_sdf_pipeline_light_create(
     const nuvk_context_t *context,
     const nuvk_shader_manager_t *shader_manager,
     const nuvk_sdf_descriptors_t *descriptors,
-    const nu_string_t *sources
+    const nuvk_sdf_pipeline_generator_t *generator
 );
 nu_result_t nuvk_sdf_pipeline_light_destroy(
     nuvk_sdf_pipeline_light_t *pipeline,
@@ -26,9 +27,7 @@ nu_result_t nuvk_sdf_pipeline_light_recompile(
     const nuvk_context_t *context,
     const nuvk_shader_manager_t *shader_manager,
     const nuvk_sdf_descriptors_t *descriptors,
-    const nu_string_t *sources,
-    const nuvk_sdf_instance_type_info_t *types,
-    uint32_t type_count
+    const nuvk_sdf_pipeline_generator_t *generator
 );
 
 #endif

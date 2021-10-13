@@ -1,5 +1,11 @@
 #include <nucleus/module/vulkan/sdf/buffer/environment.h>
 
+typedef struct {
+    nu_mat4f_t vp_matrix;
+    nu_vec3f_t eye;
+    float pixel_radius_factor;
+} nuvk_sdf_buffer_environment_data_t;
+
 nu_result_t nuvk_sdf_buffer_environment_create(
     nuvk_sdf_buffer_environment_t *buffer,
     const nuvk_context_t *context,
@@ -7,11 +13,9 @@ nu_result_t nuvk_sdf_buffer_environment_create(
     const nuvk_render_context_t *render_context
 )
 {
-    nu_result_t result;
-
     buffer->uniform_buffer_range = nuvk_buffer_pad_uniform_buffer_size(context, sizeof(nuvk_sdf_buffer_environment_data_t));
 
-    result = nuvk_dynamic_range_buffer_create(
+    nu_result_t result = nuvk_dynamic_range_buffer_create(
         &buffer->dynamic_range_buffer, memory_manager, 
         VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
         buffer->uniform_buffer_range,

@@ -3,6 +3,7 @@
 
 #include <nucleus/module/vulkan/core/shader.h>
 #include <nucleus/module/vulkan/sdf/descriptor/descriptors.h>
+#include <nucleus/module/vulkan/sdf/pipeline/generator.h>
 
 typedef struct {
     VkShaderModule vertex;
@@ -17,7 +18,7 @@ nu_result_t nuvk_sdf_pipeline_geometry_create(
     const nuvk_shader_manager_t *shader_manager,
     const nuvk_sdf_descriptors_t *descriptors,
     VkRenderPass geometry_renderpass,
-    const nu_string_t *sources
+    const nuvk_sdf_pipeline_generator_t *generator
 );
 nu_result_t nuvk_sdf_pipeline_geometry_destroy(
     nuvk_sdf_pipeline_geometry_t *pipeline,
@@ -28,9 +29,7 @@ nu_result_t nuvk_sdf_pipeline_geometry_recompile(
     const nuvk_context_t *context,
     const nuvk_shader_manager_t *shader_manager,
     VkRenderPass geometry_renderpass,
-    const nu_string_t *sources,
-    const nuvk_sdf_instance_type_info_t *types,
-    uint32_t type_count
+    const nuvk_sdf_pipeline_generator_t *generator
 );
 
 #endif
