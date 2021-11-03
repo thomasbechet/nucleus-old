@@ -17,6 +17,7 @@ INCLUDE_DIRECTORIES(
     ../../../
     ../../../extlibs/vma/include/
     ../../../extlibs/shaderc/include/
+    ../../../extlibs/stb/include/
     ${Vulkan_INCLUDE_DIRS}
 )
 

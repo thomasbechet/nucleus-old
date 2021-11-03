@@ -1,22 +1,24 @@
 #ifndef NUVK_MODULE_INTERFACE_H
 #define NUVK_MODULE_INTERFACE_H
 
-#include <nucleus/module/vulkan/sdf/scene/interface.h>
+#include <nucleus/module/vulkan/assets/interface.h>
+#include <nucleus/module/vulkan/scene/interface.h>
 
 #define NUVK_MODULE_NAME "nucleus-vulkan"
 #define NUVK_MODULE_ID 0x8
 
-#define NUVK_SDF_INTERFACE_NAME "nuvk_sdf_interface"
+#define NUVK_RENDERER_INTERFACE_NAME "nuvk_renderer_interface"
 
 typedef struct {
-    nu_result_t (*register_instance_type)(const nuvk_sdf_instance_type_info_t*, nuvk_sdf_instance_type_t*);
-    nu_result_t (*get_instance_type)(nuvk_sdf_instance_type_primitives_t, nuvk_sdf_instance_type_t*);
-    nu_result_t (*create_material)(const nuvk_sdf_material_info_t*, nuvk_sdf_material_t*);
-    nu_result_t (*destroy_material)(nuvk_sdf_material_t);
-    nu_result_t (*create_instance)(const nuvk_sdf_instance_info_t*, nuvk_sdf_instance_t*);
-    nu_result_t (*destroy_instance)(nuvk_sdf_instance_t);
-    nu_result_t (*update_instance_transform)(nuvk_sdf_instance_t, const nuvk_sdf_transform_t*);
-    nu_result_t (*update_instance_data)(nuvk_sdf_instance_t, const void*);
-} nuvk_sdf_interface_t;
+    nu_result_t (*sdf_create)(const nuvk_sdf_info_t*, nuvk_sdf_t*);
+    nu_result_t (*sdf_destroy)(nuvk_sdf_t);
+    nu_result_t (*sdf_get_primitive)(nuvk_sdf_primitives_t, nuvk_sdf_t*);
+    nu_result_t (*material_create)(const nuvk_material_info_t*, nuvk_material_t*);
+    nu_result_t (*material_destroy)(nuvk_material_t);
+    nu_result_t (*sdf_instance_create)(const nuvk_sdf_instance_info_t*, nuvk_sdf_instance_t*);
+    nu_result_t (*sdf_instance_destroy)(nuvk_sdf_instance_t);
+    nu_result_t (*sdf_instance_update_transform)(nuvk_sdf_instance_t, const nuvk_sdf_transform_t*);
+    nu_result_t (*sdf_instance_update_data)(nuvk_sdf_instance_t, const void*);
+} nuvk_renderer_interface_t;
 
 #endif

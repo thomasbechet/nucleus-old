@@ -1,7 +1,6 @@
 #include <nucleus/module/utils/module/module.h>
 
 #include <nucleus/module/utils/module/interface.h>
-#include <nucleus/module/utils/console/console.h>
 #include <nucleus/module/utils/command/command.h>
 #include <nucleus/module/utils/loader/loader.h>
 
@@ -12,9 +11,8 @@ static const char *interfaces[] = {
     NUUTILS_COMMAND_INTERFACE_NAME
 };
 
-static const uint32_t plugin_count = 3;
+static const uint32_t plugin_count = 1;
 static const char *plugins[] = {
-    NUUTILS_CONSOLE_PLUGIN_NAME,
     NUUTILS_COMMAND_PLUGIN_NAME
 };
 
@@ -26,13 +24,7 @@ static nu_result_t nuutils_plugin_get_list(uint32_t *count, const char ***plugin
 }
 static nu_result_t nuutils_plugin_get_callbacks(const char *name, nu_plugin_callbacks_t *callbacks)
 {
-    if (NU_MATCH(name, NUUTILS_CONSOLE_PLUGIN_NAME)) {
-        callbacks->initialize = nuutils_console_plugin_initialize;
-        callbacks->terminate  = nuutils_console_plugin_terminate;
-        callbacks->update     = nuutils_console_plugin_update;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUUTILS_COMMAND_PLUGIN_NAME)) {
+    if (NU_MATCH(name, NUUTILS_COMMAND_PLUGIN_NAME)) {
         callbacks->initialize = nuutils_command_plugin_initialize;
         callbacks->terminate  = nuutils_command_plugin_terminate;
 

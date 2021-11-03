@@ -23,15 +23,17 @@ void main() {
 
     if (normalDepth.w < MAX_DISTANCE) {
         vec3 materialColor = materials[floatBitsToUint(positionMaterial.w)].color.xyz;
-        
+
         color = vec4(materialColor, 1.0);
         float intensity = max(0, dot(normalDepth.xyz, sunDir));
     
-        if (intensity > 0.95)      color *= vec4(1.0, 1.0, 1.0, 1.0);
-        else if (intensity > 0.75) color *= vec4(0.8, 0.8, 0.8, 1.0);
-        else if (intensity > 0.50) color *= vec4(0.6, 0.6, 0.6, 1.0);
-        else if (intensity > 0.25) color *= vec4(0.4, 0.4, 0.4, 1.0);
-        else                       color *= vec4(0.2, 0.2, 0.2, 1.0);
+        // if (intensity > 0.95)      color *= vec4(1.0, 1.0, 1.0, 1.0);
+        // else if (intensity > 0.75) color *= vec4(0.8, 0.8, 0.8, 1.0);
+        // else if (intensity > 0.50) color *= vec4(0.6, 0.6, 0.6, 1.0);
+        // else if (intensity > 0.25) color *= vec4(0.4, 0.4, 0.4, 1.0);
+        // else                       color *= vec4(0.2, 0.2, 0.2, 1.0);
+
+        color *= intensity;
 
         vec3 normal;
         float sunRay = trace(positionMaterial.xyz + normalDepth.xyz * EPSILON, sunDir, normal);
@@ -39,7 +41,7 @@ void main() {
             color = color * 0.08;
         }
         
-    } else {  
+    } else {
         color = vec4(backgroundColor + abs(1.0 - normalDepth.y) * 0.4, 1.0);
     }
 

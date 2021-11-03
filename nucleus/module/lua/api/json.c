@@ -6,7 +6,7 @@
 
 int Json__call(lua_State *L)
 {
-    nu_json_t *j = (nu_json_t*)lua_newuserdata(L, sizeof(nu_json_t));
+    // nu_json_t *j = (nu_json_t*)lua_newuserdata(L, sizeof(nu_json_t));
     luaL_setmetatable(L, NULUA_JSON_TYPENAME);
     // nu_json_allocate_from_file(j, )
 
