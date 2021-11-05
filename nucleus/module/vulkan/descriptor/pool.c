@@ -9,7 +9,7 @@ nu_result_t nuvk_descriptor_pool_create(
     VkDescriptorPoolSize pool_sizes[2];
     memset(pool_sizes, 0, sizeof(VkDescriptorPoolSize) * 2);
     pool_sizes[0].type            = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC;
-    pool_sizes[0].descriptorCount = 3;
+    pool_sizes[0].descriptorCount = 4;
     pool_sizes[1].type            = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
     pool_sizes[1].descriptorCount = 4;
 

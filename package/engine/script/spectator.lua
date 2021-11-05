@@ -19,7 +19,7 @@ function plugin:on_start()
     -- set initial position
     self.transform.translation = Vec3(0, 0, 0.5)
 
-    Json.parse('$ENGINE_DIR/script/map.json')
+    local j = Json.parse('$ENGINE_DIR/script/map.json')
 end
 
 function plugin:on_update()
