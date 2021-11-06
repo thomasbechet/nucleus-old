@@ -1,3 +1,5 @@
+require('engine/script/utils')
+
 local plugin = {
     -- constants
     NORMAL_SPEED         = 10.0 / 1000.0,
@@ -14,7 +16,7 @@ local plugin = {
     pitch     = 0.0,
     fov       = 80.0
 }
-
+ 
 function plugin:on_start()
     -- set initial position
     self.transform.translation = Vec3(0, 0, 0.5)
