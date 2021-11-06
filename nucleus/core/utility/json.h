@@ -35,6 +35,7 @@ NU_API nu_result_t nu_json_value_as_int(nu_json_value_t value, int32_t *i);
 NU_API nu_result_t nu_json_value_as_uint(nu_json_value_t value, uint32_t *u);
 NU_API nu_result_t nu_json_value_as_bool(nu_json_value_t value, bool *b);
 NU_API nu_result_t nu_json_value_as_float(nu_json_value_t value, float *f);
+NU_API nu_result_t nu_json_value_as_double(nu_json_value_t value, double *d);
 NU_API nu_result_t nu_json_value_as_vec3f(nu_json_value_t value, nu_vec3f_t v);
 NU_API nu_result_t nu_json_value_as_transform(nu_json_value_t value, nu_transform_t *transform);
 

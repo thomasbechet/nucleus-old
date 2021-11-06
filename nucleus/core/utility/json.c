@@ -108,6 +108,11 @@ nu_result_t nu_json_value_as_float(nu_json_value_t value, float *f)
     if (value == NU_NULL_HANDLE || nu_json_value_get_type(value) != NU_JSON_TYPE_NUMBER) return NU_FAILURE;
     return nu_strtof(json_value_as_number(((struct json_value_s*)value))->number, f);
 }
+nu_result_t nu_json_value_as_double(nu_json_value_t value, double *d)
+{
+    if (value == NU_NULL_HANDLE || nu_json_value_get_type(value) != NU_JSON_TYPE_NUMBER) return NU_FAILURE;
+    return nu_strtod(json_value_as_number(((struct json_value_s*)value))->number, d);
+}
 nu_result_t nu_json_value_as_vec3f(nu_json_value_t value, nu_vec3f_t v)
 {
     if (value == NU_NULL_HANDLE || nu_json_value_get_type(value) != NU_JSON_TYPE_ARRAY) return NU_FAILURE;

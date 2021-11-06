@@ -7,18 +7,31 @@
 static nu_result_t resolve_value(lua_State *L, nu_json_value_t value)
 {
     nu_json_type_t type = nu_json_value_get_type(value);
+
     if (type == NU_JSON_TYPE_ARRAY) {
-        
+        nu_json_array_t array;
+        nu_json_value_as_array(value, &array);
+        lua_createtable(L, nu_json_array_get_length(array), 0);
+        nu_json_array_iterator_t it = NU_NULL_HANDLE;
+        int i = 0;
+        while (nu_json_array_next(array, &it)) {
+            resolve_value(L, nu_json_array_iterator_get_value(it));
+            lua_rawseti(L, -2, ++i);
+        }
+        return NU_SUCCESS;
     } else if (type == NU_JSON_TYPE_BOOL) {
         bool b;
         nu_json_value_as_bool(value, &b);
         lua_pushboolean(L, b);
+        return NU_SUCCESS;
     } else if (type == NU_JSON_TYPE_NULL) {
         lua_pushnil(L);
+        return NU_SUCCESS;
     } else if (type == NU_JSON_TYPE_NUMBER) {
-        float f;
-        nu_json_value_as_float(value, &f);
-        lua_pushnumber(L, f);
+        double d;
+        nu_json_value_as_double(value, &d);
+        lua_pushnumber(L, d);
+        return NU_SUCCESS;
     } else if (type == NU_JSON_TYPE_OBJECT) {
         nu_json_object_t object;
         nu_json_value_as_object(value, &object);
@@ -28,13 +41,15 @@ static nu_result_t resolve_value(lua_State *L, nu_json_value_t value)
             resolve_value(L, nu_json_object_iterator_get_value(it));
             lua_setfield(L, -2, nu_json_object_iterator_get_name(it));
         }
+        return NU_SUCCESS;
     } else if (type == NU_JSON_TYPE_STRING) {
         const char *str;
         nu_json_value_as_cstr(value, &str);
         lua_pushstring(L, str);
+        return NU_SUCCESS;
     }
 
-    return NU_SUCCESS;
+    return NU_FAILURE;
 }
 
 int Json_parse(lua_State *L)
@@ -54,7 +69,7 @@ int Json_parse(lua_State *L)
     /* build object */
     result = resolve_value(L, nu_json_get_root(json));
     NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME, "Failed to resolve json.");
-        
+
     /* free resources */
     nu_json_free(json);
     nu_string_free(path);
