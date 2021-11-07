@@ -10,4 +10,54 @@
 [ ] support headless systems
 [ ] LUA memory alignment (currently using a patched version)
 [ ] LUA use custom memory pool (based on a general pool ?)
-[ ] LUA : ajouter Json API
+[ ] add custom macro for api using sizeof() e.g. NU_EVENT_DECLARE(...) 
+
+nuecs_entity_t
+nuecs_archetype_t
+nuecs_
+
+typedef struct {
+    float x, y, z;
+} position_t;
+
+typedef struct {
+    float health;
+} health_t;
+
+void my_system(nuecs_world_t world, nuecs_chunk_t chunk) 
+{
+    health_t    *healths   = nuecs_chunk_get(chunk, 0);
+    positions_t *positions = nuecs_chunk_get(chunk, 1);
+    uint32_t count = nuecs_chunk_get_size(chunk);
+    for (uint32_t i = 0; i < count; i++) {
+        healths[i] += positions[i];
+    }
+}
+
+nuecs_world_t world;
+nu_result_t result;
+result = nuecs_world_allocate(&world);
+
+/* register component */
+nuecs_component_info_t info;
+info.name = "health_t";
+info.size = sizeof(health_t);
+nuecs_component_t health_component;
+result = nuecs_component_register(world, &info, &health_component);
+
+nuecs_component_t health_component;
+NUECS_REGISTER_COMPONENT(world, health_t, health_component);
+NUECS_REGISTER_COMPONENT(world, health_t, health_component);
+
+/* register system */
+nuecs_component_t system_components[] = {
+    health_component,
+    position_component
+};
+nuecs_system_info_t info; 
+info.name            = "move_entity";
+info.components      = system_components;
+info.component_count = 2;
+result = nuecs_system_register(world, &info);
+
+result = nuecs_world_update(world);
