@@ -1,0 +1,4 @@
+#ifndef NUECS_ARCHETYPE_H
+#define NUECS_ARCHETYPE_H
+
+#endif

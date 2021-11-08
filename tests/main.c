@@ -5,6 +5,7 @@
 #include <nucleus/module/utils.h>
 #include <nucleus/module/lua.h>
 #include <nucleus/module/vulkan.h>
+#include <nucleus/module/ecs.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -164,16 +165,27 @@ static nu_result_t on_start(void)
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
     nu_plugin_require(lua_module, NULUA_PLUGIN_NAME);
 
+    nu_module_t ecs_module;
+    NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-ecs", &ecs_module) == NU_SUCCESS);
+    nu_plugin_require(ecs_module, NUECS_PLUGIN_NAME);
+
     /* load sdf interface */
     nu_module_t renderer_module = nu_renderer_get_module();
     nu_module_get_interface(renderer_module, NUVK_RENDERER_INTERFACE_NAME, &renderer);
 
-    /* load lua plugin */
+    /* load lua interface */
     nulua_plugin_interface_t lua_interface;
     NU_ASSERT(nu_module_get_interface(lua_module, NULUA_PLUGIN_INTERFACE_NAME, &lua_interface) == NU_SUCCESS);
     nulua_plugin_t plugin;
     NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/test.lua", &plugin));
     NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/spectator.lua", &plugin));
+
+    /* load ecs interface */
+    nuecs_plugin_interface_t ecs_interface;
+    NU_ASSERT(nu_module_get_interface(ecs_module, NUECS_PLUGIN_INTERFACE_NAME, &ecs_interface) == NU_SUCCESS);
+
+    nuecs_world_t world;
+    NU_ASSERT(ecs_interface.world_create(&world) == NU_SUCCESS);
 
     /* load texture */
     int width, height, channel;
