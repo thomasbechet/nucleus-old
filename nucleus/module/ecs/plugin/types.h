@@ -32,10 +32,11 @@ typedef struct {
 typedef struct {
     uint32_t size;
     nu_string_t name;
-} nuecs_component_data_t;
+} nuecs_component_type_t;
 
 typedef struct {
     nu_array_t archetypes;
+    nuecs_archetype_t empty_archetype;
     nu_indexed_array_t types;
     uint32_t id;
 } nuecs_world_data_t;

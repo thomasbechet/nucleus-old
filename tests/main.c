@@ -154,6 +154,10 @@ cleanup0:
     return NU_SUCCESS;
 }
 
+typedef struct {
+    nu_vec3f_t pos;
+} position_t;
+
 static nu_result_t on_start(void)
 {
     nu_module_t module;
@@ -186,6 +190,12 @@ static nu_result_t on_start(void)
 
     nuecs_world_t world;
     NU_ASSERT(ecs_interface.world_create(&world) == NU_SUCCESS);
+
+    nuecs_component_info_t info;
+    info.name = "position";
+    info.size = sizeof(position_t);
+    nuecs_component_t position_component;
+    NU_ASSERT(ecs_interface.component_register(world, &info, &position_component) == NU_SUCCESS);
 
     /* load texture */
     int width, height, channel;
