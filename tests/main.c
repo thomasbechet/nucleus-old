@@ -157,13 +157,90 @@ cleanup0:
 typedef struct {
     nu_vec3f_t pos;
 } position_t;
+typedef struct {
+    float value;
+} health_t;
+typedef struct {
+    nu_vec3f_t velocity;
+} velocity_t;
+typedef struct {
+    uint32_t score;
+} score_t;
 
+typedef struct {
+    uint32_t id;
+    uint32_t v;
+} stest;
+static uint32_t nu_random()
+{
+    static uint32_t next = 1231125;
+    next = (unsigned int)(next * 123423542) % 23423425;
+    return next;
+}
 static nu_result_t on_start(void)
 {
+    // nu_array_t ar;
+    // uint32_t val;
+    // nu_array_allocate(&ar, sizeof(uint32_t));
+    // val = 0; nu_array_push(ar, &val);
+    // val = 1; nu_array_push(ar, &val);
+    // val = 2; nu_array_push(ar, &val);
+    // val = 3; nu_array_push(ar, &val);
+    // val = 4; nu_array_push(ar, &val);
+    // val = 5; nu_array_push(ar, &val);
+    // val = 6; nu_array_push(ar, &val);
+    // nu_array_swap(ar, 5, 6);
+    // for (uint32_t i = 0; i < nu_array_get_size(ar); i++) {
+    //     nu_info("ar", "%d", *(uint32_t*)nu_array_get(ar, i));
+    // }
+
+    // nu_indexed_array_t ar;
+    // stest v;
+    // uint32_t id;
+    // nu_indexed_array_allocate(&ar, sizeof(stest));
+    // nu_indexed_array_add(ar, &v, &id);
+    // nu_info("test", "index capacity %d\n", nu_indexed_array_get_index_capacity(ar));
+    // nu_info("test", "capacity       %d\n", nu_indexed_array_get_capacity(ar));
+    // nu_info("test", "memory         %d\n", nu_indexed_array_get_allocated_memory(ar));
+    // nu_indexed_array_free(ar);
+
+    // nu_indexed_array_t iar;
+    // nu_array_t ids;
+    // stest s;
+    // nu_indexed_array_allocate(&iar, sizeof(uint32_t));
+    // nu_array_allocate(&ids, sizeof(stest));
+
+    // for (uint32_t i = 0; i < 100000; i++) {
+    //     if (nu_random() % 3 != 0) {
+    //         s.v = nu_random() % 1000;
+    //         nu_indexed_array_add(iar, &s.v, &s.id);
+    //         nu_info("test", "add %d with %d", s.id, s.v);
+    //         nu_array_push(ids, &s);
+    //     } else {
+    //         uint32_t len = nu_array_get_size(ids);
+    //         if (len > 0) {
+    //             nu_array_swap_last(ids, nu_random() % len);
+    //             stest s = *((stest*)nu_array_get_last(ids));
+    //             nu_array_pop(ids);
+
+    //             uint32_t v = *((uint32_t*)nu_indexed_array_get(iar, s.id));
+    //             NU_ASSERT(s.v == v);
+    //             nu_indexed_array_remove(iar, s.id);
+    //             nu_info("test", "remove %d expect %d got %d", s.id, s.v, v);
+    //         }
+    //     }
+    // }
+
+    // nu_indexed_array_free(iar);
+    // nu_array_free(ids);
+
+    // nu_info("test", "done");
+    // exit(0);
+
+
     nu_module_t module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
-    // nu_plugin_require(module, NUUTILS_SPECTATOR_PLUGIN_NAME);
 
     nu_module_t lua_module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
@@ -191,11 +268,19 @@ static nu_result_t on_start(void)
     nuecs_world_t world;
     NU_ASSERT(ecs_interface.world_create(&world) == NU_SUCCESS);
 
-    nuecs_component_info_t info;
-    info.name = "position";
-    info.size = sizeof(position_t);
-    nuecs_component_t position_component;
-    NU_ASSERT(ecs_interface.component_register(world, &info, &position_component) == NU_SUCCESS);
+    nuecs_component_t position_component, health_component, velocity_component, score_component;
+    NUECS_REGISTER_COMPONENT(ecs_interface, world, position_t, position_component);
+    NUECS_REGISTER_COMPONENT(ecs_interface, world, health_t, health_component);
+    NUECS_REGISTER_COMPONENT(ecs_interface, world, velocity_t, velocity_component);
+    NUECS_REGISTER_COMPONENT(ecs_interface, world, score_t, score_component);
+
+    nuecs_component_t components0[] = {position_component, health_component, velocity_component};
+    nuecs_component_t components1[] = {position_component, health_component};
+    nuecs_component_t components2[] = {position_component, score_component};
+    nuecs_entity_t entity0, entity1, entity2;
+    NUECS_CREATE_ENTITY(ecs_interface, world, components0, NULL, entity0);
+    NUECS_CREATE_ENTITY(ecs_interface, world, components1, NULL, entity1);
+    NUECS_CREATE_ENTITY(ecs_interface, world, components2, NULL, entity2);
 
     /* load texture */
     int width, height, channel;

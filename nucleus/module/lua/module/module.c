@@ -3,9 +3,10 @@
 #include <nucleus/module/lua/module/interface.h>
 #include <nucleus/module/lua/plugin/plugin.h>
 
-static const uint32_t interface_count = 1;
+static const uint32_t interface_count = 2;
 static const char *interfaces[] = {
-    NU_PLUGIN_INTERFACE_NAME
+    NU_PLUGIN_INTERFACE_NAME,
+    NULUA_PLUGIN_INTERFACE_NAME
 };
 
 static const uint32_t plugin_count = 1;

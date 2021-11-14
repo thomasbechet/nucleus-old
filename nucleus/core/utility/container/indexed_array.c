@@ -2,144 +2,94 @@
 
 #include <nucleus/core/coresystem/memory/memory.h>
 
-#define INDEXED_ARRAY_DEFAULT_CAPACITY 10
-#define FREE_INDEX_FLAG 0x0
-
-/*
-    +--------+
-    | header |
-    +--------+
-        |
-        |   +-------------+
-        --->| indexes ... |
-        |   +-------------+
-        |
-        |   +--------+------------+
-        --->| header | swap space |
-        |   +--------+------------+
-        |       |
-        |       |    +-------------+
-        |       ---->| free_ids... |
-        |            +-------------+
-        |
-        |   +--------+------------+
-        --->| header | swap space |
-            +--------+------------+
-                |
-                |    +----------+
-                ---->| data ... |
-                     +----------+
-*/
+#define META_SIZE   2
+#define ID_TO_INDEX 0
+#define INDEX_TO_ID 1
+#define FREE_ID     1
 
 typedef struct {
-    uint32_t id_to_index; /* [ID]->[DATA] */
-    uint32_t index_to_id; /* [ID]<-[DATA] */
-} nu_index_pair_t;
-
-typedef struct {
-    uint32_t size;
-    uint32_t capacity;
-    nu_index_pair_t *indexes;
+    uint32_t free_count;
+    nu_array_t meta;
     nu_array_t data;
-    nu_array_t free_ids;
 } nu_indexed_array_header_t;
 
 void nu_indexed_array_allocate(nu_indexed_array_t *array, uint32_t object_size)
 {
     *array = (nu_indexed_array_t)nu_malloc(sizeof(nu_indexed_array_header_t));
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)(*array); 
-    header->size         = 0;
-    header->capacity     = INDEXED_ARRAY_DEFAULT_CAPACITY;
-    nu_array_allocate_capacity(&header->data, object_size, INDEXED_ARRAY_DEFAULT_CAPACITY);
-    nu_array_allocate(&header->free_ids, sizeof(uint32_t));
-    header->indexes      = (nu_index_pair_t*)nu_malloc(sizeof(nu_index_pair_t) * INDEXED_ARRAY_DEFAULT_CAPACITY);
+    header->free_count = 0;
+    nu_array_allocate(&header->data, object_size);
+    nu_array_allocate(&header->meta, sizeof(uint32_t) * META_SIZE);
 }
 void nu_indexed_array_free(nu_indexed_array_t array)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
     nu_array_free(header->data);
-    nu_array_free(header->free_ids);
-    nu_free(header->indexes);
+    nu_array_free(header->meta);
     nu_free(array);
 }
 void nu_indexed_array_add(nu_indexed_array_t array, void *object, uint32_t *id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    /* no free index available */
-    if (nu_array_get_size(header->free_ids) == 0) {
-        /* check if reallocation is needed */
-        if (header->size >= header->capacity) {
-            header->capacity *= 2;
-            header->indexes = (nu_index_pair_t*)nu_realloc(header->indexes, sizeof(nu_index_pair_t) * header->capacity);
-        }
-        /* save the id and increase the list size */
-        *id = header->size++;
+
+    if (header->free_count) {
+        uint32_t size = nu_array_get_size(header->data);
+        nu_array_push(header->data, object);
+        uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+        uint32_t free_id = meta[META_SIZE * size + FREE_ID];
+        meta[META_SIZE * free_id + ID_TO_INDEX] = size;
+        meta[META_SIZE * size    + INDEX_TO_ID] = free_id;
+        header->free_count--;
+        *id = free_id;
     } else {
-        /* save the new id */
-        *id = *(uint32_t*)nu_array_get_last(header->free_ids);
-        /* this id is no longer free */
-        nu_array_pop(header->free_ids);
+        uint32_t size = nu_array_get_size(header->data);
+        nu_array_push(header->data, object);
+        nu_array_push(header->meta, NULL);
+        uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+        meta[META_SIZE * size + ID_TO_INDEX] = size;
+        meta[META_SIZE * size + INDEX_TO_ID] = size;
+        *id = size;
     }
-    /* get the data index */
-    uint32_t index = nu_array_get_size(header->data);
-    /* save the data index (+1 so it is different from the free index flag) */
-    header->indexes[*id].id_to_index = index + 1;
-    /* save the id index (size of indexes is always < to the size of data */
-    header->indexes[index].index_to_id = *id;
-    /* add the object */
-    nu_array_push(header->data, object);
 }
 void nu_indexed_array_remove(nu_indexed_array_t array, uint32_t id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    NU_ASSERT(id < header->size);
-    uint32_t index = header->indexes[id].id_to_index;
-    NU_ASSERT(index != FREE_INDEX_FLAG);
-    index--; /* remove the +1 */
-    /* add this id to the free ids */
-    nu_array_push(header->free_ids, &id);
-    /* index pointing to the last object (only pop) */
-    uint32_t size = nu_array_get_size(header->data);
-    if (index == (size - 1)) {
-        nu_array_pop(header->data);
-    } else {
-        /* swap elements */
-        nu_array_swap_last(header->data, index);
-        /* remap the moved data index */
-        uint32_t old_id = header->indexes[(size - 1)].index_to_id;
-        header->indexes[old_id].id_to_index = index + 1;
-        header->indexes[index].index_to_id = old_id;
-        /* safely remove the object */
-        nu_array_pop(header->data);
-    }
-    /* mark the index place as free */
-    header->indexes[id].id_to_index = FREE_INDEX_FLAG;
+
+    uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+    uint32_t last_index = nu_array_get_size(header->data) - 1;
+    uint32_t index      = meta[META_SIZE * id + ID_TO_INDEX];
+    nu_array_swap_last(header->data, index);
+    nu_array_pop(header->data);
+
+    uint32_t last_id = meta[META_SIZE * last_index + INDEX_TO_ID];
+    meta[META_SIZE * last_id    + ID_TO_INDEX] = index;
+    meta[META_SIZE * index      + INDEX_TO_ID] = last_id;
+    meta[META_SIZE * last_index + FREE_ID]     = id;
+    header->free_count++;
 }
 void *nu_indexed_array_get(nu_indexed_array_t array, uint32_t id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    NU_ASSERT(id < header->size);
-    uint32_t index = header->indexes[id].id_to_index;
-    NU_ASSERT(index != FREE_INDEX_FLAG);
-    return nu_array_get(header->data, index - 1);
+    uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+    return nu_array_get(header->data, meta[META_SIZE * id + ID_TO_INDEX]);
 }
 bool nu_indexed_array_find_id(nu_indexed_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
+    uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
     uint32_t index;
     if (!nu_array_find_index(header->data, find_pfn, user, &index)) {
         return false;
     }
-    *id = header->indexes[index].index_to_id;
-    NU_ASSERT(*id != FREE_INDEX_FLAG);
+    *id = meta[META_SIZE * index + INDEX_TO_ID];
     return true;
 }
 void nu_indexed_array_clear(nu_indexed_array_t array)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    header->size = 0;
     nu_array_clear(header->data);
-    nu_array_clear(header->free_ids);
+    nu_array_clear(header->meta);
+    header->free_count = 0;
 }
 uint32_t nu_indexed_array_get_size(nu_indexed_array_t array)
 {
@@ -159,15 +109,10 @@ const void *nu_indexed_array_get_data_const(nu_indexed_array_t array)
 uint32_t nu_indexed_array_get_allocated_memory(nu_indexed_array_t array)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    return nu_array_get_allocated_memory(header->data) + nu_array_get_allocated_memory(header->free_ids)
-        + sizeof(nu_indexed_array_header_t) + sizeof(nu_index_pair_t) * header->capacity;
+    return nu_array_get_allocated_memory(header->data) + nu_array_get_allocated_memory(header->meta) + sizeof(nu_indexed_array_header_t);
 }
 uint32_t nu_indexed_array_get_capacity(nu_indexed_array_t array)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
     return nu_array_get_capacity(header->data);
-}
-uint32_t nu_indexed_array_get_index_capacity(nu_indexed_array_t array)
-{
-    return ((nu_indexed_array_header_t*)array)->capacity;
 }

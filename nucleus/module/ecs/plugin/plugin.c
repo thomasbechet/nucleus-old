@@ -45,16 +45,17 @@ nu_result_t nuecs_world_update(nuecs_world_t world)
 nu_result_t nuecs_component_register(nuecs_world_t world, const nuecs_component_info_t *info, nuecs_component_t *handle)
 {
     nuecs_world_data_t *data = (nuecs_world_data_t*)world;
-    return nuecs_world_register_component(data, info, handle);
+    return nuecs_world_component_register(data, info, handle);
 }
 nu_result_t nuecs_system_register(nuecs_world_t world, const nuecs_system_info_t *info, nuecs_system_t *handle)
 {
     nuecs_world_data_t *data = (nuecs_world_data_t*)world;
-    return nuecs_world_register_system(data, info, handle);
+    return nuecs_world_system_register(data, info, handle);
 }
 nu_result_t nuecs_entity_create(nuecs_world_t world, const nuecs_entity_info_t *info, nuecs_entity_t *handle)
 {
-    return NU_SUCCESS;
+    nuecs_world_data_t *data = (nuecs_world_data_t*)world;
+    return nuecs_world_entity_create(data, info, handle);
 }
 nu_result_t nuecs_entity_destroy(nuecs_world_t world, nuecs_entity_t entity)
 {

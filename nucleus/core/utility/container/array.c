@@ -18,7 +18,7 @@ typedef struct {
     uint32_t size;
     uint32_t capacity;
     uint32_t object_size;
-    char *data;
+    uint8_t *data;
 } nu_array_header_t;
 
 void nu_array_allocate(nu_array_t *array, uint32_t object_size)
@@ -139,14 +139,14 @@ void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second)
     NU_ASSERT(first < header->size);
     NU_ASSERT(second < header->size);
     if (first != second) {
-        void *dfirst = header->data + first * header->object_size;
+        void *dfirst  = header->data + first * header->object_size;
         void *dsecond = header->data + second * header->object_size;
-        void *dswap = header->data + sizeof(nu_array_header_t);
+        void *dswap   = (uint8_t*)header + sizeof(nu_array_header_t);
         /* copy first to the swap space */
         memcpy(dswap, dfirst, header->object_size);
         /* copy second to first */
         memcpy(dfirst, dsecond, header->object_size);
-        /* copy swap space to second */
+        /* copy swap space (first) to second */
         memcpy(dsecond, dswap, header->object_size);
     }
 }
