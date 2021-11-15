@@ -24,7 +24,6 @@ typedef struct {
     uint32_t type_count;
 
     uint32_t entity_count;
-    nu_array_t free_indices;
 } nuecs_archetype_t;
 
 typedef struct {
@@ -34,8 +33,10 @@ typedef struct {
 } nuecs_archetype_edge_t;
 
 typedef struct {
-    void *data;
-    uint32_t type_count;
+    uint8_t *data;
+    uint32_t *ids;
+    uint32_t *indices;
+    uint32_t free_count;
 } nuecs_chunk_data_t;
 
 typedef struct {

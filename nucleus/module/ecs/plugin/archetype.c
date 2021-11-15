@@ -130,3 +130,11 @@ nu_result_t nuecs_archetype_find(nu_array_t archetypes, nuecs_archetype_t *root,
     *find = current;
     return NU_SUCCESS;
 }
+nu_result_t nuecs_archetype_add(nuecs_archetype_t *archetype, void **data, nuecs_entity_data_t *entity)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_archetype_remove(nuecs_archetype_t *archetype, const nuecs_entity_data_t *entity)
+{
+    return NU_SUCCESS;
+}

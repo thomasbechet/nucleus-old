@@ -61,3 +61,8 @@ info.component_count = 2;
 result = nuecs_system_register(world, &info);
 
 result = nuecs_world_update(world);
+
+enregistrer les ajouts :
+- size avant/après
+- conserver les row à retirer, retirer à la fin
+- on created
