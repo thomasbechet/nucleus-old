@@ -20,7 +20,7 @@ typedef struct {
     nu_array_t chunks;
     nuecs_component_type_t **types;
     uint32_t *data_offsets;
-    uint32_t chunk_size;
+    uint32_t *data_sizes;
     uint32_t type_count;
 
     uint32_t entity_count;
@@ -34,8 +34,9 @@ typedef struct {
 
 typedef struct {
     uint8_t *data;
-    uint32_t *ids;
-    uint32_t *indices;
+    uint32_t *ids_to_indices;
+    uint32_t *indices_to_ids;
+    uint32_t size;
     uint32_t free_count;
 } nuecs_chunk_data_t;
 
