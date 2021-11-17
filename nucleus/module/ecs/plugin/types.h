@@ -4,7 +4,6 @@
 #include <nucleus/module/ecs/module/interface.h>
 
 #define NUECS_CHUNK_SIZE 32
-#define NUECS_ARCHETYPE_MASK_LENGTH 4
 
 #define NUECS_INSTANCEOF (nuecs_id_t)(1 << 63)
 #define NUECS_CHILDOF    (nuecs_id_t)(1 << 62)
@@ -22,8 +21,7 @@ typedef struct {
     uint32_t *data_offsets;
     uint32_t *data_sizes;
     uint32_t type_count;
-
-    uint32_t entity_count;
+    uint32_t chunk_data_total_size;
 } nuecs_archetype_t;
 
 typedef struct {
@@ -49,6 +47,7 @@ typedef struct {
 typedef struct {
     nu_array_t archetypes;
     nu_array_t types;
+    nu_indexed_array_t entities;
     nuecs_archetype_t *empty_archetype;
     uint32_t next_type_id;
     uint32_t id;

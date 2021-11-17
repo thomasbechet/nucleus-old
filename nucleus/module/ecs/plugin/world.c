@@ -25,6 +25,7 @@ nu_result_t nuecs_world_initialize(nuecs_world_data_t *world)
 {
     nu_array_allocate(&world->archetypes, sizeof(nuecs_archetype_t*));
     nu_array_allocate(&world->types, sizeof(nuecs_component_type_t*));
+    nu_indexed_array_allocate(&world->entities, sizeof(nuecs_entity_data_t));
 
     world->next_type_id = 0;
 
@@ -56,6 +57,9 @@ nu_result_t nuecs_world_terminate(nuecs_world_data_t *world)
     }
     nu_array_free(world->types);
 
+    /* entities */
+    nu_indexed_array_free(world->entities);
+
     return NU_SUCCESS;
 }
 nu_result_t nuecs_world_component_register(nuecs_world_data_t *world, const nuecs_component_info_t *info, nuecs_component_t *handle)
@@ -81,6 +85,12 @@ nu_result_t nuecs_world_entity_create(nuecs_world_data_t *world, const nuecs_ent
     uint32_t type_count;
     nuecs_sanatize_components(info, types, &type_count);
 
+    /* allocate entity data */
+    uint32_t entity_id;
+    nu_indexed_array_add(world->entities, NULL, &entity_id);
+    nuecs_entity_data_t *entity = (nuecs_entity_data_t*)nu_indexed_array_get(world->entities, entity_id);
+    NU_HANDLE_SET_ID(*handle, entity_id);
+
     /* add/find archetype */
     nuecs_archetype_t *archetype;
     bool created;
@@ -91,7 +101,10 @@ nu_result_t nuecs_world_entity_create(nuecs_world_data_t *world, const nuecs_ent
 
     }
 
-    nu_info("world", "%d", nu_array_get_size(world->archetypes));
+    /* add entity to archetype */
+    nuecs_archetype_add(archetype, info->data, entity);
+
+    nu_info("NEW ENTITY", "archetype %p chunk %d id %d", entity->archetype, entity->chunk, entity->row);
 
     return NU_SUCCESS;
 }

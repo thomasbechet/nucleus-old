@@ -179,65 +179,6 @@ static uint32_t nu_random()
 }
 static nu_result_t on_start(void)
 {
-    // nu_array_t ar;
-    // uint32_t val;
-    // nu_array_allocate(&ar, sizeof(uint32_t));
-    // val = 0; nu_array_push(ar, &val);
-    // val = 1; nu_array_push(ar, &val);
-    // val = 2; nu_array_push(ar, &val);
-    // val = 3; nu_array_push(ar, &val);
-    // val = 4; nu_array_push(ar, &val);
-    // val = 5; nu_array_push(ar, &val);
-    // val = 6; nu_array_push(ar, &val);
-    // nu_array_swap(ar, 5, 6);
-    // for (uint32_t i = 0; i < nu_array_get_size(ar); i++) {
-    //     nu_info("ar", "%d", *(uint32_t*)nu_array_get(ar, i));
-    // }
-
-    // nu_indexed_array_t ar;
-    // stest v;
-    // uint32_t id;
-    // nu_indexed_array_allocate(&ar, sizeof(stest));
-    // nu_indexed_array_add(ar, &v, &id);
-    // nu_info("test", "index capacity %d\n", nu_indexed_array_get_index_capacity(ar));
-    // nu_info("test", "capacity       %d\n", nu_indexed_array_get_capacity(ar));
-    // nu_info("test", "memory         %d\n", nu_indexed_array_get_allocated_memory(ar));
-    // nu_indexed_array_free(ar);
-
-    // nu_indexed_array_t iar;
-    // nu_array_t ids;
-    // stest s;
-    // nu_indexed_array_allocate(&iar, sizeof(uint32_t));
-    // nu_array_allocate(&ids, sizeof(stest));
-
-    // for (uint32_t i = 0; i < 100000; i++) {
-    //     if (nu_random() % 3 != 0) {
-    //         s.v = nu_random() % 1000;
-    //         nu_indexed_array_add(iar, &s.v, &s.id);
-    //         nu_info("test", "add %d with %d", s.id, s.v);
-    //         nu_array_push(ids, &s);
-    //     } else {
-    //         uint32_t len = nu_array_get_size(ids);
-    //         if (len > 0) {
-    //             nu_array_swap_last(ids, nu_random() % len);
-    //             stest s = *((stest*)nu_array_get_last(ids));
-    //             nu_array_pop(ids);
-
-    //             uint32_t v = *((uint32_t*)nu_indexed_array_get(iar, s.id));
-    //             NU_ASSERT(s.v == v);
-    //             nu_indexed_array_remove(iar, s.id);
-    //             nu_info("test", "remove %d expect %d got %d", s.id, s.v, v);
-    //         }
-    //     }
-    // }
-
-    // nu_indexed_array_free(iar);
-    // nu_array_free(ids);
-
-    // nu_info("test", "done");
-    // exit(0);
-
-
     nu_module_t module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
@@ -274,13 +215,25 @@ static nu_result_t on_start(void)
     NUECS_REGISTER_COMPONENT(ecs_interface, world, velocity_t, velocity_component);
     NUECS_REGISTER_COMPONENT(ecs_interface, world, score_t, score_component);
 
+    position_t position;
+    health_t health;
+    velocity_t velocity;
+    score_t score;
+
     nuecs_component_t components0[] = {position_component, health_component, velocity_component};
     nuecs_component_t components1[] = {position_component, health_component};
     nuecs_component_t components2[] = {position_component, score_component};
+    nuecs_component_data_ptr_t data0[] = {&position, &health, &velocity};
+    nuecs_component_data_ptr_t data1[] = {&position, &health};
+    nuecs_component_data_ptr_t data2[] = {&position, &score};
     nuecs_entity_t entity0, entity1, entity2;
-    NUECS_CREATE_ENTITY(ecs_interface, world, components0, NULL, entity0);
-    NUECS_CREATE_ENTITY(ecs_interface, world, components1, NULL, entity1);
-    NUECS_CREATE_ENTITY(ecs_interface, world, components2, NULL, entity2);
+    NUECS_CREATE_ENTITY(ecs_interface, world, components0, data0, entity0);
+    NUECS_CREATE_ENTITY(ecs_interface, world, components1, data1, entity1);
+    NUECS_CREATE_ENTITY(ecs_interface, world, components1, data1, entity1);
+    NUECS_CREATE_ENTITY(ecs_interface, world, components2, data2, entity2);
+    for (uint32_t i = 0; i < 35; i++) {
+        NUECS_CREATE_ENTITY(ecs_interface, world, components2, data2, entity2);
+    }
 
     /* load texture */
     int width, height, channel;

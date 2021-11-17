@@ -9,7 +9,7 @@ nu_result_t nuecs_chunk_add(
     nuecs_chunk_data_t *chunk, 
     const uint32_t *offsets, 
     const uint32_t *sizes,
-    const void **data,
+    nuecs_component_data_ptr_t *data,
     uint32_t type_count, 
     uint32_t *id
 );
@@ -17,7 +17,7 @@ nu_result_t nuecs_chunk_remove(
     nuecs_chunk_data_t *chunk,
     const uint32_t *offsets,
     const uint32_t *sizes,
-    uint32_t type_count, 
+    uint32_t type_count,
     uint32_t id
 );
 

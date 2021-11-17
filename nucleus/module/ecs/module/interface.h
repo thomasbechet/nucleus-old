@@ -18,8 +18,10 @@ NU_DECLARE_HANDLE(nuecs_entity_t);
 NU_DECLARE_HANDLE(nuecs_component_t);
 NU_DECLARE_HANDLE(nuecs_system_t);
 
+typedef void *nuecs_component_data_ptr_t;
+
 typedef struct {
-    void **components;
+    nuecs_component_data_ptr_t *components;
     uint32_t count;
 } nuecs_chunk_t;
 
@@ -36,7 +38,7 @@ typedef struct {
 
 typedef struct {
     nuecs_component_t *components;
-    void **data;
+    nuecs_component_data_ptr_t *data;
     uint32_t component_count;
 } nuecs_entity_info_t;
 
