@@ -215,10 +215,10 @@ nu_result_t nuecs_archetype_add_entity(nuecs_archetype_t *archetype, nuecs_compo
         }
     }
 
-    uint32_t id;
-    nuecs_chunk_add(chunk, data, &id);
-    entity->chunk = chunk;
-    entity->id    = id;
+    uint32_t chunk_id;
+    nuecs_chunk_add(chunk, data, &chunk_id);
+    entity->chunk    = chunk;
+    entity->chunk_id = chunk_id;
 
     return NU_SUCCESS;
 }

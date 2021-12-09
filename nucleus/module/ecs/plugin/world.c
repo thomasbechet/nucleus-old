@@ -172,7 +172,7 @@ nu_result_t nuecs_world_update(nuecs_world_data_t *world)
     uint32_t index_count = nu_array_get_size(world->deleted_entries);
     nuecs_entity_entry_t *entries = (nuecs_entity_entry_t*)nu_array_get_data(world->entries);
     for (uint32_t i = 0; i < index_count; i++) {
-        nuecs_chunk_remove(entries[i].chunk, entries[i].id);
+        nuecs_chunk_remove(entries[i].chunk, entries[i].chunk_id);
         nu_array_push(world->free_entries, &indices[i]);
     }
     nu_array_clear(world->deleted_entries);

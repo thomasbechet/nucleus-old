@@ -45,7 +45,8 @@ typedef struct {
 
 typedef struct {
     nuecs_chunk_data_t *chunk;
-    uint32_t id;
+    uint32_t chunk_id;
+    uint32_t entry_index;
 } nuecs_entity_entry_t;
 
 typedef struct {
