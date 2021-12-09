@@ -54,7 +54,7 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         nuecs_plugin_interface_t *i = (nuecs_plugin_interface_t*)interface;
 
         i->world_create       = nuecs_world_create;
-        i->world_update       = nuecs_world_update;
+        i->world_progress     = nuecs_world_progress;
         i->component_register = nuecs_component_register;
         i->system_register    = nuecs_system_register;
         i->entity_create      = nuecs_entity_create;

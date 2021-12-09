@@ -9,5 +9,6 @@ nu_result_t nuecs_world_component_register(nuecs_world_data_t *world, const nuec
 nu_result_t nuecs_world_system_register(nuecs_world_data_t *world, const nuecs_system_info_t *info, nuecs_system_t *handle);
 nu_result_t nuecs_world_entity_create(nuecs_world_data_t *world, const nuecs_entity_info_t *info, nuecs_entity_t *handle);
 nu_result_t nuecs_world_entity_destroy(nuecs_world_data_t *world, nuecs_entity_t handle);
+nu_result_t nuecs_world_update(nuecs_world_data_t *world);
 
 #endif

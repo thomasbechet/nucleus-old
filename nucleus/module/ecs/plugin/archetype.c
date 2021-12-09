@@ -53,46 +53,66 @@ nu_result_t nuecs_archetype_create(nuecs_archetype_t *archetype, nuecs_component
 {
     archetype->type_count = type_count;
     if (archetype->type_count > 0) {
-        /* types */
-        archetype->types = (nuecs_component_type_t**)nu_malloc(sizeof(nuecs_component_type_t*) * type_count);
-        memcpy(archetype->types, types, sizeof(nuecs_component_type_t*) * type_count);
-        /* offsets and sizes */
-        archetype->data_offsets            = (uint32_t*)nu_malloc(sizeof(uint32_t) * type_count);
-        archetype->data_sizes              = (uint32_t*)nu_malloc(sizeof(uint32_t) * type_count);
-        archetype->chunk_data_total_size   = 0;
+        archetype->types           = (uint32_t*)nu_malloc(sizeof(uint32_t) * type_count);
+        archetype->data_sizes      = (uint32_t*)nu_malloc(sizeof(uint32_t) * type_count);
         for (uint32_t i = 0; i < type_count; i++) {
-            archetype->data_offsets[i] = archetype->chunk_data_total_size;
-            archetype->data_sizes[i]   = types[i]->size;
-            archetype->chunk_data_total_size     += types[i]->size * NUECS_CHUNK_SIZE; 
+            archetype->data_sizes[i]    = types[i]->size;
+            archetype->types[i]         = types[i]->type_id;
         }
     }
     
-    nu_array_allocate(&archetype->chunks, sizeof(nuecs_chunk_data_t));
-    nu_array_allocate(&archetype->edges, sizeof(nuecs_archetype_edge_t));
+    nu_array_allocate(&archetype->chunks,  sizeof(nuecs_chunk_data_t*));
+    nu_array_allocate(&archetype->edges,   sizeof(nuecs_archetype_edge_t));
+    nu_array_allocate(&archetype->systems, sizeof(nuecs_system_data_t*));
 
     return NU_SUCCESS;
 }
 nu_result_t nuecs_archetype_destroy(nuecs_archetype_t *archetype)
 {
-    nuecs_chunk_data_t *chunks = (nuecs_chunk_data_t*)nu_array_get_data(archetype->chunks);
+    nuecs_chunk_data_t **chunks = (nuecs_chunk_data_t**)nu_array_get_data(archetype->chunks);
     uint32_t chunk_count       = nu_array_get_size(archetype->chunks);
     for (uint32_t i = 0; i < chunk_count; i++) {
-        nuecs_chunk_destroy(&chunks[i]);
+        nuecs_chunk_free(chunks[i]);
     }
     nu_array_free(archetype->chunks);
     nu_array_free(archetype->edges);
+    nu_array_free(archetype->systems);
     if (archetype->type_count > 0) {
         nu_free(archetype->types);
-        nu_free(archetype->data_offsets);
         nu_free(archetype->data_sizes);
     }
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_archetype_find(nu_array_t archetypes, nuecs_archetype_t *root, nuecs_component_type_t **types, uint32_t type_count, nuecs_archetype_t **find, bool *created)
+static bool system_include_archetype_types(const nuecs_archetype_t *archetype, const nuecs_system_data_t *system)
+{
+    bool has_all = true;
+    for (uint32_t i = 0; i < system->type_count; i++) {
+        bool found = false;
+        for (uint32_t j = 0; j < archetype->type_count; j++) {
+            if (archetype->types[j] == system->types[i]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            has_all = false;
+            break;
+        }
+    }
+    return has_all;
+}
+nu_result_t nuecs_archetype_find(
+    nu_array_t archetypes,
+    nuecs_archetype_t *root, 
+    nuecs_component_type_t **types, 
+    uint32_t type_count, 
+    nuecs_system_data_t **systems,
+    uint32_t system_count,
+    nuecs_archetype_t **find
+)
 {
     nuecs_archetype_t *current = root;
-    *created = false;
 
     for (uint32_t i = 0; i < type_count; i++) {
         nuecs_archetype_edge_t *edges = (nuecs_archetype_edge_t*)nu_array_get_data(current->edges);
@@ -100,7 +120,7 @@ nu_result_t nuecs_archetype_find(nu_array_t archetypes, nuecs_archetype_t *root,
 
         bool edge_found = false;
         for (uint32_t j = 0; j < edge_count; j++) {
-            if (edges[j].type == types[i]->id && edges[j].add) {
+            if (edges[j].type == types[i]->type_id && edges[j].add) {
                 current = edges[j].add;
                 edge_found = true;
                 break;
@@ -117,17 +137,17 @@ nu_result_t nuecs_archetype_find(nu_array_t archetypes, nuecs_archetype_t *root,
                 if (archetypes_data[j]->type_count == (i + 1)) {
                     bool same = true;
                     for (uint32_t k = 0; k < (i + 1); k++) {
-                        if (types[k]->id != archetypes_data[j]->types[k]->id) {
+                        if (types[k]->type_id != archetypes_data[j]->types[k]) {
                             same = false;
                             break;
                         }
                     }
                     if (same) {
-                        nuecs_archetype_link(current, archetypes_data[j], types[i]->id);
+                        nuecs_archetype_link(current, archetypes_data[j], types[i]->type_id);
                         current = archetypes_data[j];
                         found = true;
                         break;
-                    }                    
+                    }        
                 }
             }
 
@@ -137,11 +157,16 @@ nu_result_t nuecs_archetype_find(nu_array_t archetypes, nuecs_archetype_t *root,
                 nu_array_push(archetypes, &new);
                 nuecs_archetype_create(new, types, i + 1);
 
-                /* add links */
-                nuecs_archetype_link(current, new, types[i]->id);
-                current = new;
+                /* add existing systems to the archetype */
+                for (uint32_t i = 0; i < system_count; i++) {
+                    if (system_include_archetype_types(new, systems[i])) {
+                        nu_array_push(new->systems, &systems[i]);
+                    }
+                }
 
-                *created = true;
+                /* add links */
+                nuecs_archetype_link(current, new, types[i]->type_id);
+                current = new;
             }
         }
     }
@@ -151,29 +176,64 @@ nu_result_t nuecs_archetype_find(nu_array_t archetypes, nuecs_archetype_t *root,
 }
 static bool nuecs_find_chunk_not_full(const void *user, const void *object) {
     (void)user;
-    nuecs_chunk_data_t *data = (nuecs_chunk_data_t*)object;
+    nuecs_chunk_data_t *data = *(nuecs_chunk_data_t**)object;
     return data->size < NUECS_CHUNK_SIZE;
 }
-nu_result_t nuecs_archetype_add(nuecs_archetype_t *archetype, nuecs_component_data_ptr_t *data, nuecs_entity_data_t *entity)
-{    
-    nuecs_chunk_data_t *chunk = NULL;
-    uint32_t index;
-    if (nu_array_find_index(archetype->chunks, nuecs_find_chunk_not_full, NULL, &index)) {
-        chunk = (nuecs_chunk_data_t*)nu_array_get(archetype->chunks, index);
-    } else {
-        nu_array_push(archetype->chunks, NULL);
-        index = nu_array_get_size(archetype->chunks) - 1;
-        chunk = (nuecs_chunk_data_t*)nu_array_get_last(archetype->chunks);
-        nuecs_chunk_create(chunk, archetype->chunk_data_total_size, NUECS_CHUNK_SIZE);
-    }
+static nu_result_t nuecs_add_chunk_view(nuecs_archetype_t *archetype, nuecs_system_data_t *system, nuecs_chunk_data_t *chunk)
+{
+    nu_array_push(system->chunks, NULL);
+    nuecs_chunk_view_t *view = (nuecs_chunk_view_t*)nu_array_get_last(system->chunks);
 
-    nuecs_chunk_add(chunk, archetype->data_offsets, archetype->data_sizes, data, archetype->type_count, &entity->row);
-    entity->chunk     = index;
-    entity->archetype = archetype;
+    uint32_t indice = 0;
+    uint32_t offset = 0;
+    for (uint32_t j = 0; j < archetype->type_count && indice < system->type_count; j++) {
+        if (archetype->types[j] == system->types[indice]) {
+            view->chunk              = chunk;
+            view->components[indice] = chunk->data + offset;
+            indice++;
+        }
+        offset += archetype->data_sizes[j] * NUECS_CHUNK_SIZE;
+    }
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_archetype_remove(nuecs_archetype_t *archetype, const nuecs_entity_data_t *entity)
+nu_result_t nuecs_archetype_add_entity(nuecs_archetype_t *archetype, nuecs_component_data_ptr_t *data, nuecs_entity_entry_t *entity)
+{    
+    nuecs_chunk_data_t *chunk = NULL;
+    uint32_t chunk_index;
+    if (nu_array_find_index(archetype->chunks, nuecs_find_chunk_not_full, NULL, &chunk_index)) {
+        chunk = *(nuecs_chunk_data_t**)nu_array_get(archetype->chunks, chunk_index);
+    } else {
+        nuecs_chunk_allocate(archetype, &chunk);
+        nu_array_push(archetype->chunks, &chunk);
+
+        /* add the chunk view to the systems */
+        nuecs_system_data_t **systems = (nuecs_system_data_t**)nu_array_get_data(archetype->systems);
+        uint32_t system_count         = nu_array_get_size(archetype->systems);
+        for (uint32_t i = 0; i < system_count; i++) {
+            nuecs_add_chunk_view(archetype, systems[i], chunk);
+        }
+    }
+
+    uint32_t id;
+    nuecs_chunk_add(chunk, data, &id);
+    entity->chunk = chunk;
+    entity->id    = id;
+
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_archetype_new_system(nuecs_archetype_t *archetype, nuecs_system_data_t *system)
 {
+    if (system_include_archetype_types(archetype, system)) {
+        /* add system to list */
+        nu_array_push(archetype->systems, &system);
+        /* add chunks to system TODO: add views first (regroup loops) */
+        nuecs_chunk_data_t **chunks = (nuecs_chunk_data_t**)nu_array_get_data(archetype->chunks);
+        uint32_t chunk_count        = nu_array_get_size(archetype->chunks);
+        for (uint32_t i = 0; i < chunk_count; i++) {
+            nuecs_add_chunk_view(archetype, system, chunks[i]);
+        }
+    }
+
     return NU_SUCCESS;
 }

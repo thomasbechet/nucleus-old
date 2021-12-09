@@ -177,6 +177,22 @@ static uint32_t nu_random()
     next = (unsigned int)(next * 123423542) % 23423425;
     return next;
 }
+static nu_result_t nuecs_system0_update(nuecs_component_data_ptr_t *components, uint32_t count)
+{
+    // nu_info("test", "update %d", count);
+    // position_t *positions = (position_t*)components[0];
+    // health_t   *healthes  = (health_t*)components[1];
+    // for (uint32_t i = 0; i < count; i++) {
+    //     nu_info("test", "health %lf", healthes[i].value);
+    // }
+
+    return NU_SUCCESS;
+}
+static nu_result_t nuecs_system2_update(nuecs_component_data_ptr_t *components, uint32_t count)
+{
+    // nu_info("system2", "%d", count);
+    return NU_SUCCESS;
+}
 static nu_result_t on_start(void)
 {
     nu_module_t module;
@@ -216,6 +232,7 @@ static nu_result_t on_start(void)
     NUECS_REGISTER_COMPONENT(ecs_interface, world, score_t, score_component);
 
     position_t position;
+    nu_vec3f_copy((nu_vec3f_t){0, 1, 2}, position.pos);
     health_t health;
     velocity_t velocity;
     score_t score;
@@ -227,13 +244,30 @@ static nu_result_t on_start(void)
     nuecs_component_data_ptr_t data1[] = {&position, &health};
     nuecs_component_data_ptr_t data2[] = {&position, &score};
     nuecs_entity_t entity0, entity1, entity2;
+    health.value = 0.0f;
     NUECS_CREATE_ENTITY(ecs_interface, world, components0, data0, entity0);
+    health.value = 1.0f;
     NUECS_CREATE_ENTITY(ecs_interface, world, components1, data1, entity1);
+    health.value = 2.0f;
     NUECS_CREATE_ENTITY(ecs_interface, world, components1, data1, entity1);
     NUECS_CREATE_ENTITY(ecs_interface, world, components2, data2, entity2);
-    for (uint32_t i = 0; i < 35; i++) {
+    for (uint32_t i = 0; i < 10000; i++) {
         NUECS_CREATE_ENTITY(ecs_interface, world, components2, data2, entity2);
     }
+
+    nuecs_system_t system0, system2;
+    NUECS_REGISTER_SYSTEM(ecs_interface, world, components1, nuecs_system0_update, system0);
+    NUECS_REGISTER_SYSTEM(ecs_interface, world, components2, nuecs_system2_update, system2);
+
+    // nu_info("WORLD", "START");
+    // ecs_interface.world_progress(world);
+    // ecs_interface.entity_destroy(world, entity0);
+    // nu_info("WORLD", "REMOVE");
+    // ecs_interface.world_progress(world);
+    // nu_info("WORLD", "ADD");
+    // NUECS_CREATE_ENTITY(ecs_interface, world, components0, data0, entity0);
+    // ecs_interface.world_progress(world);
+    // nu_info("WORLD", "END");
 
     /* load texture */
     int width, height, channel;

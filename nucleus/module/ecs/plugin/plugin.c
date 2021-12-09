@@ -28,6 +28,11 @@ nu_result_t nuecs_plugin_terminate(void)
 }
 nu_result_t nuecs_plugin_update(void)
 {
+    nuecs_world_data_t **worlds = (nuecs_world_data_t**)nu_indexed_array_get_data(_module.worlds);
+    uint32_t world_count        = nu_indexed_array_get_size(_module.worlds);
+    for (uint32_t i = 0; i < world_count; i++) {
+        nuecs_world_update(worlds[i]);
+    }
     return NU_SUCCESS;
 }
 
@@ -38,9 +43,10 @@ nu_result_t nuecs_world_create(nuecs_world_t *handle)
     *handle = (nuecs_world_t)world;
     return nuecs_world_initialize(world);
 }
-nu_result_t nuecs_world_update(nuecs_world_t world)
+nu_result_t nuecs_world_progress(nuecs_world_t world)
 {
-    return NU_SUCCESS;
+    nuecs_world_data_t *data = (nuecs_world_data_t*)world;
+    return nuecs_world_update(data);
 }
 nu_result_t nuecs_component_register(nuecs_world_t world, const nuecs_component_info_t *info, nuecs_component_t *handle)
 {
@@ -59,5 +65,6 @@ nu_result_t nuecs_entity_create(nuecs_world_t world, const nuecs_entity_info_t *
 }
 nu_result_t nuecs_entity_destroy(nuecs_world_t world, nuecs_entity_t entity)
 {
-    return NU_SUCCESS;
+    nuecs_world_data_t *data = (nuecs_world_data_t*)world;
+    return nuecs_world_entity_destroy(data, entity);
 }

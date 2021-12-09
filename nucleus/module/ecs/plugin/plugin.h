@@ -10,7 +10,7 @@ nu_result_t nuecs_plugin_update(void);
 
 /* ecs plugin interface */
 nu_result_t nuecs_world_create(nuecs_world_t *handle);
-nu_result_t nuecs_world_update(nuecs_world_t world);
+nu_result_t nuecs_world_progress(nuecs_world_t world);
 nu_result_t nuecs_component_register(nuecs_world_t world, const nuecs_component_info_t *info, nuecs_component_t *handle);
 nu_result_t nuecs_system_register(nuecs_world_t world, const nuecs_system_info_t *info, nuecs_system_t *handle);
 nu_result_t nuecs_entity_create(nuecs_world_t world, const nuecs_entity_info_t *info, nuecs_entity_t *handle);
