@@ -25,7 +25,7 @@ nu_result_t nuecs_system_update(nuecs_system_data_t *system)
     /* iterate over chunks */
     uint32_t view_count  = nu_array_get_size(system->chunks);
     for (uint32_t i = 0; i < view_count; i++) {
-        nuecs_chunk_view_t *view = nu_array_get(system->chunks, i); /* view size is unknown */
+        nuecs_chunk_view_t *view = nu_array_get(system->chunks, i); /* sizeof(view) is unknown */
         if (view->chunk->frame_size == 0) continue;
         system->update(view->components, view->chunk->frame_size);
     }

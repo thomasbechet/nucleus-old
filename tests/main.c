@@ -219,17 +219,17 @@ static nu_result_t on_start(void)
     NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/spectator.lua", &plugin));
 
     /* load ecs interface */
-    nuecs_plugin_interface_t ecs_interface;
-    NU_ASSERT(nu_module_get_interface(ecs_module, NUECS_PLUGIN_INTERFACE_NAME, &ecs_interface) == NU_SUCCESS);
+    nuecs_plugin_interface_t ecs;
+    NU_ASSERT(nu_module_get_interface(ecs_module, NUECS_PLUGIN_INTERFACE_NAME, &ecs) == NU_SUCCESS);
 
     nuecs_world_t world;
-    NU_ASSERT(ecs_interface.world_create(&world) == NU_SUCCESS);
+    NU_ASSERT(ecs.world_create(&world) == NU_SUCCESS);
 
     nuecs_component_t position_component, health_component, velocity_component, score_component;
-    NUECS_REGISTER_COMPONENT(ecs_interface, world, position_t, position_component);
-    NUECS_REGISTER_COMPONENT(ecs_interface, world, health_t, health_component);
-    NUECS_REGISTER_COMPONENT(ecs_interface, world, velocity_t, velocity_component);
-    NUECS_REGISTER_COMPONENT(ecs_interface, world, score_t, score_component);
+    NUECS_REGISTER_COMPONENT(ecs, world, position_t, position_component);
+    NUECS_REGISTER_COMPONENT(ecs, world, health_t, health_component);
+    NUECS_REGISTER_COMPONENT(ecs, world, velocity_t, velocity_component);
+    NUECS_REGISTER_COMPONENT(ecs, world, score_t, score_component);
 
     position_t position;
     nu_vec3f_copy((nu_vec3f_t){0, 1, 2}, position.pos);
@@ -245,28 +245,28 @@ static nu_result_t on_start(void)
     nuecs_component_data_ptr_t data2[] = {&position, &score};
     nuecs_entity_t entity0, entity1, entity2;
     health.value = 0.0f;
-    NUECS_CREATE_ENTITY(ecs_interface, world, components0, data0, entity0);
+    NUECS_CREATE_ENTITY(ecs, world, components0, data0, entity0);
     health.value = 1.0f;
-    NUECS_CREATE_ENTITY(ecs_interface, world, components1, data1, entity1);
+    NUECS_CREATE_ENTITY(ecs, world, components1, data1, entity1);
     health.value = 2.0f;
-    NUECS_CREATE_ENTITY(ecs_interface, world, components1, data1, entity1);
-    NUECS_CREATE_ENTITY(ecs_interface, world, components2, data2, entity2);
+    NUECS_CREATE_ENTITY(ecs, world, components1, data1, entity1);
+    NUECS_CREATE_ENTITY(ecs, world, components2, data2, entity2);
     for (uint32_t i = 0; i < 10000; i++) {
-        NUECS_CREATE_ENTITY(ecs_interface, world, components2, data2, entity2);
+        NUECS_CREATE_ENTITY(ecs, world, components2, data2, entity2);
     }
 
     nuecs_system_t system0, system2;
-    NUECS_REGISTER_SYSTEM(ecs_interface, world, components1, nuecs_system0_update, system0);
-    NUECS_REGISTER_SYSTEM(ecs_interface, world, components2, nuecs_system2_update, system2);
+    NUECS_REGISTER_SYSTEM(ecs, world, components1, nuecs_system0_update, system0);
+    NUECS_REGISTER_SYSTEM(ecs, world, components2, nuecs_system2_update, system2);
 
     // nu_info("WORLD", "START");
-    // ecs_interface.world_progress(world);
-    // ecs_interface.entity_destroy(world, entity0);
+    // ecs.world_progress(world);
+    // ecs.entity_destroy(world, entity0);
     // nu_info("WORLD", "REMOVE");
-    // ecs_interface.world_progress(world);
+    // ecs.world_progress(world);
     // nu_info("WORLD", "ADD");
-    // NUECS_CREATE_ENTITY(ecs_interface, world, components0, data0, entity0);
-    // ecs_interface.world_progress(world);
+    // NUECS_CREATE_ENTITY(ecs, world, components0, data0, entity0);
+    // ecs.world_progress(world);
     // nu_info("WORLD", "END");
 
     /* load texture */

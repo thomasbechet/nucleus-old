@@ -17,6 +17,7 @@ NU_DECLARE_HANDLE(nuecs_world_t);
 NU_DECLARE_HANDLE(nuecs_entity_t);
 NU_DECLARE_HANDLE(nuecs_component_t);
 NU_DECLARE_HANDLE(nuecs_system_t);
+NU_DECLARE_HANDLE(nuecs_archetype_t);
 
 typedef void *nuecs_component_data_ptr_t;
 
