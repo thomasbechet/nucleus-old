@@ -68,3 +68,13 @@ nu_result_t nuecs_entity_destroy(nuecs_world_t world, nuecs_entity_t entity)
     nuecs_world_data_t *data = (nuecs_world_data_t*)world;
     return nuecs_world_entity_destroy(data, entity);
 }
+nu_result_t nuecs_entity_add_component(nuecs_world_t world, nuecs_entity_t entity, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
+{
+    nuecs_world_data_t *data = (nuecs_world_data_t*)world;
+    return nuecs_world_entity_add_component(data, entity, component, component_data);
+}
+nu_result_t nuecs_entity_remove_component(nuecs_world_t world, nuecs_entity_t entity, nuecs_component_t component)
+{
+    nuecs_world_data_t *data = (nuecs_world_data_t*)world;
+    return nuecs_world_entity_remove_component(data, entity, component);
+}

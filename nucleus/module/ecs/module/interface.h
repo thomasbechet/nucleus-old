@@ -34,18 +34,19 @@ typedef struct {
 
 typedef struct {
     nuecs_component_t *components;
-    nuecs_component_data_ptr_t *data;
+    nuecs_component_data_ptr_t *component_data;
     uint32_t component_count;
 } nuecs_entity_info_t;
 
 typedef struct {
     nu_result_t (*world_create)(nuecs_world_t*);
+    nu_result_t (*world_destroy)(nuecs_world_t);
     nu_result_t (*world_progress)(nuecs_world_t);
     nu_result_t (*component_register)(nuecs_world_t, const nuecs_component_info_t*, nuecs_component_t*);
     nu_result_t (*system_register)(nuecs_world_t, const nuecs_system_info_t*, nuecs_system_t*);
     nu_result_t (*entity_create)(nuecs_world_t, const nuecs_entity_info_t*, nuecs_entity_t*);
     nu_result_t (*entity_destroy)(nuecs_world_t, nuecs_entity_t);
-    nu_result_t (*entity_add_component)(nuecs_world_t, nuecs_entity_t, nuecs_component_t, const void*);
+    nu_result_t (*entity_add_component)(nuecs_world_t, nuecs_entity_t, nuecs_component_t, nuecs_component_data_ptr_t);
     nu_result_t (*entity_remove_component)(nuecs_world_t, nuecs_entity_t, nuecs_component_t);
 } nuecs_plugin_interface_t;
 
@@ -55,7 +56,7 @@ typedef struct {
         handle##_info.name = #component; \
         handle##_info.size = sizeof(component); \
         ecs.component_register(world, &handle##_info, &handle); \
-    } 
+    }
 #define NUECS_REGISTER_SYSTEM(ecs, world, component_list, update_callback, handle) \
     { \
         nuecs_system_info_t handle##_info; \
@@ -63,14 +64,6 @@ typedef struct {
         handle##_info.component_count = sizeof(component_list) / sizeof(nuecs_component_t); \
         handle##_info.update = update_callback; \
         ecs.system_register(world, &handle##_info, &handle); \
-    }
-#define NUECS_CREATE_ENTITY(ecs, world, component_list, data_list, handle) \
-    { \
-        nuecs_entity_info_t handle##_info; \
-        handle##_info.components = component_list; \
-        handle##_info.component_count = sizeof(component_list) / sizeof(nuecs_component_t); \
-        handle##_info.data = data_list; \
-        ecs.entity_create(world, &handle##_info, &handle); \
     }
 
 #endif

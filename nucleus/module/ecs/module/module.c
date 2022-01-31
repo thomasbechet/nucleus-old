@@ -53,12 +53,14 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, NUECS_PLUGIN_INTERFACE_NAME)) {
         nuecs_plugin_interface_t *i = (nuecs_plugin_interface_t*)interface;
 
-        i->world_create       = nuecs_world_create;
-        i->world_progress     = nuecs_world_progress;
-        i->component_register = nuecs_component_register;
-        i->system_register    = nuecs_system_register;
-        i->entity_create      = nuecs_entity_create;
-        i->entity_destroy     = nuecs_entity_destroy;
+        i->world_create            = nuecs_world_create;
+        i->world_progress          = nuecs_world_progress;
+        i->component_register      = nuecs_component_register;
+        i->system_register         = nuecs_system_register;
+        i->entity_create           = nuecs_entity_create;
+        i->entity_add_component    = nuecs_entity_add_component;
+        i->entity_remove_component = nuecs_entity_remove_component;
+        i->entity_destroy          = nuecs_entity_destroy;
 
         return NU_SUCCESS;
     }

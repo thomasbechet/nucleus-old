@@ -15,5 +15,7 @@ nu_result_t nuecs_component_register(nuecs_world_t world, const nuecs_component_
 nu_result_t nuecs_system_register(nuecs_world_t world, const nuecs_system_info_t *info, nuecs_system_t *handle);
 nu_result_t nuecs_entity_create(nuecs_world_t world, const nuecs_entity_info_t *info, nuecs_entity_t *handle);
 nu_result_t nuecs_entity_destroy(nuecs_world_t world, nuecs_entity_t entity);
+nu_result_t nuecs_entity_add_component(nuecs_world_t world, nuecs_entity_t entity, nuecs_component_t component, nuecs_component_data_ptr_t data);
+nu_result_t nuecs_entity_remove_component(nuecs_world_t world, nuecs_entity_t entity, nuecs_component_t component);
 
 #endif
