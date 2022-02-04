@@ -17,7 +17,7 @@ nu_result_t nuecs_archetype_find_previous(
     nu_array_t archetypes,
     nuecs_archetype_data_t *current,
     nuecs_component_data_t *previous_component,
-    nuecs_archetype_data_t **next
+    nuecs_archetype_data_t **previous
 );
 nu_result_t nuecs_archetype_find(
     nu_array_t archetypes,

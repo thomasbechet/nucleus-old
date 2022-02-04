@@ -16,15 +16,16 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
     for (uint32_t i = 0; i < edge_count; i++) {
         if (edges[i].component_id == component_id) {
             edges[i].add = b;
+            found = true;
         }
     }
 
     if (!found) {
         nu_array_push(a->edges, NULL);
         nuecs_archetype_edge_t *edge = (nuecs_archetype_edge_t*)nu_array_get_last(a->edges);
-        edge->add    = b;
-        edge->remove = NULL;
-        edge->component_id   = component_id;
+        edge->add          = b;
+        edge->remove       = NULL;
+        edge->component_id = component_id;
     }
 
     /* link b to a (remove) */
@@ -35,6 +36,7 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
     for (uint32_t i = 0; i < edge_count; i++) {
         if (edges[i].component_id == component_id) {
             edges[i].remove = a;
+            found = true;
         }
     }
 
@@ -159,7 +161,7 @@ nu_result_t nuecs_archetype_find_next(
                     if (!found) {
                         archetype_link(a, new, new->component_ids[j]);
                         break;
-                    } 
+                    }
                 }
             }
         }
@@ -179,10 +181,24 @@ nu_result_t nuecs_archetype_find_previous(
     nu_array_t archetypes,
     nuecs_archetype_data_t *current,
     nuecs_component_data_t *previous_component,
-    nuecs_archetype_data_t **next
+    nuecs_archetype_data_t **previous
 )
 {
-    
+    /* get edges of the current archetype */
+    nuecs_archetype_edge_t *edges = (nuecs_archetype_edge_t*)nu_array_get_data(current->edges);
+    uint32_t edge_count           = nu_array_get_size(current->edges);
+    nu_info("test", "%d", previous_component->component_id);
+    /* try to find the direct neighbour (fast solution) */
+    for (uint32_t j = 0; j < edge_count; j++) {
+        nu_info("test", "%d", edges[j].component_id);
+        if (edges[j].component_id == previous_component->component_id && edges[j].remove) {
+            *previous = edges[j].remove;
+            return NU_SUCCESS;
+        }
+    }
+
+    *previous = NULL;
+    return NU_FAILURE;
 }
 nu_result_t nuecs_archetype_find(
     nu_array_t archetypes,

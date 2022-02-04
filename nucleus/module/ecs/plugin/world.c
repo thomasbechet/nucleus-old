@@ -185,6 +185,24 @@ nu_result_t nuecs_world_entity_add_component(nuecs_world_data_t *world, nuecs_en
 }
 nu_result_t nuecs_world_entity_remove_component(nuecs_world_data_t *world, nuecs_entity_t handle, nuecs_component_t component)
 {
+    /* get entity entry */
+    uint32_t index;
+    NU_HANDLE_GET_ID(handle, index);
+    nuecs_entity_entry_t *entry = (nuecs_entity_entry_t*)nu_array_get(world->entries, index);
+
+    /* get component data */
+    nuecs_component_data_t *component_data = (nuecs_component_data_t*)component;
+
+    /* find previous archetype */
+    nuecs_archetype_data_t *archetype;
+    nuecs_archetype_find_previous(world->archetypes, entry->chunk->archetype, 
+        component_data, &archetype);
+
+    nu_info("test", "%p", archetype);
+
+    /* transfer entity */
+    nuecs_archetype_transfer(entry, archetype);
+
     return NU_SUCCESS;
 }
 nu_result_t nuecs_world_update(nuecs_world_data_t *world)
