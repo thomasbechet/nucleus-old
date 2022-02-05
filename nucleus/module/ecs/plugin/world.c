@@ -156,6 +156,15 @@ nu_result_t nuecs_world_entity_destroy(nuecs_world_data_t *world, nuecs_entity_t
 
     return NU_SUCCESS;
 }
+static bool archetype_has_component(const nuecs_archetype_data_t *archetype, const nuecs_component_data_t *component)
+{
+    for (uint32_t i = 0; i < archetype->component_count; i++) {
+        if (component->component_id == archetype->component_ids[i]) {
+            return true;
+        }
+    }
+    return false;
+}
 nu_result_t nuecs_world_entity_add_component(nuecs_world_data_t *world, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t data)
 {
     /* get entity entry */
@@ -165,6 +174,9 @@ nu_result_t nuecs_world_entity_add_component(nuecs_world_data_t *world, nuecs_en
 
     /* get component data */
     nuecs_component_data_t *component_data = (nuecs_component_data_t*)component;
+
+    /* check entity has component */
+    if (archetype_has_component(entry->chunk->archetype, component_data)) return NU_FAILURE;
 
     /* find new archetype */
     nuecs_system_data_t **systems = (nuecs_system_data_t**)nu_indexed_array_get_data(world->systems);
@@ -193,12 +205,13 @@ nu_result_t nuecs_world_entity_remove_component(nuecs_world_data_t *world, nuecs
     /* get component data */
     nuecs_component_data_t *component_data = (nuecs_component_data_t*)component;
 
+    /* check entity has component */
+    if (!archetype_has_component(entry->chunk->archetype, component_data)) return NU_FAILURE;
+
     /* find previous archetype */
     nuecs_archetype_data_t *archetype;
-    nuecs_archetype_find_previous(world->archetypes, entry->chunk->archetype, 
+    nuecs_archetype_find_previous(world->archetypes, world->empty_archetype, entry->chunk->archetype, 
         component_data, &archetype);
-
-    nu_info("test", "%p", archetype);
 
     /* transfer entity */
     nuecs_archetype_transfer(entry, archetype);

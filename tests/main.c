@@ -260,29 +260,31 @@ static nu_result_t on_start(void)
 
     nuecs_entity_t entity0;
     nuecs_entity_info_t info1;
-    info1.components      = (nuecs_component_t[]){position_component, health_component};
-    info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &health};
+    info1.components      = (nuecs_component_t[]){position_component, velocity_component};
+    info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
     info1.component_count = 2;
     ecs.entity_create(world, &info1, &entity0);
 
     nu_info("WORLD", "start");
     ecs.world_progress(world);
 
-    nu_info("WORLD", "add velocity component");
-    ecs.entity_add_component(world, entity0, velocity_component, &velocity);
+    // nu_info("WORLD", "add velocity component");
+    // ecs.entity_add_component(world, entity0, velocity_component, &velocity);
+    // ecs.world_progress(world);
+
+    nu_info("WORLD", "remove velocity component");
+    ecs.entity_remove_component(world, entity0, velocity_component);
     ecs.world_progress(world);
 
-    nu_info("WORLD", "remove health component");
-    ecs.entity_remove_component(world, entity0, health_component);
+    nu_info("WORLD", "remove position component");
+    ecs.entity_remove_component(world, entity0, position_component);
     ecs.world_progress(world);
 
-    nu_info("WORLD", "destroy");
-    ecs.entity_destroy(world, entity0);
-    ecs.world_progress(world);
+    // nu_info("WORLD", "destroy");
+    // ecs.entity_destroy(world, entity0);
+    // ecs.world_progress(world);
     
     nu_info("WORLD", "end");
-
-    nu_context_request_stop();
 
     /* load texture */
     int width, height, channel;

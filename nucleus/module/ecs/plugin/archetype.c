@@ -145,23 +145,20 @@ nu_result_t nuecs_archetype_find_next(
     uint32_t archetype_count = nu_array_get_size(archetypes);
     for (uint32_t i = 0; i < archetype_count; i++) {
         nuecs_archetype_data_t *a = archetypes_data[i];
-        /* filter: component count equals to the current archetype */
-        if (a->component_count == current_archetype->component_count) {
-            /* check component ids TODO: optimize me ! */
-            if (is_subset(a->component_ids, a->component_count, new->component_ids, new->component_count)) {
-                /* find the different component id */
-                for (uint32_t j = 0; j < new->component_count; j++) {
-                    bool found = false;
-                    for (uint32_t k = 0; k < a->component_count; k++) {
-                        if (a->component_ids[k] == new->component_ids[j]) {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        archetype_link(a, new, new->component_ids[j]);
+        /* check component ids TODO: optimize me ! */
+        if (is_subset(a->component_ids, a->component_count, new->component_ids, new->component_count)) {
+            /* find the different component id */
+            for (uint32_t j = 0; j < new->component_count; j++) {
+                bool found = false;
+                for (uint32_t k = 0; k < a->component_count; k++) {
+                    if (a->component_ids[k] == new->component_ids[j]) {
+                        found = true;
                         break;
                     }
+                }
+                if (!found) {
+                    archetype_link(a, new, new->component_ids[j]);
+                    break;
                 }
             }
         }
@@ -179,6 +176,7 @@ nu_result_t nuecs_archetype_find_next(
 }
 nu_result_t nuecs_archetype_find_previous(
     nu_array_t archetypes,
+    nuecs_archetype_data_t *root,
     nuecs_archetype_data_t *current,
     nuecs_component_data_t *previous_component,
     nuecs_archetype_data_t **previous
@@ -187,10 +185,8 @@ nu_result_t nuecs_archetype_find_previous(
     /* get edges of the current archetype */
     nuecs_archetype_edge_t *edges = (nuecs_archetype_edge_t*)nu_array_get_data(current->edges);
     uint32_t edge_count           = nu_array_get_size(current->edges);
-    nu_info("test", "%d", previous_component->component_id);
     /* try to find the direct neighbour (fast solution) */
     for (uint32_t j = 0; j < edge_count; j++) {
-        nu_info("test", "%d", edges[j].component_id);
         if (edges[j].component_id == previous_component->component_id && edges[j].remove) {
             *previous = edges[j].remove;
             return NU_SUCCESS;
