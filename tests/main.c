@@ -5,6 +5,7 @@
 #include <nucleus/module/utils.h>
 #include <nucleus/module/lua.h>
 #include <nucleus/module/vulkan.h>
+#include <nucleus/module/ecs.h>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -153,27 +154,137 @@ cleanup0:
     return NU_SUCCESS;
 }
 
+typedef struct {
+    nu_vec3f_t pos;
+} position_t;
+typedef struct {
+    float value;
+} health_t;
+typedef struct {
+    nu_vec3f_t velocity;
+} velocity_t;
+typedef struct {
+    uint32_t score;
+} score_t;
+
+typedef struct {
+    uint32_t id;
+    uint32_t v;
+} stest;
+static uint32_t nu_random()
+{
+    static uint32_t next = 1231125;
+    next = (unsigned int)(next * 123423542) % 23423425;
+    return next;
+}
+static nu_result_t nuecs_system0_update(nuecs_component_data_ptr_t *components, uint32_t count)
+{
+    nu_info("test", "update [health, component] 0 %d", count);
+    health_t   *healthes  = (health_t*)components[0];
+    position_t *positions = (position_t*)components[1];
+    for (uint32_t i = 0; i < count; i++) {
+        nu_info("test", "position %lf health %lf", positions[i].pos[0], healthes[i].value);
+    }
+    return NU_SUCCESS;
+}
+static nu_result_t nuecs_system1_update(nuecs_component_data_ptr_t *components, uint32_t count)
+{
+    nu_info("test", "update [position] 1 %d", count);
+    position_t *positions = (position_t*)components[0];
+    for (uint32_t i = 0; i < count; i++) {
+        nu_info("test", "position %lf", positions[i].pos[0]);
+    }
+    return NU_SUCCESS;
+}
+static nu_result_t nuecs_system2_update(nuecs_component_data_ptr_t *components, uint32_t count)
+{
+    nu_info("test", "update [position, velocity] 2 %d", count);
+    velocity_t *velocities = (velocity_t*)components[1];
+    for (uint32_t i = 0; i < count; i++) {
+        nu_info("test", "velocity %lf", velocities[i].velocity[0]);
+    }
+    return NU_SUCCESS;
+}
 static nu_result_t on_start(void)
 {
     nu_module_t module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
-    // nu_plugin_require(module, NUUTILS_SPECTATOR_PLUGIN_NAME);
 
     nu_module_t lua_module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
     nu_plugin_require(lua_module, NULUA_PLUGIN_NAME);
 
+    nu_module_t ecs_module;
+    NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-ecs", &ecs_module) == NU_SUCCESS);
+    nu_plugin_require(ecs_module, NUECS_PLUGIN_NAME);
+
     /* load sdf interface */
     nu_module_t renderer_module = nu_renderer_get_module();
     nu_module_get_interface(renderer_module, NUVK_RENDERER_INTERFACE_NAME, &renderer);
 
-    /* load lua plugin */
+    /* load lua interface */
     nulua_plugin_interface_t lua_interface;
     NU_ASSERT(nu_module_get_interface(lua_module, NULUA_PLUGIN_INTERFACE_NAME, &lua_interface) == NU_SUCCESS);
     nulua_plugin_t plugin;
     NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/test.lua", &plugin));
     NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/spectator.lua", &plugin));
+
+    /* load ecs interface */
+    nuecs_plugin_interface_t ecs;
+    NU_ASSERT(nu_module_get_interface(ecs_module, NUECS_PLUGIN_INTERFACE_NAME, &ecs) == NU_SUCCESS);
+
+    nuecs_world_t world;
+    NU_ASSERT(ecs.world_create(&world) == NU_SUCCESS);
+
+    nuecs_component_t position_component, health_component, velocity_component, score_component;
+    NUECS_REGISTER_COMPONENT(ecs, world, position_t, position_component);
+    NUECS_REGISTER_COMPONENT(ecs, world, health_t, health_component);
+    NUECS_REGISTER_COMPONENT(ecs, world, velocity_t, velocity_component);
+    NUECS_REGISTER_COMPONENT(ecs, world, score_t, score_component);
+
+    position_t position;
+    nu_vec3f_copy((nu_vec3f_t){3, 1, 2}, position.pos);
+    health_t health = {2.0f};
+    velocity_t velocity;
+    nu_vec3f_copy((nu_vec3f_t){5, 1, 2}, velocity.velocity);
+    score_t score;
+    
+    nuecs_system_t system0, system1, system2;
+    nuecs_component_t system0_components[] = {health_component, position_component};
+    NUECS_REGISTER_SYSTEM(ecs, world, system0_components, nuecs_system0_update, system0);
+    nuecs_component_t system1_components[] = {position_component};
+    NUECS_REGISTER_SYSTEM(ecs, world, system1_components, nuecs_system1_update, system1);
+    nuecs_component_t system2_components[] = {position_component, velocity_component};
+    NUECS_REGISTER_SYSTEM(ecs, world, system2_components, nuecs_system2_update, system2);
+
+    nuecs_entity_t entity0;
+    nuecs_entity_info_t info1;
+    info1.components      = (nuecs_component_t[]){position_component, velocity_component};
+    info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
+    info1.component_count = 2;
+    ecs.entity_create(world, &info1, &entity0);
+
+    nu_info("WORLD", "start");
+    ecs.world_progress(world);
+
+    // nu_info("WORLD", "add velocity component");
+    // ecs.entity_add_component(world, entity0, velocity_component, &velocity);
+    // ecs.world_progress(world);
+
+    nu_info("WORLD", "remove velocity component");
+    ecs.entity_remove_component(world, entity0, velocity_component);
+    ecs.world_progress(world);
+
+    nu_info("WORLD", "remove position component");
+    ecs.entity_remove_component(world, entity0, position_component);
+    ecs.world_progress(world);
+
+    // nu_info("WORLD", "destroy");
+    // ecs.entity_destroy(world, entity0);
+    // ecs.world_progress(world);
+    
+    nu_info("WORLD", "end");
 
     /* load texture */
     int width, height, channel;
