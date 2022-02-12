@@ -1,7 +1,7 @@
 #ifndef NUECS_ARCHETYPE_H
 #define NUECS_ARCHETYPE_H
 
-#include <nucleus/module/ecs/plugin/types.h>
+#include <nucleus/module/ecs/plugin/types_private.h>
 
 nu_result_t nuecs_archetype_create_empty(nuecs_archetype_data_t *archetype);
 nu_result_t nuecs_archetype_destroy(nuecs_archetype_data_t *archetype);

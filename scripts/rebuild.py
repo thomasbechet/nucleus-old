@@ -1,7 +1,15 @@
 import subprocess
+import os
+import shutil
 
-subprocess.Popen('mkdir -p build', cwd='..').wait()
-subprocess.Popen('rm -rf *', cwd='../build/').wait()
-subprocess.Popen('cmake .. -G"MinGW Makefiles"', cwd='../build/').wait()
-subprocess.Popen('cmake .. -G"MinGW Makefiles"', cwd='../build/').wait()
-subprocess.Popen('python build.py', cwd='.').wait()
+# Create build folder
+if os.path.exists('../build/'):
+    shutil.rmtree('../build')
+os.makedirs('../build/')
+
+# Call cmake
+subprocess.call('cmake .. -G"MinGW Makefiles"', cwd='../build/', shell=True)
+subprocess.call('cmake .. -G"MinGW Makefiles"', cwd='../build/', shell=True)
+
+# Build
+subprocess.call('python build.py', cwd='.', shell=True)

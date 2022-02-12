@@ -1,7 +1,7 @@
 #ifndef NUECS_TYPES_H
 #define NUECS_TYPES_H
 
-#include <nucleus/module/ecs/module/interface.h>
+#include <nucleus/module/ecs/plugin/types_public.h>
 
 #define NUECS_INSTANCEOF (nuecs_id_t)(1 << 63)
 #define NUECS_CHILDOF    (nuecs_id_t)(1 << 62)

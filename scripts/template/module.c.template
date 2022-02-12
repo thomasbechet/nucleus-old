@@ -1,8 +1,10 @@
+/* Generated file: DO NOT EDIT ! */
 #include <{{ module.directory }}/module.h>
 
-#include <{{ module.directory }}/interface.h>
-
-#include <nucleus/module/ecs/plugin/plugin.h>
+#include <{{ module.directory }}/definition.h>
+{%- for header in module.implementation_headers %}
+#include <{{ header }}>
+{%- endfor %}
 
 static const uint32_t interface_count = {{ module.interfaces|length + 1 }};
 static const char *interfaces[] = {
@@ -33,9 +35,9 @@ static nu_result_t plugin_get_callbacks(const char *name, nu_plugin_callbacks_t 
     {%- else %}
     } else if (NU_MATCH(name, {{ module.namespace|upper }}_{{ plugin.name|upper }}_PLUGIN_NAME)) {
     {%- endif %}
-        callbacks->initialize = {{ module.namespace }}_{{ plugin.name }}_initialize;
-        callbacks->terminate = {{ module.namespace }}_{{ plugin.name }}_terminate;
-        callbacks->update = {{ module.namespace }}_{{ plugin.name }}_update;
+        callbacks->initialize = {{ module.namespace }}_{{ plugin.name }}_plugin_initialize;
+        callbacks->terminate = {{ module.namespace }}_{{ plugin.name }}_plugin_terminate;
+        callbacks->update = {{ module.namespace }}_{{ plugin.name }}_plugin_update;
         return NU_SUCCESS;
     {%- if loop.last %}
     }

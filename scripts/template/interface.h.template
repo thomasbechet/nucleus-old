@@ -1,52 +1,32 @@
-#ifndef {{ module.namespace|upper }}_INTERFACE_H
-#define {{ module.namespace|upper }}_INTERFACE_H
+/* Generated file: DO NOT EDIT ! */
+#ifndef {{ module.namespace|upper }}_MODULE_INTERFACE_H
+#define {{ module.namespace|upper }}_MODULE_INTERFACE_H
 
-#include <nucleus/nucleus.h>
-{%- for header in module.include_headers %}
-#include <{{ header }}>
-{%- endfor %}
-
-/* module */
-#define {{ module.namespace|upper }}_MODULE_NAME "{{ module.name }}"
-#define {{ module.namespace|upper }}_MODULE_ID {{ module.id }}
-
-/* interface */
-{%- for interface in module.interfaces %}
-#define {{ module.namespace|upper }}_{{ interface.name|upper }}_INTERFACE_NAME "{{ module.namespace }}_{{ interface.name }}_interface"
-
-typedef struct {
-    {%- for function in interface.functions %}
-    nu_result_t (*{{ function.name }})({{ function.parameters|map(attribute='type')|join(', ') }});
-    {%- endfor %}
-} {{ module.namespace }}_{{ interface.name }}_interface_t;
-{%- endfor %}
-
-/* plugin */
-{%- for plugin in module.plugins %}
-#define {{ module.namespace|upper }}_{{ plugin.name|upper }}_PLUGIN_NAME "{{ module.namespace }}_{{ plugin.name }}_plugin"
-{%- endfor %}
+#include <{{ module.directory }}/definition.h>
 
 /* loader */
-#ifndef {{ module.namespace|upper }}_LOADER_IMPLEMENTATION
+#ifdef {{ module.namespace|upper }}_BOOTSTRAP
     {%- for interface in module.interfaces %}
     {{ module.namespace }}_{{ interface.name }}_interface_t _{{ module.namespace }}_{{ interface.name }}_interface;
     nu_result_t {{ module.namespace }}_{{ interface.name }}_interface_load(nu_module_t module)
     {
         return nu_module_get_interface(module, {{ module.namespace|upper }}_{{ interface.name|upper }}_INTERFACE_NAME, &_{{ module.namespace }}_{{ interface.name }}_interface);
     }
+    {%- for function in interface.functions %}
+    nu_result_t {{ module.namespace }}_{{ interface.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }})
+    {
+        return _{{ module.namespace }}_{{ interface.name }}_interface.{{ function.name }}({{ function.parameters|map(attribute='name')|join(', ') }}{{ 'void' if not function.parameters }});
+    }
     {%- endfor %}
-#elif
+    {%- endfor %}
+#else
     {%- for interface in module.interfaces %}
     extern {{ module.namespace }}_{{ interface.name }}_interface_t _{{ module.namespace }}_{{ interface.name }}_interface;
     nu_result_t {{ module.namespace }}_{{ interface.name }}_interface_load(nu_module_t module);
+    {%- for function in interface.functions %}
+    nu_result_t {{ module.namespace }}_{{ interface.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }});
+    {%- endfor %}
     {%- endfor %}
 #endif
-
-/* macro */
-{%- for interface in module.interfaces %}
-{%- for function in interface.functions %}
-#define {{ module.namespace }}_{{ interface.name }}_{{ function.name }}({{ function.parameters|map(attribute='name')|join(', ') }}) _{{ module.namespace }}_{{ interface.name }}_interface.{{ function.name }}({{ function.parameters|map(attribute='name')|join(', ') }})
-{%- endfor %}
-{%- endfor %}
 
 #endif

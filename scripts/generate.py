@@ -27,6 +27,13 @@ def generate_module(path):
             output.write(render)
             output.close()
 
+        # Generate definition.h
+        template = env.get_template('definition.h.template')
+        with open('module/definition.h', 'w') as output:
+            render = template.render(module=module)
+            output.write(render)
+            output.close()
+
         # Generate interface.h
         template = env.get_template('interface.h.template')
         with open('module/interface.h', 'w') as output:

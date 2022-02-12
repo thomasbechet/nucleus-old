@@ -5,6 +5,7 @@
 #include <nucleus/module/utils.h>
 #include <nucleus/module/lua.h>
 #include <nucleus/module/vulkan.h>
+#define NUECS_BOOTSTRAP
 #include <nucleus/module/ecs.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -217,7 +218,8 @@ static nu_result_t on_start(void)
 
     nu_module_t ecs_module;
     NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-ecs", &ecs_module) == NU_SUCCESS);
-    nu_plugin_require(ecs_module, NUECS_PLUGIN_NAME);
+    nu_plugin_require(ecs_module, NUECS_WORLD_PLUGIN_NAME);
+    nuecs_world_interface_load(ecs_module);
 
     /* load sdf interface */
     nu_module_t renderer_module = nu_renderer_get_module();
@@ -231,11 +233,8 @@ static nu_result_t on_start(void)
     NU_ASSERT(lua_interface.load_plugin("$ENGINE_DIR/script/spectator.lua", &plugin));
 
     /* load ecs interface */
-    nuecs_plugin_interface_t ecs;
-    NU_ASSERT(nu_module_get_interface(ecs_module, NUECS_PLUGIN_INTERFACE_NAME, &ecs) == NU_SUCCESS);
-
     nuecs_world_t world;
-    NU_ASSERT(ecs.world_create(&world) == NU_SUCCESS);
+    NU_ASSERT(nuecs_world_create(&world) == NU_SUCCESS);
 
     nuecs_component_t position_component, health_component, velocity_component, score_component;
     NUECS_REGISTER_COMPONENT(ecs, world, position_t, position_component);
@@ -263,22 +262,22 @@ static nu_result_t on_start(void)
     info1.components      = (nuecs_component_t[]){position_component, velocity_component};
     info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
     info1.component_count = 2;
-    ecs.entity_create(world, &info1, &entity0);
+    nuecs_world_create_entity(world, &info1, &entity0);
 
     nu_info("WORLD", "start");
-    ecs.world_progress(world);
+    nuecs_world_progress(world);
 
     // nu_info("WORLD", "add velocity component");
     // ecs.entity_add_component(world, entity0, velocity_component, &velocity);
     // ecs.world_progress(world);
 
     nu_info("WORLD", "remove velocity component");
-    ecs.entity_remove_component(world, entity0, velocity_component);
-    ecs.world_progress(world);
+    nuecs_world_entity_remove_component(world, entity0, velocity_component);
+    nuecs_world_progress(world);
 
     nu_info("WORLD", "remove position component");
-    ecs.entity_remove_component(world, entity0, position_component);
-    ecs.world_progress(world);
+    nuecs_world_entity_remove_component(world, entity0, position_component);
+    nuecs_world_progress(world);
 
     // nu_info("WORLD", "destroy");
     // ecs.entity_destroy(world, entity0);

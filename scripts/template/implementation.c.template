@@ -1,7 +1,7 @@
 {%- for interface in module.interfaces %}
 /* {{ interface.name }} interface */
 {%- for function in interface.functions %}
-nu_result_t {{ module.namespace }}_{{ interface.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %})
+nu_result_t {{ module.namespace }}_{{ interface.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }})
 {
     return NU_SUCCESS;
 }
@@ -9,15 +9,15 @@ nu_result_t {{ module.namespace }}_{{ interface.name }}_{{ function.name }}({% f
 {%- endfor %}
 {%- for plugin in module.plugins %}
 /* {{ plugin.name }} plugin */
-nu_result_t {{ module.namespace }}_{{ plugin.name }}_initialize()
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_initialize(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t {{ module.namespace }}_{{ plugin.name }}_terminate()
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_terminate(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t {{ module.namespace }}_{{ plugin.name }}_update()
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_update(void)
 {
     return NU_SUCCESS;
 }
