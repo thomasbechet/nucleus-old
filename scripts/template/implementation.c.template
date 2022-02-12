@@ -1,0 +1,24 @@
+{%- for interface in module.interfaces %}
+/* {{ interface.name }} interface */
+{%- for function in interface.functions %}
+nu_result_t {{ module.namespace }}_{{ interface.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %})
+{
+    return NU_SUCCESS;
+}
+{%- endfor %}
+{%- endfor %}
+{%- for plugin in module.plugins %}
+/* {{ plugin.name }} plugin */
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_initialize()
+{
+    return NU_SUCCESS;
+}
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_terminate()
+{
+    return NU_SUCCESS;
+}
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_update()
+{
+    return NU_SUCCESS;
+}
+{%- endfor %}

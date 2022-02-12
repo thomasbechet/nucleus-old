@@ -1,0 +1,151 @@
+{
+    "name": "nucleus-ecs",
+    "id": 14,
+    "flags": [],
+    "directory": "nucleus/module/ecs/module",
+    "include_headers": [
+        "nucleus/module/ecs/module/types.h"
+    ],
+    "namespace": "nuecs",
+    "interfaces": [
+        {
+            "name": "world",
+            "functions": [
+                {
+                    "name": "create",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t*",
+                            "name": "handle"
+                        }
+                    ]    
+                },
+                {
+                    "name": "destroy",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "handle"
+                        }
+                    ]    
+                },
+                {
+                    "name": "progress",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "handle"
+                        }
+                    ]    
+                },
+                {
+                    "name": "component_register",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "world_handle"
+                        },
+                        {
+                            "type": "const nuecs_component_info_t*",
+                            "name": "info"
+                        },
+                        {
+                            "type": "nuecs_component_t*",
+                            "name": "handle"
+                        }
+                    ]    
+                },
+                {
+                    "name": "system_register",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "world_handle"
+                        },
+                        {
+                            "type": "const nuecs_system_info_t*",
+                            "name": "info"
+                        },
+                        {
+                            "type": "nuecs_system_t*",
+                            "name": "handle"
+                        }
+                    ]    
+                },
+                {
+                    "name": "entity_create",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "world_handle"
+                        },
+                        {
+                            "type": "const nuecs_entity_info_t*",
+                            "name": "info"
+                        },
+                        {
+                            "type": "nuecs_entity_t*",
+                            "name": "handle"
+                        }
+                    ]    
+                },
+                {
+                    "name": "entity_destroy",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "world_handle"
+                        },
+                        {
+                            "type": "nuecs_entity_t",
+                            "name": "handle"
+                        }
+                    ]    
+                },
+                {
+                    "name": "entity_add_component",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "world_handle"
+                        },
+                        {
+                            "type": "nuecs_entity_t",
+                            "name": "handle"
+                        },
+                        {
+                            "type": "nuecs_component_t",
+                            "name": "component"
+                        },
+                        {
+                            "type": "nuecs_component_data_ptr_t",
+                            "name": "component_data"
+                        }
+                    ]    
+                },
+                {
+                    "name": "entity_remove_component",
+                    "parameters": [
+                        {
+                            "type": "nuecs_world_t",
+                            "name": "world_handle"
+                        },
+                        {
+                            "type": "nuecs_entity_t",
+                            "name": "handle"
+                        },
+                        {
+                            "type": "nuecs_component_t",
+                            "name": "component"
+                        }
+                    ]    
+                }
+            ]
+        }
+    ],
+    "plugins": [
+        {
+            "name": "thomas"
+        }
+    ]
+}
