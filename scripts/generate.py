@@ -6,10 +6,27 @@ import argparse
 def generate_module(path):
     print('generating template from {}'.format(path))
     with open(path) as file:
+        # Load json
         module = json.load(file)
 
+        # Resolve json
+        define_interfaces = []
+        for path in module['define_interfaces']:
+            with open('{}/{}'.format('../', path)) as f:
+                define_interfaces.append(json.load(f))
+        module['define_interfaces'] = define_interfaces
+
+        implement_interfaces = []
+        for interface in module['implement_interfaces']:
+            with open('{}/{}'.format('../', interface['path'])) as f:
+                interface['definition'] = json.load(f)
+                implement_interfaces.append(interface)
+        module['implement_interfaces'] = implement_interfaces
+
+        # Create jinja environment
         env = jinja2.Environment(loader=jinja2.FileSystemLoader('template/'))
         
+        # Create module folder
         if not os.path.exists('module'):
             os.makedirs('module')
 

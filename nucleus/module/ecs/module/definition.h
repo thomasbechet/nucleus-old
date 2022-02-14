@@ -24,6 +24,7 @@ typedef struct {
     nu_result_t (*entity_remove_component)(nuecs_world_t, nuecs_entity_t, nuecs_component_t);
 } nuecs_world_interface_t;
 
+
 /* plugin */
 #define NUECS_WORLD_PLUGIN_NAME "nuecs_world_plugin"
 

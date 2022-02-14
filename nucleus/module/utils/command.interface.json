@@ -1,0 +1,27 @@
+{
+    "namespace": "nuutils",
+    "name": "command",
+    "include_headers": [
+        "nucleus/module/utils/command/types_public.h"
+    ],
+    "functions": [
+        {
+            "name": "get_event_id",
+            "parameters": [
+                {
+                    "type": "nu_event_id_t*",
+                    "name": "id"
+                }
+            ]    
+        },
+        {
+            "name": "execute",
+            "parameters": [
+                {
+                    "type": "const char*",
+                    "name": "command"
+                }
+            ]
+        }
+    ]
+}

@@ -132,13 +132,14 @@ nu_result_t nuglfw_window_set_mode(nu_window_mode_t mode)
     return NU_SUCCESS;
 }
 
-const char **nuglfw_get_required_instance_extensions(uint32_t *count)
+nu_result_t nuglfw_window_get_required_instance_extensions(const char*** extensions, uint32_t* extension_count)
 {
-    return glfwGetRequiredInstanceExtensions(count);
+    *extensions = glfwGetRequiredInstanceExtensions(extension_count);
+    return NU_SUCCESS;
 }
-nu_result_t nuglfw_create_window_surface(void *instance_ptr, void *surface_ptr, const void *allocator_ptr)
+nu_result_t nuglfw_window_create_window_surface(void* instance_ptr, void* surface_ptr, const void* allocator_ptr)
 {
-#ifdef GLFW_INCLUDE_VULKAN
+    #ifdef GLFW_INCLUDE_VULKAN
     VkInstance *instance = (VkInstance*)instance_ptr;
     VkSurfaceKHR *surface = (VkSurfaceKHR*)surface_ptr;
     const VkAllocationCallbacks *allocator = (const VkAllocationCallbacks*)allocator_ptr;
@@ -151,20 +152,16 @@ nu_result_t nuglfw_create_window_surface(void *instance_ptr, void *surface_ptr, 
     return NU_FAILURE;
 #endif
 }
-nu_result_t nuglfw_present_surface(
-    const nu_vec2u_t size,
-    void *pixels
-)
+nu_result_t nuglfw_window_present_surface(const nu_vec2u_t size, void* pixels)
 {
     int32_t w, h;
     glfwGetWindowSize(_module.window, &w, &h);
     glViewport(0, 0, w, h);
     nuglfw_surface_draw(size[0], size[1], pixels);
     glfwSwapBuffers(_module.window);
-
     return NU_SUCCESS;
 }
-nu_result_t nuglfw_swap_buffers(void)
+nu_result_t nuglfw_window_swap_buffers(void)
 {
     glfwSwapBuffers(_module.window);
     return NU_SUCCESS;

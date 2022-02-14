@@ -1,0 +1,54 @@
+{
+    "namespace": "nuglfw",
+    "name": "window",
+    "include_headers": [],
+    "functions": [
+        {
+            "name": "get_required_instance_extensions",
+            "parameters": [
+                {
+                    "type": "const char***",
+                    "name": "extensions"
+                },
+                {
+                    "type": "uint32_t*",
+                    "name": "extension_count"
+                }
+            ]    
+        },
+        {
+            "name": "create_window_surface",
+            "parameters": [
+                {
+                    "type": "void*",
+                    "name": "instance"
+                },
+                {
+                    "type": "void*",
+                    "name": "surface"
+                },
+                {
+                    "type": "const void*",
+                    "name": "allocator_ptr"
+                }
+            ]
+        },
+        {
+            "name": "present_surface",
+            "parameters": [
+                {
+                    "type": "const nu_vec2u_t",
+                    "name": "size"
+                },
+                {
+                    "type": "void*",
+                    "name": "pixels"
+                }
+            ]
+        },
+        {
+            "name": "swap_buffers",
+            "parameters": []
+        }
+    ]
+}

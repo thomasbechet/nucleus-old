@@ -179,6 +179,14 @@ nu_result_t nuvk_renderer_terminate(void)
 
     return NU_SUCCESS;
 }
+nu_result_t nuvk_renderer_start(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_renderer_stop(void)
+{
+    return NU_SUCCESS;
+}
 static nu_result_t nuvk_renderer_execute_frame(void)
 {
     /* recover active command buffer */
@@ -411,7 +419,14 @@ nu_result_t nuvk_renderer_render(void)
 
     return NU_SUCCESS;
 }
-
+nu_result_t nuvk_renderer_camera_create(const nu_renderer_camera_create_info_t* info, nu_renderer_camera_t* handle)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_renderer_camera_destroy(nu_renderer_camera_t handle)
+{
+    return NU_SUCCESS;
+}
 nu_result_t nuvk_renderer_camera_set_fov(nu_renderer_camera_t handle, float fov)
 {
     _module.scene.camera.fov = fov;
@@ -427,7 +442,6 @@ nu_result_t nuvk_renderer_camera_set_view(nu_renderer_camera_t handle, const nu_
 
     return NU_SUCCESS;
 }
-
 nu_result_t nuvk_renderer_viewport_set_size(const nu_vec2u_t size)
 {
     nu_result_t result;
@@ -457,6 +471,10 @@ nu_result_t nuvk_renderer_viewport_set_size(const nu_vec2u_t size)
     result = nuvk_descriptor_postprocess_update_images(&_module.descriptors.postprocess, &_module.context, &_module.images.light);
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NUVK_LOGGER_NAME, "Failed to update postprocess descriptor.");
     
+    return NU_SUCCESS;
+}
+nu_result_t nuvk_renderer_viewport_get_size(nu_vec2u_t size)
+{
     return NU_SUCCESS;
 }
 

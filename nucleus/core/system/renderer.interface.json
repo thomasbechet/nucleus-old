@@ -1,0 +1,103 @@
+{
+    "namespace": "nu",
+    "name": "renderer",
+    "include_headers": [
+        "nucleus/core/system/renderer/interface.h"
+    ],
+    "functions": [
+        {
+            "name": "initialize",
+            "parameters": []
+        },
+        {
+            "name": "terminate",
+            "parameters": []
+        },
+        {
+            "name": "start",
+            "parameters": []
+        },
+        {
+            "name": "stop",
+            "parameters": []
+        },
+        {
+            "name": "render",
+            "parameters": []
+        },
+        {
+            "name": "camera_create",
+            "parameters": [
+                {
+                    "type": "const nu_renderer_camera_create_info_t*",
+                    "name": "info"
+                },
+                {
+                    "type": "nu_renderer_camera_t*",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "camera_destroy",
+            "parameters": [
+                {
+                    "type": "nu_renderer_camera_t",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "camera_set_fov",
+            "parameters": [
+                {
+                    "type": "nu_renderer_camera_t",
+                    "name": "handle"
+                },
+                {
+                    "type": "float",
+                    "name": "fov"
+                }
+            ]
+        },
+        {
+            "name": "camera_set_view",
+            "parameters": [
+                {
+                    "type": "nu_renderer_camera_t",
+                    "name": "handle"
+                },
+                {
+                    "type": "const nu_vec3f_t",
+                    "name": "eye"
+                },
+                {
+                    "type": "const nu_vec3f_t",
+                    "name": "forward"
+                },
+                {
+                    "type": "const nu_vec3f_t",
+                    "name": "up"
+                }
+            ]
+        },
+        {
+            "name": "viewport_set_size",
+            "parameters": [
+                {
+                    "type": "const nu_vec2u_t",
+                    "name": "size"
+                }
+            ]
+        },
+        {
+            "name": "viewport_get_size",
+            "parameters": [
+                {
+                    "type": "nu_vec2u_t",
+                    "name": "size"
+                }
+            ]
+        }
+    ]
+}

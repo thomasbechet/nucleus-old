@@ -1,0 +1,37 @@
+{
+    "name": "nucleus-utils",
+    "id": 6,
+    "flags": [],
+    "namespace": "nuutils",
+    "directory": "nucleus/module/utils/module",
+    "define_interfaces": [
+        "nucleus/module/utils/loader.interface.json",
+        "nucleus/module/utils/command.interface.json"
+    ],
+    "implementation_headers": [
+        "nucleus/module/utils/loader/loader.h",
+        "nucleus/module/utils/command/command.h"
+    ],
+    "implement_interfaces": [
+        {
+            "path": "nucleus/module/utils/loader.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/module/utils/command.interface.json",
+            "generate_loader": true
+        }
+    ],
+    "plugins": [
+        {
+            "name": "command",
+            "callbacks": {
+                "initialize": true,
+                "terminate": true,
+                "update": false,
+                "fixed_update": false,
+                "late_update": false
+            }
+        }
+    ]
+}

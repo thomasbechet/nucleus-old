@@ -2,7 +2,7 @@
 
 #define NUUTILS_LOGGER_NAME "LOADER"
 
-nu_result_t nuutils_load_mesh_from_obj(const char *filename, nu_renderer_mesh_t *handle)
+nu_result_t nuutils_loader_load_mesh_from_obj(const char *filename, nu_renderer_mesh_t *handle)
 {    
     nu_string_t path;
     nu_string_allocate_cstr(&path, filename);
@@ -27,7 +27,7 @@ nu_result_t nuutils_load_mesh_from_obj(const char *filename, nu_renderer_mesh_t 
 
     return NU_FAILURE;
 }
-nu_result_t nuutils_load_texture(const char *filename, nu_renderer_texture_t *handle)
+nu_result_t nuutils_loader_load_texture(const char *filename, nu_renderer_texture_t *handle)
 {
     nu_string_t path;
     nu_string_allocate_cstr(&path, filename);
