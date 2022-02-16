@@ -5,7 +5,7 @@
 #include <nucleus/module/glfw/module/definition.h>
 
 /* loader */
-#ifdef NUGLFW_BOOTSTRAP
+#ifdef NUGLFW_LOADER_IMPLEMENTATION
     nuglfw_window_interface_t _nuglfw_window_interface;
     nu_result_t nuglfw_window_interface_load(nu_module_t module)
     {

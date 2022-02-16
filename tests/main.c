@@ -3,11 +3,11 @@
 
 #include <nucleus/nucleus.h>
 #include <nucleus/module/utils.h>
-#define NULUA_BOOTSTRAP
+#define NULUA_LOADER_IMPLEMENTATION
 #include <nucleus/module/lua.h>
-#define NUVK_BOOTSTRAP
+#define NUVK_LOADER_IMPLEMENTATION
 #include <nucleus/module/vulkan.h>
-#define NUECS_BOOTSTRAP
+#define NUECS_LOADER_IMPLEMENTATION
 #include <nucleus/module/ecs.h>
 
 #define STB_IMAGE_IMPLEMENTATION

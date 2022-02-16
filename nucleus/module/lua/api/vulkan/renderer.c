@@ -1,14 +1,9 @@
 #include <nucleus/module/lua/api/vulkan/renderer.h>
 
 #include <nucleus/module/lua/common/logger.h>
+#define NUVK_LOADER_IMPLEMENTATION
 #include <nucleus/module/vulkan.h>
 #include <lauxlib.h>
-
-typedef struct {
-    nuvk_renderer_interface_t interface;
-} nulua_module_data_t;
-
-static nulua_module_data_t _module;
 
 static int VkRenderer_material_create(lua_State *L)
 {
@@ -19,9 +14,8 @@ static int VkRenderer_material_create(lua_State *L)
 
 nu_result_t nulua_register_vulkan_renderer_api(lua_State *L)
 {
-    nu_module_t renderer = nu_renderer_get_module();
-    nu_result_t result = nu_module_get_interface(renderer, NUVK_RENDERER_INTERFACE_NAME, &_module.interface);
-    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NULUA_LOGGER_NAME, "Failed to get the interface.");
+    NU_CHECK(nuvk_renderer_interface_load(nu_renderer_get_module()) == NU_SUCCESS, return NU_FAILURE,
+        NULUA_LOGGER_NAME, "Failed to load vulkan interface.");
 
     static const struct luaL_Reg VkRenderer_methods[] = {
         {"material_create", VkRenderer_material_create},

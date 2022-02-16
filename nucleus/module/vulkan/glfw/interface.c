@@ -1,6 +1,6 @@
 #include <nucleus/module/vulkan/glfw/interface.h>
 
-#define NUGLFW_BOOTSTRAP
+#define NUGLFW_LOADER_IMPLEMENTATION
 #include <nucleus/module/glfw.h>
 
 #define NUVK_LOGGER_NAME "VULKAN GLFW"

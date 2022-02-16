@@ -5,7 +5,7 @@
 #include <nucleus/module/vulkan/module/definition.h>
 
 /* loader */
-#ifdef NUVK_BOOTSTRAP
+#ifdef NUVK_LOADER_IMPLEMENTATION
     nuvk_renderer_interface_t _nuvk_renderer_interface;
     nu_result_t nuvk_renderer_interface_load(nu_module_t module)
     {

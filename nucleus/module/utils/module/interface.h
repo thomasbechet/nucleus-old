@@ -5,7 +5,7 @@
 #include <nucleus/module/utils/module/definition.h>
 
 /* loader */
-#ifdef NUUTILS_BOOTSTRAP
+#ifdef NUUTILS_LOADER_IMPLEMENTATION
     nuutils_loader_interface_t _nuutils_loader_interface;
     nu_result_t nuutils_loader_interface_load(nu_module_t module)
     {

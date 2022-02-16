@@ -5,7 +5,7 @@
 #include <nucleus/module/ecs/module/definition.h>
 
 /* loader */
-#ifdef NUECS_BOOTSTRAP
+#ifdef NUECS_LOADER_IMPLEMENTATION
     nuecs_world_interface_t _nuecs_world_interface;
     nu_result_t nuecs_world_interface_load(nu_module_t module)
     {

@@ -5,7 +5,7 @@
 #include <nucleus/module/lua/module/definition.h>
 
 /* loader */
-#ifdef NULUA_BOOTSTRAP
+#ifdef NULUA_LOADER_IMPLEMENTATION
     nulua_manager_interface_t _nulua_manager_interface;
     nu_result_t nulua_manager_interface_load(nu_module_t module)
     {

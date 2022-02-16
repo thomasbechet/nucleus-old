@@ -5,7 +5,7 @@
 #include <{{ module.directory }}/definition.h>
 
 /* loader */
-#ifdef {{ module.namespace|upper }}_BOOTSTRAP
+#ifdef {{ module.namespace|upper }}_LOADER_IMPLEMENTATION
     {%- for interface in module.implement_interfaces %}
     {%- if interface.generate_loader %}
     {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t _{{ interface.definition.namespace }}_{{ interface.definition.name }}_interface;
