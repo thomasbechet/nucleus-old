@@ -1,0 +1,32 @@
+/* Generated file: DO NOT EDIT ! */
+#ifndef {{ module.namespace|upper }}_MODULE_DEFINITION_H
+#define {{ module.namespace|upper }}_MODULE_DEFINITION_H
+
+#include <nucleus/nucleus.h>
+{%- for interface in module.define_interfaces %}
+{%- for header in interface.include_headers %}
+#include <{{ header }}>
+{%- endfor %}
+{%- endfor %}
+
+/* module */
+#define {{ module.namespace|upper }}_MODULE_NAME "{{ module.name }}"
+#define {{ module.namespace|upper }}_MODULE_ID {{ module.id }}
+
+/* interface */
+{%- for interface in module.define_interfaces %}
+#define {{ interface.namespace|upper }}_{{ interface.name|upper }}_INTERFACE_NAME "{{ interface.namespace }}_{{ interface.name }}_interface"
+
+typedef struct {
+    {%- for function in interface.functions %}
+    nu_result_t (*{{ function.name }})({{ function.parameters|map(attribute='type')|join(', ') }}{{ 'void' if not function.parameters }});
+    {%- endfor %}
+} {{ interface.namespace }}_{{ interface.name }}_interface_t;
+{% endfor %}
+
+/* plugin */
+{%- for plugin in module.plugins %}
+#define {{ module.namespace|upper }}_{{ plugin.name|upper }}_PLUGIN_NAME "{{ module.namespace }}_{{ plugin.name }}_plugin"
+{%- endfor %}
+
+#endif

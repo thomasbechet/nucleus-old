@@ -1,5 +1,7 @@
-import subprocess
+from distutils.dir_util import copy_tree
 
-subprocess.Popen(['mkdir', '-p', 'bin/'], cwd='../build/').wait()
-subprocess.Popen(['cp', '-r', '../package/.', 'bin/'], cwd='../build/').wait()
+# Copy content
+copy_tree('../package/', '../build/bin/')
+
+# subprocess.Popen(['cp', '-r', '../package/.', 'bin/'], cwd='../build/').wait()
 print('Package installed.')

@@ -2,3 +2,4 @@ bin/
 build/
 libs/
 .vscode/*
+scripts/module/*

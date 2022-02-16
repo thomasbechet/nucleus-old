@@ -1,0 +1,60 @@
+{
+    "namespace": "nu",
+    "name": "input_system",
+    "include_headers": [
+        "nucleus/core/system/task/interface.h"
+    ],
+    "functions": [
+        {
+            "name": "initialize",
+            "parameters": []
+        },
+        {
+            "name": "terminate",
+            "parameters": []
+        },
+        {
+            "name": "start",
+            "parameters": []
+        },
+        {
+            "name": "stop",
+            "parameters": []
+        },
+        {
+            "name": "create",
+            "parameters": [
+                {
+                    "type": "nu_task_t*",
+                    "name": "task"
+                }
+            ]
+        },
+        {
+            "name": "perform",
+            "parameters": [
+                {
+                    "type": "nu_task_t",
+                    "name": "task"
+                },
+                {
+                    "type": "nu_task_job_t*",
+                    "name": "jobs"
+                },
+                {
+                    "type": "uint32_t",
+                    "name": "count"
+                }
+            ]
+        },
+        {
+            "name": "wait",
+            "parameters": [
+                {
+                    "type": "nu_task_t",
+                    "name": "task"
+                }
+            ]
+        }
+    ]
+}

@@ -19,5 +19,6 @@ typedef struct {
 } nu_plugin_interface_t;
 
 NU_API nu_result_t nu_plugin_require(nu_module_t module, const char *plugin);
+NU_API nu_result_t nu_plugin_get_list(nu_module_t module, uint32_t *count, const char ***plugins);
 
 #endif

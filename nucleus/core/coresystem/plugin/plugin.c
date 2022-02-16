@@ -125,3 +125,16 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
 
     return NU_SUCCESS;
 }
+nu_result_t nu_plugin_get_list(nu_module_t module, uint32_t *count, const char ***plugins)
+{
+    /* get plugin interface */
+    nu_plugin_interface_t interface;
+    nu_result_t result = nu_module_get_interface(module, NU_PLUGIN_INTERFACE_NAME, (nu_pfn_t*)&interface);
+    if (result != NU_SUCCESS) {
+        *count = 0;
+        *plugins = NULL;
+    }
+
+    /* get list */
+    return interface.get_list(count, plugins);
+}

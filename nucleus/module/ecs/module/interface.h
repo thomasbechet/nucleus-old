@@ -1,69 +1,55 @@
-#ifndef NUECS_INTERFACE_H
-#define NUECS_INTERFACE_H
+/* Generated file: DO NOT EDIT ! */
+#ifndef NUECS_MODULE_INTERFACE_H
+#define NUECS_MODULE_INTERFACE_H
 
-#include <nucleus/nucleus.h>
+#include <nucleus/module/ecs/module/definition.h>
 
-/* module */
-#define NUECS_MODULE_NAME "nucleus-ecs"
-#define NUECS_MODULE_ID 0x2
-
-/* interface */
-#define NUECS_PLUGIN_NAME "nuecs_plugin"
-#define NUECS_PLUGIN_INTERFACE_NAME "nuecs_plugin_interface"
-
-#define NUECS_MAX_COMPONENT_PER_ENTITY 64
-
-NU_DECLARE_HANDLE(nuecs_world_t);
-NU_DECLARE_HANDLE(nuecs_entity_t);
-NU_DECLARE_HANDLE(nuecs_component_t);
-NU_DECLARE_HANDLE(nuecs_system_t);
-NU_DECLARE_HANDLE(nuecs_archetype_t);
-
-typedef void *nuecs_component_data_ptr_t;
-
-typedef struct {
-    const char *name;
-    uint32_t size;
-} nuecs_component_info_t;
-
-typedef struct {
-    nuecs_component_t *components;
-    uint32_t component_count;
-    nu_result_t (*update)(nuecs_component_data_ptr_t *components, uint32_t count);
-} nuecs_system_info_t;
-
-typedef struct {
-    nuecs_component_t *components;
-    nuecs_component_data_ptr_t *component_data;
-    uint32_t component_count;
-} nuecs_entity_info_t;
-
-typedef struct {
-    nu_result_t (*world_create)(nuecs_world_t*);
-    nu_result_t (*world_destroy)(nuecs_world_t);
-    nu_result_t (*world_progress)(nuecs_world_t);
-    nu_result_t (*component_register)(nuecs_world_t, const nuecs_component_info_t*, nuecs_component_t*);
-    nu_result_t (*system_register)(nuecs_world_t, const nuecs_system_info_t*, nuecs_system_t*);
-    nu_result_t (*entity_create)(nuecs_world_t, const nuecs_entity_info_t*, nuecs_entity_t*);
-    nu_result_t (*entity_destroy)(nuecs_world_t, nuecs_entity_t);
-    nu_result_t (*entity_add_component)(nuecs_world_t, nuecs_entity_t, nuecs_component_t, nuecs_component_data_ptr_t);
-    nu_result_t (*entity_remove_component)(nuecs_world_t, nuecs_entity_t, nuecs_component_t);
-} nuecs_plugin_interface_t;
-
-#define NUECS_REGISTER_COMPONENT(ecs, world, component, handle) \
-    { \
-        nuecs_component_info_t handle##_info; \
-        handle##_info.name = #component; \
-        handle##_info.size = sizeof(component); \
-        ecs.component_register(world, &handle##_info, &handle); \
+/* loader */
+#ifdef NUECS_LOADER_IMPLEMENTATION
+    nuecs_world_interface_t _nuecs_world_interface;
+    nu_result_t nuecs_world_interface_load(nu_module_t module)
+    {
+        return nu_module_get_interface(module, NUECS_WORLD_INTERFACE_NAME, &_nuecs_world_interface);
     }
-#define NUECS_REGISTER_SYSTEM(ecs, world, component_list, update_callback, handle) \
-    { \
-        nuecs_system_info_t handle##_info; \
-        handle##_info.components = component_list; \
-        handle##_info.component_count = sizeof(component_list) / sizeof(nuecs_component_t); \
-        handle##_info.update = update_callback; \
-        ecs.system_register(world, &handle##_info, &handle); \
+    nu_result_t nuecs_world_create(nuecs_world_t* handle)
+    {
+        return _nuecs_world_interface.create(handle);
     }
+    nu_result_t nuecs_world_destroy(nuecs_world_t handle)
+    {
+        return _nuecs_world_interface.destroy(handle);
+    }
+    nu_result_t nuecs_world_progress(nuecs_world_t handle)
+    {
+        return _nuecs_world_interface.progress(handle);
+    }
+    nu_result_t nuecs_world_register_component(nuecs_world_t world_handle, const nuecs_component_info_t* info, nuecs_component_t* handle)
+    {
+        return _nuecs_world_interface.register_component(world_handle, info, handle);
+    }
+    nu_result_t nuecs_world_register_system(nuecs_world_t world_handle, const nuecs_system_info_t* info, nuecs_system_t* handle)
+    {
+        return _nuecs_world_interface.register_system(world_handle, info, handle);
+    }
+    nu_result_t nuecs_world_create_entity(nuecs_world_t world_handle, const nuecs_entity_info_t* info, nuecs_entity_t* handle)
+    {
+        return _nuecs_world_interface.create_entity(world_handle, info, handle);
+    }
+    nu_result_t nuecs_world_destroy_entity(nuecs_world_t world_handle, nuecs_entity_t handle)
+    {
+        return _nuecs_world_interface.destroy_entity(world_handle, handle);
+    }
+    nu_result_t nuecs_world_entity_add_component(nuecs_world_t world_handle, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
+    {
+        return _nuecs_world_interface.entity_add_component(world_handle, handle, component, component_data);
+    }
+    nu_result_t nuecs_world_entity_remove_component(nuecs_world_t world_handle, nuecs_entity_t handle, nuecs_component_t component)
+    {
+        return _nuecs_world_interface.entity_remove_component(world_handle, handle, component);
+    }
+#else
+    extern nuecs_world_interface_t _nuecs_world_interface;
+    nu_result_t nuecs_world_interface_load(nu_module_t module);
+#endif
 
 #endif

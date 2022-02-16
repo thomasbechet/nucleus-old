@@ -1,0 +1,115 @@
+{
+    "namespace": "nuvk",
+    "name": "renderer",
+    "include_headers": [
+        "nucleus/module/vulkan/assets/interface.h",
+        "nucleus/module/vulkan/scene/interface.h"
+    ],
+    "functions": [
+        {
+            "name": "sdf_create",
+            "parameters": [
+                {
+                    "type": "const nuvk_sdf_info_t*",
+                    "name": "info"
+                },
+                {
+                    "type": "nuvk_sdf_t*",
+                    "name": "handle"
+                }
+            ]    
+        },
+        {
+            "name": "sdf_destroy",
+            "parameters": [
+                {
+                    "type": "nuvk_sdf_t",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "sdf_get_primitive",
+            "parameters": [
+                {
+                    "type": "nuvk_sdf_primitives_t",
+                    "name": "primitive"
+                },
+                {
+                    "type": "nuvk_sdf_t*",
+                    "name": "sdf"
+                }
+            ]
+        },
+        {
+            "name": "material_create",
+            "parameters": [
+                {
+                    "type": "const nuvk_material_info_t*",
+                    "name": "info"
+                },
+                {
+                    "type": "nuvk_material_t*",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "material_destroy",
+            "parameters": [
+                {
+                    "type": "nuvk_material_t",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "sdf_instance_create",
+            "parameters": [
+                {
+                    "type": "const nuvk_sdf_instance_info_t*",
+                    "name": "info"
+                },
+                {
+                    "type": "nuvk_sdf_instance_t*",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "sdf_instance_destroy",
+            "parameters": [
+                {
+                    "type": "nuvk_sdf_instance_t",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "sdf_instance_update_transform",
+            "parameters": [
+                {
+                    "type": "nuvk_sdf_instance_t",
+                    "name": "handle"
+                },
+                {
+                    "type": "const nuvk_sdf_transform_t*",
+                    "name": "transform"
+                }
+            ]
+        },
+        {
+            "name": "sdf_instance_update_data",
+            "parameters": [
+                {
+                    "type": "nuvk_sdf_instance_t",
+                    "name": "handle"
+                },
+                {
+                    "type": "const void*",
+                    "name": "data"
+                }
+            ]
+        }
+    ]
+}

@@ -1,0 +1,65 @@
+{
+    "namespace": "nu",
+    "name": "window",
+    "include_headers": [
+        "nucleus/core/system/window/interface.h"
+    ],
+    "functions": [
+        {
+            "name": "initialize",
+            "parameters": []
+        },
+        {
+            "name": "terminate",
+            "parameters": []
+        },
+        {
+            "name": "start",
+            "parameters": []
+        },
+        {
+            "name": "stop",
+            "parameters": []
+        },
+        {
+            "name": "update",
+            "parameters": []
+        },
+        {
+            "name": "set_size",
+            "parameters": [
+                {
+                    "type": "const nu_vec2u_t",
+                    "name": "size"
+                }
+            ]
+        },
+        {
+            "name": "get_size",
+            "parameters": [
+                {
+                    "type": "nu_vec2u_t",
+                    "name": "size"
+                }
+            ]
+        },
+        {
+            "name": "set_title",
+            "parameters": [
+                {
+                    "type": "const char*",
+                    "name": "title"
+                }
+            ]
+        },
+        {
+            "name": "set_mode",
+            "parameters": [
+                {
+                    "type": "nu_window_mode_t",
+                    "name": "mode"
+                }
+            ]
+        }
+    ]
+}

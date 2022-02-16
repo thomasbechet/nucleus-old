@@ -1,7 +1,7 @@
 #ifndef NUECS_CHUNK_H
 #define NUECS_CHUNK_H
 
-#include <nucleus/module/ecs/plugin/types.h>
+#include <nucleus/module/ecs/plugin/types_private.h>
 
 #define NUECS_CHUNK_SIZE 512
 

@@ -23,7 +23,7 @@ typedef struct {
 
 static nulua_module_data_t _module;
 
-nu_result_t nulua_plugin_initialize(void)
+nu_result_t nulua_manager_plugin_initialize(void)
 {
     /* initialize resources */
     memset(&_module, 0, sizeof(nulua_module_data_t));
@@ -46,7 +46,7 @@ cleanup0:
     lua_close(_module.L);
     return NU_FAILURE;
 }
-nu_result_t nulua_plugin_terminate(void)
+nu_result_t nulua_manager_plugin_terminate(void)
 {
     /* stop plugins */
     uint32_t plugin_count = nu_indexed_array_get_size(_module.plugins);
@@ -68,7 +68,7 @@ nu_result_t nulua_plugin_terminate(void)
     nu_indexed_array_free(_module.plugins);
     return NU_SUCCESS;
 }
-nu_result_t nulua_plugin_update(void)
+nu_result_t nulua_manager_plugin_update(void)
 {
     /* update plugins */
     uint32_t plugin_count = nu_indexed_array_get_size(_module.plugins);
@@ -93,7 +93,7 @@ nu_result_t nulua_plugin_update(void)
     return NU_SUCCESS;
 }
 
-nu_result_t nulua_plugin_load(const char *filename, nulua_plugin_t *handle)
+nu_result_t nulua_manager_load_plugin(const char* filename, nulua_plugin_t* handle)
 {
     nu_string_t path;
     nu_string_allocate_cstr(&path, filename);

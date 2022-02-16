@@ -76,8 +76,44 @@ nu_result_t nuecs_world_terminate(nuecs_world_data_t *world)
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_world_component_register(nuecs_world_data_t *world, const nuecs_component_info_t *info, nuecs_component_t *handle)
-{    
+nu_result_t nuecs_world_progress(nuecs_world_t handle)
+{
+    nuecs_world_data_t *world = (nuecs_world_data_t*)handle;
+
+    /* remove entities */
+    uint32_t *indices    = (uint32_t*)nu_array_get_data_const(world->deleted_entries);
+    uint32_t index_count = nu_array_get_size(world->deleted_entries);
+    nuecs_entity_entry_t *entries = (nuecs_entity_entry_t*)nu_array_get_data(world->entries);
+    for (uint32_t i = 0; i < index_count; i++) {
+        nuecs_archetype_remove_entity(&entries[i]);
+        nu_array_push(world->free_entries, &indices[i]);
+    }
+    nu_array_clear(world->deleted_entries);
+
+    /* update chunk frame size */
+    nuecs_archetype_data_t **archetypes = (nuecs_archetype_data_t**)nu_array_get_data(world->archetypes);
+    uint32_t archetype_count            = nu_array_get_size(world->archetypes);
+    for (uint32_t i = 0; i < archetype_count; i++) {
+        nuecs_chunk_data_t **chunks = (nuecs_chunk_data_t**)nu_array_get_data(archetypes[i]->chunks);
+        uint32_t chunk_count        = nu_array_get_size(archetypes[i]->chunks);
+        for (uint32_t j = 0; j < chunk_count; j++) {
+            chunks[j]->frame_size = chunks[j]->size;
+        }
+    }
+
+    /* update all systems */
+    nuecs_system_data_t **systems = (nuecs_system_data_t**)nu_indexed_array_get_data(world->systems);
+    uint32_t system_count         = nu_indexed_array_get_size(world->systems);
+    for (uint32_t i = 0; i < system_count; i++) {
+        nuecs_system_update(systems[i]);
+    }
+
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_world_register_component(nuecs_world_t world_handle, const nuecs_component_info_t* info, nuecs_component_t* handle)
+{
+    nuecs_world_data_t *world = (nuecs_world_data_t*)world_handle;
+
     /* allocate memory */
     nuecs_component_data_t *component = (nuecs_component_data_t*)nu_malloc(sizeof(nuecs_component_data_t));
     component->component_id = world->next_component_id++;
@@ -92,8 +128,10 @@ nu_result_t nuecs_world_component_register(nuecs_world_data_t *world, const nuec
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_world_system_register(nuecs_world_data_t *world, const nuecs_system_info_t *info, nuecs_system_t *handle)
+nu_result_t nuecs_world_register_system(nuecs_world_t world_handle, const nuecs_system_info_t* info, nuecs_system_t* handle)
 {
+    nuecs_world_data_t *world = (nuecs_world_data_t*)world_handle;
+
     /* sort types ids */
     nuecs_component_data_t *components[NUECS_MAX_COMPONENT_PER_ENTITY];
     uint32_t component_count;
@@ -119,8 +157,11 @@ nu_result_t nuecs_world_system_register(nuecs_world_data_t *world, const nuecs_s
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_world_entity_create(nuecs_world_data_t *world, const nuecs_entity_info_t *info, nuecs_entity_t *handle)
+nu_result_t nuecs_world_create_entity(nuecs_world_t world_handle, const nuecs_entity_info_t* info, nuecs_entity_t* handle)
 {
+    nuecs_world_data_t *world = (nuecs_world_data_t*)world_handle;
+
+    /* sanatize components */
     nuecs_component_data_t *components[NUECS_MAX_COMPONENT_PER_ENTITY];
     uint32_t component_count;
     sanatize_components((nuecs_component_data_t**)info->components, info->component_count, components, &component_count);
@@ -148,8 +189,10 @@ nu_result_t nuecs_world_entity_create(nuecs_world_data_t *world, const nuecs_ent
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_world_entity_destroy(nuecs_world_data_t *world, nuecs_entity_t handle)
+nu_result_t nuecs_world_destroy_entity(nuecs_world_t world_handle, nuecs_entity_t handle)
 {
+    nuecs_world_data_t *world = (nuecs_world_data_t*)world_handle;
+
     uint32_t index;
     NU_HANDLE_GET_ID(handle, index);
     nu_array_push(world->deleted_entries, &index);
@@ -165,8 +208,10 @@ static bool archetype_has_component(const nuecs_archetype_data_t *archetype, con
     }
     return false;
 }
-nu_result_t nuecs_world_entity_add_component(nuecs_world_data_t *world, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t data)
+nu_result_t nuecs_world_entity_add_component(nuecs_world_t world_handle, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t data)
 {
+    nuecs_world_data_t *world = (nuecs_world_data_t*)world_handle;
+
     /* get entity entry */
     uint32_t index;
     NU_HANDLE_GET_ID(handle, index);
@@ -195,8 +240,10 @@ nu_result_t nuecs_world_entity_add_component(nuecs_world_data_t *world, nuecs_en
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_world_entity_remove_component(nuecs_world_data_t *world, nuecs_entity_t handle, nuecs_component_t component)
+nu_result_t nuecs_world_entity_remove_component(nuecs_world_t world_handle, nuecs_entity_t handle, nuecs_component_t component)
 {
+    nuecs_world_data_t *world = (nuecs_world_data_t*)world_handle;
+
     /* get entity entry */
     uint32_t index;
     NU_HANDLE_GET_ID(handle, index);
@@ -215,38 +262,6 @@ nu_result_t nuecs_world_entity_remove_component(nuecs_world_data_t *world, nuecs
 
     /* transfer entity */
     nuecs_archetype_transfer(entry, archetype);
-
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_world_update(nuecs_world_data_t *world)
-{
-    /* remove entities */
-    uint32_t *indices    = (uint32_t*)nu_array_get_data_const(world->deleted_entries);
-    uint32_t index_count = nu_array_get_size(world->deleted_entries);
-    nuecs_entity_entry_t *entries = (nuecs_entity_entry_t*)nu_array_get_data(world->entries);
-    for (uint32_t i = 0; i < index_count; i++) {
-        nuecs_archetype_remove_entity(&entries[i]);
-        nu_array_push(world->free_entries, &indices[i]);
-    }
-    nu_array_clear(world->deleted_entries);
-
-    /* update chunk frame size */
-    nuecs_archetype_data_t **archetypes = (nuecs_archetype_data_t**)nu_array_get_data(world->archetypes);
-    uint32_t archetype_count            = nu_array_get_size(world->archetypes);
-    for (uint32_t i = 0; i < archetype_count; i++) {
-        nuecs_chunk_data_t **chunks = (nuecs_chunk_data_t**)nu_array_get_data(archetypes[i]->chunks);
-        uint32_t chunk_count        = nu_array_get_size(archetypes[i]->chunks);
-        for (uint32_t j = 0; j < chunk_count; j++) {
-            chunks[j]->frame_size = chunks[j]->size;
-        }
-    }
-
-    /* update all systems */
-    nuecs_system_data_t **systems = (nuecs_system_data_t**)nu_indexed_array_get_data(world->systems);
-    uint32_t system_count         = nu_indexed_array_get_size(world->systems);
-    for (uint32_t i = 0; i < system_count; i++) {
-        nuecs_system_update(systems[i]);
-    }
 
     return NU_SUCCESS;
 }

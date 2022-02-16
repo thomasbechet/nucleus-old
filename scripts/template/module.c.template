@@ -1,0 +1,93 @@
+/* Generated file: DO NOT EDIT ! */
+#include <{{ module.directory }}/module.h>
+
+#include <{{ module.directory }}/definition.h>
+{%- for header in module.implementation_headers %}
+#include <{{ header }}>
+{%- endfor %}
+
+static const uint32_t interface_count = {{ module.implement_interfaces|length + 1 }};
+static const char *interfaces[] = {
+    NU_PLUGIN_INTERFACE_NAME,
+    {%- for interface in module.implement_interfaces %} 
+    {{ interface.definition.namespace|upper }}_{{ interface.definition.name|upper }}_INTERFACE_NAME{{ ',' if not loop.last }} 
+    {%- endfor %}
+};
+
+static const uint32_t plugin_count = {{ module.plugins|length }};
+static const char *plugins[] = {
+    {%- for plugin in module.plugins %}
+    {{ module.namespace|upper }}_{{ plugin.name|upper }}_PLUGIN_NAME{{ ',' if not loop.last }}
+    {%- endfor %}
+};
+
+static nu_result_t plugin_get_list(uint32_t *count, const char ***plugin_list)
+{
+    *count = plugin_count;
+    *plugin_list = plugins;
+    return NU_SUCCESS;
+}
+static nu_result_t plugin_get_callbacks(const char *name, nu_plugin_callbacks_t *callbacks)
+{
+    {%- for plugin in module.plugins %}
+    {%- if loop.first %}
+    if (NU_MATCH(name, {{ module.namespace|upper }}_{{ plugin.name|upper }}_PLUGIN_NAME)) {
+    {%- else %}
+    } else if (NU_MATCH(name, {{ module.namespace|upper }}_{{ plugin.name|upper }}_PLUGIN_NAME)) {
+    {%- endif %}
+        {%- if plugin.callbacks['initialize'] %}
+        callbacks->initialize = {{ module.namespace }}_{{ plugin.name }}_plugin_initialize;
+        {%- endif %}
+        {%- if plugin.callbacks['terminate'] %}
+        callbacks->terminate = {{ module.namespace }}_{{ plugin.name }}_plugin_terminate;
+        {%- endif %}
+        {%- if plugin.callbacks['update'] %}
+        callbacks->update = {{ module.namespace }}_{{ plugin.name }}_plugin_update;
+        {%- endif %}
+        {%- if plugin.callbacks['fixed_update'] %}
+        callbacks->fixed_update = {{ module.namespace }}_{{ plugin.name }}_plugin_fixed_update;
+        {%- endif %}
+        {%- if plugin.callbacks['late_update'] %}
+        callbacks->late_update = {{ module.namespace }}_{{ plugin.name }}_plugin_late_update;
+        {%- endif %}
+        return NU_SUCCESS;
+    {%- if loop.last %}
+    }
+    {%- endif %}
+    {%- endfor %}
+
+    return NU_FAILURE;
+}
+
+nu_result_t nu_module_info(nu_module_info_t *info)
+{
+    info->name = {{ module.namespace|upper }}_MODULE_NAME;
+    info->id = {{ module.namespace|upper }}_MODULE_ID;
+    info->flags = {{ module.flags|join(' | ') if module.flags else 'NU_MODULE_FLAG_NONE' }};
+    info->interface_count = interface_count;
+    info->interfaces = interfaces;
+
+    return NU_SUCCESS;
+}
+nu_result_t nu_module_interface(const char *name, void *interface)
+{
+    if (NU_MATCH(name, NU_PLUGIN_INTERFACE_NAME)) {
+        nu_plugin_interface_t *i = (nu_plugin_interface_t*)interface;
+
+        i->get_callbacks = plugin_get_callbacks;
+        i->get_list = plugin_get_list;
+
+        return NU_SUCCESS;
+    {%- for interface in module.implement_interfaces %}
+    } else if (NU_MATCH(name, {{ interface.definition.namespace|upper }}_{{ interface.definition.name|upper }}_INTERFACE_NAME)) {
+        {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t *i = ({{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t*)interface;
+        {% for function in interface.definition.functions %}
+        i->{{ function.name }} = {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }};
+        {%- endfor %}
+
+        return NU_SUCCESS;
+    {%- endfor %}
+    }
+
+    return NU_FAILURE;
+}

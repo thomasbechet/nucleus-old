@@ -3,12 +3,12 @@
 
 #include <nucleus/module/lua/module/interface.h>
 
-/* plugin interface */
-nu_result_t nulua_plugin_initialize(void);
-nu_result_t nulua_plugin_terminate(void);
-nu_result_t nulua_plugin_update(void);
+/* manager plugin */
+nu_result_t nulua_manager_plugin_initialize(void);
+nu_result_t nulua_manager_plugin_terminate(void);
+nu_result_t nulua_manager_plugin_update(void);
 
-/* lua plugin interface */
-nu_result_t nulua_plugin_load(const char *filename, nulua_plugin_t *handle);
+/* manager interface */
+nu_result_t nulua_manager_load_plugin(const char* path, nulua_plugin_t* handle);
 
 #endif

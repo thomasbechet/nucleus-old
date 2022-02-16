@@ -1,0 +1,29 @@
+{
+    "name": "nucleus-glfw",
+    "id": 1,
+    "flags": [],
+    "namespace": "nuglfw",
+    "directory": "nucleus/module/glfw/module",
+    "define_interfaces": [
+        "nucleus/module/glfw/window.interface.json"
+    ],
+    "implementation_headers": [
+        "nucleus/module/glfw/input/input.h",
+        "nucleus/module/glfw/window/window.h"
+    ],
+    "implement_interfaces": [
+        {
+            "path": "nucleus/module/glfw/window.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/core/system/window.interface.json",
+            "generate_loader": false
+        },
+        {
+            "path": "nucleus/core/system/input.interface.json",
+            "generate_loader": false
+        }
+    ],
+    "plugins": []
+}

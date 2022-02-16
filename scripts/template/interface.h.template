@@ -1,0 +1,36 @@
+/* Generated file: DO NOT EDIT ! */
+#ifndef {{ module.namespace|upper }}_MODULE_INTERFACE_H
+#define {{ module.namespace|upper }}_MODULE_INTERFACE_H
+
+#include <{{ module.directory }}/definition.h>
+
+/* loader */
+#ifdef {{ module.namespace|upper }}_LOADER_IMPLEMENTATION
+    {%- for interface in module.implement_interfaces %}
+    {%- if interface.generate_loader %}
+    {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t _{{ interface.definition.namespace }}_{{ interface.definition.name }}_interface;
+    nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_interface_load(nu_module_t module)
+    {
+        return nu_module_get_interface(module, {{ module.namespace|upper }}_{{ interface.definition.name|upper }}_INTERFACE_NAME, &_{{ module.namespace }}_{{ interface.definition.name }}_interface);
+    }
+    {%- for function in interface.definition.functions %}
+    nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }})
+    {
+        return _{{ interface.definition.namespace }}_{{ interface.definition.name }}_interface.{{ function.name }}({{ function.parameters|map(attribute='name')|join(', ') }});
+    }
+    {%- endfor %}
+    {%- endif %}
+    {%- endfor %}
+#else
+    {%- for interface in module.implement_interfaces %}
+    {%- if interface.generate_loader %}
+    extern {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t _{{ interface.definition.namespace }}_{{ interface.definition.name }}_interface;
+    nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_interface_load(nu_module_t module);
+    {%- for function in interface.functions %}
+    nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }});
+    {%- endfor %}
+    {%- endif %}
+    {%- endfor %}
+#endif
+
+#endif
