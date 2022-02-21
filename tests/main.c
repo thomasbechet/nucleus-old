@@ -31,7 +31,7 @@ static nu_result_t parse_scene(void)
     nu_json_object_t root;
     nu_json_array_t instances;
 
-    result = nu_json_allocate_from_file(&json, "$ENGINE_DIR/script/map.json");
+    result = nu_json_allocate_from_file(&json, "$ENGINE/script/map.json");
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, "MAIN", "Failed to parse json.");
     result = nu_json_value_as_object(nu_json_get_root(json), &root);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, "MAIN", "Failed to get root object.");
@@ -209,15 +209,15 @@ static nu_result_t nuecs_system2_update(nuecs_component_data_ptr_t *components, 
 static nu_result_t on_start(void)
 {
     nu_module_t module;
-    NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-utils", &module) == NU_SUCCESS);
+    NU_ASSERT(nu_module_load("$MODULE/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
 
     nu_module_t lua_module;
-    NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-lua", &lua_module) == NU_SUCCESS);
+    NU_ASSERT(nu_module_load("$MODULE/nucleus-lua", &lua_module) == NU_SUCCESS);
     nu_plugin_require(lua_module, NULUA_MANAGER_PLUGIN_NAME);
 
     nu_module_t ecs_module;
-    NU_ASSERT(nu_module_load("$MODULE_DIR/nucleus-ecs", &ecs_module) == NU_SUCCESS);
+    NU_ASSERT(nu_module_load("$MODULE/nucleus-ecs", &ecs_module) == NU_SUCCESS);
     nu_plugin_require(ecs_module, NUECS_WORLD_PLUGIN_NAME);
     nuecs_world_interface_load(ecs_module);
 
@@ -228,8 +228,8 @@ static nu_result_t on_start(void)
     /* load lua interface */
     NU_ASSERT(nulua_manager_interface_load(lua_module) == NU_SUCCESS);
     nulua_plugin_t plugin;
-    NU_ASSERT(nulua_manager_load_plugin("$ENGINE_DIR/script/test.lua", &plugin));
-    NU_ASSERT(nulua_manager_load_plugin("$ENGINE_DIR/script/spectator.lua", &plugin));
+    NU_ASSERT(nulua_manager_load_plugin("$ENGINE/script/test.lua", &plugin));
+    NU_ASSERT(nulua_manager_load_plugin("$ENGINE/script/spectator.lua", &plugin));
 
     /* load ecs interface */
     nuecs_world_t world;
@@ -290,6 +290,38 @@ static nu_result_t on_start(void)
     ima_data = stbi_load("engine/texture/brick.jpg", &width, &height, &channel, STBI_rgb);
     if (!ima_data) nu_interrupt(MAIN_LOGGER_NAME, "Failed to load brick texture.\n");
     stbi_image_free(ima_data);
+
+    /* test json */
+    // {
+    //     nu_json_t j;
+    //     nu_json_object_t o;
+    //     nu_json_allocate_empty_object(&j);
+    //     nu_json_value_as_object(nu_json_get_root(j), &o);
+    //     nu_json_object_put_cstr(o, "coucou", "salut !");
+    //     nu_json_object_put_double(o, "test", 123.45252);
+    //     nu_json_array_t a;
+    //     nu_json_object_put_empty_array(o, "array", &a);
+    //     nu_json_object_t sub;
+    //     nu_json_object_put_empty_object(o, "object", &sub);
+    //     nu_json_object_put_bool(o, "boolean", false);
+    //     nu_vec3f_t v = {0, 1, 2};
+    //     nu_json_object_put_vec3f(o, "myvector", v);
+
+    //     nu_transform_t t;
+    //     nu_transform_identity(&t);
+    //     nu_json_object_put_transform(o, "transform",  &t);
+
+    //     nu_json_array_t array;
+    //     nu_json_object_put_empty_array(o, "mylist", &array);
+    //     nu_json_array_add_transform(array, &t);
+    //     nu_json_array_add_transform(array, &t);
+    //     nu_json_array_add_transform(array, &t);
+    //     nu_json_array_add_uint(array, 12345);
+    //     nu_json_array_add_cstr(array, "coucou ma biche !");
+
+    //     nu_json_print_file(j, "$ROOT/test.json", true);
+    //     nu_json_free(j);
+    // }
 
     return NU_SUCCESS;
 }

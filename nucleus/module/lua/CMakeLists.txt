@@ -12,7 +12,7 @@ else (UNIX OR MINGW)
 endif()
 
 INCLUDE_DIRECTORIES(
-    ../../../extlibs/lua/include/
+    ../../../externals/lua/include/
     ../../../
 )
 
@@ -32,7 +32,7 @@ elseif (MINGW)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
         mingw32
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/lua/lib/lib-mingw-w64/liblua.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../externals/lua/lib/lib-mingw-w64/liblua.a
     )
 elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 

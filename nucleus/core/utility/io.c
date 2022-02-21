@@ -135,3 +135,9 @@ nu_result_t nu_file_write_string(nu_file_t file, nu_string_t str)
     
     return NU_SUCCESS;
 }
+nu_result_t nu_file_write_cstr(nu_file_t file, const char *cstr)
+{
+    fputs(cstr, (FILE*)file);
+    
+    return NU_SUCCESS;
+}

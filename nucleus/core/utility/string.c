@@ -458,9 +458,9 @@ void nu_string_array_clear(nu_string_array_t array)
 
 void nu_string_resolve_path(nu_string_t *path)
 {
-    nu_string_replace_cstr(path, "$ENGINE_DIR", NU_PATH_ENGINE_DIRECTORY);
-    nu_string_replace_cstr(path, "$MODULE_DIR", NU_PATH_MODULE_DIRECTORY);
-    nu_string_replace_cstr(path, "$ROOT_DIR", NU_PATH_ROOT_DIRECTORY);
+    nu_string_replace_cstr(path, "$ENGINE", NU_PATH_ENGINE_DIRECTORY);
+    nu_string_replace_cstr(path, "$MODULE", NU_PATH_MODULE_DIRECTORY);
+    nu_string_replace_cstr(path, "$ROOT", NU_PATH_ROOT_DIRECTORY);
 
     nu_string_replace_cstr(path, "\\", NU_PATH_SEPARATOR);
     nu_string_replace_cstr(path, "//", NU_PATH_SEPARATOR);

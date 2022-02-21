@@ -7,9 +7,9 @@ SET(CMAKE_BUILD_TYPE Debug)
 
 INCLUDE_DIRECTORIES(
     ../
-    ../extlibs/stb/include/
-    ../extlibs/tinyobjloader/include/
-    ../extlibs/json/include/
+    ../externals/stb/include/
+    ../externals/tinyobjloader/include/
+    ../externals/json/include/
 )
 
 ADD_EXECUTABLE(

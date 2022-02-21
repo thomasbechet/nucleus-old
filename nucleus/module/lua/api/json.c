@@ -6,12 +6,10 @@
 
 static nu_result_t resolve_value(lua_State *L, nu_json_value_t value)
 {
-    nu_json_type_t type = nu_json_value_get_type(value);
-
-    if (type == NU_JSON_TYPE_ARRAY) {
+    if (nu_json_value_is_array(value)) {
         nu_json_array_t array;
         nu_json_value_as_array(value, &array);
-        lua_createtable(L, nu_json_array_get_length(array), 0);
+        lua_createtable(L, nu_json_array_get_size(array), 0);
         nu_json_array_iterator_t it = NU_NULL_HANDLE;
         int i = 0;
         while (nu_json_array_next(array, &it)) {
@@ -19,20 +17,20 @@ static nu_result_t resolve_value(lua_State *L, nu_json_value_t value)
             lua_rawseti(L, -2, ++i);
         }
         return NU_SUCCESS;
-    } else if (type == NU_JSON_TYPE_BOOL) {
+    } else if (nu_json_value_is_bool(value)) {
         bool b;
         nu_json_value_as_bool(value, &b);
         lua_pushboolean(L, b);
         return NU_SUCCESS;
-    } else if (type == NU_JSON_TYPE_NULL) {
+    } else if (nu_json_value_is_null(value)) {
         lua_pushnil(L);
         return NU_SUCCESS;
-    } else if (type == NU_JSON_TYPE_NUMBER) {
+    } else if (nu_json_value_is_number(value)) {
         double d;
         nu_json_value_as_double(value, &d);
         lua_pushnumber(L, d);
         return NU_SUCCESS;
-    } else if (type == NU_JSON_TYPE_OBJECT) {
+    } else if (nu_json_value_is_object(value)) {
         nu_json_object_t object;
         nu_json_value_as_object(value, &object);
         lua_newtable(L);
@@ -42,7 +40,7 @@ static nu_result_t resolve_value(lua_State *L, nu_json_value_t value)
             lua_setfield(L, -2, nu_json_object_iterator_get_name(it));
         }
         return NU_SUCCESS;
-    } else if (type == NU_JSON_TYPE_STRING) {
+    } else if (nu_json_value_is_string(value)) {
         const char *str;
         nu_json_value_as_cstr(value, &str);
         lua_pushstring(L, str);

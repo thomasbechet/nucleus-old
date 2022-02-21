@@ -110,7 +110,7 @@ static nu_result_t glsl_source_to_spirv_code(
         nu_file_t file;
         nu_result_t result;
 
-        nu_string_allocate_format(&filename, "$ENGINE_DIR/shader/dump/%s.dump", identifier);
+        nu_string_allocate_format(&filename, "$ENGINE/shader/dump/%s.dump", identifier);
         nu_string_resolve_path(&filename);
         result = nu_file_open(&file, nu_string_get_cstr(filename), NU_IO_MODE_WRITE);
         if (result == NU_SUCCESS) {

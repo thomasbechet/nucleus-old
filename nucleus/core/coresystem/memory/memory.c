@@ -3,6 +3,8 @@
 #include <nucleus/core/context/context.h>
 #include <nucleus/core/coresystem/logger/logger.h>
 
+#include <cJSON/cJSON.h>
+
 typedef struct {
     uint64_t alloc_count;
     uint64_t alloc_aligned_count;
@@ -30,6 +32,12 @@ nu_result_t nu_memory_initialize(void)
     _system.free_aligned_count    = 0;
     _system.realloc_count         = 0;
     _system.realloc_aligned_count = 0;
+
+    /* setup cJSON hooks */
+    cJSON_Hooks hooks;
+    hooks.malloc_fn = nu_malloc;
+    hooks.free_fn   = nu_free;
+    cJSON_InitHooks(&hooks);
 
     return NU_SUCCESS;
 }
