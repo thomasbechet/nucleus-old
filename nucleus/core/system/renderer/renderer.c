@@ -7,9 +7,9 @@
 #define NU_LOGGER_RENDERER_NAME "RENDERER"
 
 static const char *nu_renderer_api_names[] = {
-    "$MODULE_DIR/nucleus-renderer-none",
-    "$MODULE_DIR/nucleus-renderer-none",
-    "$MODULE_DIR/"NUVK_MODULE_NAME
+    "$MODULE/nucleus-renderer-none",
+    "$MODULE/nucleus-renderer-none",
+    "$MODULE/"NUVK_MODULE_NAME
 };
 
 typedef struct {

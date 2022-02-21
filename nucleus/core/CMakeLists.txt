@@ -18,18 +18,21 @@ if (OPENMP_FOUND)
 endif()
 
 INCLUDE_DIRECTORIES(
-    ../../extlibs/cglm/include/
-    ../../extlibs/ini/include/
-    ../../extlibs/json/include/
+    ../../externals/cglm/include/
+    ../../externals/ini/include/
+    ../../externals/json/include/
+    ../../externals/cJSON/include/
     ../../
 )
 
-FILE(GLOB_RECURSE sources_ini ${CMAKE_CURRENT_SOURCE_DIR}/../../extlibs/ini/include/*.c)
+FILE(GLOB_RECURSE sources_ini ${CMAKE_CURRENT_SOURCE_DIR}/../../externals/ini/include/*.c)
+FILE(GLOB_RECURSE sources_cjson ${CMAKE_CURRENT_SOURCE_DIR}/../../externals/cJSON/include/*.c)
 FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
 ADD_LIBRARY(
     ${PROJECT_NAME} SHARED
     ${sources_ini}
+    ${sources_cjson}
     ${sources}
 )
 

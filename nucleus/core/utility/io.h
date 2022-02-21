@@ -21,5 +21,6 @@ NU_API nu_result_t nu_io_readall_string(const char *filename, nu_string_t *str);
 NU_API nu_result_t nu_file_write_vprintf(nu_file_t file, const char *format, va_list args);
 NU_API nu_result_t nu_file_write_printf(nu_file_t file, const char *format, ...);
 NU_API nu_result_t nu_file_write_string(nu_file_t file, nu_string_t str);
+NU_API nu_result_t nu_file_write_cstr(nu_file_t file, const char *cstr);
 
 #endif

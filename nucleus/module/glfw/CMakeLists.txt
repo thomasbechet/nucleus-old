@@ -18,8 +18,8 @@ IF (NU_BUILD_MODULE_VULKAN)
 ENDIF()
 
 INCLUDE_DIRECTORIES(
-    ../../../extlibs/glfw/include/
-    ../../../extlibs/glew/include/
+    ../../../externals/glfw/include/
+    ../../../externals/glew/include/
     ../../../
     IF (NU_BUILD_MODULE_VULKAN)
         ${Vulkan_INCLUDE_DIRS}
@@ -30,7 +30,7 @@ FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
 ADD_LIBRARY(
     ${PROJECT_NAME} SHARED
-    ../../../extlibs/glew/src/glew.c
+    ../../../externals/glew/src/glew.c
     ${sources}
 )
 
@@ -40,20 +40,20 @@ if (MSVC)
 	TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
         "${OPENGL_gl_LIBRARY}"
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-vc2019/glfw3.lib
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../externals/glfw/lib/lib-vc2019/glfw3.lib
     )
 elseif (MINGW)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
         "${OPENGL_gl_LIBRARY}" 
         mingw32
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-mingw-w64/libglfw3.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../externals/glfw/lib/lib-mingw-w64/libglfw3.a
     )
 elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
         "${OPENGL_gl_LIBRARY}"
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/glfw/lib/lib-unix/libglfw3.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../externals/glfw/lib/lib-unix/libglfw3.a
     )
 endif()
 

@@ -15,9 +15,9 @@ FIND_PACKAGE(Vulkan REQUIRED FATAL_ERROR)
 
 INCLUDE_DIRECTORIES(
     ../../../
-    ../../../extlibs/vma/include/
-    ../../../extlibs/shaderc/include/
-    ../../../extlibs/stb/include/
+    ../../../externals/vma/include/
+    ../../../externals/shaderc/include/
+    ../../../externals/stb/include/
     ${Vulkan_INCLUDE_DIRS}
 )
 
@@ -39,13 +39,13 @@ elseif (MINGW)
         nucleus
         mingw32
         ${Vulkan_LIBRARIES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/shaderc/lib/lib-mingw-w64/libshaderc_combined.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../externals/shaderc/lib/lib-mingw-w64/libshaderc_combined.a
     )
 elseif (UNIX)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} 
         nucleus
         ${Vulkan_LIBRARIES}
-        ${CMAKE_CURRENT_SOURCE_DIR}/../../../extlibs/shaderc/lib/lib-unix/libshaderc_combined.a
+        ${CMAKE_CURRENT_SOURCE_DIR}/../../../externals/shaderc/lib/lib-unix/libshaderc_combined.a
     )
 endif()
 

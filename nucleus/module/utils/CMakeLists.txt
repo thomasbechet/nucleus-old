@@ -13,8 +13,8 @@ endif()
 FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
 INCLUDE_DIRECTORIES(
-    ../../../extlibs/stb/include/
-    ../../../extlibs/tinyobjloader/include/
+    ../../../externals/stb/include/
+    ../../../externals/tinyobjloader/include/
     ../../../
 )
 

@@ -3,11 +3,11 @@
 #include <nucleus/module/vulkan/core/context.h>
 
 static const char *glsl_sources[] = {
-    "$ENGINE_DIR/shader/geometry_template.frag",
-    "$ENGINE_DIR/shader/geometry_template.vert",
-    "$ENGINE_DIR/shader/light.comp",
-    "$ENGINE_DIR/shader/postprocess.frag",
-    "$ENGINE_DIR/shader/postprocess.vert"
+    "$ENGINE/shader/geometry_template.frag",
+    "$ENGINE/shader/geometry_template.vert",
+    "$ENGINE/shader/light.comp",
+    "$ENGINE/shader/postprocess.frag",
+    "$ENGINE/shader/postprocess.vert"
 };
 
 static nu_result_t nuvk_pipeline_sources_load(nu_string_t *sources)
