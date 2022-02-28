@@ -133,6 +133,15 @@ bool nu_array_pop(nu_array_t array)
     }
     return false;
 }
+void nu_array_resize(nu_array_t array, uint32_t size)
+{
+    nu_array_header_t *header = (nu_array_header_t*)array;
+    header->size = size;
+    if (header->size > header->capacity) {
+        header->capacity = size;
+        header->data = nu_realloc(header->data, header->object_size * header->capacity);
+    }
+}
 void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second)
 {
     nu_array_header_t *header = (nu_array_header_t*)array;

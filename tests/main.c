@@ -172,6 +172,32 @@ typedef struct {
     uint32_t id;
     uint32_t v;
 } stest;
+
+static nu_result_t serialize_position(const nuecs_component_data_ptr_t data, nu_json_object_t json)
+{
+    const position_t *position = (const position_t*)data;
+    nu_json_object_put_vec3f(json, "value", position->pos);
+    return NU_SUCCESS;
+}
+static nu_result_t serialize_health(const nuecs_component_data_ptr_t data, nu_json_object_t json)
+{
+    const health_t *health = (const health_t*)data;
+    nu_json_object_put_float(json, "value", health->value);
+    return NU_SUCCESS;
+}
+static nu_result_t serialize_velocity(const nuecs_component_data_ptr_t data, nu_json_object_t json)
+{
+    const velocity_t *velocity = (const velocity_t*)data;
+    nu_json_object_put_vec3f(json, "value", velocity->velocity);
+    return NU_SUCCESS;  
+}
+static nu_result_t serialize_score(const nuecs_component_data_ptr_t data, nu_json_object_t json)
+{
+    const score_t *score = (const score_t*)data;
+    nu_json_object_put_float(json, "value", score->score);
+    return NU_SUCCESS;
+}
+
 static uint32_t nu_random()
 {
     static uint32_t next = 1231125;
@@ -218,8 +244,9 @@ static nu_result_t on_start(void)
 
     nu_module_t ecs_module;
     NU_ASSERT(nu_module_load("$MODULE/nucleus-ecs", &ecs_module) == NU_SUCCESS);
-    nu_plugin_require(ecs_module, NUECS_WORLD_PLUGIN_NAME);
-    nuecs_world_interface_load(ecs_module);
+    nu_plugin_require(ecs_module, NUECS_SCENE_PLUGIN_NAME);
+    nuecs_scene_interface_load(ecs_module);
+    nuecs_manager_interface_load(ecs_module);
 
     /* load sdf interface */
     nu_module_t renderer_module = nu_renderer_get_module();
@@ -232,14 +259,42 @@ static nu_result_t on_start(void)
     NU_ASSERT(nulua_manager_load_plugin("$ENGINE/script/spectator.lua", &plugin));
 
     /* load ecs interface */
-    nuecs_world_t world;
-    NU_ASSERT(nuecs_world_create(&world) == NU_SUCCESS);
+    // nuecs_scene_t scene;
+    // NU_ASSERT(nuecs_scene_create(&scene) == NU_SUCCESS);
 
-    nuecs_component_t position_component, health_component, velocity_component, score_component;
-    NUECS_REGISTER_COMPONENT(ecs, world, position_t, position_component);
-    NUECS_REGISTER_COMPONENT(ecs, world, health_t, health_component);
-    NUECS_REGISTER_COMPONENT(ecs, world, velocity_t, velocity_component);
-    NUECS_REGISTER_COMPONENT(ecs, world, score_t, score_component);
+    // nuecs_component_t position_component, health_component, velocity_component, score_component;
+    // {
+    //     nuecs_component_info_t info;
+    //     info.name             = "position_t";
+    //     info.size             = sizeof(position_t);
+    //     info.serialize_json   = serialize_position;
+    //     info.deserialize_json = NULL;
+    //     nuecs_scene_register_component(scene, &info, &position_component);
+    // }
+    // {
+    //     nuecs_component_info_t info;
+    //     info.name             = "health_t";
+    //     info.size             = sizeof(health_t);
+    //     info.serialize_json   = serialize_health;
+    //     info.deserialize_json = NULL;
+    //     nuecs_scene_register_component(scene, &info, &health_component);
+    // }
+    // {
+    //     nuecs_component_info_t info;
+    //     info.name             = "velocity_t";
+    //     info.size             = sizeof(velocity_t);
+    //     info.serialize_json   = serialize_velocity;
+    //     info.deserialize_json = NULL;
+    //     nuecs_scene_register_component(scene, &info, &velocity_component);
+    // }
+    // {
+    //     nuecs_component_info_t info;
+    //     info.name             = "score_t";
+    //     info.size             = sizeof(score_t);
+    //     info.serialize_json   = serialize_score;
+    //     info.deserialize_json = NULL;
+    //     nuecs_scene_register_component(scene, &info, &score_component);
+    // }
 
     position_t position;
     nu_vec3f_copy((nu_vec3f_t){3, 1, 2}, position.pos);
@@ -248,41 +303,46 @@ static nu_result_t on_start(void)
     nu_vec3f_copy((nu_vec3f_t){5, 1, 2}, velocity.velocity);
     score_t score;
     
-    nuecs_system_t system0, system1, system2;
-    nuecs_component_t system0_components[] = {health_component, position_component};
-    NUECS_REGISTER_SYSTEM(ecs, world, system0_components, nuecs_system0_update, system0);
-    nuecs_component_t system1_components[] = {position_component};
-    NUECS_REGISTER_SYSTEM(ecs, world, system1_components, nuecs_system1_update, system1);
-    nuecs_component_t system2_components[] = {position_component, velocity_component};
-    NUECS_REGISTER_SYSTEM(ecs, world, system2_components, nuecs_system2_update, system2);
+    // nuecs_system_t system0, system1, system2;
+    // nuecs_component_t system0_components[] = {health_component, position_component};
+    // NUECS_REGISTER_SYSTEM(scene, system0_components, nuecs_system0_update, system0);
+    // nuecs_component_t system1_components[] = {position_component};
+    // NUECS_REGISTER_SYSTEM(scene, system1_components, nuecs_system1_update, system1);
+    // nuecs_component_t system2_components[] = {position_component, velocity_component};
+    // NUECS_REGISTER_SYSTEM(scene, system2_components, nuecs_system2_update, system2);
 
-    nuecs_entity_t entity0;
-    nuecs_entity_info_t info1;
-    info1.components      = (nuecs_component_t[]){position_component, velocity_component};
-    info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
-    info1.component_count = 2;
-    nuecs_world_create_entity(world, &info1, &entity0);
+    // for (uint32_t i = 0; i < 100; i++) {
+    //     nuecs_entity_t entity0;
+    //     nuecs_entity_info_t info1;
+    //     info1.components      = (nuecs_component_t[]){position_component, velocity_component};
+    //     info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
+    //     info1.component_count = 2;
+    //     nuecs_scene_create_entity(scene, &info1, &entity0);
+    // }
 
-    nu_info("WORLD", "start");
-    nuecs_world_progress(world);
+    // nu_info("WORLD", "start");
+    // nuecs_scene_progress(scene);
 
     // nu_info("WORLD", "add velocity component");
-    // ecs.entity_add_component(world, entity0, velocity_component, &velocity);
-    // ecs.world_progress(world);
+    // ecs.entity_add_component(scene, entity0, velocity_component, &velocity);
+    // ecs.scene_progress(scene);
 
-    nu_info("WORLD", "remove velocity component");
-    nuecs_world_entity_remove_component(world, entity0, velocity_component);
-    nuecs_world_progress(world);
+    // nu_info("WORLD", "remove velocity component");
+    // nuecs_scene_entity_remove_component(scene, entity0, velocity_component);
+    // nuecs_scene_progress(scene);
 
-    nu_info("WORLD", "remove position component");
-    nuecs_world_entity_remove_component(world, entity0, position_component);
-    nuecs_world_progress(world);
+    // nu_info("WORLD", "remove position component");
+    // nuecs_scene_entity_remove_component(scene, entity0, position_component);
+    // nuecs_scene_progress(scene);
 
     // nu_info("WORLD", "destroy");
-    // ecs.entity_destroy(world, entity0);
-    // ecs.world_progress(world);
+    // ecs.entity_destroy(scene, entity0);
+    // ecs.scene_progress(scene);
     
-    nu_info("WORLD", "end");
+    // nu_info("WORLD", "end");
+
+    // nuecs_scene_save_file(scene, "$ROOT/mywork.json");
+    // nu_context_request_stop();
 
     /* load texture */
     int width, height, channel;
@@ -292,36 +352,36 @@ static nu_result_t on_start(void)
     stbi_image_free(ima_data);
 
     /* test json */
-    // {
-    //     nu_json_t j;
-    //     nu_json_object_t o;
-    //     nu_json_allocate_empty_object(&j);
-    //     nu_json_value_as_object(nu_json_get_root(j), &o);
-    //     nu_json_object_put_cstr(o, "coucou", "salut !");
-    //     nu_json_object_put_double(o, "test", 123.45252);
-    //     nu_json_array_t a;
-    //     nu_json_object_put_empty_array(o, "array", &a);
-    //     nu_json_object_t sub;
-    //     nu_json_object_put_empty_object(o, "object", &sub);
-    //     nu_json_object_put_bool(o, "boolean", false);
-    //     nu_vec3f_t v = {0, 1, 2};
-    //     nu_json_object_put_vec3f(o, "myvector", v);
+    {
+        nu_json_t j;
+        nu_json_object_t o;
+        nu_json_allocate_empty_object(&j);
+        nu_json_value_as_object(nu_json_get_root(j), &o);
+        nu_json_object_put_cstr(o, "coucou", "salut !");
+        nu_json_object_put_double(o, "test", 123.45252);
+        nu_json_array_t a;
+        nu_json_object_put_empty_array(o, "array", &a);
+        nu_json_object_t sub;
+        nu_json_object_put_empty_object(o, "object", &sub);
+        nu_json_object_put_bool(o, "boolean", false);
+        nu_vec3f_t v = {0, 1, 2};
+        nu_json_object_put_vec3f(o, "myvector", v);
 
-    //     nu_transform_t t;
-    //     nu_transform_identity(&t);
-    //     nu_json_object_put_transform(o, "transform",  &t);
+        nu_transform_t t;
+        nu_transform_identity(&t);
+        nu_json_object_put_transform(o, "transform",  &t);
 
-    //     nu_json_array_t array;
-    //     nu_json_object_put_empty_array(o, "mylist", &array);
-    //     nu_json_array_add_transform(array, &t);
-    //     nu_json_array_add_transform(array, &t);
-    //     nu_json_array_add_transform(array, &t);
-    //     nu_json_array_add_uint(array, 12345);
-    //     nu_json_array_add_cstr(array, "coucou ma biche !");
+        nu_json_array_t array;
+        nu_json_object_put_empty_array(o, "mylist", &array);
+        nu_json_array_add_transform(array, &t);
+        nu_json_array_add_transform(array, &t);
+        nu_json_array_add_transform(array, &t);
+        nu_json_array_add_uint(array, 12345);
+        nu_json_array_add_cstr(array, "coucou ma biche !");
 
-    //     nu_json_print_file(j, "$ROOT/test.json", true);
-    //     nu_json_free(j);
-    // }
+        nu_json_save_file(j, "$ROOT/test.json", true);
+        nu_json_free(j);
+    }
 
     return NU_SUCCESS;
 }

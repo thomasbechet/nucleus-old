@@ -1,50 +1,15 @@
 {
     "namespace": "nuecs",
-    "name": "world",
+    "name": "scene",
     "include_headers": [
         "nucleus/module/ecs/plugin/types_public.h"
     ],
     "functions": [
         {
-            "name": "create",
-            "parameters": [
-                {
-                    "type": "nuecs_world_t*",
-                    "name": "handle"
-                }
-            ]    
-        },
-        {
-            "name": "destroy",
-            "parameters": [
-                {
-                    "type": "nuecs_world_t",
-                    "name": "handle"
-                }
-            ]    
-        },
-        {
             "name": "progress",
             "parameters": [
                 {
-                    "type": "nuecs_world_t",
-                    "name": "handle"
-                }
-            ]    
-        },
-        {
-            "name": "register_component",
-            "parameters": [
-                {
-                    "type": "nuecs_world_t",
-                    "name": "world_handle"
-                },
-                {
-                    "type": "const nuecs_component_info_t*",
-                    "name": "info"
-                },
-                {
-                    "type": "nuecs_component_t*",
+                    "type": "nuecs_scene_t",
                     "name": "handle"
                 }
             ]    
@@ -53,8 +18,8 @@
             "name": "register_system",
             "parameters": [
                 {
-                    "type": "nuecs_world_t",
-                    "name": "world_handle"
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
                 },
                 {
                     "type": "const nuecs_system_info_t*",
@@ -70,8 +35,8 @@
             "name": "create_entity",
             "parameters": [
                 {
-                    "type": "nuecs_world_t",
-                    "name": "world_handle"
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
                 },
                 {
                     "type": "const nuecs_entity_info_t*",
@@ -87,8 +52,8 @@
             "name": "destroy_entity",
             "parameters": [
                 {
-                    "type": "nuecs_world_t",
-                    "name": "world_handle"
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
                 },
                 {
                     "type": "nuecs_entity_t",
@@ -100,8 +65,8 @@
             "name": "entity_add_component",
             "parameters": [
                 {
-                    "type": "nuecs_world_t",
-                    "name": "world_handle"
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
                 },
                 {
                     "type": "nuecs_entity_t",
@@ -121,8 +86,8 @@
             "name": "entity_remove_component",
             "parameters": [
                 {
-                    "type": "nuecs_world_t",
-                    "name": "world_handle"
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
                 },
                 {
                     "type": "nuecs_entity_t",
@@ -133,6 +98,19 @@
                     "name": "component"
                 }
             ]    
+        },
+        {
+            "name": "save_file",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "const char*",
+                    "name": "filename"
+                }
+            ]
         }
     ]
 }

@@ -1,49 +1,23 @@
 #include <nucleus/module/ecs/plugin/plugin.h>
 
-#include <nucleus/module/ecs/plugin/world.h>
+#include <nucleus/module/ecs/plugin/scene_manager.h>
+#include <nucleus/module/ecs/plugin/component_manager.h>
 
-typedef struct {
-    nu_indexed_array_t worlds;
-} nuecs_module_data_t;
-
-static nuecs_module_data_t _module;
-
-nu_result_t nuecs_world_plugin_initialize(void)
+/* plugin */
+nu_result_t nuecs_scene_plugin_initialize(void)
 {
-    nu_indexed_array_allocate(&_module.worlds, sizeof(nuecs_world_data_t*));
-
+    // nuecs_component_manager_initialize();
+    // nuecs_scene_manager_initialize();
     return NU_SUCCESS;
 }
-nu_result_t nuecs_world_plugin_terminate(void)
+nu_result_t nuecs_scene_plugin_terminate(void)
 {
-    nuecs_world_data_t **worlds = (nuecs_world_data_t**)nu_indexed_array_get_data(_module.worlds);
-    uint32_t world_count = nu_indexed_array_get_size(_module.worlds);
-    for (uint32_t i = 0; i < world_count; i++) {
-        nuecs_world_terminate(worlds[i]);
-        nu_free(worlds[i]);
-    }
-    nu_indexed_array_free(_module.worlds);
-
+    // nuecs_scene_manager_terminate();
+    // nuecs_component_manager_terminate();
     return NU_SUCCESS;
 }
-nu_result_t nuecs_world_plugin_update(void)
+nu_result_t nuecs_scene_plugin_update(void)
 {
-    nuecs_world_data_t **worlds = (nuecs_world_data_t**)nu_indexed_array_get_data(_module.worlds);
-    uint32_t world_count        = nu_indexed_array_get_size(_module.worlds);
-    for (uint32_t i = 0; i < world_count; i++) {
-        nuecs_world_progress((nuecs_world_t)worlds[i]);
-    }
-    return NU_SUCCESS;
-}
-
-nu_result_t nuecs_world_create(nuecs_world_t* handle)
-{
-    nuecs_world_data_t *world = (nuecs_world_data_t*)nu_malloc(sizeof(nuecs_world_data_t));
-    nu_indexed_array_add(_module.worlds, &world, &world->id);
-    *handle = (nuecs_world_t)world;
-    return nuecs_world_initialize(world);
-}
-nu_result_t nuecs_world_destroy(nuecs_world_t handle)
-{
+    // return nuecs_scene_manager_progress();
     return NU_SUCCESS;
 }

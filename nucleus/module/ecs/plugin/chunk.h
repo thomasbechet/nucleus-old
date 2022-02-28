@@ -15,15 +15,21 @@ nu_result_t nuecs_chunk_remove(
     nuecs_chunk_data_t *chunk,
     uint32_t id
 );
+nu_result_t nuecs_chunk_transfer(
+    nuecs_chunk_data_t *chunk,
+    nuecs_chunk_data_t *dst,
+    uint32_t id,
+    uint32_t *dst_id
+);
 nu_result_t nuecs_chunk_get_component(
     nuecs_chunk_data_t *chunk,
-    uint32_t entity_id,
+    uint32_t id,
     uint32_t component_index,
     nuecs_component_data_ptr_t *component
 );
 nu_result_t nuecs_chunk_write_component(
     nuecs_chunk_data_t *chunk,
-    uint32_t entity_id,
+    uint32_t id,
     uint32_t component_index,
     nuecs_component_data_ptr_t data
 );

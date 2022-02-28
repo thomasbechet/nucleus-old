@@ -66,6 +66,11 @@ static nu_result_t on_start(void)
         nu_array_free(ids);
     }
 
+    /* test hashmap */
+    {
+        
+    }
+
     nu_context_request_stop();
 
     return NU_SUCCESS;

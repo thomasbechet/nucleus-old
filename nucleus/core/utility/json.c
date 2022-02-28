@@ -50,7 +50,7 @@ nu_result_t nu_json_allocate_from_cstr(nu_json_t *json, const char *cstr)
 {
     return nu_json_parse(json, cstr, strlen(cstr));
 }
-nu_result_t nu_json_print_file(nu_json_t json, const char *filename, bool minify)
+nu_result_t nu_json_save_file(nu_json_t json, const char *filename, bool minify)
 {
     /* resolve path */
     nu_string_t path;
