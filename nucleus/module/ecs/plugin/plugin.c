@@ -6,18 +6,18 @@
 /* plugin */
 nu_result_t nuecs_scene_plugin_initialize(void)
 {
-    // nuecs_component_manager_initialize();
-    // nuecs_scene_manager_initialize();
+    nuecs_component_manager_initialize();
+    nuecs_scene_manager_initialize();
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_plugin_terminate(void)
 {
-    // nuecs_scene_manager_terminate();
-    // nuecs_component_manager_terminate();
+    nuecs_scene_manager_terminate();
+    nuecs_component_manager_terminate();
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_plugin_update(void)
 {
-    // return nuecs_scene_manager_progress();
+    return nuecs_scene_manager_progress();
     return NU_SUCCESS;
 }

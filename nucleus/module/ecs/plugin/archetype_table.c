@@ -20,6 +20,7 @@ nu_result_t nuecs_archetype_table_terminate(nu_array_t table)
             }
         }
     }
+    nu_array_free(table);
     return NU_SUCCESS;
 }
 static bool find_chunk_not_full(const void *user, const void *object) {

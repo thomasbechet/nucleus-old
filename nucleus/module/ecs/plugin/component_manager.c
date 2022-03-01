@@ -7,8 +7,8 @@ static nuecs_component_manager_data_t _manager;
 nu_result_t nuecs_component_manager_initialize(void)
 {
     /* allocate resources */
-    nu_array_allocate(_manager.archetypes, sizeof(nuecs_archetype_t*));
-    nu_indexed_array_allocate(_manager.components, sizeof(nuecs_component_data_t*));
+    nu_array_allocate(&_manager.archetypes, sizeof(nuecs_archetype_t*));
+    nu_indexed_array_allocate(&_manager.components, sizeof(nuecs_component_data_t*));
     _manager.next_archetype_index = 0;
 
     /* create empty archetype */
@@ -57,6 +57,11 @@ nu_result_t nuecs_component_manager_register_component(const nuecs_component_inf
 
     return NU_SUCCESS;
 }
+nu_result_t nuecs_component_manager_get_component(uint32_t component_id, nuecs_component_data_t **component)
+{
+    *component = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, component_id);
+    return NU_SUCCESS;
+}
 nu_result_t nuecs_component_manager_find_archetype(
     nuecs_component_data_t **components,
     uint32_t component_count,
@@ -80,10 +85,10 @@ nu_result_t nuecs_component_manager_find_next_archetype(
 )
 {
      /* find next archetype */
-    nuecs_archetype_find_next(current, component, &current);
+    nuecs_archetype_find_next(current, component, archetype);
     
     /* next archetype not found */
-    if (!current) {
+    if (!archetype) {
 
         /* create new archetype */
         nuecs_archetype_data_t *new;
@@ -100,7 +105,7 @@ nu_result_t nuecs_component_manager_find_next_archetype(
 
         /* add archetype to the list */
         nu_array_push(_manager.archetypes, &new);
-        *archetype = current;
+        *archetype = new;
     }
 
     return NU_SUCCESS;
@@ -113,7 +118,7 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
 {
     /* find previous archetype */
     nuecs_archetype_data_t *previous;
-    nuecs_archetype_find_previous(archetype, component, &previous);
+    nuecs_archetype_find_previous(current, component, &previous);
 
     /* not found */
     if (!previous) {
@@ -124,7 +129,7 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
         /* copy components */
         uint32_t j = 0;
         for (uint32_t i = 0; i < current->component_count; i++) {
-            nuecs_component_data_t *c = (nuecs_component_data_ptr_t*)nu_indexed_array_get(_manager.components, current->component_ids[i]);
+            nuecs_component_data_t *c = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, current->component_ids[i]);
             if (c != component) {
                 components[j++] = c;
             }

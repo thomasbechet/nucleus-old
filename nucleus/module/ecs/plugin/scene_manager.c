@@ -1,5 +1,7 @@
 #include <nucleus/module/ecs/plugin/scene_manager.h>
 
+#include <nucleus/module/ecs/plugin/scene.h>
+
 static nuecs_scene_manager_data_t _manager;
 
 nu_result_t nuecs_scene_manager_initialize(void)

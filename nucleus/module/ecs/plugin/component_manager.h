@@ -7,6 +7,7 @@ nu_result_t nuecs_component_manager_initialize(void);
 nu_result_t nuecs_component_manager_terminate(void);
 
 nu_result_t nuecs_component_manager_register_component(const nuecs_component_info_t* info, nuecs_component_t* handle);
+nu_result_t nuecs_component_manager_get_component(uint32_t component_id, nuecs_component_data_t **component);
 nu_result_t nuecs_component_manager_find_archetype(
     nuecs_component_data_t **components,
     uint32_t component_count,
