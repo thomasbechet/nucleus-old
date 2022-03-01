@@ -299,7 +299,7 @@ nu_result_t nuecs_scene_save_file(nuecs_scene_t scene_handle, const char* filena
     }
 
     /* save json */
-    nu_result_t result = nu_json_save_file(json, filename, true);
+    nu_result_t result = nu_json_save_file(json, filename, false);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to save scene.");
 
 cleanup0:

@@ -75,6 +75,7 @@ nu_result_t nuecs_component_manager_find_archetype(
         nuecs_component_manager_find_next_archetype(current, components[i], &next);
         current = next;
     }
+    *archetype = current;
 
     return NU_SUCCESS;
 }
@@ -85,10 +86,7 @@ nu_result_t nuecs_component_manager_find_next_archetype(
 )
 {
      /* find next archetype */
-    nuecs_archetype_find_next(current, component, archetype);
-    
-    /* next archetype not found */
-    if (!archetype) {
+    if (nuecs_archetype_find_next(current, component, archetype) != NU_SUCCESS) {
 
         /* create new archetype */
         nuecs_archetype_data_t *new;

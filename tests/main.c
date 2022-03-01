@@ -320,16 +320,13 @@ static nu_result_t on_start(void)
         nuecs_scene_create_entity(scene, &info1, &entity0);
     }
 
-    // nu_info("WORLD", "start");
-    // nuecs_scene_progress(scene);
-
-    // nu_info("WORLD", "add velocity component");
-    // ecs.entity_add_component(scene, entity0, velocity_component, &velocity);
-    // ecs.scene_progress(scene);
-
-    // nu_info("WORLD", "remove velocity component");
-    // nuecs_scene_entity_remove_component(scene, entity0, velocity_component);
-    // nuecs_scene_progress(scene);
+    nuecs_entity_t e;
+    nuecs_entity_info_t info;
+    info.components      = (nuecs_component_t[]){position_component, velocity_component};
+    info.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
+    info.component_count = 2;
+    nuecs_scene_create_entity(scene, &info, &e);
+    nuecs_scene_entity_remove_component(scene, e, velocity_component);
 
     // nu_info("WORLD", "remove position component");
     // nuecs_scene_entity_remove_component(scene, entity0, position_component);
@@ -350,38 +347,6 @@ static nu_result_t on_start(void)
     ima_data = stbi_load("engine/texture/brick.jpg", &width, &height, &channel, STBI_rgb);
     if (!ima_data) nu_interrupt(MAIN_LOGGER_NAME, "Failed to load brick texture.\n");
     stbi_image_free(ima_data);
-
-    /* test json */
-    {
-        nu_json_t j;
-        nu_json_object_t o;
-        nu_json_allocate_empty_object(&j);
-        nu_json_value_as_object(nu_json_get_root(j), &o);
-        nu_json_object_put_cstr(o, "coucou", "salut !");
-        nu_json_object_put_double(o, "test", 123.45252);
-        nu_json_array_t a;
-        nu_json_object_put_empty_array(o, "array", &a);
-        nu_json_object_t sub;
-        nu_json_object_put_empty_object(o, "object", &sub);
-        nu_json_object_put_bool(o, "boolean", false);
-        nu_vec3f_t v = {0, 1, 2};
-        nu_json_object_put_vec3f(o, "myvector", v);
-
-        nu_transform_t t;
-        nu_transform_identity(&t);
-        nu_json_object_put_transform(o, "transform",  &t);
-
-        nu_json_array_t array;
-        nu_json_object_put_empty_array(o, "mylist", &array);
-        nu_json_array_add_transform(array, &t);
-        nu_json_array_add_transform(array, &t);
-        nu_json_array_add_transform(array, &t);
-        nu_json_array_add_uint(array, 12345);
-        nu_json_array_add_cstr(array, "coucou ma biche !");
-
-        nu_json_save_file(j, "$ROOT/test.json", true);
-        nu_json_free(j);
-    }
 
     return NU_SUCCESS;
 }

@@ -18,6 +18,7 @@ nu_result_t nuecs_archetype_table_terminate(nu_array_t table)
             for (uint32_t j = 0; j < chunk_count; j++) {
                 nuecs_chunk_free(chunks[j]);
             }
+            nu_array_free(data[i].chunks);
         }
     }
     nu_array_free(table);
