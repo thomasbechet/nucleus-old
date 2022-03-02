@@ -10,6 +10,7 @@ NU_DECLARE_HANDLE(nuecs_entity_t);
 NU_DECLARE_HANDLE(nuecs_component_t);
 NU_DECLARE_HANDLE(nuecs_system_t);
 NU_DECLARE_HANDLE(nuecs_archetype_t);
+NU_DECLARE_HANDLE(nuecs_query_t);
 
 typedef void *nuecs_component_data_ptr_t;
 typedef nu_result_t (*nuecs_component_serialize_json_pfn_t)(const nuecs_component_data_ptr_t, nu_json_object_t);
@@ -33,6 +34,21 @@ typedef struct {
     nuecs_component_data_ptr_t *component_data;
     uint32_t component_count;
 } nuecs_entity_info_t;
+
+typedef struct {
+    nuecs_component_t *components;
+    uint32_t component_count;
+} nuecs_query_info_t;
+
+typedef struct {
+    nuecs_component_data_ptr_t *components;
+    uint32_t size;
+} nuecs_query_chunk_view_t;
+
+typedef struct {
+    nuecs_query_chunk_view_t *chunks;
+    uint32_t size;
+} nuecs_query_chunks_t;
 
 #define NUECS_REGISTER_COMPONENT(scene, component, handle) \
     { \

@@ -7,11 +7,12 @@
 #include <nucleus/module/ecs/plugin/scene_manager.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
 
-static const uint32_t interface_count = 3;
+static const uint32_t interface_count = 4;
 static const char *interfaces[] = {
     NU_PLUGIN_INTERFACE_NAME, 
     NUECS_MANAGER_INTERFACE_NAME, 
-    NUECS_SCENE_INTERFACE_NAME
+    NUECS_SCENE_INTERFACE_NAME, 
+    NUECS_QUERY_INTERFACE_NAME
 };
 
 static const uint32_t plugin_count = 1;
@@ -59,9 +60,9 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, NUECS_MANAGER_INTERFACE_NAME)) {
         nuecs_manager_interface_t *i = (nuecs_manager_interface_t*)interface;
         
-        i->register_component = nuecs_component_manager_register_component;
-        i->create_scene = nuecs_scene_manager_create_scene;
-        i->destroy_scene = nuecs_scene_manager_destroy_scene;
+        i->register_component = nuecs_manager_register_component;
+        i->create_scene = nuecs_manager_create_scene;
+        i->destroy_scene = nuecs_manager_destroy_scene;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_SCENE_INTERFACE_NAME)) {
@@ -74,6 +75,14 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->entity_add_component = nuecs_scene_entity_add_component;
         i->entity_remove_component = nuecs_scene_entity_remove_component;
         i->save_file = nuecs_scene_save_file;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_QUERY_INTERFACE_NAME)) {
+        nuecs_query_interface_t *i = (nuecs_query_interface_t*)interface;
+        
+        i->create = nuecs_query_create;
+        i->destroy = nuecs_query_destroy;
+        i->resolve_chunks = nuecs_query_resolve_chunks;
 
         return NU_SUCCESS;
     }

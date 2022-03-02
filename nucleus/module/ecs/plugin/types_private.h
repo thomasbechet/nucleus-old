@@ -44,7 +44,7 @@ typedef struct {
 typedef struct {
     nuecs_chunk_data_t *chunk;
     nuecs_component_data_ptr_t components[1];
-} nuecs_chunk_view_t;
+} nuecs_chunk_view_data_t;
 
 typedef struct {
     nuecs_chunk_data_t *chunk;
@@ -56,7 +56,6 @@ typedef struct {
     nu_array_t free_entries;    /* uint32_t */
     nu_array_t deleted_entries; /* uint32_t */
     nu_array_t archetype_table; /* nuecs_archetype_chunks_t */
-    nu_array_t chunks_to_update;
     uint32_t id;
 } nuecs_scene_data_t;
 

@@ -247,6 +247,7 @@ static nu_result_t on_start(void)
     nu_plugin_require(ecs_module, NUECS_SCENE_PLUGIN_NAME);
     nuecs_scene_interface_load(ecs_module);
     nuecs_manager_interface_load(ecs_module);
+    nuecs_query_interface_load(ecs_module);
 
     /* load sdf interface */
     nu_module_t renderer_module = nu_renderer_get_module();
@@ -328,15 +329,24 @@ static nu_result_t on_start(void)
     nuecs_scene_create_entity(scene, &info, &e);
     nuecs_scene_entity_remove_component(scene, e, velocity_component);
 
-    // nu_info("WORLD", "remove position component");
-    // nuecs_scene_entity_remove_component(scene, entity0, position_component);
-    // nuecs_scene_progress(scene);
+    nuecs_query_info_t qinfo;
+    nuecs_query_t query;
+    qinfo.component_count = 1;
+    qinfo.components = &position_component;
+    NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
+    nuecs_scene_create_query
+    nuecs_scene_destroy_query
+    nuecs_query_resolve_chunks
+    nuecs_query_
 
-    // nu_info("WORLD", "destroy");
-    // ecs.entity_destroy(scene, entity0);
-    // ecs.scene_progress(scene);
-    
-    // nu_info("WORLD", "end");
+    nuecs_query_chunks_t res;
+    NU_ASSERT(nuecs_query_resolve_chunks(query, &res) == NU_SUCCESS);
+    for (uint32_t i = 0; i < res.size; i++) {
+        const position_t *positions = (const position_t*)res.chunks[i].components[0];
+        for (uint32_t j = 0; j < res.chunks[i].size; j++) {
+            nu_info("query", "%lf", positions[j].pos[0]);
+        }
+    }
 
     nuecs_scene_save_file(scene, "$ROOT/mywork.json");
     nu_context_request_stop();

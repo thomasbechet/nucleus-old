@@ -5,6 +5,7 @@
 #include <nucleus/nucleus.h>
 #include <nucleus/module/ecs/plugin/types_public.h>
 #include <nucleus/module/ecs/plugin/types_public.h>
+#include <nucleus/module/ecs/plugin/types_public.h>
 
 /* module */
 #define NUECS_MODULE_NAME "nucleus-ecs"
@@ -30,6 +31,14 @@ typedef struct {
     nu_result_t (*entity_remove_component)(nuecs_scene_t, nuecs_entity_t, nuecs_component_t);
     nu_result_t (*save_file)(nuecs_scene_t, const char*);
 } nuecs_scene_interface_t;
+
+#define NUECS_QUERY_INTERFACE_NAME "nuecs_query_interface"
+
+typedef struct {
+    nu_result_t (*create)(nuecs_scene_t, nuecs_query_info_t*, nuecs_query_t*);
+    nu_result_t (*destroy)(nuecs_scene_t, nuecs_handle_t);
+    nu_result_t (*resolve_chunks)(nuecs_query_t, nuecs_query_chunks_t*);
+} nuecs_query_interface_t;
 
 
 /* plugin */

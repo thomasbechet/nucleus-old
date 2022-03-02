@@ -11,6 +11,8 @@ nu_result_t nuecs_scene_create_entity(nuecs_scene_t scene_handle, const nuecs_en
 nu_result_t nuecs_scene_destroy_entity(nuecs_scene_t scene_handle, nuecs_entity_t handle);
 nu_result_t nuecs_scene_entity_add_component(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t component_data);
 nu_result_t nuecs_scene_entity_remove_component(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component);
+nu_result_t nuecs_scene_create_query(nuecs_scene_t scene_handle, const nuecs_query_info_t *info, nuecs_query_t *handle);
+nu_result_t nuecs_scene_destroy_query(nuecs_scene_t scene_handle, nuecs_query_t handle);
 nu_result_t nuecs_scene_save_file(nuecs_scene_t scene_handle, const char* filename);
 
 #endif
