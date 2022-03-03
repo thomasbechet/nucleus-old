@@ -334,16 +334,12 @@ static nu_result_t on_start(void)
     qinfo.component_count = 1;
     qinfo.components = &position_component;
     NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
-    nuecs_scene_create_query
-    nuecs_scene_destroy_query
-    nuecs_query_resolve_chunks
-    nuecs_query_
 
-    nuecs_query_chunks_t res;
-    NU_ASSERT(nuecs_query_resolve_chunks(query, &res) == NU_SUCCESS);
-    for (uint32_t i = 0; i < res.size; i++) {
-        const position_t *positions = (const position_t*)res.chunks[i].components[0];
-        for (uint32_t j = 0; j < res.chunks[i].size; j++) {
+    nuecs_query_chunks_t chunks;
+    NU_ASSERT(nuecs_query_resolve_chunks(scene, query, &chunks) == NU_SUCCESS);
+    for (uint32_t i = 0; i < chunks.count; i++) {
+        const position_t *positions = (const position_t*)chunks.views[i].components[0];
+        for (uint32_t j = 0; j < chunks.views[i].count; j++) {
             nu_info("query", "%lf", positions[j].pos[0]);
         }
     }

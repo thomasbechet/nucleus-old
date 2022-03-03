@@ -29,7 +29,7 @@ static bool find_chunk_not_full(const void *user, const void *object) {
     nuecs_chunk_data_t *data = *(nuecs_chunk_data_t**)object;
     return data->size < NUECS_CHUNK_SIZE;
 }
-nu_result_t nuecs_archetype_table_get_chunk(
+nu_result_t nuecs_archetype_table_get_next_chunk(
     nu_array_t table, 
     nuecs_archetype_data_t *archetype, 
     nuecs_chunk_data_t **output

@@ -6,6 +6,7 @@
 #include <nucleus/module/ecs/plugin/scene.h>
 #include <nucleus/module/ecs/plugin/scene_manager.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
+#include <nucleus/module/ecs/plugin/query.h>
 
 static const uint32_t interface_count = 4;
 static const char *interfaces[] = {
@@ -60,9 +61,9 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, NUECS_MANAGER_INTERFACE_NAME)) {
         nuecs_manager_interface_t *i = (nuecs_manager_interface_t*)interface;
         
-        i->register_component = nuecs_manager_register_component;
-        i->create_scene = nuecs_manager_create_scene;
-        i->destroy_scene = nuecs_manager_destroy_scene;
+        i->register_component = nuecs_component_manager_register_component;
+        i->create_scene = nuecs_scene_manager_create_scene;
+        i->destroy_scene = nuecs_scene_manager_destroy_scene;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_SCENE_INTERFACE_NAME)) {

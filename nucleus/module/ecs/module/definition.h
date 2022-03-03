@@ -35,9 +35,9 @@ typedef struct {
 #define NUECS_QUERY_INTERFACE_NAME "nuecs_query_interface"
 
 typedef struct {
-    nu_result_t (*create)(nuecs_scene_t, nuecs_query_info_t*, nuecs_query_t*);
-    nu_result_t (*destroy)(nuecs_scene_t, nuecs_handle_t);
-    nu_result_t (*resolve_chunks)(nuecs_query_t, nuecs_query_chunks_t*);
+    nu_result_t (*create)(nuecs_scene_t, const nuecs_query_info_t*, nuecs_query_t*);
+    nu_result_t (*destroy)(nuecs_scene_t, nuecs_query_t);
+    nu_result_t (*resolve_chunks)(nuecs_scene_t, nuecs_query_t, nuecs_query_chunks_t*);
 } nuecs_query_interface_t;
 
 

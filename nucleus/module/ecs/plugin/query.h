@@ -3,8 +3,8 @@
 
 #include <nucleus/module/ecs/plugin/types_private.h>
 
-nu_result_t nuecs_query_create(nuecs_query_t scene);
-nu_result_t nuecs_query_destroy(nuecs_query_t query);
-nu_result_t nuecs_query_resolve_chunks(nuecs_query_t query, nuecs_query_chunks_t *chunks);
+nu_result_t nuecs_query_create(nuecs_scene_t scene, const nuecs_query_info_t *info, nuecs_query_t *handle);
+nu_result_t nuecs_query_destroy(nuecs_scene_t scene, nuecs_query_t handle);
+nu_result_t nuecs_query_resolve_chunks(nuecs_scene_t scene, nuecs_query_t query, nuecs_query_chunks_t *chunks);
 
 #endif

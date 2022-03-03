@@ -10,10 +10,10 @@
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
-                    "name": "handle"
+                    "name": "scene_handle"
                 },
                 {
-                    "type": "nuecs_query_info_t*",
+                    "type": "const nuecs_query_info_t*",
                     "name": "info"
                 },
                 {
@@ -30,7 +30,7 @@
                     "name": "scene_handle"
                 },
                 {
-                    "type": "nuecs_handle_t",
+                    "type": "nuecs_query_t",
                     "name": "handle"
                 }
             ]
@@ -38,6 +38,10 @@
         {
             "name": "resolve_chunks",
             "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
                 {
                     "type": "nuecs_query_t",
                     "name": "handle"

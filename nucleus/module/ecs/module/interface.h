@@ -61,17 +61,17 @@
     {
         return nu_module_get_interface(module, NUECS_QUERY_INTERFACE_NAME, &_nuecs_query_interface);
     }
-    nu_result_t nuecs_query_create(nuecs_scene_t handle, nuecs_query_info_t* info, nuecs_query_t* handle)
+    nu_result_t nuecs_query_create(nuecs_scene_t scene_handle, const nuecs_query_info_t* info, nuecs_query_t* handle)
     {
-        return _nuecs_query_interface.create(handle, info, handle);
+        return _nuecs_query_interface.create(scene_handle, info, handle);
     }
-    nu_result_t nuecs_query_destroy(nuecs_scene_t scene_handle, nuecs_handle_t handle)
+    nu_result_t nuecs_query_destroy(nuecs_scene_t scene_handle, nuecs_query_t handle)
     {
         return _nuecs_query_interface.destroy(scene_handle, handle);
     }
-    nu_result_t nuecs_query_resolve_chunks(nuecs_query_t handle, nuecs_query_chunks_t* chunks)
+    nu_result_t nuecs_query_resolve_chunks(nuecs_scene_t scene_handle, nuecs_query_t handle, nuecs_query_chunks_t* chunks)
     {
-        return _nuecs_query_interface.resolve_chunks(handle, chunks);
+        return _nuecs_query_interface.resolve_chunks(scene_handle, handle, chunks);
     }
 #else
     extern nuecs_manager_interface_t _nuecs_manager_interface;

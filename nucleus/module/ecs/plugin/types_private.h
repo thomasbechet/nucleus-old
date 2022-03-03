@@ -78,4 +78,9 @@ typedef struct {
     uint32_t id;
 } nuecs_system_data_t;
 
+typedef struct {
+    nu_array_t chunk_views;
+    nu_array_t archetype_indices;
+} nuecs_chunk_query_data_t;
+
 #endif

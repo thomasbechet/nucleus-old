@@ -13,7 +13,8 @@
         "nucleus/module/ecs/plugin/plugin.h",
         "nucleus/module/ecs/plugin/scene.h",
         "nucleus/module/ecs/plugin/scene_manager.h",
-        "nucleus/module/ecs/plugin/component_manager.h"
+        "nucleus/module/ecs/plugin/component_manager.h",
+        "nucleus/module/ecs/plugin/query.h"
     ],
     "implement_interfaces": [
         {

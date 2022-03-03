@@ -42,12 +42,12 @@ typedef struct {
 
 typedef struct {
     nuecs_component_data_ptr_t *components;
-    uint32_t size;
+    uint32_t count;
 } nuecs_query_chunk_view_t;
 
 typedef struct {
-    nuecs_query_chunk_view_t *chunks;
-    uint32_t size;
+    nuecs_query_chunk_view_t *views;
+    uint32_t count;
 } nuecs_query_chunks_t;
 
 #define NUECS_REGISTER_COMPONENT(scene, component, handle) \
