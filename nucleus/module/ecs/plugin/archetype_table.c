@@ -19,6 +19,7 @@ nu_result_t nuecs_archetype_table_terminate(nu_array_t table)
                 nuecs_chunk_free(chunks[j]);
             }
             nu_array_free(data[i].chunks);
+            nu_array_free(data[i].queries);
         }
     }
     nu_array_free(table);
@@ -55,6 +56,7 @@ nu_result_t nuecs_archetype_table_get_next_chunk(
     if (row->archetype == NULL) {
         row->archetype = archetype;
         nu_array_allocate(&row->chunks, sizeof(nuecs_chunk_data_t*));
+        nu_array_allocate(&row->queries, sizeof(nuecs_chunk_query_data_t*));
     }
 
     /* find free chunk */

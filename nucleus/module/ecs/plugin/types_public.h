@@ -35,9 +35,15 @@ typedef struct {
     uint32_t component_count;
 } nuecs_entity_info_t;
 
+typedef enum {
+    NUECS_QUERY_TYPE_CHUNK,
+    NUECS_QUERY_TYPE_ENTITY
+} nuecs_query_type_t;
+
 typedef struct {
     nuecs_component_t *components;
     uint32_t component_count;
+    nuecs_query_type_t type;
 } nuecs_query_info_t;
 
 typedef struct {

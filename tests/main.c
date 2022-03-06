@@ -332,7 +332,8 @@ static nu_result_t on_start(void)
     nuecs_query_info_t qinfo;
     nuecs_query_t query;
     qinfo.component_count = 1;
-    qinfo.components = &position_component;
+    qinfo.components      = &position_component;
+    qinfo.type            = NUECS_QUERY_TYPE_CHUNK;
     NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
 
     nuecs_query_chunks_t chunks;

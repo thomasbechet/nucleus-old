@@ -39,6 +39,7 @@ typedef struct {
 typedef struct {
     nuecs_archetype_data_t *archetype;
     nu_array_t chunks;
+    nu_array_t queries;
 } nuecs_archetype_chunks_data_t;
 
 typedef struct {
@@ -70,17 +71,17 @@ typedef struct {
     uint32_t next_archetype_index;
 } nuecs_component_manager_data_t;
 
-typedef struct {
-    nu_array_t chunk_views;
-    uint32_t *component_ids;
-    uint32_t component_count;
-    nu_result_t (*update)(nuecs_component_data_ptr_t *components, uint32_t count);
-    uint32_t id;
-} nuecs_system_data_t;
+// typedef struct {
+//     nu_array_t chunk_views;
+//     uint32_t *component_ids;
+//     uint32_t component_count;
+//     nu_result_t (*update)(nuecs_component_data_ptr_t *components, uint32_t count);
+//     uint32_t id;
+// } nuecs_system_data_t;
 
 typedef struct {
     nu_array_t chunk_views;
     nu_array_t archetype_indices;
-} nuecs_chunk_query_data_t;
+} nuecs_query_data_t;
 
 #endif
