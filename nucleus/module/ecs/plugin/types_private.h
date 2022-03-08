@@ -82,6 +82,8 @@ typedef struct {
 typedef struct {
     nu_array_t chunk_views;
     nu_array_t archetype_indices;
+    uint32_t component_count;
+    uint32_t *component_ids;
 } nuecs_query_data_t;
 
 #endif

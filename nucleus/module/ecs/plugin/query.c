@@ -2,15 +2,54 @@
 
 #include <nucleus/module/ecs/plugin/component_manager.h>
 
+static nu_result_t nuecs_query_create_chunk_view(nuecs_query_data_t *query, const nuecs_chunk_data_t *chunk)
+{
+    /* create new view */
+    nu_array_push(query->chunk_views, NULL);
+    nuecs_query_chunk_view_t *view = (nuecs_query_chunk_view_t*)nu_array_get_last(query->chunk_views);
+
+    /* allocate data pointers */
+    view->components = (nuecs_component_data_ptr_t*)nu_malloc(sizeof(nuecs_component_data_ptr_t) * query->component_count);
+
+    /* acquire pointers */
+    for (uint32_t i = 0; i < query->component_count; i++) {
+        for (uint32_t j = 0; j < chunk->archetype->component_count; j++) {
+            if (query->component_ids[i] == chunk->archetype->component_ids[j]) {
+                view->components[i] = chunk->component_list_ptrs[j];
+                break;
+            }
+        }
+    }
+ 
+    return NU_SUCCESS;
+}
+
 nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_info_t *info)
 {
+    /* allocate memory */
     nu_array_allocate(&query->archetype_indices, sizeof(uint32_t));
-    // nu_array_allocate(&query->chunk_views, CHUNK_VIEW_SIZE(info->component_count));
+    nu_array_allocate(&query->chunk_views, sizeof(nuecs_query_chunk_view_t));
+
+    /* copy component ids */
+    query->component_count = info->component_count;
+    query->component_ids = (uint32_t*)nu_malloc(sizeof(info->component_count) * sizeof(uint32_t));
+    for (uint32_t i = 0; i < info->component_count; i++) {
+        query->component_ids[i] = ((nuecs_component_data_t*)info->components)[i].id;
+    }
+    
+    return NU_SUCCESS;
 }
 nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
 {
+    /* free views */
+    nuecs_
+    uint32_t view_count = nu_array_get_size(query->chunk_views);
+
+    /* free resources */
     nu_array_free(query->archetype_indices);
     nu_array_free(query->chunk_views);
+
+    return NU_SUCCESS;
 }
 
 nu_result_t nuecs_query_create(nuecs_scene_t scene_handle, const nuecs_query_info_t *info, nuecs_query_t *handle)
