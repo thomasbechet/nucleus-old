@@ -50,23 +50,6 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
 
     return NU_SUCCESS;
 }
-static bool is_subset(const uint32_t *a, uint32_t ac, const uint32_t *b, uint32_t bc) {
-    bool has_all = true;
-    for (uint32_t i = 0; i < ac; i++) {
-        bool found = false;
-        for (uint32_t j = 0; j < bc; j++) {
-            if (a[i] == b[j]) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            has_all = false;
-            break;
-        }
-    }
-    return has_all;
-}
 
 nu_result_t nuecs_archetype_create_empty(nuecs_archetype_data_t **archetype)
 {
@@ -163,7 +146,7 @@ nu_result_t nuecs_archetype_link_if_previous(
     nuecs_archetype_data_t *previous
 )
 {
-    if (previous->component_count == (current->component_count - 1) && is_subset(previous->component_ids, previous->component_count, current->component_ids, current->component_count)) {
+    if (previous->component_count == (current->component_count - 1) && nuecs_is_subset(previous->component_ids, previous->component_count, current->component_ids, current->component_count)) {
         /* find the different component id */
         for (uint32_t j = 0; j < current->component_count; j++) {
             bool found = false;

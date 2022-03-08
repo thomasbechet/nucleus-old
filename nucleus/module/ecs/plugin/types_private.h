@@ -39,13 +39,8 @@ typedef struct {
 typedef struct {
     nuecs_archetype_data_t *archetype;
     nu_array_t chunks;
-    nu_array_t queries;
-} nuecs_archetype_chunks_data_t;
-
-typedef struct {
-    nuecs_chunk_data_t *chunk;
-    nuecs_component_data_ptr_t components[1];
-} nuecs_chunk_view_data_t;
+    nu_array_t notify_queries;
+} nuecs_archetype_entry_data_t;
 
 typedef struct {
     nuecs_chunk_data_t *chunk;
@@ -56,7 +51,8 @@ typedef struct {
     nu_array_t entries;         /* nuecs_entity_entry_t */
     nu_array_t free_entries;    /* uint32_t */
     nu_array_t deleted_entries; /* uint32_t */
-    nu_array_t archetype_table; /* nuecs_archetype_chunks_t */
+    nu_array_t archetype_table; /* nuecs_archetype_entry_t */
+    nu_indexed_array_t queries; /* nuecs_query_data_t* */
     uint32_t id;
 } nuecs_scene_data_t;
 
@@ -71,19 +67,20 @@ typedef struct {
     uint32_t next_archetype_index;
 } nuecs_component_manager_data_t;
 
-// typedef struct {
-//     nu_array_t chunk_views;
-//     uint32_t *component_ids;
-//     uint32_t component_count;
-//     nu_result_t (*update)(nuecs_component_data_ptr_t *components, uint32_t count);
-//     uint32_t id;
-// } nuecs_system_data_t;
+typedef struct {
+    nu_array_t chunk_views;
+    uint32_t *component_ids;
+    uint32_t component_count;
+    nu_result_t (*update)(nuecs_component_data_ptr_t *components, uint32_t count);
+    uint32_t id;
+} nuecs_system_data_t;
 
 typedef struct {
     nu_array_t chunk_views;
-    nu_array_t archetype_indices;
+    nu_array_t archetype_entries;
     uint32_t component_count;
     uint32_t *component_ids;
+    uint32_t id;
 } nuecs_query_data_t;
 
 #endif

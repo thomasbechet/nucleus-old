@@ -5,21 +5,8 @@
 #include <nucleus/module/ecs/plugin/chunk.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
 #include <nucleus/module/ecs/plugin/archetype_table.h>
-
-static void sanatize_components(
-    nuecs_component_data_t **in_components,
-    uint32_t in_component_count,
-    nuecs_component_data_t **components,
-    uint32_t *component_count
-)
-{
-    /* copy list */
-    for (uint32_t i = 0; i < in_component_count; i++) {
-        components[i] = in_components[i];
-    }
-    *component_count = in_component_count;
-    /* TODO: remove duplicated components */
-}
+#include <nucleus/module/ecs/plugin/utility.h>
+#include <nucleus/module/ecs/plugin/query.h>
 
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
 {
@@ -27,16 +14,32 @@ nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
     nu_array_allocate(&scene->entries, sizeof(nuecs_entity_entry_t));
     nu_array_allocate(&scene->free_entries, sizeof(uint32_t));
     nu_array_allocate(&scene->deleted_entries, sizeof(uint32_t));
+
+    /* archetype table */
     nuecs_archetype_table_initialize(&scene->archetype_table);
+
+    /* queries */
+    nu_indexed_array_allocate(&scene->queries, sizeof(nuecs_query_data_t*));
 
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
 {
+    /* queries */
+    nuecs_query_data_t **queries = (nuecs_query_data_t**)nu_indexed_array_get_data(scene->queries);
+    uint32_t query_count = nu_indexed_array_get_size(scene->queries);
+    for (uint32_t i = 0; i < query_count; i++) {
+        nuecs_query_terminate(queries[i]);
+        nu_free(queries[i]);
+    }
+    nu_indexed_array_free(scene->queries);
+
     /* entities */
     nu_array_free(scene->entries);
     nu_array_free(scene->free_entries);
     nu_array_free(scene->deleted_entries);
+
+    /* archetype table */
     nuecs_archetype_table_terminate(scene->archetype_table);
 
     return NU_SUCCESS;
@@ -111,7 +114,7 @@ nu_result_t nuecs_scene_create_entity(nuecs_scene_t scene_handle, const nuecs_en
     /* sanatize components */
     nuecs_component_data_t *components[NUECS_MAX_COMPONENT_PER_ENTITY];
     uint32_t component_count;
-    sanatize_components((nuecs_component_data_t**)info->components, info->component_count, components, &component_count);
+    nuecs_sanatize_components((nuecs_component_data_t**)info->components, info->component_count, components, &component_count);
 
     /* find the entry */
     uint32_t index;
