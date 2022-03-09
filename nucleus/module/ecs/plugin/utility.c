@@ -1,4 +1,4 @@
-#include <nucleus/module/ecs/plugin/utiliy.h>
+#include <nucleus/module/ecs/plugin/utility.h>
 
 nu_result_t nuecs_sanatize_components(
     nuecs_component_data_t **in_components,

@@ -134,7 +134,7 @@ nu_result_t nuecs_scene_create_entity(nuecs_scene_t scene_handle, const nuecs_en
 
     /* find chunk */
     nuecs_chunk_data_t *chunk;
-    nuecs_archetype_table_get_next_chunk(scene->archetype_table, archetype, &chunk);
+    nuecs_archetype_table_get_next_chunk(scene->archetype_table, scene->queries, archetype, &chunk);
 
     /* add to chunk */
     uint32_t id;
@@ -193,7 +193,7 @@ nu_result_t nuecs_scene_entity_add_component(nuecs_scene_t scene_handle, nuecs_e
 
     /* find next chunk */
     nuecs_chunk_data_t *next_chunk;
-    nuecs_archetype_table_get_next_chunk(scene->archetype_table, next_archetype, &next_chunk);
+    nuecs_archetype_table_get_next_chunk(scene->archetype_table, scene->queries, next_archetype, &next_chunk);
 
     /* transfer data */
     uint32_t new_id;
@@ -231,7 +231,7 @@ nu_result_t nuecs_scene_entity_remove_component(nuecs_scene_t scene_handle, nuec
 
     /* find previous chunk */
     nuecs_chunk_data_t *previous_chunk;
-    nuecs_archetype_table_get_next_chunk(scene->archetype_table, previous_archetype, &previous_chunk);
+    nuecs_archetype_table_get_next_chunk(scene->archetype_table, scene->queries, previous_archetype, &previous_chunk);
 
     /* transfer data */
     uint32_t new_id;

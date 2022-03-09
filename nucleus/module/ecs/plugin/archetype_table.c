@@ -22,20 +22,14 @@ nu_result_t nuecs_archetype_table_terminate(nu_array_t table)
             }
             nu_array_free(data[i].chunks);
 
-            /* free queries */
-            nuecs_query_data_t **queries = (nuecs_query_data_t**)nu_indexed_array_get_data(data[i].queries);
-            uint32_t query_count = nu_indexed_array_get_size(data[i].queries);
-            for (uint32_t j = 0; j < query_count; j++) {
-                nuecs_query_terminate(queries[j]);
-                nu_free(queries[j]);
-            }
-            nu_indexed_array_free(data[i].queries);
+            /* free query notification list */
+            nu_array_free(data[i].notify_queries);
         }
     }
     nu_array_free(table);
     return NU_SUCCESS;
 }
-nu_result_t nuecs_archetype_table_get_entry(
+static nu_result_t nuecs_archetype_table_get_entry(
     nu_array_t table, 
     const nuecs_archetype_data_t *archetype,
     nuecs_archetype_entry_data_t **entry
@@ -65,8 +59,9 @@ static bool find_chunk_not_full(const void *user, const void *object) {
     return data->size < NUECS_CHUNK_SIZE;
 }
 nu_result_t nuecs_archetype_table_get_next_chunk(
-    nu_array_t table, 
-    nuecs_archetype_data_t *archetype, 
+    nu_array_t table,
+    nu_indexed_array_t queries,
+    nuecs_archetype_data_t *archetype,
     nuecs_chunk_data_t **output
 )
 {
@@ -74,11 +69,20 @@ nu_result_t nuecs_archetype_table_get_next_chunk(
     nuecs_archetype_entry_data_t *entry;
     nuecs_archetype_table_get_entry(table, archetype, &entry);
     
-    /* create new archetype chunks */
+    /* create new archetype entry */
     if (entry->archetype == NULL) {
+        
+        /* initialize new entry */
         entry->archetype = archetype;
         nu_array_allocate(&entry->chunks, sizeof(nuecs_chunk_data_t*));
-        nu_indexed_array_allocate(&entry->queries, sizeof(nuecs_query_data_t*));
+        nu_array_allocate(&entry->notify_queries, sizeof(nuecs_query_data_t*));
+
+        /* try to subscribe queries */
+        nuecs_query_data_t **queries_data = (nuecs_query_data_t**)nu_indexed_array_get_data(queries);
+        uint32_t query_count = nu_indexed_array_get_size(queries);
+        for (uint32_t i = 0; i < query_count; i++) {
+            nuecs_query_try_subscribe(queries_data[i], entry);
+        }
     }
 
     /* find free chunk */
@@ -90,6 +94,13 @@ nu_result_t nuecs_archetype_table_get_next_chunk(
         /* create new chunk */
         nuecs_chunk_allocate(archetype, &chunk);
         nu_array_push(entry->chunks, &chunk);
+
+        /* notify queries */
+        nuecs_query_data_t **notify_queries = (nuecs_query_data_t**)nu_array_get_data(entry->notify_queries);
+        uint32_t notify_query_count = nu_array_get_size(entry->notify_queries);
+        for (uint32_t i = 0; i < notify_query_count; i++) {
+            nuecs_query_notify_new_chunk(notify_queries[i], chunk);
+        }
     }
 
     /* return value */

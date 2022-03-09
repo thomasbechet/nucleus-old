@@ -1,6 +1,7 @@
 #include <nucleus/module/ecs/plugin/archetype.h>
 
 #include <nucleus/module/ecs/plugin/chunk.h>
+#include <nucleus/module/ecs/plugin/utility.h>
 
 static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_data_t *b, uint32_t component_id)
 {
