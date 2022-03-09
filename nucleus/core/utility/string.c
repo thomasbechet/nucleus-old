@@ -105,6 +105,7 @@ static inline void nu_string_allocate_substr_ncstr(nu_string_t *str, const char 
 {
     NU_ASSERT(index < n);
     NU_ASSERT(n > 0 && index + len <= n);
+    len = NU_MIN(index + len, n);
     nu_string_allocate_(str, len);
     memcpy(nu_string_get_str_(*str), cstr + index, len);
     nu_string_set_length_(str, len);

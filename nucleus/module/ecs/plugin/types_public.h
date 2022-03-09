@@ -53,7 +53,7 @@ typedef struct {
 
 typedef struct {
     nuecs_query_chunk_view_t *views;
-    uint32_t count;
+    uint32_t view_count;
 } nuecs_query_chunks_t;
 
 #define NUECS_REGISTER_COMPONENT(scene, component, handle) \

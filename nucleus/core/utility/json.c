@@ -214,7 +214,8 @@ nu_result_t nu_json_value_as_transform(nu_json_value_t value, nu_transform_t *tr
 
     nu_result_t result;
     nu_json_object_t object;
-    nu_json_value_as_object(value, &object);
+    result = nu_json_value_as_object(value, &object);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, NU_LOGGER_NAME, "Failed to parse transform object.");
 
     nu_json_value_t j_translation = nu_json_object_get_by_name(object, "translation");
     if (j_translation != NU_NULL_HANDLE) {

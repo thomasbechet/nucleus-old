@@ -103,6 +103,7 @@ nu_result_t nuvk_image_transfer_layout(
         destination_stage     = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     } else {
         nu_warning(NUVK_LOGGER_NAME, "Unsupported layout transition.");
+        return NU_FAILURE;
     }
 
     vkCmdPipelineBarrier(cmd, source_stage, destination_stage, 0, 0, NULL, 0, NULL, 1, &barrier);

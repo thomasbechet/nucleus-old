@@ -77,6 +77,7 @@ typedef struct {
 
 typedef struct {
     nu_array_t chunk_views;
+    nu_array_t chunk_references;
     nu_array_t archetype_entries;
     uint32_t component_count;
     uint32_t *component_ids;

@@ -68,6 +68,7 @@ nu_result_t nu_file_open(nu_file_t *file, const char *filename, nu_io_mode_t mod
             fp = fopen(filename, "wb+");
             break;
         default:
+            fp = NULL;
             break;
     }
     if (!fp) return NU_FAILURE;
