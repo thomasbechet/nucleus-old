@@ -142,3 +142,39 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
 
     return NU_SUCCESS;
 }
+
+nu_result_t nuecs_component_manager_debug_archetypes(void)
+{
+    nuecs_archetype_data_t **archetypes = (nuecs_archetype_data_t**)nu_array_get_data(_manager.archetypes);
+    uint32_t archetype_count            = nu_array_get_size(_manager.archetypes);
+    nu_string_t line;
+    nu_string_allocate(&line);
+    nu_info(NUECS_LOGGER_NAME, "=====ARCHETYPES=====");
+    for (uint32_t i = 0; i < archetype_count; i++) {
+        nu_string_clear(&line);
+        nu_string_append_format(&line, "ARCHETYPE %p [", archetypes[i]);
+        for (uint32_t j = 0; j < archetypes[i]->component_count; j++) {
+            nuecs_component_data_t *component = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, archetypes[i]->component_ids[j]);
+            nu_string_append_format(&line, " %s", nu_string_get_cstr(component->name));
+        }
+        nu_string_append_format(&line, " ]");
+        nu_info(NUECS_LOGGER_NAME, nu_string_get_cstr(line));
+
+        nuecs_archetype_edge_t *edges = (nuecs_archetype_edge_t*)nu_array_get_data(archetypes[i]->edges);
+        uint32_t edge_count           = nu_array_get_size(archetypes[i]->edges);
+        for (uint32_t j = 0; j < edge_count; j++) {
+            nu_string_clear(&line);
+            nuecs_component_data_t *component = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, edges[j].component_id);
+            if (edges[j].add) {
+                nu_string_append_format(&line, "--> ADD %s : %p", nu_string_get_cstr(component->name), edges[j].add);
+            }
+            if (edges[j].remove) {
+                nu_string_append_format(&line, "--> REMOVE %s : %p", nu_string_get_cstr(component->name), edges[j].remove);
+            }
+            nu_info(NUECS_LOGGER_NAME, nu_string_get_cstr(line));
+        }
+    }
+    nu_string_free(line);
+
+    return NU_SUCCESS;
+}

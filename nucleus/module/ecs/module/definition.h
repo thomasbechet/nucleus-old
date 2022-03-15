@@ -18,6 +18,7 @@ typedef struct {
     nu_result_t (*register_component)(const nuecs_component_info_t*, nuecs_component_t*);
     nu_result_t (*create_scene)(nuecs_scene_t*);
     nu_result_t (*destroy_scene)(nuecs_scene_t);
+    nu_result_t (*debug_archetypes)(void);
 } nuecs_manager_interface_t;
 
 #define NUECS_SCENE_INTERFACE_NAME "nuecs_scene_interface"

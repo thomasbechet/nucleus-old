@@ -35,6 +35,10 @@
                     "name": "handle"
                 }
             ]
+        },
+        {
+            "name": "debug_archetypes",
+            "parameters": []
         }
     ]
 }

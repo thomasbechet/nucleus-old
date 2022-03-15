@@ -195,6 +195,28 @@ void nu_string_append(nu_string_t *str, nu_string_t other)
     NU_ASSERT(*str != other);
     nu_string_append_ncstr(str, nu_string_get_str_(other), nu_string_get_length_(other));
 }
+void nu_string_append_format(nu_string_t *str, const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    nu_string_append_vformat(str, format, args);
+    va_end(args);
+}
+void nu_string_append_vformat(nu_string_t *str, const char *format, va_list args)
+{
+    va_list args_temp;
+    va_copy(args_temp, args);
+    uint32_t n = vsnprintf(NULL, 0, format, args);
+    va_end(args_temp);
+    uint32_t len = nu_string_get_length_(*str);
+    if (len + n > nu_string_get_capacity_(*str)) {
+        nu_string_realloc_(str, len + n);
+    }
+    va_copy(args_temp, args);
+    vsnprintf(nu_string_get_str_(*str) + len, n + 1, format, args);
+    va_end(args_temp);
+    nu_string_set_length_(str, n + len);
+}
 static inline void nu_string_insert_ncstr(nu_string_t *str, const char *cstr, uint32_t n, uint32_t index)
 {
     if (n > 0) {

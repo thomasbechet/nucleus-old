@@ -38,6 +38,8 @@ NU_API void nu_string_set_cstr(nu_string_t *str, const char *cstr);
 NU_API void nu_string_set(nu_string_t *str, nu_string_t other);
 NU_API void nu_string_append_cstr(nu_string_t *str, const char *cstr);
 NU_API void nu_string_append(nu_string_t *str, nu_string_t other);
+NU_API void nu_string_append_format(nu_string_t *str, const char *format, ...);
+NU_API void nu_string_append_vformat(nu_string_t *str, const char *format, va_list args);
 NU_API void nu_string_insert_cstr(nu_string_t *str, const char *cstr, uint32_t index);
 NU_API void nu_string_insert(nu_string_t *str, nu_string_t other, uint32_t index);
 NU_API uint32_t nu_string_cstr_find_first_cstr(const char *cstr, const char *token);

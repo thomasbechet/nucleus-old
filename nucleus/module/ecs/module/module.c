@@ -64,6 +64,7 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->register_component = nuecs_component_manager_register_component;
         i->create_scene = nuecs_scene_manager_create_scene;
         i->destroy_scene = nuecs_scene_manager_destroy_scene;
+        i->debug_archetypes = nuecs_component_manager_debug_archetypes;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_SCENE_INTERFACE_NAME)) {

@@ -312,7 +312,9 @@ static nu_result_t on_start(void)
     // nuecs_component_t system2_components[] = {position_component, velocity_component};
     // NUECS_REGISTER_SYSTEM(scene, system2_components, nuecs_system2_update, system2);
 
-    for (uint32_t i = 0; i < 3; i++) {
+    nuecs_manager_debug_archetypes();
+
+    for (uint32_t i = 0; i < 1; i++) {
         nuecs_entity_t entity0;
         nuecs_entity_info_t info1;
         info1.components      = (nuecs_component_t[]){position_component, velocity_component};
@@ -329,6 +331,8 @@ static nu_result_t on_start(void)
     nuecs_scene_create_entity(scene, &info, &e);
     nuecs_scene_entity_remove_component(scene, e, velocity_component);
 
+    nuecs_manager_debug_archetypes();
+
     nuecs_query_info_t qinfo;
     nuecs_query_t query;
     qinfo.component_count = 1;
@@ -338,8 +342,8 @@ static nu_result_t on_start(void)
 
     nuecs_query_chunks_t chunks;
     NU_ASSERT(nuecs_query_resolve_chunks(scene, query, &chunks) == NU_SUCCESS);
-    nu_info("test", "%d components", chunks.views[0].count);
-    nu_info("test", "%d components", chunks.views[1].count);
+    // nu_info("test", "%d components", chunks.views[0].count);
+    // nu_info("test", "%d components", chunks.views[1].count);
 
     for (uint32_t i = 0; i < chunks.view_count; i++) {
         nu_info("test", "view %d/%d with %d components", i+1, chunks.view_count, chunks.views[i].count);

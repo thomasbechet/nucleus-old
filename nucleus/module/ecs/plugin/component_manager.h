@@ -24,4 +24,6 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
     nuecs_archetype_data_t **archetype
 );
 
+nu_result_t nuecs_component_manager_debug_archetypes(void);
+
 #endif

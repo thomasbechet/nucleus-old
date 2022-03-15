@@ -23,6 +23,10 @@
     {
         return _nuecs_manager_interface.destroy_scene(handle);
     }
+    nu_result_t nuecs_manager_debug_archetypes(void)
+    {
+        return _nuecs_manager_interface.debug_archetypes();
+    }
     nuecs_scene_interface_t _nuecs_scene_interface;
     nu_result_t nuecs_scene_interface_load(nu_module_t module)
     {
