@@ -59,13 +59,11 @@ void nu_array_free(nu_array_t array)
     nu_free(((nu_array_header_t*)array)->data);
     nu_free(array);
 }
-void *nu_array_get_data(nu_array_t array)
+void nu_array_get_data(nu_array_t array, void *pdata, uint32_t *size)
 {
-    return ((nu_array_header_t*)array)->data;
-}
-const void *nu_array_get_data_const(nu_array_t array)
-{
-    return nu_array_get_data(array);
+    void **data = (void**)pdata;
+    if(pdata) *data = ((nu_array_header_t*)array)->data;
+    if(size) *size = ((nu_array_header_t*)array)->size;
 }
 void nu_array_clear(nu_array_t array)
 {

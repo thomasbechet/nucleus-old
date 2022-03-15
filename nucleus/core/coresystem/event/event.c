@@ -26,8 +26,9 @@ nu_result_t nu_event_initialize(void)
 nu_result_t nu_event_terminate(void)
 {
     /* terminate all messages */
-    uint32_t event_count = nu_array_get_size(_system.events);
-    nu_event_data_t *events = (nu_event_data_t*)nu_array_get_data(_system.events);
+    nu_event_data_t *events;
+    uint32_t event_count;
+    nu_array_get_data(_system.events, &events, &event_count);
     for (uint32_t ei = 0; ei < event_count; ei++) {
         uint32_t message_count = nu_array_get_size(events[ei].messages);
         for (uint32_t mi = 0; mi < message_count; mi++) {
@@ -98,9 +99,10 @@ nu_result_t nu_event_dispatch(nu_event_id_t id)
     nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
 
     /* dispatch */
-    uint32_t subscriber_count = nu_array_get_size(event->subscribers);
     uint32_t message_count = nu_array_get_size(event->messages);
-    nu_event_callback_pfn_t *subscribers = (nu_event_callback_pfn_t*)nu_array_get_data(event->subscribers);
+    nu_event_callback_pfn_t *subscribers;
+    uint32_t subscriber_count;
+    nu_array_get_data(event->subscribers, &subscribers, &subscriber_count);
     for (uint32_t mi = 0; mi < message_count; mi++) {
         /* send message */
         void *data = nu_array_get(event->messages, mi);

@@ -67,8 +67,9 @@ nu_result_t nuvk_shader_manager_initialize(nuvk_shader_manager_t *manager)
 nu_result_t nuvk_shader_manager_terminate(nuvk_shader_manager_t *manager)
 {
     /* free resources */
-    nu_string_t *injectors  = (nu_string_t*)nu_array_get_data(manager->injectors);
-    uint32_t injector_count = nu_array_get_size(manager->injectors);
+    nu_string_t *injectors;
+    uint32_t injector_count;
+    nu_array_get_data(manager->injectors, &injectors, &injector_count);
     for (uint32_t i = 0; i < injector_count; i++) {
         nu_string_free(injectors[i]);
     }

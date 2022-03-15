@@ -25,8 +25,9 @@ nu_result_t nu_plugin_initialize(void)
 nu_result_t nu_plugin_terminate(void)
 {
     /* free resources */
-    uint32_t plugin_count = nu_array_get_size(_system.plugins);
-    nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
+    nu_plugin_data_t *plugins;
+    uint32_t plugin_count;
+    nu_array_get_data(_system.plugins, &plugins, &plugin_count);
     for (uint32_t i = 0; i < plugin_count; i++) {
         nu_string_free(plugins[i].name);
     }
@@ -40,8 +41,9 @@ nu_result_t nu_plugin_start(void)
 }
 nu_result_t nu_plugin_stop(void)
 {
-    uint32_t size = nu_array_get_size(_system.plugins);
-    nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
+    nu_plugin_data_t *plugins;
+    uint32_t size;
+    nu_array_get_data(_system.plugins, &plugins, &size);
     for (uint32_t i = 0; i < size; i++) {
         if (plugins[i].callbacks.terminate) {
             plugins[i].callbacks.terminate();
@@ -51,8 +53,9 @@ nu_result_t nu_plugin_stop(void)
 }
 nu_result_t nu_plugin_update(void)
 {
-    uint32_t size = nu_array_get_size(_system.plugins);
-    nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
+    nu_plugin_data_t *plugins;
+    uint32_t size;
+    nu_array_get_data(_system.plugins, &plugins, &size);
     for (uint32_t i = 0; i < size; i++) {
         if (plugins[i].callbacks.update) {
             plugins[i].callbacks.update();
@@ -62,8 +65,9 @@ nu_result_t nu_plugin_update(void)
 }
 nu_result_t nu_plugin_fixed_update(void)
 {
-    uint32_t size = nu_array_get_size(_system.plugins);
-    nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
+    nu_plugin_data_t *plugins;
+    uint32_t size;
+    nu_array_get_data(_system.plugins, &plugins, &size);
     for (uint32_t i = 0; i < size; i++) {
         if (plugins[i].callbacks.fixed_update) {
             plugins[i].callbacks.fixed_update();
@@ -73,8 +77,9 @@ nu_result_t nu_plugin_fixed_update(void)
 }
 nu_result_t nu_plugin_late_update(void)
 {
-    uint32_t size = nu_array_get_size(_system.plugins);
-    nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
+    nu_plugin_data_t *plugins;
+    uint32_t size;
+    nu_array_get_data(_system.plugins, &plugins, &size);
     for (uint32_t i = 0; i < size; i++) {
         if (plugins[i].callbacks.late_update) {
             plugins[i].callbacks.late_update();
@@ -89,8 +94,9 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     result = NU_SUCCESS;
 
     /* check exists */
-    uint32_t size = nu_array_get_size(_system.plugins);
-    nu_plugin_data_t *plugins = (nu_plugin_data_t*)nu_array_get_data(_system.plugins);
+    nu_plugin_data_t *plugins;
+    uint32_t size;
+    nu_array_get_data(_system.plugins, &plugins, &size);
     for (uint32_t i = 0; i < size; i++) {
         if (plugins[i].module == module && NU_MATCH(nu_string_get_cstr(plugins[i].name), plugin_name)) {
             return NU_SUCCESS;

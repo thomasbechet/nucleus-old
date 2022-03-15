@@ -10,13 +10,15 @@ nu_result_t nuecs_archetype_table_initialize(nu_array_t *table)
 }
 nu_result_t nuecs_archetype_table_terminate(nu_array_t table)
 {
-    nuecs_archetype_entry_data_t *data = (nuecs_archetype_entry_data_t*)nu_array_get_data(table);
-    uint32_t size                      = nu_array_get_size(table);
+    nuecs_archetype_entry_data_t *data;
+    uint32_t size;
+    nu_array_get_data(table, &data, &size);
     for (uint32_t i = 0; i < size; i++) {
         if (data[i].archetype) {
             /* free chunks */
-            nuecs_chunk_data_t **chunks = (nuecs_chunk_data_t**)nu_array_get_data(data[i].chunks);
-            uint32_t chunk_count        = nu_array_get_size(data[i].chunks);
+            nuecs_chunk_data_t **chunks; 
+            uint32_t chunk_count;
+            nu_array_get_data(data[i].chunks, &chunks, &chunk_count);
             for (uint32_t j = 0; j < chunk_count; j++) {
                 nuecs_chunk_free(chunks[j]);
             }
@@ -42,7 +44,8 @@ static nu_result_t nuecs_archetype_table_get_entry(
         uint32_t new_size = archetype->index + 1;
         nu_array_resize(table, new_size);
         /* initialize new items */
-        nuecs_archetype_entry_data_t *data = (nuecs_archetype_entry_data_t*)nu_array_get_data(table);
+        nuecs_archetype_entry_data_t *data;
+        nu_array_get_data(table, &data, NULL);
         for (uint32_t i = table_size; i < new_size; i++) {
             data[i].archetype = NULL;
         }
@@ -78,8 +81,9 @@ nu_result_t nuecs_archetype_table_get_next_chunk(
         nu_array_allocate(&entry->notify_queries, sizeof(nuecs_query_data_t*));
 
         /* try to subscribe queries */
-        nuecs_query_data_t **queries_data = (nuecs_query_data_t**)nu_indexed_array_get_data(queries);
-        uint32_t query_count = nu_indexed_array_get_size(queries);
+        nuecs_query_data_t **queries_data;
+        uint32_t query_count;
+        nu_indexed_array_get_data(queries, &queries_data, &query_count);
         for (uint32_t i = 0; i < query_count; i++) {
             nuecs_query_try_subscribe(queries_data[i], entry);
         }
@@ -96,8 +100,9 @@ nu_result_t nuecs_archetype_table_get_next_chunk(
         nu_array_push(entry->chunks, &chunk);
 
         /* notify queries */
-        nuecs_query_data_t **notify_queries = (nuecs_query_data_t**)nu_array_get_data(entry->notify_queries);
-        uint32_t notify_query_count = nu_array_get_size(entry->notify_queries);
+        nuecs_query_data_t **notify_queries;
+        uint32_t notify_query_count;
+        nu_array_get_data(entry->notify_queries, &notify_queries, &notify_query_count);
         for (uint32_t i = 0; i < notify_query_count; i++) {
             nuecs_query_notify_new_chunk(notify_queries[i], chunk);
         }

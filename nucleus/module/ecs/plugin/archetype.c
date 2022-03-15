@@ -10,8 +10,7 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
     bool found;
 
     /* link a to b (add) */
-    edges = (nuecs_archetype_edge_t*)nu_array_get_data(a->edges);
-    edge_count = nu_array_get_size(a->edges);
+    nu_array_get_data(a->edges, &edges, &edge_count);
     found = false;
     
     for (uint32_t i = 0; i < edge_count; i++) {
@@ -30,8 +29,7 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
     }
 
     /* link b to a (remove) */
-    edges = (nuecs_archetype_edge_t*)nu_array_get_data(b->edges);
-    edge_count = nu_array_get_size(b->edges);
+    nu_array_get_data(b->edges, &edges, &edge_count);
     found = false;
     
     for (uint32_t i = 0; i < edge_count; i++) {
@@ -107,8 +105,9 @@ nu_result_t nuecs_archetype_find_next(
 )
 {
     /* get edges of the current archetype */
-    nuecs_archetype_edge_t *edges = (nuecs_archetype_edge_t*)nu_array_get_data(current_archetype->edges);
-    uint32_t edge_count = nu_array_get_size(current_archetype->edges);
+    nuecs_archetype_edge_t *edges;
+    uint32_t edge_count;
+    nu_array_get_data(current_archetype->edges, &edges, &edge_count);
 
     /* try to find the direct neighbour (fast solution) */
     for (uint32_t j = 0; j < edge_count; j++) {
@@ -128,9 +127,10 @@ nu_result_t nuecs_archetype_find_previous(
 )
 {
     /* get edges of the current archetype */
-    nuecs_archetype_edge_t *edges = (nuecs_archetype_edge_t*)nu_array_get_data(current->edges);
-    uint32_t edge_count           = nu_array_get_size(current->edges);
-    
+    nuecs_archetype_edge_t *edges;
+    uint32_t edge_count;
+    nu_array_get_data(current->edges, &edges, &edge_count);
+
     /* try to find the direct neighbour (fast solution) */
     for (uint32_t j = 0; j < edge_count; j++) {
         if (edges[j].component_id == previous_component->id && edges[j].remove) {

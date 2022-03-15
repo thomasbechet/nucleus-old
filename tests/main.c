@@ -329,9 +329,9 @@ static nu_result_t on_start(void)
     info.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
     info.component_count = 2;
     nuecs_scene_create_entity(scene, &info, &e);
-    nuecs_scene_entity_remove_component(scene, e, velocity_component);
-
     nuecs_manager_debug_archetypes();
+    // nuecs_scene_entity_remove_component(scene, e, velocity_component);
+
 
     nuecs_query_info_t qinfo;
     nuecs_query_t query;
@@ -345,15 +345,16 @@ static nu_result_t on_start(void)
     // nu_info("test", "%d components", chunks.views[0].count);
     // nu_info("test", "%d components", chunks.views[1].count);
 
-    for (uint32_t i = 0; i < chunks.view_count; i++) {
-        nu_info("test", "view %d/%d with %d components", i+1, chunks.view_count, chunks.views[i].count);
-        const position_t *positions = (const position_t*)chunks.views[i].components[0];
-        for (uint32_t j = 0; j < chunks.views[i].count; j++) {
-            nu_info("query", "%lf", positions[j].pos[0]);
-        }
-    }
-
     nuecs_scene_save_file(scene, "$ROOT/mywork.json");
+
+    // for (uint32_t i = 0; i < chunks.view_count; i++) {
+    //     nu_info("test", "view %d/%d with %d components", i+1, chunks.view_count, chunks.views[i].count);
+    //     const position_t *positions = (const position_t*)chunks.views[i].components[0];
+    //     for (uint32_t j = 0; j < chunks.views[i].count; j++) {
+    //         nu_info("query", "%lf", positions[j].pos[0]);
+    //     }
+    // }
+
     nu_context_request_stop();
 
     /* load texture */

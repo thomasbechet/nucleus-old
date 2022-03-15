@@ -35,7 +35,8 @@ void nu_indexed_array_add(nu_indexed_array_t array, void *object, uint32_t *id)
     if (header->free_count) {
         uint32_t size = nu_array_get_size(header->data);
         nu_array_push(header->data, object);
-        uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+        uint32_t *meta;
+        nu_array_get_data(header->meta, &meta, NULL);
         uint32_t free_id = meta[META_SIZE * size + FREE_ID];
         meta[META_SIZE * free_id + ID_TO_INDEX] = size;
         meta[META_SIZE * size    + INDEX_TO_ID] = free_id;
@@ -45,7 +46,8 @@ void nu_indexed_array_add(nu_indexed_array_t array, void *object, uint32_t *id)
         uint32_t size = nu_array_get_size(header->data);
         nu_array_push(header->data, object);
         nu_array_push(header->meta, NULL);
-        uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+        uint32_t *meta;
+        nu_array_get_data(header->meta, &meta, NULL);
         meta[META_SIZE * size + ID_TO_INDEX] = size;
         meta[META_SIZE * size + INDEX_TO_ID] = size;
         *id = size;
@@ -55,7 +57,8 @@ void nu_indexed_array_remove(nu_indexed_array_t array, uint32_t id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
 
-    uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+    uint32_t *meta;
+    nu_array_get_data(header->meta, &meta, NULL);
     uint32_t last_index = nu_array_get_size(header->data) - 1;
     uint32_t index      = meta[META_SIZE * id + ID_TO_INDEX];
     nu_array_swap_last(header->data, index);
@@ -70,13 +73,15 @@ void nu_indexed_array_remove(nu_indexed_array_t array, uint32_t id)
 void *nu_indexed_array_get(nu_indexed_array_t array, uint32_t id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+    uint32_t *meta;
+    nu_array_get_data(header->meta, &meta, NULL);
     return nu_array_get(header->data, meta[META_SIZE * id + ID_TO_INDEX]);
 }
 bool nu_indexed_array_find_id(nu_indexed_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    uint32_t *meta = (uint32_t*)nu_array_get_data(header->meta);
+    uint32_t *meta;
+    nu_array_get_data(header->meta, &meta, NULL);
     uint32_t index;
     if (!nu_array_find_index(header->data, find_pfn, user, &index)) {
         return false;
@@ -96,15 +101,10 @@ uint32_t nu_indexed_array_get_size(nu_indexed_array_t array)
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
     return nu_array_get_size(header->data);
 }
-void *nu_indexed_array_get_data(nu_indexed_array_t array)
+void nu_indexed_array_get_data(nu_indexed_array_t array, void *pdata, uint32_t *size)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    return nu_array_get_data(header->data);
-}
-const void *nu_indexed_array_get_data_const(nu_indexed_array_t array)
-{
-    nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
-    return nu_array_get_data_const(header->data);
+    nu_array_get_data(header->data, pdata, size);
 }
 uint32_t nu_indexed_array_get_allocated_memory(nu_indexed_array_t array)
 {

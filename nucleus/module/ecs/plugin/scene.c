@@ -26,8 +26,9 @@ nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
 nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
 {
     /* queries */
-    nuecs_query_data_t **queries = (nuecs_query_data_t**)nu_indexed_array_get_data(scene->queries);
-    uint32_t query_count = nu_indexed_array_get_size(scene->queries);
+    nuecs_query_data_t **queries;
+    uint32_t query_count;
+    nu_indexed_array_get_data(scene->queries, &queries, &query_count);
     for (uint32_t i = 0; i < query_count; i++) {
         nuecs_query_terminate(queries[i]);
         nu_free(queries[i]);
@@ -49,9 +50,11 @@ nu_result_t nuecs_scene_progress(nuecs_scene_t handle)
     nuecs_scene_data_t *scene = (nuecs_scene_data_t*)handle;
 
     /* remove entities */
-    uint32_t *indices    = (uint32_t*)nu_array_get_data_const(scene->deleted_entries);
-    uint32_t index_count = nu_array_get_size(scene->deleted_entries);
-    nuecs_entity_entry_t *entries = (nuecs_entity_entry_t*)nu_array_get_data(scene->entries);
+    uint32_t *indices;
+    uint32_t index_count;
+    nu_array_get_data(scene->deleted_entries, &indices, &index_count);
+    nuecs_entity_entry_t *entries;
+    nu_array_get_data(scene->entries, &entries, NULL);
     for (uint32_t i = 0; i < index_count; i++) {
         nuecs_chunk_remove(entries->chunk, entries->id);
         nu_array_push(scene->free_entries, &indices[i]);
@@ -258,8 +261,9 @@ nu_result_t nuecs_scene_save_file(nuecs_scene_t scene_handle, const char* filena
     nu_json_object_put_empty_array(root, "entities", &j_entities);
 
     /* iterate over entries */
-    uint32_t entry_count                = nu_array_get_size(scene->entries);
-    const nuecs_entity_entry_t *entries = (const nuecs_entity_entry_t*)nu_array_get_data_const(scene->entries);
+    nuecs_entity_entry_t *entries;
+    uint32_t entry_count;
+    nu_array_get_data(scene->entries, &entries, &entry_count);
     for (uint32_t i = 0; i < entry_count; i++) {
 
         /* create entity object */

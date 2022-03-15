@@ -21,16 +21,18 @@ nu_result_t nuecs_component_manager_initialize(void)
 nu_result_t nuecs_component_manager_terminate(void)
 {
     /* archetypes */
-    nuecs_archetype_data_t **archetypes = (nuecs_archetype_data_t**)nu_array_get_data(_manager.archetypes);
-    uint32_t archetype_count = nu_array_get_size(_manager.archetypes);
+    nuecs_archetype_data_t **archetypes;
+    uint32_t archetype_count;
+    nu_array_get_data(_manager.archetypes, &archetypes, &archetype_count);
     for (uint32_t i = 0; i < archetype_count; i++) {
         nuecs_archetype_destroy(archetypes[i]);
     }
     nu_array_free(_manager.archetypes);
 
     /* components */
-    nuecs_component_data_t **components = (nuecs_component_data_t**)nu_indexed_array_get_data(_manager.components);
-    uint32_t type_count = nu_indexed_array_get_size(_manager.components);
+    nuecs_component_data_t **components;
+    uint32_t type_count;
+    nu_indexed_array_get_data(_manager.components, &components, &type_count);
     for (uint32_t i = 0; i < type_count; i++) {
         nu_string_free(components[i]->name);
         nu_free(components[i]);
@@ -94,8 +96,9 @@ nu_result_t nuecs_component_manager_find_next_archetype(
         new->index = _manager.next_archetype_index++;
 
         /* link the new archetype */
-        nuecs_archetype_data_t **archetypes_data = (nuecs_archetype_data_t**)nu_array_get_data(_manager.archetypes);
-        uint32_t archetype_count                 = nu_array_get_size(_manager.archetypes);
+        nuecs_archetype_data_t **archetypes_data;
+        uint32_t archetype_count;
+        nu_array_get_data(_manager.archetypes, &archetypes_data, &archetype_count);
         for (uint32_t i = 0; i < archetype_count; i++) {
             /* try to link */
             nuecs_archetype_link_if_previous(new, archetypes_data[i]);
@@ -145,8 +148,10 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
 
 nu_result_t nuecs_component_manager_debug_archetypes(void)
 {
-    nuecs_archetype_data_t **archetypes = (nuecs_archetype_data_t**)nu_array_get_data(_manager.archetypes);
-    uint32_t archetype_count            = nu_array_get_size(_manager.archetypes);
+    nuecs_archetype_data_t **archetypes;
+    uint32_t archetype_count;
+    nu_array_get_data(_manager.archetypes, &archetypes, &archetype_count);
+    
     nu_string_t line;
     nu_string_allocate(&line);
     nu_info(NUECS_LOGGER_NAME, "=====ARCHETYPES=====");
@@ -160,8 +165,9 @@ nu_result_t nuecs_component_manager_debug_archetypes(void)
         nu_string_append_format(&line, " ]");
         nu_info(NUECS_LOGGER_NAME, nu_string_get_cstr(line));
 
-        nuecs_archetype_edge_t *edges = (nuecs_archetype_edge_t*)nu_array_get_data(archetypes[i]->edges);
-        uint32_t edge_count           = nu_array_get_size(archetypes[i]->edges);
+        nuecs_archetype_edge_t *edges;
+        uint32_t edge_count;
+        nu_array_get_data(archetypes[i]->edges, &edges, &edge_count);
         for (uint32_t j = 0; j < edge_count; j++) {
             nu_string_clear(&line);
             nuecs_component_data_t *component = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, edges[j].component_id);

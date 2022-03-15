@@ -490,8 +490,9 @@ nu_result_t nuvk_renderer_sdf_create(const nuvk_sdf_info_t *info, nuvk_sdf_t *ha
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to create sdf pool.");
     
     /* update generator */
-    const nuvk_sdf_data_t **sdfs = (const nuvk_sdf_data_t**)nu_indexed_array_get_data_const(_module.assets.sdfs);
-    uint32_t sdf_count = nu_indexed_array_get_size(_module.assets.sdfs);
+    const nuvk_sdf_data_t **sdfs;
+    uint32_t sdf_count;
+    nu_indexed_array_get_data(_module.assets.sdfs, &sdfs, &sdf_count);
     result = nuvk_pipeline_generator_update_sdfs(&_module.pipelines.generator, sdfs, sdf_count);
     NU_CHECK(result == NU_SUCCESS, return result, NUVK_LOGGER_NAME, "Failed to update generator.");
 

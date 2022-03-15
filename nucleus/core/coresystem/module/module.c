@@ -144,8 +144,9 @@ nu_result_t nu_module_initialize(void)
 nu_result_t nu_module_terminate(void)
 {
     /* unload all module */
-    uint32_t size = nu_indexed_array_get_size(_system.modules);
-    nu_module_data_t *data = nu_indexed_array_get_data(_system.modules);
+    nu_module_data_t *data;
+    uint32_t size;
+    nu_indexed_array_get_data(_system.modules, &data, &size);
     for (uint32_t i = 0; i < size; i++) {
         unload_module(&data[i]);
     }
@@ -374,8 +375,9 @@ static void log_line(
 nu_result_t nu_module_log(void)
 {
     /* get module data */
-    const nu_module_data_t *modules = (const nu_module_data_t*)nu_indexed_array_get_data(_system.modules);
-    uint32_t module_count = nu_indexed_array_get_size(_system.modules);
+    nu_module_data_t *modules;
+    uint32_t module_count;
+    nu_indexed_array_get_data(_system.modules, &modules, &module_count);
 
     /* compute max */
     uint32_t max_name, max_id, max_flag, max_interface, max_plugin;

@@ -49,8 +49,9 @@ cleanup0:
 nu_result_t nulua_manager_plugin_terminate(void)
 {
     /* stop plugins */
-    uint32_t plugin_count = nu_indexed_array_get_size(_module.plugins);
-    nulua_plugin_data_t *plugins = (nulua_plugin_data_t*)nu_indexed_array_get_data(_module.plugins);
+    nulua_plugin_data_t *plugins;
+    uint32_t plugin_count;
+    nu_indexed_array_get_data(_module.plugins, &plugins, &plugin_count);
     for (uint32_t i = 0; i < plugin_count; i++) {
         if (plugins[i].started) {
             if (plugins[i].stop_ref != LUA_REFNIL) {
@@ -71,8 +72,9 @@ nu_result_t nulua_manager_plugin_terminate(void)
 nu_result_t nulua_manager_plugin_update(void)
 {
     /* update plugins */
-    uint32_t plugin_count = nu_indexed_array_get_size(_module.plugins);
-    nulua_plugin_data_t *plugins = (nulua_plugin_data_t*)nu_indexed_array_get_data(_module.plugins);
+    nulua_plugin_data_t *plugins;
+    uint32_t plugin_count;
+    nu_indexed_array_get_data(_module.plugins, &plugins, &plugin_count);
     for (uint32_t i = 0; i < plugin_count; i++) {
         if (!plugins[i].started) { /* start the plugin */
             if (plugins[i].start_ref != LUA_REFNIL) {

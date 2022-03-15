@@ -4,8 +4,9 @@ static nu_result_t nuvk_sdf_pool_destroy(
     nuvk_sdf_pool_t *pool
 )
 {
-    nuvk_sdf_instance_data_t *instances = (nuvk_sdf_instance_data_t*)nu_indexed_array_get_data(pool->instances);
-    uint32_t instance_count = nu_indexed_array_get_size(pool->instances);
+    nuvk_sdf_instance_data_t *instances;
+    uint32_t instance_count;
+    nu_indexed_array_get_data(pool->instances, &instances, &instance_count);
     for (uint32_t i = 0; i < instance_count; i++) {
         nu_free(instances[i].data);
     }
@@ -17,8 +18,9 @@ static nu_result_t nuvk_sdf_pool_destroy(
 }
 static nu_result_t nuvk_sdf_pool_generate_indices(nuvk_sdf_pool_t *pool)
 {
-    const nuvk_sdf_instance_data_t *instances = (const nuvk_sdf_instance_data_t*)nu_indexed_array_get_data_const(pool->instances);
-    uint32_t instance_count = nu_indexed_array_get_size(pool->instances);
+    nuvk_sdf_instance_data_t *instances;
+    uint32_t instance_count;
+    nu_indexed_array_get_data(pool->instances, &instances, &instance_count);
     for (uint32_t i = 0; i < instance_count; i++) {
         pool->indices[i] = instances[i].buffer_index;
     }
@@ -36,8 +38,9 @@ nu_result_t nuvk_scene_initialize(nuvk_scene_t *scene)
 }
 nu_result_t nuvk_scene_terminate(nuvk_scene_t *scene)
 {
-    nuvk_sdf_pool_t *pools = (nuvk_sdf_pool_t*)nu_indexed_array_get_data(scene->sdf_pools);
-    uint32_t pool_count = nu_indexed_array_get_size(scene->sdf_pools);
+    nuvk_sdf_pool_t *pools;
+    uint32_t pool_count;
+    nu_indexed_array_get_data(scene->sdf_pools, &pools, &pool_count);
     for (uint32_t i = 0; i < pool_count; i++) {
         nuvk_sdf_pool_destroy(&pools[i]);
     }

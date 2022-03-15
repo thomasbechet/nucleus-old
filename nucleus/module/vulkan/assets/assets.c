@@ -12,15 +12,17 @@ nu_result_t nuvk_assets_initialize(nuvk_assets_t *assets)
 }
 nu_result_t nuvk_assets_terminate(nuvk_assets_t *assets)
 {
-    nuvk_sdf_data_t **sdfs = (nuvk_sdf_data_t**)nu_indexed_array_get_data(assets->sdfs);
-    uint32_t sdf_count     = nu_indexed_array_get_size(assets->sdfs);
+    nuvk_sdf_data_t **sdfs;
+    uint32_t sdf_count;
+    nu_indexed_array_get_data(assets->sdfs, &sdfs, &sdf_count);
     for (uint32_t i = 0; i < sdf_count; i++) {
         nu_free(sdfs[i]);
     }
     nu_indexed_array_free(assets->sdfs);
     
-    nuvk_material_data_t **materials = (nuvk_material_data_t**)nu_indexed_array_get_data(assets->materials);
-    uint32_t material_count    = nu_indexed_array_get_size(assets->materials);
+    nuvk_material_data_t **materials;
+    uint32_t material_count;
+    nu_indexed_array_get_data(assets->materials, &materials, &material_count);
     for (uint32_t i = 0; i < material_count; i++) {
         nu_free(materials[i]);
     }
@@ -48,8 +50,9 @@ nu_result_t nuvk_assets_sdf_create(
     *handle = (nuvk_sdf_t)data;
 
     /* configure sdfs */
-    nuvk_sdf_data_t **sdfs = (nuvk_sdf_data_t**)nu_indexed_array_get_data(assets->sdfs);
-    uint32_t sdf_count = nu_indexed_array_get_size(assets->sdfs);
+    nuvk_sdf_data_t **sdfs;
+    uint32_t sdf_count;
+    nu_indexed_array_get_data(assets->sdfs, &sdfs, &sdf_count);
     nuvk_buffer_instances_configure_sdfs(buffer, sdfs, sdf_count); /* buffer_id are set here */
 
     return NU_SUCCESS;

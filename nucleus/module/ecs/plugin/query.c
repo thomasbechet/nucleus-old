@@ -23,8 +23,9 @@ nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_
 nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
 {
     /* free views */
-    nuecs_query_chunk_view_t *views = (nuecs_query_chunk_view_t*)nu_array_get_data(query->chunk_views);
-    uint32_t view_count = nu_array_get_size(query->chunk_views);
+    nuecs_query_chunk_view_t *views;
+    uint32_t view_count;
+    nu_array_get_data(query->chunk_views, &views, &view_count);
     for (uint32_t i = 0; i < view_count; i++) {
         nu_free(views[i].components);
     }
@@ -68,8 +69,9 @@ nu_result_t nuecs_query_try_subscribe(nuecs_query_data_t *query, nuecs_archetype
         nu_array_push(query->archetype_entries, &entry);
     }
     /* create existing chunk views */
-    nuecs_chunk_data_t **chunks = (nuecs_chunk_data_t**)nu_array_get_data(entry->chunks);
-    uint32_t chunk_count = nu_array_get_size(entry->chunks);
+    nuecs_chunk_data_t **chunks;
+    uint32_t chunk_count;
+    nu_array_get_data(entry->chunks, &chunks, &chunk_count);
     for (uint32_t i = 0; i < chunk_count; i++) {
         nuecs_query_notify_new_chunk(query, chunks[i]);
     }
@@ -92,8 +94,9 @@ nu_result_t nuecs_query_create(nuecs_scene_t scene_handle, const nuecs_query_inf
     nuecs_query_initialize(query, info);
 
     /* try to subscribe to archetype entries */
-    nuecs_archetype_entry_data_t *entries = (nuecs_archetype_entry_data_t*)nu_array_get_data(scene->archetype_table);
-    uint32_t entry_count = nu_array_get_size(scene->archetype_table);
+    nuecs_archetype_entry_data_t *entries;
+    uint32_t entry_count;
+    nu_array_get_data(scene->archetype_table, &entries, &entry_count);
     for (uint32_t i = 0; i < entry_count; i++) {
         if (entries[i].archetype) {
             nuecs_query_try_subscribe(query, &entries[i]);
@@ -117,10 +120,12 @@ nu_result_t nuecs_query_resolve_chunks(nuecs_scene_t scene, nuecs_query_t query,
     nuecs_query_data_t *query_data = (nuecs_query_data_t*)query;
 
     /* update chunks */
-    nuecs_query_chunk_view_t *views_data = (nuecs_query_chunk_view_t*)nu_array_get_data(query_data->chunk_views);
-    nuecs_chunk_data_t **chunks_data = (nuecs_chunk_data_t**)nu_array_get_data(query_data->chunk_references);
-    uint32_t view_count = nu_array_get_size(query_data->chunk_views);
-
+    nuecs_query_chunk_view_t *views_data;
+    uint32_t view_count;
+    nu_array_get_data(query_data->chunk_views, &views_data, &view_count);
+    nuecs_chunk_data_t **chunks_data;
+    nu_array_get_data(query_data->chunk_references, &chunks_data, NULL);
+    
     for (uint32_t i = 0; i < view_count; i++) {
         views_data[i].count = chunks_data[i]->size;
     }

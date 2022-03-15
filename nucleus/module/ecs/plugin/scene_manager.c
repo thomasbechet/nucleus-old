@@ -12,8 +12,9 @@ nu_result_t nuecs_scene_manager_initialize(void)
 }
 nu_result_t nuecs_scene_manager_terminate(void)
 {
-    nuecs_scene_data_t **scenes = (nuecs_scene_data_t**)nu_indexed_array_get_data(_manager.scenes);
-    uint32_t scene_count = nu_indexed_array_get_size(_manager.scenes);
+    nuecs_scene_data_t **scenes;
+    uint32_t scene_count;
+    nu_indexed_array_get_data(_manager.scenes, &scenes, &scene_count);
     for (uint32_t i = 0; i < scene_count; i++) {
         nuecs_scene_terminate(scenes[i]);
         nu_free(scenes[i]);
@@ -35,8 +36,9 @@ nu_result_t nuecs_scene_manager_destroy_scene(nuecs_scene_t handle)
 }
 nu_result_t nuecs_scene_manager_progress(void)
 {
-    nuecs_scene_data_t **scenes = (nuecs_scene_data_t**)nu_indexed_array_get_data(_manager.scenes);
-    uint32_t scene_count        = nu_indexed_array_get_size(_manager.scenes);
+    nuecs_scene_data_t **scenes;
+    uint32_t scene_count;
+    nu_indexed_array_get_data(_manager.scenes, &scenes, &scene_count);
     for (uint32_t i = 0; i < scene_count; i++) {
         nuecs_scene_progress((nuecs_scene_t)scenes[i]);
     }

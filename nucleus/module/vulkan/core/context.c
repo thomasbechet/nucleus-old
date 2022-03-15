@@ -107,10 +107,12 @@ static nu_result_t nuvk_context_create_instance(nuvk_context_t *context)
     instance_info.sType                   = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     instance_info.flags                   = 0x0;
     instance_info.pApplicationInfo        = &application_info;
-    instance_info.enabledLayerCount       = nu_array_get_size(required_layers);
-    instance_info.ppEnabledLayerNames     = (const char *const *)nu_array_get_data_const(required_layers);
-    instance_info.enabledExtensionCount   = nu_array_get_size(required_extensions);
-    instance_info.ppEnabledExtensionNames = (const char *const *)nu_array_get_data_const(required_extensions);  
+    nu_array_get_data(required_layers, 
+        &instance_info.ppEnabledLayerNames, 
+        &instance_info.enabledLayerCount);
+    nu_array_get_data(required_extensions, 
+        &instance_info.ppEnabledExtensionNames, 
+        &instance_info.enabledExtensionCount);
 
     VkResult error = vkCreateInstance(&instance_info, &context->allocator, &context->instance);
     nu_array_free(required_layers);
@@ -351,8 +353,9 @@ static nu_result_t nuvk_context_create_device(nuvk_context_t *context)
     device_info.pQueueCreateInfos       = queue_infos;
     device_info.enabledLayerCount       = 0;
     device_info.ppEnabledLayerNames     = NULL;
-    device_info.enabledExtensionCount   = nu_array_get_size(extensions);
-    device_info.ppEnabledExtensionNames = (const char *const *)nu_array_get_data_const(extensions);
+    nu_array_get_data(extensions, 
+        &device_info.ppEnabledExtensionNames,
+        &device_info.enabledExtensionCount);
     device_info.pEnabledFeatures        = &features;
 
     VkResult result = vkCreateDevice(context->physical_device, &device_info, &context->allocator, &context->device);
