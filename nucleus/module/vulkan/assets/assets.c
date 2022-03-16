@@ -72,7 +72,7 @@ nu_result_t nuvk_assets_material_create(
 
     /* set buffer id */
     if (!nu_array_is_empty(assets->material_free_buffer_indices)) {
-        uint32_t *free_id = nu_array_get_last(assets->material_free_buffer_indices);
+        uint32_t *free_id; nu_array_get_last(assets->material_free_buffer_indices, &free_id);
         data->buffer_id = *free_id;
         nu_array_pop(assets->material_free_buffer_indices);
     } else {

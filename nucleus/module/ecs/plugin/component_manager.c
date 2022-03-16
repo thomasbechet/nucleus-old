@@ -61,7 +61,8 @@ nu_result_t nuecs_component_manager_register_component(const nuecs_component_inf
 }
 nu_result_t nuecs_component_manager_get_component(uint32_t component_id, nuecs_component_data_t **component)
 {
-    *component = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, component_id);
+    nuecs_component_data_t **pcomponent; nu_indexed_array_get(_manager.components, component_id, &pcomponent);
+    *component = *pcomponent;
     return NU_SUCCESS;
 }
 nu_result_t nuecs_component_manager_find_archetype(
@@ -130,7 +131,7 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
         /* copy components */
         uint32_t j = 0;
         for (uint32_t i = 0; i < current->component_count; i++) {
-            nuecs_component_data_t *c = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, current->component_ids[i]);
+            nuecs_component_data_t *c; nu_indexed_array_get(_manager.components, current->component_ids[i], &c);
             if (c != component) {
                 components[j++] = c;
             }
@@ -159,7 +160,8 @@ nu_result_t nuecs_component_manager_debug_archetypes(void)
         nu_string_clear(&line);
         nu_string_append_format(&line, "ARCHETYPE %p [", archetypes[i]);
         for (uint32_t j = 0; j < archetypes[i]->component_count; j++) {
-            nuecs_component_data_t *component = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, archetypes[i]->component_ids[j]);
+            nuecs_component_data_t **pcomponent; nu_indexed_array_get(_manager.components, archetypes[i]->component_ids[j], &pcomponent); 
+            nuecs_component_data_t *component = *pcomponent;
             nu_string_append_format(&line, " %s", nu_string_get_cstr(component->name));
         }
         nu_string_append_format(&line, " ]");
@@ -170,7 +172,8 @@ nu_result_t nuecs_component_manager_debug_archetypes(void)
         nu_array_get_data(archetypes[i]->edges, &edges, &edge_count);
         for (uint32_t j = 0; j < edge_count; j++) {
             nu_string_clear(&line);
-            nuecs_component_data_t *component = *(nuecs_component_data_t**)nu_indexed_array_get(_manager.components, edges[j].component_id);
+            nuecs_component_data_t **pcomponent; nu_indexed_array_get(_manager.components, edges[j].component_id, &pcomponent);
+            nuecs_component_data_t *component = *pcomponent;
             if (edges[j].add) {
                 nu_string_append_format(&line, "--> ADD %s : %p", nu_string_get_cstr(component->name), edges[j].add);
             }

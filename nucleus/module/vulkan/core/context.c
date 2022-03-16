@@ -213,7 +213,8 @@ static bool nuvk_context_is_physical_device_suitable(VkPhysicalDevice physical_d
     
     bool missing_extension = false;
     for (uint32_t i = 0; i < nu_array_get_size(required_extensions); i++) {
-        const char *required_extension = *(const char**)nu_array_get(required_extensions, i);
+        const char **pdata; nu_array_get(required_extensions, i, &pdata);
+        const char *required_extension = *pdata;
         bool extension_found = false;
         for (uint32_t j = 0; j < property_count; j++) {
             if (NU_MATCH(required_extension, properties[j].extensionName)) {

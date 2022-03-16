@@ -52,7 +52,8 @@ static nu_result_t nuecs_archetype_table_get_entry(
     }
 
     /* get the archetype entry */
-    *entry = (nuecs_archetype_entry_data_t*)nu_array_get(table, archetype->index);
+    nuecs_archetype_entry_data_t *pentry; nu_array_get(table, archetype->index, &pentry);
+    *entry = pentry;
 
     return NU_SUCCESS;
 }
@@ -93,7 +94,8 @@ nu_result_t nuecs_archetype_table_get_next_chunk(
     nuecs_chunk_data_t *chunk = NULL;
     uint32_t chunk_index;
     if (nu_array_find_index(entry->chunks, find_chunk_not_full, NULL, &chunk_index)) {
-        chunk = *(nuecs_chunk_data_t**)nu_array_get(entry->chunks, chunk_index);
+        nuecs_chunk_data_t **pchunk; nu_array_get(entry->chunks, chunk_index, &pchunk);
+        chunk = *pchunk;
     } else {
         /* create new chunk */
         nuecs_chunk_allocate(archetype, &chunk);

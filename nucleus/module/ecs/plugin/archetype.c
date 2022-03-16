@@ -22,7 +22,7 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
 
     if (!found) {
         nu_array_push(a->edges, NULL);
-        nuecs_archetype_edge_t *edge = (nuecs_archetype_edge_t*)nu_array_get_last(a->edges);
+        nuecs_archetype_edge_t *edge; nu_array_get_last(a->edges, &edge);
         edge->add          = b;
         edge->remove       = NULL;
         edge->component_id = component_id;
@@ -41,7 +41,7 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
 
     if (!found) {
         nu_array_push(b->edges, NULL);
-        nuecs_archetype_edge_t *edge = (nuecs_archetype_edge_t*)nu_array_get_last(b->edges);
+        nuecs_archetype_edge_t *edge; nu_array_get_last(b->edges, &edge);
         edge->add          = NULL;
         edge->remove       = a;
         edge->component_id = component_id;

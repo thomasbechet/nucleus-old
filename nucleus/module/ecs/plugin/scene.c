@@ -122,13 +122,14 @@ nu_result_t nuecs_scene_create_entity(nuecs_scene_t scene_handle, const nuecs_en
     /* find the entry */
     uint32_t index;
     if (!nu_array_is_empty(scene->free_entries)) {
-        index = *(uint32_t*)nu_array_get_last(scene->free_entries);
+        uint32_t *pindex; nu_array_get_last(scene->free_entries, &pindex);
+        index = *pindex;
         nu_array_pop(scene->free_entries);
     } else {
         nu_array_push(scene->entries, NULL);
         index = nu_array_get_size(scene->entries) - 1;
     }
-    nuecs_entity_entry_t *entry = (nuecs_entity_entry_t*)nu_array_get(scene->entries, index);
+    nuecs_entity_entry_t *entry; nu_array_get(scene->entries, index, &entry);
     NU_HANDLE_SET_ID(*handle, index);
 
     /* find archetype */
@@ -182,7 +183,7 @@ nu_result_t nuecs_scene_entity_add_component(nuecs_scene_t scene_handle, nuecs_e
     /* get entity entry */
     uint32_t index;
     NU_HANDLE_GET_ID(handle, index);
-    nuecs_entity_entry_t *entry = (nuecs_entity_entry_t*)nu_array_get(scene->entries, index);
+    nuecs_entity_entry_t *entry; nu_array_get(scene->entries, index, &entry);
 
     /* get component data */
     nuecs_component_data_t *component_data = (nuecs_component_data_t*)component;
@@ -220,7 +221,7 @@ nu_result_t nuecs_scene_entity_remove_component(nuecs_scene_t scene_handle, nuec
     /* get entity entry */
     uint32_t index;
     NU_HANDLE_GET_ID(handle, index);
-    nuecs_entity_entry_t *entry = (nuecs_entity_entry_t*)nu_array_get(scene->entries, index);
+    nuecs_entity_entry_t *entry; nu_array_get(scene->entries, index, &entry);
 
     /* get component data */
     nuecs_component_data_t *component_data = (nuecs_component_data_t*)component;

@@ -73,17 +73,19 @@ bool nu_array_is_empty(nu_array_t array)
 {
     return ((nu_array_header_t*)array)->size == 0;
 }
-void *nu_array_get(nu_array_t array, uint32_t index)
+void nu_array_get(nu_array_t array, uint32_t index, void *pdata)
 {
+    void **data = (void**)pdata;
     nu_array_header_t *header = (nu_array_header_t*)array;
     NU_ASSERT(index < header->size);
-    return header->data + header->object_size * index;
+    *data = header->data + header->object_size * index;
 }
-void *nu_array_get_last(nu_array_t array)
+void nu_array_get_last(nu_array_t array, void *pdata)
 {
+    void **data = (void**)pdata;
     nu_array_header_t *header = (nu_array_header_t*)array;
     NU_ASSERT(header->size > 0);
-    return header->data + header->object_size * (header->size - 1);
+    *data = header->data + header->object_size * (header->size - 1);
 }
 bool nu_array_find_index(nu_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *index)
 {

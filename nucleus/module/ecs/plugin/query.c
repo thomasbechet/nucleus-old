@@ -45,7 +45,7 @@ nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_
     nu_array_push(query->chunk_references, &chunk);
 
     /* recover allocated view */
-    nuecs_query_chunk_view_t *view = (nuecs_query_chunk_view_t*)nu_array_get_last(query->chunk_views);
+    nuecs_query_chunk_view_t *view; nu_array_get_last(query->chunk_views, &view);
     view->components = (nuecs_component_data_ptr_t*)nu_malloc(sizeof(nuecs_component_data_ptr_t) * query->component_count);
 
     /* setup component data ptrs */

@@ -33,7 +33,8 @@ nu_result_t nu_event_terminate(void)
         uint32_t message_count = nu_array_get_size(events[ei].messages);
         for (uint32_t mi = 0; mi < message_count; mi++) {
             if (events[ei].terminate) {
-                events[ei].terminate(nu_array_get(events[ei].messages, mi));
+                void *data; nu_array_get(events[ei].messages, mi, &data);
+                events[ei].terminate(data);
             }
         }
         nu_array_clear(events[ei].messages);
@@ -77,7 +78,7 @@ nu_result_t nu_event_register(const nu_event_register_info_t *info, nu_event_id_
 nu_result_t nu_event_post(nu_event_id_t id, void *data)
 {
     /* add the message */
-    nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
+    nu_event_data_t *event; nu_array_get(_system.events, id, &event);
     nu_array_push(event->messages, data);
 
     /* initialize message */
@@ -89,14 +90,14 @@ nu_result_t nu_event_post(nu_event_id_t id, void *data)
 }
 nu_result_t nu_event_subscribe(nu_event_id_t id, nu_event_callback_pfn_t callback)
 {
-    nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
+    nu_event_data_t *event; nu_array_get(_system.events, id, &event);
     nu_array_push(event->subscribers, &callback);
 
     return NU_SUCCESS;
 }
 nu_result_t nu_event_dispatch(nu_event_id_t id)
 {
-    nu_event_data_t *event = (nu_event_data_t*)nu_array_get(_system.events, id);
+    nu_event_data_t *event; nu_array_get(_system.events, id, &event);
 
     /* dispatch */
     uint32_t message_count = nu_array_get_size(event->messages);
@@ -105,7 +106,7 @@ nu_result_t nu_event_dispatch(nu_event_id_t id)
     nu_array_get_data(event->subscribers, &subscribers, &subscriber_count);
     for (uint32_t mi = 0; mi < message_count; mi++) {
         /* send message */
-        void *data = nu_array_get(event->messages, mi);
+        void *data; nu_array_get(event->messages, mi, &data);
         for (uint32_t si = 0; si < subscriber_count; si++) {
             subscribers[si](id, data);
         }

@@ -30,8 +30,11 @@ static nu_result_t on_start(void)
         val = 5; nu_array_push(ar, &val);
         val = 6; nu_array_push(ar, &val);
         nu_array_swap(ar, 5, 6);
-        NU_ASSERT(*(uint32_t*)nu_array_get(ar, 5) == 6);
-        NU_ASSERT(*(uint32_t*)nu_array_get(ar, 6) == 5);
+        uint32_t *value;
+        nu_array_get(ar, 5, &value);
+        NU_ASSERT(*value == 6);
+        nu_array_get(ar, 6, &value);
+        NU_ASSERT(*value == 5);
         nu_array_free(ar);
     }
     
@@ -52,10 +55,13 @@ static nu_result_t on_start(void)
                 uint32_t len = nu_array_get_size(ids);
                 if (len > 0) {
                     nu_array_swap_last(ids, nu_random() % len);
-                    stest s = *((stest*)nu_array_get_last(ids));
+                    stest s;
+                    stest *ps; nu_array_get_last(ids, &ps);
+                    s = *ps;
                     nu_array_pop(ids);
 
-                    uint32_t v = *((uint32_t*)nu_indexed_array_get(iar, s.id));
+                    uint32_t *pv; nu_indexed_array_get(iar, s.id, &pv);
+                    uint32_t v = *pv;
                     NU_ASSERT(s.v == v);
                     nu_indexed_array_remove(iar, s.id);
                 }

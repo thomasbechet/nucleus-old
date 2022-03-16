@@ -70,12 +70,12 @@ void nu_indexed_array_remove(nu_indexed_array_t array, uint32_t id)
     meta[META_SIZE * last_index + FREE_ID]     = id;
     header->free_count++;
 }
-void *nu_indexed_array_get(nu_indexed_array_t array, uint32_t id)
+void nu_indexed_array_get(nu_indexed_array_t array, uint32_t id, void *pdata)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
     uint32_t *meta;
     nu_array_get_data(header->meta, &meta, NULL);
-    return nu_array_get(header->data, meta[META_SIZE * id + ID_TO_INDEX]);
+    nu_array_get(header->data, meta[META_SIZE * id + ID_TO_INDEX], pdata);
 }
 bool nu_indexed_array_find_id(nu_indexed_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *id)
 {
