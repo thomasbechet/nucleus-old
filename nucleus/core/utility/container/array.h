@@ -5,7 +5,7 @@
 #include <nucleus/core/utility/macro.h>
 
 NU_DECLARE_HANDLE(nu_array_t);
-typedef bool (*nu_array_find_pfn_t)(const void *user, const void *object);
+typedef bool (*nu_array_equals_pfn_t)(const void *user, const void *object);
 
 NU_API void nu_array_allocate(nu_array_t *array, uint32_t object_size);
 NU_API void nu_array_allocate_capacity(nu_array_t *array, uint32_t object_size, uint32_t capacity);
@@ -16,7 +16,7 @@ NU_API void nu_array_clear(nu_array_t array);
 NU_API bool nu_array_is_empty(nu_array_t array);
 NU_API void nu_array_get(nu_array_t array, uint32_t index, void *pdata);
 NU_API void nu_array_get_last(nu_array_t array, void *pdata);
-NU_API bool nu_array_find_index(nu_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *index);
+NU_API bool nu_array_find_index(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *user, uint32_t *index);
 NU_API uint32_t nu_array_get_size(nu_array_t array);
 NU_API uint32_t nu_array_get_capacity(nu_array_t array);
 NU_API uint32_t nu_array_get_allocated_memory(nu_array_t array);
@@ -25,5 +25,6 @@ NU_API bool nu_array_pop(nu_array_t array);
 NU_API void nu_array_resize(nu_array_t array, uint32_t size);
 NU_API void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second);
 NU_API void nu_array_swap_last(nu_array_t array, uint32_t index);
+NU_API uint32_t nu_array_remove(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *value);
 
 #endif

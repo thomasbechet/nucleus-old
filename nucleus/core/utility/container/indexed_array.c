@@ -77,13 +77,13 @@ void nu_indexed_array_get(nu_indexed_array_t array, uint32_t id, void *pdata)
     nu_array_get_data(header->meta, &meta, NULL);
     nu_array_get(header->data, meta[META_SIZE * id + ID_TO_INDEX], pdata);
 }
-bool nu_indexed_array_find_id(nu_indexed_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *id)
+bool nu_indexed_array_find_id(nu_indexed_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *user, uint32_t *id)
 {
     nu_indexed_array_header_t *header = (nu_indexed_array_header_t*)array;
     uint32_t *meta;
     nu_array_get_data(header->meta, &meta, NULL);
     uint32_t index;
-    if (!nu_array_find_index(header->data, find_pfn, user, &index)) {
+    if (!nu_array_find_index(header->data, cmp_pfn, user, &index)) {
         return false;
     }
     *id = meta[META_SIZE * index + INDEX_TO_ID];

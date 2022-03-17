@@ -4,6 +4,11 @@
 #include <nucleus/module/ecs/plugin/archetype_table.h>
 #include <nucleus/module/ecs/plugin/utility.h>
 
+static bool query_reference_equals(const void *user, const void *object)
+{
+    return *((nuecs_query_data_t**)user) == *((nuecs_query_data_t**)object);
+}
+
 nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_info_t *info)
 {
     /* allocate memory */
@@ -22,6 +27,14 @@ nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_
 }
 nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
 {
+    /* unsubscribe */
+    nuecs_archetype_entry_data_t **entries;
+    uint32_t entry_count;
+    nu_array_get_data(query->archetype_entries, &entries, &entry_count);
+    for (uint32_t i = 0; i < entry_count; i++) {
+        nu_array_remove(entries[i]->notify_queries, query_reference_equals, &query);
+    }
+
     /* free views */
     nuecs_query_chunk_view_t *views;
     uint32_t view_count;
@@ -111,10 +124,16 @@ nu_result_t nuecs_query_create(nuecs_scene_t scene_handle, const nuecs_query_inf
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_destroy(nuecs_scene_t scene, nuecs_query_t handle)
+nu_result_t nuecs_query_destroy(nuecs_scene_t scene_handle, nuecs_query_t handle)
 {
-    // remove from notify lists
-    // 
+    /* recover handles */
+    nuecs_query_data_t *query = (nuecs_query_data_t*)handle;
+    nuecs_scene_data_t *scene = (nuecs_scene_data_t*)scene_handle;
+
+    /* remove and terminate query */
+    nu_indexed_array_remove(scene->queries, query->id);
+    nuecs_query_terminate(query);
+    nu_free(query);
 
     return NU_SUCCESS;
 }

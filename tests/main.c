@@ -351,8 +351,6 @@ static nu_result_t on_start(void)
 
     nuecs_query_chunks_t chunks;
     NU_ASSERT(nuecs_query_resolve_chunks(scene, query, &chunks) == NU_SUCCESS);
-    // nu_info("test", "%d components", chunks.views[0].count);
-    // nu_info("test", "%d components", chunks.views[1].count);
 
     nuecs_scene_save_file(scene, "$ROOT/mywork.json");
 
@@ -364,7 +362,9 @@ static nu_result_t on_start(void)
         }
     }
 
-    nu_context_request_stop();
+    nuecs_query_destroy(scene, query);
+
+    // nu_context_request_stop();
 
     /* load texture */
     int width, height, channel;

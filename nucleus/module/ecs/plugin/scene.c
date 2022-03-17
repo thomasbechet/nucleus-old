@@ -61,24 +61,6 @@ nu_result_t nuecs_scene_progress(nuecs_scene_t handle)
     }
     nu_array_clear(scene->deleted_entries);
 
-    // /* update chunk frame size */
-    // nuecs_archetype_data_t **archetypes = (nuecs_archetype_data_t**)nu_array_get_data(scene->archetypes);
-    // uint32_t archetype_count            = nu_array_get_size(scene->archetypes);
-    // for (uint32_t i = 0; i < archetype_count; i++) {
-    //     nuecs_chunk_data_t **chunks = (nuecs_chunk_data_t**)nu_array_get_data(archetypes[i]->chunks);
-    //     uint32_t chunk_count        = nu_array_get_size(archetypes[i]->chunks);
-    //     for (uint32_t j = 0; j < chunk_count; j++) {
-    //         chunks[j]->frame_size = chunks[j]->size;
-    //     }
-    // }
-
-    // /* update all systems */
-    // nuecs_system_data_t **systems = (nuecs_system_data_t**)nu_indexed_array_get_data(scene->systems);
-    // uint32_t system_count         = nu_indexed_array_get_size(scene->systems);
-    // for (uint32_t i = 0; i < system_count; i++) {
-    //     nuecs_system_update(systems[i]);
-    // }
-
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_register_system(nuecs_scene_t scene_handle, const nuecs_system_info_t* info, nuecs_system_t* handle)
