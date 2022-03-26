@@ -5,21 +5,46 @@
     "namespace": "nuecs",
     "directory": "nucleus/module/ecs/module",
     "define_interfaces": [
-        "nucleus/module/ecs/world.interface.json"
+        "nucleus/module/ecs/interface/archetype.interface.json",
+        "nucleus/module/ecs/interface/scene.interface.json",
+        "nucleus/module/ecs/interface/query.interface.json",
+        "nucleus/module/ecs/interface/entity.interface.json",
+        "nucleus/module/ecs/interface/component.interface.json"
+    ],
+    "definition_headers": [
+        "nucleus/module/ecs/plugin/types_public.h"
     ],
     "implementation_headers": [
-        "nucleus/module/ecs/plugin/plugin.h",
-        "nucleus/module/ecs/plugin/world.h"
+        "nucleus/module/ecs/plugin/scene.h",
+        "nucleus/module/ecs/plugin/entity.h",
+        "nucleus/module/ecs/plugin/component_manager.h",
+        "nucleus/module/ecs/plugin/query.h"
     ],
     "implement_interfaces": [
         {
-            "path": "nucleus/module/ecs/world.interface.json",
+            "path": "nucleus/module/ecs/interface/archetype.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/module/ecs/interface/scene.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/module/ecs/interface/query.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/module/ecs/interface/entity.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/module/ecs/interface/component.interface.json",
             "generate_loader": true
         }
     ],
     "plugins": [
         {
-            "name": "world",
+            "name": "scene",
             "callbacks": {
                 "initialize": true,
                 "terminate": true,

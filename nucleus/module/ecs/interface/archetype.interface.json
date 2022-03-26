@@ -1,0 +1,10 @@
+{
+    "namespace": "nuecs",
+    "name": "archetype",
+    "functions": [
+        {
+            "name": "debug_archetypes",
+            "parameters": []
+        }
+    ]
+}

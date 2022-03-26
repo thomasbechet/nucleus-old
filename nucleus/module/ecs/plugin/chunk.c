@@ -1,5 +1,7 @@
 #include <nucleus/module/ecs/plugin/chunk.h>
 
+#include <nucleus/module/ecs/plugin/archetype.h>
+
 #define ID_TO_INDEX(id)    id    * 2 + 0
 #define INDEX_TO_ID(index) index * 2 + 1
 
@@ -100,26 +102,58 @@ nu_result_t nuecs_chunk_remove(
 
     return NU_SUCCESS;
 }
+nu_result_t nuecs_chunk_transfer(
+    nuecs_chunk_data_t *chunk,
+    nuecs_chunk_data_t *dst,
+    uint32_t id,
+    uint32_t *dst_id
+)
+{
+    /* create new entry */
+    uint32_t new_id;
+    nuecs_chunk_add(dst, &new_id); /* not initialized */
+
+    /* copy data */
+    for (uint32_t i = 0; i < dst->archetype->component_count; i++) {
+        /* find source component index */
+        uint32_t src_index;
+        if (nuecs_archetype_find_component_index(chunk->archetype, dst->archetype->component_ids[i], &src_index) != NU_FAILURE) {
+            /* find source component data */
+            nuecs_component_data_ptr_t ptr;
+            nuecs_chunk_get_component(chunk, id, src_index, &ptr);
+            /* write component data */
+            nuecs_chunk_write_component(dst, new_id, i, ptr);
+        }
+    }
+
+    /* remove entry */
+    nuecs_chunk_remove(chunk, id);
+
+    /* save new id */
+    *dst_id = new_id;
+
+    return NU_SUCCESS;
+}
 nu_result_t nuecs_chunk_get_component(
     nuecs_chunk_data_t *chunk,
-    uint32_t entity_id,
+    uint32_t id,
     uint32_t component_index,
     nuecs_component_data_ptr_t *component
 )
 {
-    uint32_t index = chunk->indice_table[ID_TO_INDEX(entity_id)];
+    uint32_t index = chunk->indice_table[ID_TO_INDEX(id)];
     *component = (nuecs_component_data_ptr_t)((uint8_t*)chunk->component_list_ptrs[component_index] + chunk->archetype->data_sizes[component_index] * index);
 
     return NU_SUCCESS;
 }
 nu_result_t nuecs_chunk_write_component(
     nuecs_chunk_data_t *chunk,
-    uint32_t entity_id,
+    uint32_t id,
     uint32_t component_index,
     nuecs_component_data_ptr_t data
 )
 {
-    uint32_t index = chunk->indice_table[ID_TO_INDEX(entity_id)];
+    uint32_t index = chunk->indice_table[ID_TO_INDEX(id)];
     const uint32_t size = chunk->archetype->data_sizes[component_index];
     memcpy((uint8_t*)chunk->component_list_ptrs[component_index] + size * index, data, size);
 

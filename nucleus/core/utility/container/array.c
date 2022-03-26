@@ -59,13 +59,11 @@ void nu_array_free(nu_array_t array)
     nu_free(((nu_array_header_t*)array)->data);
     nu_free(array);
 }
-void *nu_array_get_data(nu_array_t array)
+void nu_array_get_data(nu_array_t array, void *pdata, uint32_t *size)
 {
-    return ((nu_array_header_t*)array)->data;
-}
-const void *nu_array_get_data_const(nu_array_t array)
-{
-    return nu_array_get_data(array);
+    void **data = (void**)pdata;
+    if(pdata) *data = ((nu_array_header_t*)array)->data;
+    if(size) *size = ((nu_array_header_t*)array)->size;
 }
 void nu_array_clear(nu_array_t array)
 {
@@ -75,23 +73,25 @@ bool nu_array_is_empty(nu_array_t array)
 {
     return ((nu_array_header_t*)array)->size == 0;
 }
-void *nu_array_get(nu_array_t array, uint32_t index)
+void nu_array_get(nu_array_t array, uint32_t index, void *pdata)
 {
+    void **data = (void**)pdata;
     nu_array_header_t *header = (nu_array_header_t*)array;
     NU_ASSERT(index < header->size);
-    return header->data + header->object_size * index;
+    *data = header->data + header->object_size * index;
 }
-void *nu_array_get_last(nu_array_t array)
+void nu_array_get_last(nu_array_t array, void *pdata)
 {
+    void **data = (void**)pdata;
     nu_array_header_t *header = (nu_array_header_t*)array;
     NU_ASSERT(header->size > 0);
-    return header->data + header->object_size * (header->size - 1);
+    *data = header->data + header->object_size * (header->size - 1);
 }
-bool nu_array_find_index(nu_array_t array, nu_array_find_pfn_t find_pfn, const void *user, uint32_t *index)
+bool nu_array_find_index(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *user, uint32_t *index)
 {
     nu_array_header_t *header = (nu_array_header_t*)array;
     for (uint32_t i = 0; i < header->size; i++) {
-        if (find_pfn(user, &header->data[i * header->object_size])) {
+        if (cmp_pfn(user, &header->data[i * header->object_size])) {
             *index = i;
             return true;
         }
@@ -133,6 +133,15 @@ bool nu_array_pop(nu_array_t array)
     }
     return false;
 }
+void nu_array_resize(nu_array_t array, uint32_t size)
+{
+    nu_array_header_t *header = (nu_array_header_t*)array;
+    header->size = size;
+    if (header->size > header->capacity) {
+        header->capacity = size;
+        header->data = nu_realloc(header->data, header->object_size * header->capacity);
+    }
+}
 void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second)
 {
     nu_array_header_t *header = (nu_array_header_t*)array;
@@ -154,4 +163,15 @@ void nu_array_swap_last(nu_array_t array, uint32_t index)
 {
     nu_array_header_t *header = (nu_array_header_t*)array;
     nu_array_swap(array, index, header->size - 1);
+}
+uint32_t nu_array_remove(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *value)
+{
+    uint32_t count = 0;
+    uint32_t index;
+    while (nu_array_find_index(array, cmp_pfn, value, &index)) {
+        nu_array_swap_last(array, index);
+        nu_array_pop(array);
+        count++;
+    }
+    return count;
 }

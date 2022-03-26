@@ -1,0 +1,74 @@
+{
+    "namespace": "nuecs",
+    "name": "entity",
+    "functions": [
+        {
+            "name": "create",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "const nuecs_entity_info_t*",
+                    "name": "info"
+                },
+                {
+                    "type": "nuecs_entity_t*",
+                    "name": "handle"
+                }
+            ]    
+        },
+        {
+            "name": "destroy",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "nuecs_entity_t",
+                    "name": "handle"
+                }
+            ]    
+        },
+        {
+            "name": "add_component",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "nuecs_entity_t",
+                    "name": "handle"
+                },
+                {
+                    "type": "nuecs_component_t",
+                    "name": "component"
+                },
+                {
+                    "type": "nuecs_component_data_ptr_t",
+                    "name": "component_data"
+                }
+            ]    
+        },
+        {
+            "name": "remove_component",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "nuecs_entity_t",
+                    "name": "handle"
+                },
+                {
+                    "type": "nuecs_component_t",
+                    "name": "component"
+                }
+            ]    
+        }
+    ]
+}

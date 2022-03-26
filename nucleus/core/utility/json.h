@@ -18,7 +18,7 @@ NU_API nu_result_t nu_json_allocate_empty_array(nu_json_t *json);
 NU_API nu_result_t nu_json_allocate_from_file(nu_json_t *json, const char *filename);
 NU_API nu_result_t nu_json_allocate_from_cstr(nu_json_t *json, const char *cstr);
 NU_API void nu_json_free(nu_json_t json);
-NU_API nu_result_t nu_json_print_file(nu_json_t json, const char *filename, bool minify);
+NU_API nu_result_t nu_json_save_file(nu_json_t json, const char *filename, bool minify);
 NU_API nu_json_value_t nu_json_get_root(nu_json_t json);
 
 NU_API bool nu_json_value_is_string(nu_json_value_t value);

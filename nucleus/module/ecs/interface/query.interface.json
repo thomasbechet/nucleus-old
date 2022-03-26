@@ -1,0 +1,49 @@
+{
+    "namespace": "nuecs",
+    "name": "query",
+    "functions": [
+        {
+            "name": "create",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "const nuecs_query_info_t*",
+                    "name": "info"
+                },
+                {
+                    "type": "nuecs_query_t*",
+                    "name": "handle"
+                }
+            ]    
+        },
+        {
+            "name": "destroy",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "nuecs_query_t",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "resolve_chunks",
+            "parameters": [
+                {
+                    "type": "nuecs_query_t",
+                    "name": "handle"
+                },
+                {
+                    "type": "nuecs_query_chunks_t*",
+                    "name": "chunks"
+                }
+            ]
+        }
+    ]
+}

@@ -4,8 +4,9 @@ static nu_result_t nuvk_sdf_pool_destroy(
     nuvk_sdf_pool_t *pool
 )
 {
-    nuvk_sdf_instance_data_t *instances = (nuvk_sdf_instance_data_t*)nu_indexed_array_get_data(pool->instances);
-    uint32_t instance_count = nu_indexed_array_get_size(pool->instances);
+    nuvk_sdf_instance_data_t *instances;
+    uint32_t instance_count;
+    nu_indexed_array_get_data(pool->instances, &instances, &instance_count);
     for (uint32_t i = 0; i < instance_count; i++) {
         nu_free(instances[i].data);
     }
@@ -17,8 +18,9 @@ static nu_result_t nuvk_sdf_pool_destroy(
 }
 static nu_result_t nuvk_sdf_pool_generate_indices(nuvk_sdf_pool_t *pool)
 {
-    const nuvk_sdf_instance_data_t *instances = (const nuvk_sdf_instance_data_t*)nu_indexed_array_get_data_const(pool->instances);
-    uint32_t instance_count = nu_indexed_array_get_size(pool->instances);
+    nuvk_sdf_instance_data_t *instances;
+    uint32_t instance_count;
+    nu_indexed_array_get_data(pool->instances, &instances, &instance_count);
     for (uint32_t i = 0; i < instance_count; i++) {
         pool->indices[i] = instances[i].buffer_index;
     }
@@ -36,8 +38,9 @@ nu_result_t nuvk_scene_initialize(nuvk_scene_t *scene)
 }
 nu_result_t nuvk_scene_terminate(nuvk_scene_t *scene)
 {
-    nuvk_sdf_pool_t *pools = (nuvk_sdf_pool_t*)nu_indexed_array_get_data(scene->sdf_pools);
-    uint32_t pool_count = nu_indexed_array_get_size(scene->sdf_pools);
+    nuvk_sdf_pool_t *pools;
+    uint32_t pool_count;
+    nu_indexed_array_get_data(scene->sdf_pools, &pools, &pool_count);
     for (uint32_t i = 0; i < pool_count; i++) {
         nuvk_sdf_pool_destroy(&pools[i]);
     }
@@ -56,7 +59,7 @@ nu_result_t nuvk_scene_sdf_pool_create(
 )
 {
     nu_indexed_array_add(scene->sdf_pools, NULL, &sdf_data->pool_id);
-    nuvk_sdf_pool_t *pool = nu_indexed_array_get(scene->sdf_pools, sdf_data->pool_id);
+    nuvk_sdf_pool_t *pool; nu_indexed_array_get(scene->sdf_pools, sdf_data->pool_id, &pool);
 
     pool->sdf_data = sdf_data;
     nu_indexed_array_allocate(&pool->instances, sizeof(nuvk_sdf_instance_data_t)); 
@@ -77,13 +80,13 @@ nu_result_t nuvk_scene_sdf_instance_create(
 )
 {
     nuvk_sdf_data_t *sdf_data = (nuvk_sdf_data_t*)info->sdf;
-    nuvk_sdf_pool_t *pool     = (nuvk_sdf_pool_t*)nu_indexed_array_get(scene->sdf_pools, sdf_data->pool_id);
+    nuvk_sdf_pool_t *pool; nu_indexed_array_get(scene->sdf_pools, sdf_data->pool_id, &pool);
 
     nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)handle;
     handle_data->pool_id = sdf_data->pool_id; 
 
     nu_indexed_array_add(pool->instances, NULL, &handle_data->instance_id);
-    nuvk_sdf_instance_data_t *instance = (nuvk_sdf_instance_data_t*)nu_indexed_array_get(pool->instances, handle_data->instance_id);
+    nuvk_sdf_instance_data_t *instance; nu_indexed_array_get(pool->instances, handle_data->instance_id, &instance);
     
     /* data */
     instance->data = nu_malloc(sdf_data->data_size);
@@ -99,7 +102,7 @@ nu_result_t nuvk_scene_sdf_instance_create(
 
     /* set buffer id */
     if (!nu_array_is_empty(pool->instance_free_buffer_indices)) {
-        uint32_t *free_id = (uint32_t*)nu_array_get_last(pool->instance_free_buffer_indices);
+        uint32_t *free_id; nu_array_get_last(pool->instance_free_buffer_indices, &free_id);
         instance->buffer_index = *free_id;
         nu_array_pop(pool->instance_free_buffer_indices);
     } else {
@@ -127,8 +130,8 @@ nu_result_t nuvk_scene_sdf_instance_destroy(
 )
 {
     nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)handle;
-    nuvk_sdf_pool_t *pool = (nuvk_sdf_pool_t*)nu_indexed_array_get(scene->sdf_pools, handle_data->pool_id);
-    nuvk_sdf_instance_data_t *instance = (nuvk_sdf_instance_data_t*)nu_indexed_array_get(pool->instances, handle_data->instance_id);
+    nuvk_sdf_pool_t *pool; nu_indexed_array_get(scene->sdf_pools, handle_data->pool_id, &pool);
+    nuvk_sdf_instance_data_t *instance; nu_indexed_array_get(pool->instances, handle_data->instance_id, &instance);
     
     nu_free(instance->data);
     nu_indexed_array_remove(pool->instances, handle_data->instance_id);
@@ -144,8 +147,8 @@ nu_result_t nuvk_scene_sdf_instance_update_transform(
 )
 {
     nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)handle;
-    nuvk_sdf_pool_t *pool = (nuvk_sdf_pool_t*)nu_indexed_array_get(scene->sdf_pools, handle_data->pool_id);
-    nuvk_sdf_instance_data_t *instance = (nuvk_sdf_instance_data_t*)nu_indexed_array_get(pool->instances, handle_data->instance_id);
+    nuvk_sdf_pool_t *pool; nu_indexed_array_get(scene->sdf_pools, handle_data->pool_id, &pool);
+    nuvk_sdf_instance_data_t *instance; nu_indexed_array_get(pool->instances, handle_data->instance_id, &instance);
 
     /* transform */
     memcpy(&instance->transform, transform, sizeof(nuvk_sdf_transform_t));
@@ -169,8 +172,8 @@ nu_result_t nuvk_scene_sdf_instance_update_data(
 )
 {
     nuvk_sdf_instance_handle_data_t *handle_data = (nuvk_sdf_instance_handle_data_t*)handle;
-    nuvk_sdf_pool_t *pool = (nuvk_sdf_pool_t*)nu_indexed_array_get(scene->sdf_pools, handle_data->pool_id);
-    nuvk_sdf_instance_data_t *instance = (nuvk_sdf_instance_data_t*)nu_indexed_array_get(pool->instances, handle_data->instance_id);
+    nuvk_sdf_pool_t *pool; nu_indexed_array_get(scene->sdf_pools, handle_data->pool_id, &pool);
+    nuvk_sdf_instance_data_t *instance; nu_indexed_array_get(pool->instances, handle_data->instance_id, &instance);
 
     /* data */
     memcpy(instance->data, data, pool->sdf_data->data_size);

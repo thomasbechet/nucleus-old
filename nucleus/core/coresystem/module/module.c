@@ -144,8 +144,9 @@ nu_result_t nu_module_initialize(void)
 nu_result_t nu_module_terminate(void)
 {
     /* unload all module */
-    uint32_t size = nu_indexed_array_get_size(_system.modules);
-    nu_module_data_t *data = nu_indexed_array_get_data(_system.modules);
+    nu_module_data_t *data;
+    uint32_t size;
+    nu_indexed_array_get_data(_system.modules, &data, &size);
     for (uint32_t i = 0; i < size; i++) {
         unload_module(&data[i]);
     }
@@ -178,20 +179,22 @@ nu_result_t nu_module_load(const char *path, nu_module_t *handle)
     NU_HANDLE_SET_ID(*handle, id);
 
     /* store handle */
-    ((nu_module_data_t*)nu_indexed_array_get(_system.modules, id))->handle = *handle;
+    nu_module_data_t *pmodule; nu_indexed_array_get(_system.modules, id, &pmodule);
+    pmodule->handle = *handle;
 
     return NU_SUCCESS;
 }
 nu_result_t nu_module_get_function(nu_module_t handle, const char *function_name, nu_pfn_t *function)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
-    return get_function((nu_module_data_t*)nu_indexed_array_get(_system.modules, id), function_name, function);
+    nu_module_data_t *pmodule; nu_indexed_array_get(_system.modules, id, &pmodule);
+    return get_function(pmodule, function_name, function);
 }
 nu_result_t nu_module_get_interface(nu_module_t handle, const char *interface_name, void *interface)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
-    nu_module_data_t *module = (nu_module_data_t*)nu_indexed_array_get(_system.modules, id);
-    return module->interface_loader(interface_name, interface);
+    nu_module_data_t *pmodule; nu_indexed_array_get(_system.modules, id, &pmodule);
+    return pmodule->interface_loader(interface_name, interface);
 }
 static bool nu_module_find_by_name(const void *user, const void *object)
 {
@@ -224,8 +227,8 @@ nu_result_t nu_module_get_by_id(uint32_t id, nu_module_t *handle)
 uint32_t nu_module_get_id(nu_module_t handle)
 {
     uint32_t id; NU_HANDLE_GET_ID(handle, id);
-    nu_module_data_t *module = (nu_module_data_t*)nu_indexed_array_get(_system.modules, id);
-    return module->info.id;
+    nu_module_data_t *pmodule; nu_indexed_array_get(_system.modules, id, &pmodule);
+    return pmodule->info.id;
 }
 
 #define MAX_MODULE_FLAG_COUNT 5
@@ -374,8 +377,9 @@ static void log_line(
 nu_result_t nu_module_log(void)
 {
     /* get module data */
-    const nu_module_data_t *modules = (const nu_module_data_t*)nu_indexed_array_get_data(_system.modules);
-    uint32_t module_count = nu_indexed_array_get_size(_system.modules);
+    nu_module_data_t *modules;
+    uint32_t module_count;
+    nu_indexed_array_get_data(_system.modules, &modules, &module_count);
 
     /* compute max */
     uint32_t max_name, max_id, max_flag, max_interface, max_plugin;

@@ -2,18 +2,21 @@
 #include <nucleus/module/ecs/module/module.h>
 
 #include <nucleus/module/ecs/module/definition.h>
-#include <nucleus/module/ecs/plugin/plugin.h>
-#include <nucleus/module/ecs/plugin/world.h>
+#include <nucleus/module/ecs/module/implementation.h>
 
-static const uint32_t interface_count = 2;
+static const uint32_t interface_count = 6;
 static const char *interfaces[] = {
     NU_PLUGIN_INTERFACE_NAME, 
-    NUECS_WORLD_INTERFACE_NAME
+    NUECS_ARCHETYPE_INTERFACE_NAME, 
+    NUECS_SCENE_INTERFACE_NAME, 
+    NUECS_QUERY_INTERFACE_NAME, 
+    NUECS_ENTITY_INTERFACE_NAME, 
+    NUECS_COMPONENT_INTERFACE_NAME
 };
 
 static const uint32_t plugin_count = 1;
 static const char *plugins[] = {
-    NUECS_WORLD_PLUGIN_NAME
+    NUECS_SCENE_PLUGIN_NAME
 };
 
 static nu_result_t plugin_get_list(uint32_t *count, const char ***plugin_list)
@@ -24,10 +27,10 @@ static nu_result_t plugin_get_list(uint32_t *count, const char ***plugin_list)
 }
 static nu_result_t plugin_get_callbacks(const char *name, nu_plugin_callbacks_t *callbacks)
 {
-    if (NU_MATCH(name, NUECS_WORLD_PLUGIN_NAME)) {
-        callbacks->initialize = nuecs_world_plugin_initialize;
-        callbacks->terminate = nuecs_world_plugin_terminate;
-        callbacks->update = nuecs_world_plugin_update;
+    if (NU_MATCH(name, NUECS_SCENE_PLUGIN_NAME)) {
+        callbacks->initialize = nuecs_scene_plugin_initialize_impl;
+        callbacks->terminate = nuecs_scene_plugin_terminate_impl;
+        callbacks->update = nuecs_scene_plugin_update_impl;
         return NU_SUCCESS;
     }
 
@@ -53,18 +56,43 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->get_list = plugin_get_list;
 
         return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_WORLD_INTERFACE_NAME)) {
-        nuecs_world_interface_t *i = (nuecs_world_interface_t*)interface;
+    } else if (NU_MATCH(name, NUECS_ARCHETYPE_INTERFACE_NAME)) {
+        nuecs_archetype_interface_t *i = (nuecs_archetype_interface_t*)interface;
         
-        i->create = nuecs_world_create;
-        i->destroy = nuecs_world_destroy;
-        i->progress = nuecs_world_progress;
-        i->register_component = nuecs_world_register_component;
-        i->register_system = nuecs_world_register_system;
-        i->create_entity = nuecs_world_create_entity;
-        i->destroy_entity = nuecs_world_destroy_entity;
-        i->entity_add_component = nuecs_world_entity_add_component;
-        i->entity_remove_component = nuecs_world_entity_remove_component;
+        i->debug_archetypes = nuecs_archetype_debug_archetypes_impl;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_SCENE_INTERFACE_NAME)) {
+        nuecs_scene_interface_t *i = (nuecs_scene_interface_t*)interface;
+        
+        i->create = nuecs_scene_create_impl;
+        i->destroy = nuecs_scene_destroy_impl;
+        i->progress = nuecs_scene_progress_impl;
+        i->register_system = nuecs_scene_register_system_impl;
+        i->save_file = nuecs_scene_save_file_impl;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_QUERY_INTERFACE_NAME)) {
+        nuecs_query_interface_t *i = (nuecs_query_interface_t*)interface;
+        
+        i->create = nuecs_query_create_impl;
+        i->destroy = nuecs_query_destroy_impl;
+        i->resolve_chunks = nuecs_query_resolve_chunks_impl;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_ENTITY_INTERFACE_NAME)) {
+        nuecs_entity_interface_t *i = (nuecs_entity_interface_t*)interface;
+        
+        i->create = nuecs_entity_create_impl;
+        i->destroy = nuecs_entity_destroy_impl;
+        i->add_component = nuecs_entity_add_component_impl;
+        i->remove_component = nuecs_entity_remove_component_impl;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_COMPONENT_INTERFACE_NAME)) {
+        nuecs_component_interface_t *i = (nuecs_component_interface_t*)interface;
+        
+        i->record = nuecs_component_record_impl;
 
         return NU_SUCCESS;
     }

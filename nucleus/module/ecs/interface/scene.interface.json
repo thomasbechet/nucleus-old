@@ -1,0 +1,63 @@
+{
+    "namespace": "nuecs",
+    "name": "scene",
+    "functions": [
+        {
+            "name": "create",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t*",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "destroy",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "progress",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "handle"
+                }
+            ]    
+        },
+        {
+            "name": "register_system",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "const nuecs_system_info_t*",
+                    "name": "info"
+                },
+                {
+                    "type": "nuecs_system_t*",
+                    "name": "handle"
+                }
+            ]
+        },
+        {
+            "name": "save_file",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                },
+                {
+                    "type": "const char*",
+                    "name": "filename"
+                }
+            ]
+        }
+    ]
+}
