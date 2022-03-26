@@ -1,38 +1,9 @@
 {
     "namespace": "nuecs",
-    "name": "scene",
-    "include_headers": [
-        "nucleus/module/ecs/plugin/types_public.h"
-    ],
+    "name": "entity",
     "functions": [
         {
-            "name": "progress",
-            "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "handle"
-                }
-            ]    
-        },
-        {
-            "name": "register_system",
-            "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "scene_handle"
-                },
-                {
-                    "type": "const nuecs_system_info_t*",
-                    "name": "info"
-                },
-                {
-                    "type": "nuecs_system_t*",
-                    "name": "handle"
-                }
-            ]    
-        },
-        {
-            "name": "create_entity",
+            "name": "create",
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
@@ -49,7 +20,7 @@
             ]    
         },
         {
-            "name": "destroy_entity",
+            "name": "destroy",
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
@@ -62,7 +33,7 @@
             ]    
         },
         {
-            "name": "entity_add_component",
+            "name": "add_component",
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
@@ -83,7 +54,7 @@
             ]    
         },
         {
-            "name": "entity_remove_component",
+            "name": "remove_component",
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
@@ -98,19 +69,6 @@
                     "name": "component"
                 }
             ]    
-        },
-        {
-            "name": "save_file",
-            "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "scene_handle"
-                },
-                {
-                    "type": "const char*",
-                    "name": "filename"
-                }
-            ]
         }
     ]
 }

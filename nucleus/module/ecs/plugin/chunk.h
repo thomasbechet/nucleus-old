@@ -1,9 +1,20 @@
 #ifndef NUECS_CHUNK_H
 #define NUECS_CHUNK_H
 
-#include <nucleus/module/ecs/plugin/types_private.h>
+#include <nucleus/module/ecs/plugin/archetype.h>
+#include <nucleus/module/ecs/plugin/chunk.h>
+#include <nucleus/module/ecs/plugin/types_public.h>
 
 #define NUECS_CHUNK_SIZE 512
+
+typedef struct {
+    nuecs_archetype_data_t *archetype;
+    uint32_t size;
+    uint32_t frame_size;
+    uint32_t free_count;
+    uint32_t *indice_table;
+    nuecs_component_data_ptr_t *component_list_ptrs;
+} nuecs_chunk_data_t;
 
 nu_result_t nuecs_chunk_allocate(nuecs_archetype_data_t *archetype, nuecs_chunk_data_t **chunk);
 nu_result_t nuecs_chunk_free(nuecs_chunk_data_t *chunk);

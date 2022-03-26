@@ -1,7 +1,7 @@
 #ifndef NUECS_UTILITY_H
 #define NUECS_UTILITY_H
 
-#include <nucleus/module/ecs/plugin/types_private.h>
+#include <nucleus/module/ecs/plugin/component.h>
 
 nu_result_t nuecs_sanatize_components(
     nuecs_component_data_t **in_components,

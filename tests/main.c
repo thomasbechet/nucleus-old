@@ -169,6 +169,22 @@ typedef struct {
 } score_t;
 
 typedef struct {
+    nuecs_entity_t next;
+    nuecs_entity_t prev;
+    nuecs_entity_t parent;
+    nuecs_entity_t child;
+    bool diry;
+} transform_t;
+
+// static nu_result_t serialize_transform(const nuecs_component_data_ptr_t data, nu_json_object_t json)
+// {
+//     const transform_t *transform = (const transform_t*)data;
+//     // nuecs_serialize_entity(transform->child, "child", json);
+//     nuecs_entity_serialize()
+//     return NU_SUCCESS;
+// }
+
+typedef struct {
     uint32_t id;
     uint32_t v;
 } stest;
@@ -245,9 +261,7 @@ static nu_result_t on_start(void)
     nu_module_t ecs_module;
     NU_ASSERT(nu_module_load("$MODULE/nucleus-ecs", &ecs_module) == NU_SUCCESS);
     nu_plugin_require(ecs_module, NUECS_SCENE_PLUGIN_NAME);
-    nuecs_scene_interface_load(ecs_module);
-    nuecs_manager_interface_load(ecs_module);
-    nuecs_query_interface_load(ecs_module);
+    nuecs_interface_load_all(ecs_module);
 
     /* load sdf interface */
     nu_module_t renderer_module = nu_renderer_get_module();
@@ -261,7 +275,7 @@ static nu_result_t on_start(void)
 
     /* load ecs interface */
     nuecs_scene_t scene;
-    NU_ASSERT(nuecs_manager_create_scene(&scene) == NU_SUCCESS);
+    NU_ASSERT(nuecs_scene_create(&scene) == NU_SUCCESS);
 
     nuecs_component_t position_component, health_component, velocity_component, score_component;
     {
@@ -270,7 +284,7 @@ static nu_result_t on_start(void)
         info.size             = sizeof(position_t);
         info.serialize_json   = serialize_position;
         info.deserialize_json = NULL;
-        nuecs_manager_register_component(&info, &position_component);
+        nuecs_component_record(&info, &position_component);
     }
     {
         nuecs_component_info_t info;
@@ -278,7 +292,7 @@ static nu_result_t on_start(void)
         info.size             = sizeof(health_t);
         info.serialize_json   = serialize_health;
         info.deserialize_json = NULL;
-        nuecs_manager_register_component(&info, &health_component);
+        nuecs_component_record(&info, &health_component);
     }
     {
         nuecs_component_info_t info;
@@ -286,7 +300,7 @@ static nu_result_t on_start(void)
         info.size             = sizeof(velocity_t);
         info.serialize_json   = serialize_velocity;
         info.deserialize_json = NULL;
-        nuecs_manager_register_component(&info, &velocity_component);
+        nuecs_component_record(&info, &velocity_component);
     }
     {
         nuecs_component_info_t info;
@@ -294,7 +308,7 @@ static nu_result_t on_start(void)
         info.size             = sizeof(score_t);
         info.serialize_json   = serialize_score;
         info.deserialize_json = NULL;
-        nuecs_manager_register_component(&info, &score_component);
+        nuecs_component_record(&info, &score_component);
     }
 
     position_t position;
@@ -318,7 +332,7 @@ static nu_result_t on_start(void)
         info1.components      = (nuecs_component_t[]){position_component, velocity_component};
         info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
         info1.component_count = 2;
-        nuecs_scene_create_entity(scene, &info1, &entity0);
+        nuecs_entity_create(scene, &info1, &entity0);
     }
 
     {
@@ -327,8 +341,8 @@ static nu_result_t on_start(void)
         info.components      = (nuecs_component_t[]){position_component, velocity_component};
         info.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
         info.component_count = 2;
-        nuecs_scene_create_entity(scene, &info, &e);
-        nuecs_scene_entity_remove_component(scene, e, velocity_component);
+        nuecs_entity_create(scene, &info, &e);
+        nuecs_entity_remove_component(scene, e, velocity_component);
     }
 
     {
@@ -337,7 +351,7 @@ static nu_result_t on_start(void)
         info.components      = (nuecs_component_t[]){velocity_component};
         info.component_data  = (nuecs_component_data_ptr_t[]){&velocity};
         info.component_count = 1;
-        nuecs_scene_create_entity(scene, &info, &e);
+        nuecs_entity_create(scene, &info, &e);
     }
 
     nuecs_query_info_t qinfo;
@@ -347,10 +361,10 @@ static nu_result_t on_start(void)
     qinfo.type            = NUECS_QUERY_TYPE_CHUNK;
     NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
 
-    nuecs_manager_debug_archetypes();
+    nuecs_archetype_debug_archetypes();
 
     nuecs_query_chunks_t chunks;
-    NU_ASSERT(nuecs_query_resolve_chunks(scene, query, &chunks) == NU_SUCCESS);
+    NU_ASSERT(nuecs_query_resolve_chunks(query, &chunks) == NU_SUCCESS);
 
     nuecs_scene_save_file(scene, "$ROOT/mywork.json");
 

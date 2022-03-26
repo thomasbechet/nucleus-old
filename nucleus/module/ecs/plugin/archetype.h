@@ -1,7 +1,21 @@
 #ifndef NUECS_ARCHETYPE_H
 #define NUECS_ARCHETYPE_H
 
-#include <nucleus/module/ecs/plugin/types_private.h>
+#include <nucleus/module/ecs/plugin/component.h>
+
+typedef struct {
+    nu_array_t edges;
+    uint32_t component_count;
+    uint32_t *data_sizes;
+    uint32_t *component_ids;
+    uint32_t index;
+} nuecs_archetype_data_t;
+
+typedef struct {
+    nuecs_archetype_data_t *add;
+    nuecs_archetype_data_t *remove;
+    uint32_t component_id;
+} nuecs_archetype_edge_t;
 
 nu_result_t nuecs_archetype_create_empty(nuecs_archetype_data_t **archetype);
 nu_result_t nuecs_archetype_create_next(

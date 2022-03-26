@@ -2,9 +2,7 @@
 #include <{{ module.directory }}/module.h>
 
 #include <{{ module.directory }}/definition.h>
-{%- for header in module.implementation_headers %}
-#include <{{ header }}>
-{%- endfor %}
+#include <{{ module.directory }}/implementation.h>
 
 static const uint32_t interface_count = {{ module.implement_interfaces|length + 1 }};
 static const char *interfaces[] = {
@@ -36,19 +34,19 @@ static nu_result_t plugin_get_callbacks(const char *name, nu_plugin_callbacks_t 
     } else if (NU_MATCH(name, {{ module.namespace|upper }}_{{ plugin.name|upper }}_PLUGIN_NAME)) {
     {%- endif %}
         {%- if plugin.callbacks['initialize'] %}
-        callbacks->initialize = {{ module.namespace }}_{{ plugin.name }}_plugin_initialize;
+        callbacks->initialize = {{ module.namespace }}_{{ plugin.name }}_plugin_initialize_impl;
         {%- endif %}
         {%- if plugin.callbacks['terminate'] %}
-        callbacks->terminate = {{ module.namespace }}_{{ plugin.name }}_plugin_terminate;
+        callbacks->terminate = {{ module.namespace }}_{{ plugin.name }}_plugin_terminate_impl;
         {%- endif %}
         {%- if plugin.callbacks['update'] %}
-        callbacks->update = {{ module.namespace }}_{{ plugin.name }}_plugin_update;
+        callbacks->update = {{ module.namespace }}_{{ plugin.name }}_plugin_update_impl;
         {%- endif %}
         {%- if plugin.callbacks['fixed_update'] %}
-        callbacks->fixed_update = {{ module.namespace }}_{{ plugin.name }}_plugin_fixed_update;
+        callbacks->fixed_update = {{ module.namespace }}_{{ plugin.name }}_plugin_fixed_update_impl;
         {%- endif %}
         {%- if plugin.callbacks['late_update'] %}
-        callbacks->late_update = {{ module.namespace }}_{{ plugin.name }}_plugin_late_update;
+        callbacks->late_update = {{ module.namespace }}_{{ plugin.name }}_plugin_late_update_impl;
         {%- endif %}
         return NU_SUCCESS;
     {%- if loop.last %}
@@ -82,7 +80,7 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, {{ interface.definition.namespace|upper }}_{{ interface.definition.name|upper }}_INTERFACE_NAME)) {
         {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t *i = ({{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t*)interface;
         {% for function in interface.definition.functions %}
-        i->{{ function.name }} = {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }};
+        i->{{ function.name }} = {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }}_impl;
         {%- endfor %}
 
         return NU_SUCCESS;

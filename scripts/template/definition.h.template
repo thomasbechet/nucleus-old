@@ -3,10 +3,8 @@
 #define {{ module.namespace|upper }}_MODULE_DEFINITION_H
 
 #include <nucleus/nucleus.h>
-{%- for interface in module.define_interfaces %}
-{%- for header in interface.include_headers %}
+{%- for header in module.definition_headers %}
 #include <{{ header }}>
-{%- endfor %}
 {%- endfor %}
 
 /* module */

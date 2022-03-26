@@ -1,7 +1,11 @@
-{%- for interface in module.implement_interfaces %}
+#include <{{ module.directory }}/implementation.h>
+{% for header in module.implementation_headers %}
+#include <{{ header }}>
+{%- endfor %}
+{% for interface in module.implement_interfaces %}
 /* {{ interface.definition.name }} interface */
 {%- for function in interface.definition.functions %}
-nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }})
+nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }}_impl({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }})
 {
     return NU_SUCCESS;
 }
@@ -9,15 +13,15 @@ nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_{{ function.n
 {%- endfor %}
 {%- for plugin in module.plugins %}
 /* {{ plugin.name }} plugin */
-nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_initialize(void)
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_initialize_impl(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_terminate(void)
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_terminate_impl(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_update(void)
+nu_result_t {{ module.namespace }}_{{ plugin.name }}_plugin_update_impl(void)
 {
     return NU_SUCCESS;
 }

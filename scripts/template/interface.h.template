@@ -21,6 +21,14 @@
     {%- endfor %}
     {%- endif %}
     {%- endfor %}
+    nu_result_t {{ module.namespace }}_interface_load_all(nu_module_t module)
+    {
+        {%- for interface in module.implement_interfaces %}
+        {%- if interface.generate_loader %}
+        {{ module.namespace }}_{{ interface.definition.name }}_interface_load(module);
+        {%- endif %}
+        {%- endfor %}
+    }
 #else
     {%- for interface in module.implement_interfaces %}
     {%- if interface.generate_loader %}
@@ -31,6 +39,7 @@
     {%- endfor %}
     {%- endif %}
     {%- endfor %}
+    nu_result_t {{ module.namespace }}_interface_load_all(nu_module_t module);
 #endif
 
 #endif
