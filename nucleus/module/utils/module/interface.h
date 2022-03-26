@@ -32,11 +32,19 @@
     {
         return _nuutils_command_interface.execute(command);
     }
+    nu_result_t nuutils_interface_load_all(nu_module_t module)
+    {
+        nu_result_t result = NU_SUCCESS;
+        result &= nuutils_loader_interface_load(module);
+        result &= nuutils_command_interface_load(module);
+        return result;
+    }
 #else
     extern nuutils_loader_interface_t _nuutils_loader_interface;
     nu_result_t nuutils_loader_interface_load(nu_module_t module);
     extern nuutils_command_interface_t _nuutils_command_interface;
     nu_result_t nuutils_command_interface_load(nu_module_t module);
+    nu_result_t nuutils_interface_load_all(nu_module_t module);
 #endif
 
 #endif

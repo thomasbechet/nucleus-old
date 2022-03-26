@@ -2,8 +2,7 @@
 #include <nucleus/module/glfw/module/module.h>
 
 #include <nucleus/module/glfw/module/definition.h>
-#include <nucleus/module/glfw/input/input.h>
-#include <nucleus/module/glfw/window/window.h>
+#include <nucleus/module/glfw/module/implementation.h>
 
 static const uint32_t interface_count = 4;
 static const char *interfaces[] = {
@@ -51,41 +50,41 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, NUGLFW_WINDOW_INTERFACE_NAME)) {
         nuglfw_window_interface_t *i = (nuglfw_window_interface_t*)interface;
         
-        i->get_required_instance_extensions = nuglfw_window_get_required_instance_extensions;
-        i->create_window_surface = nuglfw_window_create_window_surface;
-        i->present_surface = nuglfw_window_present_surface;
-        i->swap_buffers = nuglfw_window_swap_buffers;
+        i->get_required_instance_extensions = nuglfw_window_get_required_instance_extensions_impl;
+        i->create_window_surface = nuglfw_window_create_window_surface_impl;
+        i->present_surface = nuglfw_window_present_surface_impl;
+        i->swap_buffers = nuglfw_window_swap_buffers_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NU_WINDOW_INTERFACE_NAME)) {
         nu_window_interface_t *i = (nu_window_interface_t*)interface;
         
-        i->initialize = nuglfw_window_initialize;
-        i->terminate = nuglfw_window_terminate;
-        i->start = nuglfw_window_start;
-        i->stop = nuglfw_window_stop;
-        i->update = nuglfw_window_update;
-        i->set_size = nuglfw_window_set_size;
-        i->get_size = nuglfw_window_get_size;
-        i->set_title = nuglfw_window_set_title;
-        i->set_mode = nuglfw_window_set_mode;
+        i->initialize = nuglfw_window_initialize_impl;
+        i->terminate = nuglfw_window_terminate_impl;
+        i->start = nuglfw_window_start_impl;
+        i->stop = nuglfw_window_stop_impl;
+        i->update = nuglfw_window_update_impl;
+        i->set_size = nuglfw_window_set_size_impl;
+        i->get_size = nuglfw_window_get_size_impl;
+        i->set_title = nuglfw_window_set_title_impl;
+        i->set_mode = nuglfw_window_set_mode_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NU_INPUT_INTERFACE_NAME)) {
         nu_input_interface_t *i = (nu_input_interface_t*)interface;
         
-        i->initialize = nuglfw_input_initialize;
-        i->terminate = nuglfw_input_terminate;
-        i->start = nuglfw_input_start;
-        i->stop = nuglfw_input_stop;
-        i->update = nuglfw_input_update;
-        i->get_keyboard_state = nuglfw_input_get_keyboard_state;
-        i->get_keyboard_text = nuglfw_input_get_keyboard_text;
-        i->get_mouse_state = nuglfw_input_get_mouse_state;
-        i->get_mouse_motion = nuglfw_input_get_mouse_motion;
-        i->get_mouse_scroll = nuglfw_input_get_mouse_scroll;
-        i->get_cursor_mode = nuglfw_input_get_cursor_mode;
-        i->set_cursor_mode = nuglfw_input_set_cursor_mode;
+        i->initialize = nuglfw_input_initialize_impl;
+        i->terminate = nuglfw_input_terminate_impl;
+        i->start = nuglfw_input_start_impl;
+        i->stop = nuglfw_input_stop_impl;
+        i->update = nuglfw_input_update_impl;
+        i->get_keyboard_state = nuglfw_input_get_keyboard_state_impl;
+        i->get_keyboard_text = nuglfw_input_get_keyboard_text_impl;
+        i->get_mouse_state = nuglfw_input_get_mouse_state_impl;
+        i->get_mouse_motion = nuglfw_input_get_mouse_motion_impl;
+        i->get_mouse_scroll = nuglfw_input_get_mouse_scroll_impl;
+        i->get_cursor_mode = nuglfw_input_get_cursor_mode_impl;
+        i->set_cursor_mode = nuglfw_input_set_cursor_mode_impl;
 
         return NU_SUCCESS;
     }

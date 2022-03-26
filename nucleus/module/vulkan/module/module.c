@@ -2,7 +2,7 @@
 #include <nucleus/module/vulkan/module/module.h>
 
 #include <nucleus/module/vulkan/module/definition.h>
-#include <nucleus/module/vulkan/renderer.h>
+#include <nucleus/module/vulkan/module/implementation.h>
 
 static const uint32_t interface_count = 3;
 static const char *interfaces[] = {
@@ -49,31 +49,31 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, NU_RENDERER_INTERFACE_NAME)) {
         nu_renderer_interface_t *i = (nu_renderer_interface_t*)interface;
         
-        i->initialize = nuvk_renderer_initialize;
-        i->terminate = nuvk_renderer_terminate;
-        i->start = nuvk_renderer_start;
-        i->stop = nuvk_renderer_stop;
-        i->render = nuvk_renderer_render;
-        i->camera_create = nuvk_renderer_camera_create;
-        i->camera_destroy = nuvk_renderer_camera_destroy;
-        i->camera_set_fov = nuvk_renderer_camera_set_fov;
-        i->camera_set_view = nuvk_renderer_camera_set_view;
-        i->viewport_set_size = nuvk_renderer_viewport_set_size;
-        i->viewport_get_size = nuvk_renderer_viewport_get_size;
+        i->initialize = nuvk_renderer_initialize_impl;
+        i->terminate = nuvk_renderer_terminate_impl;
+        i->start = nuvk_renderer_start_impl;
+        i->stop = nuvk_renderer_stop_impl;
+        i->render = nuvk_renderer_render_impl;
+        i->camera_create = nuvk_renderer_camera_create_impl;
+        i->camera_destroy = nuvk_renderer_camera_destroy_impl;
+        i->camera_set_fov = nuvk_renderer_camera_set_fov_impl;
+        i->camera_set_view = nuvk_renderer_camera_set_view_impl;
+        i->viewport_set_size = nuvk_renderer_viewport_set_size_impl;
+        i->viewport_get_size = nuvk_renderer_viewport_get_size_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUVK_RENDERER_INTERFACE_NAME)) {
         nuvk_renderer_interface_t *i = (nuvk_renderer_interface_t*)interface;
         
-        i->sdf_create = nuvk_renderer_sdf_create;
-        i->sdf_destroy = nuvk_renderer_sdf_destroy;
-        i->sdf_get_primitive = nuvk_renderer_sdf_get_primitive;
-        i->material_create = nuvk_renderer_material_create;
-        i->material_destroy = nuvk_renderer_material_destroy;
-        i->sdf_instance_create = nuvk_renderer_sdf_instance_create;
-        i->sdf_instance_destroy = nuvk_renderer_sdf_instance_destroy;
-        i->sdf_instance_update_transform = nuvk_renderer_sdf_instance_update_transform;
-        i->sdf_instance_update_data = nuvk_renderer_sdf_instance_update_data;
+        i->sdf_create = nuvk_renderer_sdf_create_impl;
+        i->sdf_destroy = nuvk_renderer_sdf_destroy_impl;
+        i->sdf_get_primitive = nuvk_renderer_sdf_get_primitive_impl;
+        i->material_create = nuvk_renderer_material_create_impl;
+        i->material_destroy = nuvk_renderer_material_destroy_impl;
+        i->sdf_instance_create = nuvk_renderer_sdf_instance_create_impl;
+        i->sdf_instance_destroy = nuvk_renderer_sdf_instance_destroy_impl;
+        i->sdf_instance_update_transform = nuvk_renderer_sdf_instance_update_transform_impl;
+        i->sdf_instance_update_data = nuvk_renderer_sdf_instance_update_data_impl;
 
         return NU_SUCCESS;
     }

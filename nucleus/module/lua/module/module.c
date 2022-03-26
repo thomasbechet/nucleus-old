@@ -2,12 +2,12 @@
 #include <nucleus/module/lua/module/module.h>
 
 #include <nucleus/module/lua/module/definition.h>
-#include <nucleus/module/lua/plugin/plugin.h>
+#include <nucleus/module/lua/module/implementation.h>
 
 static const uint32_t interface_count = 2;
 static const char *interfaces[] = {
     NU_PLUGIN_INTERFACE_NAME, 
-    NULUA_MANAGER_INTERFACE_NAME
+    NULUA_PLUGIN_INTERFACE_NAME
 };
 
 static const uint32_t plugin_count = 1;
@@ -24,9 +24,9 @@ static nu_result_t plugin_get_list(uint32_t *count, const char ***plugin_list)
 static nu_result_t plugin_get_callbacks(const char *name, nu_plugin_callbacks_t *callbacks)
 {
     if (NU_MATCH(name, NULUA_MANAGER_PLUGIN_NAME)) {
-        callbacks->initialize = nulua_manager_plugin_initialize;
-        callbacks->terminate = nulua_manager_plugin_terminate;
-        callbacks->update = nulua_manager_plugin_update;
+        callbacks->initialize = nulua_manager_plugin_initialize_impl;
+        callbacks->terminate = nulua_manager_plugin_terminate_impl;
+        callbacks->update = nulua_manager_plugin_update_impl;
         return NU_SUCCESS;
     }
 
@@ -52,10 +52,10 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->get_list = plugin_get_list;
 
         return NU_SUCCESS;
-    } else if (NU_MATCH(name, NULUA_MANAGER_INTERFACE_NAME)) {
-        nulua_manager_interface_t *i = (nulua_manager_interface_t*)interface;
+    } else if (NU_MATCH(name, NULUA_PLUGIN_INTERFACE_NAME)) {
+        nulua_plugin_interface_t *i = (nulua_plugin_interface_t*)interface;
         
-        i->load_plugin = nulua_manager_load_plugin;
+        i->load = nulua_plugin_load_impl;
 
         return NU_SUCCESS;
     }

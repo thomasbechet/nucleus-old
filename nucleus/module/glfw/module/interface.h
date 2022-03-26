@@ -27,9 +27,16 @@
     {
         return _nuglfw_window_interface.swap_buffers();
     }
+    nu_result_t nuglfw_interface_load_all(nu_module_t module)
+    {
+        nu_result_t result = NU_SUCCESS;
+        result &= nuglfw_window_interface_load(module);
+        return result;
+    }
 #else
     extern nuglfw_window_interface_t _nuglfw_window_interface;
     nu_result_t nuglfw_window_interface_load(nu_module_t module);
+    nu_result_t nuglfw_interface_load_all(nu_module_t module);
 #endif
 
 #endif

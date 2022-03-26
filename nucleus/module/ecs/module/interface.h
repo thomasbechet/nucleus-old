@@ -89,11 +89,13 @@
     }
     nu_result_t nuecs_interface_load_all(nu_module_t module)
     {
-        nuecs_archetype_interface_load(module);
-        nuecs_scene_interface_load(module);
-        nuecs_query_interface_load(module);
-        nuecs_entity_interface_load(module);
-        nuecs_component_interface_load(module);
+        nu_result_t result = NU_SUCCESS;
+        result &= nuecs_archetype_interface_load(module);
+        result &= nuecs_scene_interface_load(module);
+        result &= nuecs_query_interface_load(module);
+        result &= nuecs_entity_interface_load(module);
+        result &= nuecs_component_interface_load(module);
+        return result;
     }
 #else
     extern nuecs_archetype_interface_t _nuecs_archetype_interface;
