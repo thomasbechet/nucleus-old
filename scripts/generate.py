@@ -69,9 +69,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--module', nargs=1, help='generate module files from a module configuration')
     parser.add_argument('--install', action='store_true')
-    parser.add_argument('--install-implementation', action='store_true')
+    parser.add_argument('--install-implementation-source', action='store_true')
     args = parser.parse_args()
 
     # Generate module
     if args.module:
-        generate_module(args.module[0], args.install, args.install_implementation)
+        generate_module(args.module[0], args.install, args.install_implementation_source)

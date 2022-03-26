@@ -1,7 +1,6 @@
 {
     "namespace": "nuutils",
     "name": "loader",
-    "include_headers": [],
     "functions": [
         {
             "name": "load_mesh_from_obj",

@@ -1,12 +1,9 @@
 {
     "namespace": "nulua",
-    "name": "manager",
-    "include_headers": [
-        "nucleus/module/lua/plugin/types_public.h"
-    ],
+    "name": "plugin",
     "functions": [
         {
-            "name": "load_plugin",
+            "name": "load",
             "parameters": [
                 {
                     "type": "const char*",

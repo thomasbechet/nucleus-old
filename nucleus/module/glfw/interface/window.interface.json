@@ -1,7 +1,6 @@
 {
     "namespace": "nuglfw",
     "name": "window",
-    "include_headers": [],
     "functions": [
         {
             "name": "get_required_instance_extensions",

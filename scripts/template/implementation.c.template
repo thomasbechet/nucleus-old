@@ -1,7 +1,4 @@
 #include <{{ module.directory }}/implementation.h>
-{% for header in module.implementation_headers %}
-#include <{{ header }}>
-{%- endfor %}
 {% for interface in module.implement_interfaces %}
 /* {{ interface.definition.name }} interface */
 {%- for function in interface.definition.functions %}

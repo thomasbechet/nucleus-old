@@ -1,10 +1,6 @@
 {
     "namespace": "nuvk",
     "name": "renderer",
-    "include_headers": [
-        "nucleus/module/vulkan/assets/interface.h",
-        "nucleus/module/vulkan/scene/interface.h"
-    ],
     "functions": [
         {
             "name": "sdf_create",

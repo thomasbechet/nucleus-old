@@ -268,10 +268,10 @@ static nu_result_t on_start(void)
     nuvk_renderer_interface_load(renderer_module);
 
     /* load lua interface */
-    NU_ASSERT(nulua_manager_interface_load(lua_module) == NU_SUCCESS);
+    NU_ASSERT(nulua_interface_load_all(lua_module) == NU_SUCCESS);
     nulua_plugin_t plugin;
-    NU_ASSERT(nulua_manager_load_plugin("$ENGINE/script/test.lua", &plugin));
-    NU_ASSERT(nulua_manager_load_plugin("$ENGINE/script/spectator.lua", &plugin));
+    NU_ASSERT(nulua_plugin_load("$ENGINE/script/test.lua", &plugin));
+    NU_ASSERT(nulua_plugin_load("$ENGINE/script/spectator.lua", &plugin));
 
     /* load ecs interface */
     nuecs_scene_t scene;

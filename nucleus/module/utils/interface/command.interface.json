@@ -1,9 +1,6 @@
 {
     "namespace": "nuutils",
     "name": "command",
-    "include_headers": [
-        "nucleus/module/utils/command/types_public.h"
-    ],
     "functions": [
         {
             "name": "get_event_id",
