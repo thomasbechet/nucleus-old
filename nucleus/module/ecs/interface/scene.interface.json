@@ -58,6 +58,15 @@
                     "name": "filename"
                 }
             ]
+        },
+        {
+            "name": "debug_entities",
+            "parameters": [
+                {
+                    "type": "nuecs_scene_t",
+                    "name": "scene_handle"
+                }
+            ]
         }
     ]
 }

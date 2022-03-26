@@ -6,7 +6,7 @@
 #include <nucleus/module/ecs/plugin/types_public.h>
 #include <nucleus/module/ecs/plugin/scene.h>
 
-#define NUECS_ENTITY_HANDLE_GET_INDEX(handle) handle & 0x00FFFFFF       /* 24 bits */
+#define NUECS_ENTITY_HANDLE_GET_INDEX(handle) handle & 0x00FFFFFF     /* 24 bits */
 #define NUECS_ENTITY_HANDLE_GET_VERSION(handle) (handle >> 24) & 0xFF /*  8 bits */
 #define NUECS_ENTITY_HANDLE_BUILD(index, version) ((((uint32_t)version << 24) & 0xFF000000) | (index & 0x00FFFFFF))
 

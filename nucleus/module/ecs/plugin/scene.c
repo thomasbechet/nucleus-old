@@ -20,8 +20,8 @@ nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
 {
     /* allocate resources */
+    nu_array_allocate(&scene->entities_to_delete, sizeof(nuecs_entity_t));
     nu_array_allocate(&scene->entities, sizeof(nuecs_entity_data_t));
-    nu_array_allocate(&scene->deleted_indices, sizeof(uint32_t));
     nu_array_allocate(&scene->free_indices, sizeof(uint32_t));
     nuecs_archetype_table_initialize(&scene->archetype_table);
     nu_indexed_array_allocate(&scene->queries, sizeof(nuecs_query_data_t*));
@@ -42,9 +42,9 @@ nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
 
     /* free other resources */
     nuecs_archetype_table_terminate(scene->archetype_table);
-    nu_array_free(scene->deleted_indices);
     nu_array_free(scene->free_indices);
     nu_array_free(scene->entities);
+    nu_array_free(scene->entities_to_delete);
 
     return NU_SUCCESS;
 }
@@ -53,18 +53,13 @@ nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene)
     /* remove entities */
     nuecs_entity_data_t *entities;
     nu_array_get_data(scene->entities, &entities, NULL);
-    uint32_t *indices;
-    uint32_t index_count;
-    nu_array_get_data(scene->deleted_indices, &indices, &index_count);
-    for (uint32_t i = 0; i < index_count; i++) {
-        /* remove components */
-        uint32_t index = indices[i];
-        nuecs_chunk_remove(entities[index].chunk, entities[index].chunk_id);
-        /* remove entry */
-        nu_array_push(scene->free_indices, &index);
-        entities[index].chunk = NULL;
+    nuecs_entity_t *handles;
+    uint32_t handle_count;
+    nu_array_get_data(scene->entities_to_delete, &handles, &handle_count);
+    for (uint32_t i = 0; i < handle_count; i++) {
+        nuecs_entity_destroy(scene, handles[i]);
     }
-    nu_array_clear(scene->deleted_indices);
+    nu_array_clear(scene->entities_to_delete);
 
     return NU_SUCCESS;
 }
@@ -167,4 +162,19 @@ cleanup0:
     nu_json_free(json);
 
     return result;
+}
+nu_result_t nuecs_scene_debug_entities(nuecs_scene_data_t *scene)
+{
+    nuecs_entity_data_t *entities;
+    uint32_t entity_count;
+    nu_array_get_data(scene->entities, &entities, &entity_count);
+    for (uint32_t i = 0; i < entity_count; i++) {
+        if (entities[i].chunk) {
+            nu_info(NUECS_LOGGER_NAME, "#%03d [%02X,%03d,%p]", i, entities[i].version, entities[i].chunk_id, entities[i].chunk);
+        } else {
+            nu_info(NUECS_LOGGER_NAME, "#%03d [--,---,----------------]", i);
+        }
+    }
+
+    return NU_SUCCESS;
 }

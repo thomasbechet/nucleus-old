@@ -21,11 +21,11 @@ typedef struct {
 } nuecs_system_data_t;
 
 typedef struct {
-    nu_array_t entities;        /* nuecs_entity_data_t */
-    nu_array_t deleted_indices; /* uint32_t */
-    nu_array_t free_indices;    /* uint32_t */
-    nu_array_t archetype_table; /* nuecs_archetype_entry_t */
-    nu_indexed_array_t queries; /* nuecs_query_data_t* */
+    nu_array_t entities_to_delete; /* nuecs_entity_t */
+    nu_array_t entities;           /* nuecs_entity_data_t */
+    nu_array_t free_indices;       /* uint32_t */
+    nu_array_t archetype_table;    /* nuecs_archetype_entry_t */
+    nu_indexed_array_t queries;    /* nuecs_query_data_t* */
     uint32_t id;    
 } nuecs_scene_data_t;
 
@@ -39,5 +39,6 @@ nu_result_t nuecs_scene_save_file(
     nuecs_scene_data_t *scene, 
     const char* filename
 );
+nu_result_t nuecs_scene_debug_entities(nuecs_scene_data_t *scene);
 
 #endif

@@ -39,6 +39,10 @@ nu_result_t nuecs_scene_save_file_impl(nuecs_scene_t scene_handle, const char* f
 {
     return nuecs_scene_save_file(&_module.components, (nuecs_scene_data_t*)scene_handle, filename);
 }
+nu_result_t nuecs_scene_debug_entities_impl(nuecs_scene_t scene_handle)
+{
+    return nuecs_scene_debug_entities((nuecs_scene_data_t*)scene_handle);
+}
 /* query interface */
 nu_result_t nuecs_query_create_impl(nuecs_scene_t scene_handle, const nuecs_query_info_t* info, nuecs_query_t* handle)
 {
@@ -72,7 +76,7 @@ nu_result_t nuecs_entity_remove_component_impl(nuecs_scene_t scene_handle, nuecs
 /* component interface */
 nu_result_t nuecs_component_record_impl(const nuecs_component_info_t* info, nuecs_component_t* handle)
 {
-    return nuecs_component_manager_register_component(&_module.components, info, handle);
+    return nuecs_component_manager_record_component(&_module.components, info, handle);
 }
 /* scene plugin */
 nu_result_t nuecs_scene_plugin_initialize_impl(void)

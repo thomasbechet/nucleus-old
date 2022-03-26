@@ -70,6 +70,7 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->progress = nuecs_scene_progress_impl;
         i->register_system = nuecs_scene_register_system_impl;
         i->save_file = nuecs_scene_save_file_impl;
+        i->debug_entities = nuecs_scene_debug_entities_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_QUERY_INTERFACE_NAME)) {

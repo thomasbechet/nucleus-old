@@ -352,6 +352,7 @@ static nu_result_t on_start(void)
         info.component_data  = (nuecs_component_data_ptr_t[]){&velocity};
         info.component_count = 1;
         nuecs_entity_create(scene, &info, &e);
+        nuecs_entity_destroy(scene, e);
     }
 
     nuecs_query_info_t qinfo;
@@ -362,6 +363,7 @@ static nu_result_t on_start(void)
     NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
 
     nuecs_archetype_debug_archetypes();
+    nuecs_scene_debug_entities(scene);
 
     nuecs_query_chunks_t chunks;
     NU_ASSERT(nuecs_query_resolve_chunks(query, &chunks) == NU_SUCCESS);

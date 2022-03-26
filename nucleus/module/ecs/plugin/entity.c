@@ -78,10 +78,20 @@ nu_result_t nuecs_entity_destroy(
     nuecs_entity_t handle
 )
 {
+    /* get entity index */
     uint32_t id, index;
     NU_HANDLE_GET_ID(handle, id);
     index = NUECS_ENTITY_HANDLE_GET_INDEX(id);
-    nu_array_push(scene->deleted_indices, &index);
+
+    /* get entity */
+    nuecs_entity_data_t *entity;
+    nu_array_get(scene->entities, index, &entity);
+
+    /* reset entity slot */ 
+    entity->chunk = NULL;
+
+    /* save free index */
+    nu_array_push(scene->free_indices, &index);
 
     return NU_SUCCESS;
 }

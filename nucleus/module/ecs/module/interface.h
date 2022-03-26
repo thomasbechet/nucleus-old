@@ -40,6 +40,10 @@
     {
         return _nuecs_scene_interface.save_file(scene_handle, filename);
     }
+    nu_result_t nuecs_scene_debug_entities(nuecs_scene_t scene_handle)
+    {
+        return _nuecs_scene_interface.debug_entities(scene_handle);
+    }
     nuecs_query_interface_t _nuecs_query_interface;
     nu_result_t nuecs_query_interface_load(nu_module_t module)
     {
