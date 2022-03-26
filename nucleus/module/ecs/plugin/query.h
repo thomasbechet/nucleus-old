@@ -14,6 +14,8 @@ typedef struct {
     uint32_t id;
 } nuecs_query_data_t;
 
+nu_result_t nuecs_query_create(nuecs_scene_data_t *scene, const nuecs_query_info_t *info, nuecs_query_t *handle);
+nu_result_t nuecs_query_destroy(nuecs_scene_data_t *scene, nuecs_query_t handle);
 nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_info_t *info);
 nu_result_t nuecs_query_terminate(nuecs_query_data_t *query);
 nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_data_t *chunk);

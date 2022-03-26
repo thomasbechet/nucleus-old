@@ -21,11 +21,11 @@ nu_result_t nuecs_archetype_debug_archetypes_impl(void)
 /* scene interface */
 nu_result_t nuecs_scene_create_impl(nuecs_scene_t* handle)
 {
-    return nuecs_scene_manager_create_scene(&_module.scenes, handle);
+    return nuecs_scene_create(&_module.scenes, handle);
 }
 nu_result_t nuecs_scene_destroy_impl(nuecs_scene_t handle)
 {
-    return nuecs_scene_manager_destroy_scene(&_module.scenes, handle);
+    return nuecs_scene_destroy(&_module.scenes, handle);
 }
 nu_result_t nuecs_scene_progress_impl(nuecs_scene_t handle)
 {
@@ -42,11 +42,11 @@ nu_result_t nuecs_scene_save_file_impl(nuecs_scene_t scene_handle, const char* f
 /* query interface */
 nu_result_t nuecs_query_create_impl(nuecs_scene_t scene_handle, const nuecs_query_info_t* info, nuecs_query_t* handle)
 {
-    return nuecs_scene_create_query((nuecs_scene_data_t*)scene_handle, info, handle);
+    return nuecs_query_create((nuecs_scene_data_t*)scene_handle, info, handle);
 }
 nu_result_t nuecs_query_destroy_impl(nuecs_scene_t scene_handle, nuecs_query_t handle)
 {
-    return nuecs_scene_destroy_query((nuecs_scene_data_t*)scene_handle, handle);
+    return nuecs_query_destroy((nuecs_scene_data_t*)scene_handle, handle);
 }
 nu_result_t nuecs_query_resolve_chunks_impl(nuecs_query_t handle, nuecs_query_chunks_t* chunks)
 {

@@ -6,6 +6,17 @@
 #include <nucleus/module/ecs/plugin/entity.h>
 #include <nucleus/module/ecs/plugin/logger.h>
 
+nu_result_t nuecs_scene_create(nuecs_scene_manager_data_t *manager, nuecs_scene_t* handle)
+{
+    nuecs_scene_data_t *scene = (nuecs_scene_data_t*)nu_malloc(sizeof(nuecs_scene_data_t));
+    nu_indexed_array_add(manager->scenes, &scene, &scene->id);
+    *handle = (nuecs_scene_t)scene;
+    return nuecs_scene_initialize(scene);
+}
+nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene_t handle)
+{
+    return NU_SUCCESS;
+}
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
 {
     /* allocate resources */
@@ -86,45 +97,6 @@ nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene)
 
 //     return NU_SUCCESS;
 // }
-nu_result_t nuecs_scene_create_query(nuecs_scene_data_t *scene, const nuecs_query_info_t *info, nuecs_query_t *handle)
-{
-    /* sanitize components */
-    nuecs_component_data_t *components[NUECS_MAX_COMPONENT_PER_ENTITY];
-    uint32_t component_count;
-    nuecs_sanatize_components((nuecs_component_data_t**)info->components, info->component_count, components, &component_count);
-
-    /* allocate query */
-    nuecs_query_data_t *query = (nuecs_query_data_t*)nu_malloc(sizeof(nuecs_query_data_t));
-    nu_indexed_array_add(scene->queries, &query, &query->id);
-    nuecs_query_initialize(query, info);
-
-    /* try to subscribe to archetype entries */
-    nuecs_archetype_entry_data_t *entries;
-    uint32_t entry_count;
-    nu_array_get_data(scene->archetype_table, &entries, &entry_count);
-    for (uint32_t i = 0; i < entry_count; i++) {
-        if (entries[i].archetype) {
-            nuecs_query_try_subscribe(query, &entries[i]);
-        }
-    }
-
-    /* save handle */
-    *handle = (nuecs_query_t)query;
-
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_scene_destroy_query(nuecs_scene_data_t *scene, nuecs_query_t handle)
-{
-    /* recover handles */
-    nuecs_query_data_t *query = (nuecs_query_data_t*)handle;
-
-    /* remove and terminate query */
-    nu_indexed_array_remove(scene->queries, query->id);
-    nuecs_query_terminate(query);
-    nu_free(query);
-
-    return NU_SUCCESS;
-}
 nu_result_t nuecs_scene_save_file(
     nuecs_component_manager_data_t *manager,
     nuecs_scene_data_t *scene, 
