@@ -12,7 +12,8 @@ nu_result_t nuecs_scene_create_impl(nuecs_scene_t* scene);
 nu_result_t nuecs_scene_destroy_impl(nuecs_scene_t scene);
 nu_result_t nuecs_scene_progress_impl(nuecs_scene_t scene);
 nu_result_t nuecs_scene_register_system_impl(nuecs_scene_t scene, const nuecs_system_info_t* info, nuecs_system_t* handle);
-nu_result_t nuecs_scene_save_file_impl(nuecs_scene_t scene, const char* filename);
+nu_result_t nuecs_scene_serialize_json_impl(nuecs_scene_t scene, nu_json_object_t object);
+nu_result_t nuecs_scene_save_json_impl(nuecs_scene_t scene, const char* filename);
 nu_result_t nuecs_scene_debug_entities_impl(nuecs_scene_t scene);
 /* query interface */
 nu_result_t nuecs_query_create_impl(nuecs_scene_t scene, const nuecs_query_info_t* info, nuecs_query_t* handle);

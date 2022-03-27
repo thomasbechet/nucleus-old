@@ -345,7 +345,7 @@ static nu_result_t on_start(void)
     nuecs_query_chunks_t chunks;
     NU_ASSERT(nuecs_query_resolve_chunks(query, &chunks) == NU_SUCCESS);
 
-    nuecs_scene_save_file(scene, "$ROOT/mywork.json");
+    nuecs_scene_save_json(scene, "$ROOT/mywork.json");
 
     for (uint32_t i = 0; i < chunks.view_count; i++) {
         nu_info("test", "view %d/%d with %d components", i+1, chunks.view_count, chunks.views[i].count);

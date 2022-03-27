@@ -64,50 +64,15 @@ nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene)
 
     return NU_SUCCESS;
 }
-// nu_result_t nuecs_scene_register_system(nuecs_scene_t scene_handle, const nuecs_system_info_t* info, nuecs_system_t* handle)
-// {
-//     nuecs_scene_data_t *scene = (nuecs_scene_data_t*)scene_handle;
-
-//     /* sort types ids */
-//     nuecs_component_data_t *components[NUECS_MAX_COMPONENT_PER_ENTITY];
-//     uint32_t component_count;
-//     sanatize_components((nuecs_component_data_t**)info->components, info->component_count, components, &component_count);
-
-//     /* allocate memory */
-//     nuecs_system_data_t *system = (nuecs_system_data_t*)nu_malloc(sizeof(nuecs_system_data_t));
-//     nuecs_system_create(system, components, component_count);
-//     system->update = info->update;
-
-//     /* add system to archetypes */
-//     nuecs_archetype_data_t **archetypes = (nuecs_archetype_data_t**)nu_array_get_data(scene->archetypes);
-//     uint32_t archetype_count            = nu_array_get_size(scene->archetypes);
-//     for (uint32_t i = 0; i < archetype_count; i++) {
-//         nuecs_archetype_new_system(archetypes[i], system);
-//     }
-
-//     /* save the system */
-//     nu_indexed_array_add(scene->systems, &system, &system->id);
-
-//     /* set handle */
-//     *handle = (nuecs_system_t)system;
-
-//     return NU_SUCCESS;
-// }
-nu_result_t nuecs_scene_save_file(
-    nuecs_component_manager_data_t *manager,
+nu_result_t nuecs_scene_serialize_json(
+    nuecs_component_manager_data_t *manager, 
     nuecs_scene_data_t *scene, 
-    const char* filename
+    nu_json_object_t object
 )
 {
-    /* allocate json */
-    nu_json_t json;
-    nu_json_allocate_empty_object(&json);
-    nu_json_object_t root;
-    nu_json_value_as_object(nu_json_get_root(json), &root);
-
     /* put entities array */
     nu_json_array_t j_entities;
-    nu_json_object_put_empty_array(root, "entities", &j_entities);
+    nu_json_object_put_empty_array(object, "entities", &j_entities);
 
     /* get entities */
     nuecs_entity_data_t *entities;
@@ -175,6 +140,23 @@ nu_result_t nuecs_scene_save_file(
 
     /* free serialization context */
     nu_free(serialization.remap);
+
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_scene_save_json(
+    nuecs_component_manager_data_t *manager,
+    nuecs_scene_data_t *scene,
+    const char* filename
+)
+{
+    /* allocate json */
+    nu_json_t json;
+    nu_json_allocate_empty_object(&json);
+    nu_json_object_t root;
+    nu_json_value_as_object(nu_json_get_root(json), &root);
+
+    /* serialize scene */
+    nuecs_scene_serialize_json(manager, scene, root);
 
     /* save json */
     nu_result_t result = nu_json_save_file(json, filename, false);

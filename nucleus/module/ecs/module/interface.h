@@ -36,9 +36,13 @@
     {
         return _nuecs_scene_interface.register_system(scene, info, handle);
     }
-    nu_result_t nuecs_scene_save_file(nuecs_scene_t scene, const char* filename)
+    nu_result_t nuecs_scene_serialize_json(nuecs_scene_t scene, nu_json_object_t object)
     {
-        return _nuecs_scene_interface.save_file(scene, filename);
+        return _nuecs_scene_interface.serialize_json(scene, object);
+    }
+    nu_result_t nuecs_scene_save_json(nuecs_scene_t scene, const char* filename)
+    {
+        return _nuecs_scene_interface.save_json(scene, filename);
     }
     nu_result_t nuecs_scene_debug_entities(nuecs_scene_t scene)
     {

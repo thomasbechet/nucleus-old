@@ -29,7 +29,14 @@
             ]
         },
         {
-            "name": "save_file",
+            "name": "serialize_json",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "nu_json_object_t", "name": "object" }
+            ]
+        },
+        {
+            "name": "save_json",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" },
                 { "type": "const char*", "name": "filename" }

@@ -23,7 +23,8 @@ typedef struct {
     nu_result_t (*destroy)(nuecs_scene_t);
     nu_result_t (*progress)(nuecs_scene_t);
     nu_result_t (*register_system)(nuecs_scene_t, const nuecs_system_info_t*, nuecs_system_t*);
-    nu_result_t (*save_file)(nuecs_scene_t, const char*);
+    nu_result_t (*serialize_json)(nuecs_scene_t, nu_json_object_t);
+    nu_result_t (*save_json)(nuecs_scene_t, const char*);
     nu_result_t (*debug_entities)(nuecs_scene_t);
 } nuecs_scene_interface_t;
 

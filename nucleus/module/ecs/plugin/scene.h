@@ -35,9 +35,14 @@ nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene);
-nu_result_t nuecs_scene_save_file(
-    nuecs_component_manager_data_t *manager,
+nu_result_t nuecs_scene_serialize_json(
+    nuecs_component_manager_data_t *manager, 
     nuecs_scene_data_t *scene, 
+    nu_json_object_t object
+);
+nu_result_t nuecs_scene_save_json(
+    nuecs_component_manager_data_t *manager,
+    nuecs_scene_data_t *scene,
     const char* filename
 );
 nu_result_t nuecs_scene_debug_entities(nuecs_scene_data_t *scene);
