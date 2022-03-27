@@ -142,9 +142,9 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
         /* copy components */
         uint32_t j = 0;
         for (uint32_t i = 0; i < current->component_count; i++) {
-            nuecs_component_data_t *c; nu_indexed_array_get(manager->components, current->component_ids[i], &c);
-            if (c != component) {
-                components[j++] = c;
+            nuecs_component_data_t **c; nu_indexed_array_get(manager->components, current->component_ids[i], &c);
+            if ((*c) != component) {
+                components[j++] = (*c);
             }
         }
 

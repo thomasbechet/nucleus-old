@@ -42,6 +42,9 @@ typedef struct {
     nu_result_t (*destroy)(nuecs_scene_t, nuecs_entity_t);
     nu_result_t (*add_component)(nuecs_scene_t, nuecs_entity_t, nuecs_component_t, nuecs_component_data_ptr_t);
     nu_result_t (*remove_component)(nuecs_scene_t, nuecs_entity_t, nuecs_component_t);
+    nu_result_t (*serialize_json_object)(nuecs_entity_t, nuecs_serialization_context_t, nu_json_object_t, const char*);
+    nu_result_t (*deserialize_json_object)(nuecs_serialization_context_t, nu_json_object_t, const char*, nuecs_entity_t*);
+    nu_result_t (*remap)(nuecs_transfer_context_t, nuecs_entity_t*);
 } nuecs_entity_interface_t;
 
 #define NUECS_COMPONENT_INTERFACE_NAME "nuecs_component_interface"

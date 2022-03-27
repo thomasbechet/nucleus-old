@@ -82,6 +82,18 @@
     {
         return _nuecs_entity_interface.remove_component(scene_handle, handle, component);
     }
+    nu_result_t nuecs_entity_serialize_json_object(nuecs_entity_t handle, nuecs_serialization_context_t context, nu_json_object_t object, const char* name)
+    {
+        return _nuecs_entity_interface.serialize_json_object(handle, context, object, name);
+    }
+    nu_result_t nuecs_entity_deserialize_json_object(nuecs_serialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_t* handle)
+    {
+        return _nuecs_entity_interface.deserialize_json_object(context, object, name, handle);
+    }
+    nu_result_t nuecs_entity_remap(nuecs_transfer_context_t context, nuecs_entity_t* handle)
+    {
+        return _nuecs_entity_interface.remap(context, handle);
+    }
     nuecs_component_interface_t _nuecs_component_interface;
     nu_result_t nuecs_component_interface_load(nu_module_t module)
     {

@@ -88,6 +88,9 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->destroy = nuecs_entity_destroy_impl;
         i->add_component = nuecs_entity_add_component_impl;
         i->remove_component = nuecs_entity_remove_component_impl;
+        i->serialize_json_object = nuecs_entity_serialize_json_object_impl;
+        i->deserialize_json_object = nuecs_entity_deserialize_json_object_impl;
+        i->remap = nuecs_entity_remap_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_COMPONENT_INTERFACE_NAME)) {

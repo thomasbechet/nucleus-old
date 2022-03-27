@@ -6,14 +6,14 @@
 #include <nucleus/module/ecs/plugin/component_manager.h>
 #include <nucleus/module/ecs/plugin/archetype_table.h>
 
-static uint32_t nuecs_next_version(uint32_t a)
+static uint16_t nuecs_next_version(uint16_t a)
 {
-    a = (a ^ 61) ^ (a >> 16);
+    a = (a ^ 61) ^ (a >> 8);
     a = a + (a << 3);
     a = a ^ (a >> 4);
     a = a * 0x27d4eb2d;
-    a = a ^ (a >> 15);
-    return a;
+    a = a ^ (a >> 7);
+    return a & 0x3FF;
 }
 
 nu_result_t nuecs_entity_create(
@@ -36,7 +36,10 @@ nu_result_t nuecs_entity_create(
         index = *pdata;
         nu_array_free(scene->free_indices);
     } else {
-        nu_array_push(scene->entities, NULL);
+        nuecs_entity_data_t new_entry;
+        new_entry.version = 0;
+        new_entry.chunk   = NULL;
+        nu_array_push(scene->entities, &new_entry);
         index = nu_array_get_size(scene->entities) - 1;
     }
     nuecs_entity_data_t *entity;
@@ -57,7 +60,8 @@ nu_result_t nuecs_entity_create(
     entity->chunk_id = id;
 
     /* generate version */
-    entity->version = (uint8_t)nuecs_next_version((uint32_t)entity->version);
+    scene->next_version = nuecs_next_version(scene->next_version);
+    entity->version = scene->next_version;
 
     /* copy components */
     for (uint32_t i = 0; i < component_count; i++) {
@@ -69,7 +73,7 @@ nu_result_t nuecs_entity_create(
     }
 
     /* write handle */
-    NU_HANDLE_SET_ID(*handle, NUECS_ENTITY_HANDLE_BUILD(index, entity->version));
+    NU_HANDLE_SET_ID(*handle, NUECS_ENTITY_BUILD_ID(index, entity->version));
 
     return NU_SUCCESS;
 }
@@ -79,19 +83,25 @@ nu_result_t nuecs_entity_destroy(
 )
 {
     /* get entity index */
-    uint32_t id, index;
-    NU_HANDLE_GET_ID(handle, id);
-    index = NUECS_ENTITY_HANDLE_GET_INDEX(id);
+    uint32_t index = NUECS_ENTITY_GET_INDEX(handle);
 
     /* get entity */
     nuecs_entity_data_t *entity;
     nu_array_get(scene->entities, index, &entity);
 
-    /* reset entity slot */ 
-    entity->chunk = NULL;
+    /* check version */
+    if (entity->version != NUECS_ENTITY_GET_VERSION(handle)) return NU_FAILURE;
 
-    /* save free index */
-    nu_array_push(scene->free_indices, &index);
+    /* reset entity slot */ 
+    entity->chunk   = NULL;
+    entity->version = nuecs_next_version(scene->next_version);
+
+    /* save free index or pop entry */
+    if (index == (nu_array_get_size(scene->entities) - 1)) {
+        nu_array_pop(scene->entities);
+    } else {
+        nu_array_push(scene->free_indices, &index);
+    }
 
     return NU_SUCCESS;
 }
@@ -105,6 +115,7 @@ static bool archetype_has_component(const nuecs_archetype_data_t *archetype, con
     return false;
 }
 nu_result_t nuecs_entity_add_component(
+    nuecs_component_manager_data_t *manager,
     nuecs_scene_data_t *scene, 
     nuecs_entity_t handle, 
     nuecs_component_t component, 
@@ -112,11 +123,13 @@ nu_result_t nuecs_entity_add_component(
 )
 {
     /* get entity entry */
-    uint32_t id, index;
-    NU_HANDLE_GET_ID(handle, id);
-    index = NUECS_ENTITY_HANDLE_GET_INDEX(id);
+    uint32_t index = NUECS_ENTITY_GET_INDEX(handle);
     nuecs_entity_data_t *entity;
     nu_array_get(scene->entities, index, &entity);
+
+    /* check version */
+    uint16_t version = NUECS_ENTITY_GET_VERSION(handle);
+    if (entity->version != version) return NU_FAILURE;
 
     /* get component data */
     nuecs_component_data_t *component_data = (nuecs_component_data_t*)component;
@@ -126,7 +139,7 @@ nu_result_t nuecs_entity_add_component(
 
     /* find next archetype */
     nuecs_archetype_data_t *next_archetype;
-    nuecs_archetype_find_next(entity->chunk->archetype, component_data, &next_archetype);
+    nuecs_component_manager_find_next_archetype(manager, entity->chunk->archetype, component_data, &next_archetype);
 
     /* find next chunk */
     nuecs_chunk_data_t *next_chunk;
@@ -148,17 +161,19 @@ nu_result_t nuecs_entity_add_component(
     return NU_SUCCESS;
 }
 nu_result_t nuecs_entity_remove_component(
+    nuecs_component_manager_data_t *manager,
     nuecs_scene_data_t *scene, 
     nuecs_entity_t handle, 
     nuecs_component_t component
 )
 {
     /* get entity entry */
-    uint32_t id, index;
-    NU_HANDLE_GET_ID(handle, id);
-    index = NUECS_ENTITY_HANDLE_GET_INDEX(id);
+    uint32_t index = NUECS_ENTITY_GET_INDEX(handle);
     nuecs_entity_data_t *entity;
     nu_array_get(scene->entities, index, &entity);
+
+    /* check version */
+    if (entity->version != NUECS_ENTITY_GET_VERSION(handle)) return NU_FAILURE;
 
     /* get component data */
     nuecs_component_data_t *component_data = (nuecs_component_data_t*)component;
@@ -166,9 +181,11 @@ nu_result_t nuecs_entity_remove_component(
     /* check entity has component */
     if (!archetype_has_component(entity->chunk->archetype, component_data)) return NU_FAILURE;
 
+    nu_info("test", "%s", nu_string_get_cstr(component_data->name));
+
     /* find previous archetype */
     nuecs_archetype_data_t *previous_archetype;
-    nuecs_archetype_find_previous(entity->chunk->archetype, component_data, &previous_archetype);    
+    nuecs_component_manager_find_previous_archetype(manager, entity->chunk->archetype, component_data, &previous_archetype);
 
     /* find previous chunk */
     nuecs_chunk_data_t *previous_chunk;
@@ -182,5 +199,37 @@ nu_result_t nuecs_entity_remove_component(
     entity->chunk    = previous_chunk;
     entity->chunk_id = new_id;
 
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_entity_serialize_json_object(
+    nuecs_entity_t handle, 
+    nuecs_serialization_context_t context, 
+    nu_json_object_t object, 
+    const char* name
+)
+{
+    if (handle == NU_NULL_HANDLE) return nu_json_object_put_null(object, name);
+    nuecs_serialization_context_data_t *serialization = (nuecs_serialization_context_data_t*)context;
+    uint32_t index = NUECS_ENTITY_GET_INDEX(handle);
+    nuecs_entity_data_t *entity;
+    nu_array_get(serialization->scene->entities, index, &entity);
+    if (entity->version != NUECS_ENTITY_GET_VERSION(handle)) return nu_json_object_put_null(object, name);
+    index = serialization->remap[index];
+    return nu_json_object_put_uint(object, name, index);
+}
+nu_result_t nuecs_entity_deserialize_json_object(
+    nuecs_serialization_context_t context, 
+    nu_json_object_t object, 
+    const char* name, 
+    nuecs_entity_t* handle
+)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_entity_remap(
+    nuecs_transfer_context_t context, 
+    nuecs_entity_t* handle
+)
+{
     return NU_SUCCESS;
 }

@@ -272,6 +272,11 @@ uint32_t nu_json_array_get_size(nu_json_array_t array)
 {
     return (uint32_t)cJSON_GetArraySize((cJSON*)array);
 }
+nu_json_value_t nu_json_array_get(nu_json_array_t array, uint32_t index)
+{
+    cJSON *i = cJSON_GetArrayItem((const cJSON*)array, (int)index);
+    return i ? (nu_json_value_t)i : NU_NULL_HANDLE;
+}
 bool nu_json_array_next(nu_json_array_t array, nu_json_array_iterator_t *it)
 {
     if (*it == NU_NULL_HANDLE) {
@@ -300,6 +305,10 @@ nu_result_t nu_json_object_put_empty_object(nu_json_object_t object, const char 
 nu_result_t nu_json_object_put_empty_array(nu_json_object_t object, const char *name, nu_json_array_t *handle)
 {
     return ((*handle = (nu_json_array_t)cJSON_AddArrayToObject((cJSON *const)object, name)) != NULL) ? NU_SUCCESS : NU_FAILURE;
+}
+nu_result_t nu_json_object_put_null(nu_json_object_t object, const char *name)
+{
+    return (cJSON_AddNullToObject((cJSON *const)object, name) != NULL) ? NU_SUCCESS : NU_FAILURE;
 }
 nu_result_t nu_json_object_put_cstr(nu_json_object_t object, const char *name, const char *value)
 {
@@ -361,6 +370,11 @@ nu_result_t nu_json_array_add_empty_array(nu_json_array_t array, nu_json_array_t
 {
     cJSON *i = cJSON_CreateArray();
     *handle = (nu_json_array_t)i;
+    return cJSON_AddItemToArray((cJSON*)array, i) ? NU_SUCCESS : NU_FAILURE;
+}
+nu_result_t nu_json_array_add_null(nu_json_array_t array)
+{
+    cJSON *i = cJSON_CreateNull();
     return cJSON_AddItemToArray((cJSON*)array, i) ? NU_SUCCESS : NU_FAILURE;
 }
 nu_result_t nu_json_array_add_cstr(nu_json_array_t array, const char *value)

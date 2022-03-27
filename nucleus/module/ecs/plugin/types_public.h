@@ -11,12 +11,15 @@ NU_DECLARE_HANDLE(nuecs_component_t);
 NU_DECLARE_HANDLE(nuecs_system_t);
 NU_DECLARE_HANDLE(nuecs_archetype_t);
 NU_DECLARE_HANDLE(nuecs_query_t);
+NU_DECLARE_HANDLE(nuecs_serialization_context_t);
+NU_DECLARE_HANDLE(nuecs_transfer_context_t);
 
 typedef void *nuecs_component_data_ptr_t;
-typedef nu_result_t (*nuecs_component_serialize_json_pfn_t)(const nuecs_component_data_ptr_t, nu_json_object_t);
-typedef nu_result_t (*nuecs_component_deserialize_json_pfn_t)(nu_json_object_t, nuecs_component_data_ptr_t);
+typedef nu_result_t (*nuecs_component_serialize_json_pfn_t)(nuecs_component_data_ptr_t, nuecs_serialization_context_t, nu_json_object_t);
+typedef nu_result_t (*nuecs_component_deserialize_json_pfn_t)(nuecs_component_data_ptr_t, nu_json_object_t);
 typedef nu_result_t (*nuecs_component_initialize_pfn_t)(nuecs_component_data_ptr_t);
 typedef nu_result_t (*nuecs_component_terminate_pfn_t)(nuecs_component_data_ptr_t);
+typedef nu_result_t (*nuecs_component_transfer_pfn_t)(nuecs_component_data_ptr_t, nuecs_transfer_context_t);
 
 typedef struct {
     const char *name;
@@ -25,6 +28,7 @@ typedef struct {
     nuecs_component_terminate_pfn_t terminate;
     nuecs_component_serialize_json_pfn_t serialize_json;
     nuecs_component_deserialize_json_pfn_t deserialize_json;
+    nuecs_component_transfer_pfn_t transfer;
 } nuecs_component_info_t;
 
 typedef struct {

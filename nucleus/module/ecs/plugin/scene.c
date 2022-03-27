@@ -25,6 +25,7 @@ nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
     nu_array_allocate(&scene->free_indices, sizeof(uint32_t));
     nuecs_archetype_table_initialize(&scene->archetype_table);
     nu_indexed_array_allocate(&scene->queries, sizeof(nuecs_query_data_t*));
+    scene->next_version = 0;
 
     return NU_SUCCESS;
 }
@@ -108,10 +109,27 @@ nu_result_t nuecs_scene_save_file(
     nu_json_array_t j_entities;
     nu_json_object_put_empty_array(root, "entities", &j_entities);
 
-    /* iterate over entries */
+    /* get entities */
     nuecs_entity_data_t *entities;
     uint32_t entity_count;
     nu_array_get_data(scene->entities, &entities, &entity_count);
+
+    /* get free indices */
+    uint32_t *free_indices;
+    uint32_t free_index_count;
+    nu_array_get_data(scene->free_indices, &free_indices, &free_index_count);
+
+    /* create serialization context */
+    nuecs_serialization_context_data_t serialization;
+    serialization.scene = scene;
+    serialization.remap = (uint32_t*)nu_malloc(sizeof(uint32_t) * entity_count);
+    uint32_t index = 0;
+    for (uint32_t i = 0; i < entity_count; i++) {
+        if (!entities[i].chunk) continue;
+        serialization.remap[i] = index++;
+    }
+
+    /* iterate over entries */
     for (uint32_t i = 0; i < entity_count; i++) {
 
         /* skip entity if not used */
@@ -122,7 +140,7 @@ nu_result_t nuecs_scene_save_file(
         nu_json_array_add_empty_object(j_entities, &j_entity);
 
         /* put id */
-        nu_json_object_put_uint(j_entity, "id", i);
+        nu_json_object_put_uint(j_entity, "id", serialization.remap[i]);
 
         /* put components */
         nu_json_object_t j_components;
@@ -142,6 +160,7 @@ nu_result_t nuecs_scene_save_file(
             nu_json_object_put_empty_object(j_components, nu_string_get_cstr(component->name), &j_component);
 
             if (component->serialize_json) {
+
                 /* find component data */
                 uint32_t index;
                 nuecs_archetype_find_component_index(archetype, id, &index);
@@ -149,10 +168,13 @@ nu_result_t nuecs_scene_save_file(
                 nuecs_chunk_get_component(entities[i].chunk, entities[i].chunk_id, index, &data);
 
                 /* serialize component */
-                component->serialize_json(data, j_component);   
+                component->serialize_json(data, (nuecs_serialization_context_t)&serialization, j_component);
             }
         }
     }
+
+    /* free serialization context */
+    nu_free(serialization.remap);
 
     /* save json */
     nu_result_t result = nu_json_save_file(json, filename, false);
@@ -168,11 +190,12 @@ nu_result_t nuecs_scene_debug_entities(nuecs_scene_data_t *scene)
     nuecs_entity_data_t *entities;
     uint32_t entity_count;
     nu_array_get_data(scene->entities, &entities, &entity_count);
+    nu_info(NUECS_LOGGER_NAME, "|VERSION|INDEX|");
     for (uint32_t i = 0; i < entity_count; i++) {
         if (entities[i].chunk) {
-            nu_info(NUECS_LOGGER_NAME, "#%03d [%02X,%03d,%p]", i, entities[i].version, entities[i].chunk_id, entities[i].chunk);
+            nu_info(NUECS_LOGGER_NAME, "|%07X|%05d|", entities[i].version, i);
         } else {
-            nu_info(NUECS_LOGGER_NAME, "#%03d [--,---,----------------]", i);
+            nu_info(NUECS_LOGGER_NAME, "|-------|-----|", i);
         }
     }
 

@@ -26,7 +26,8 @@ typedef struct {
     nu_array_t free_indices;       /* uint32_t */
     nu_array_t archetype_table;    /* nuecs_archetype_entry_t */
     nu_indexed_array_t queries;    /* nuecs_query_data_t* */
-    uint32_t id;    
+    uint16_t next_version;
+    uint32_t id;
 } nuecs_scene_data_t;
 
 nu_result_t nuecs_scene_create(nuecs_scene_manager_data_t *manager, nuecs_scene_t* handle);

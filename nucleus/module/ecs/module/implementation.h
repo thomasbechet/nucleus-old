@@ -23,6 +23,9 @@ nu_result_t nuecs_entity_create_impl(nuecs_scene_t scene_handle, const nuecs_ent
 nu_result_t nuecs_entity_destroy_impl(nuecs_scene_t scene_handle, nuecs_entity_t handle);
 nu_result_t nuecs_entity_add_component_impl(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t component_data);
 nu_result_t nuecs_entity_remove_component_impl(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component);
+nu_result_t nuecs_entity_serialize_json_object_impl(nuecs_entity_t handle, nuecs_serialization_context_t context, nu_json_object_t object, const char* name);
+nu_result_t nuecs_entity_deserialize_json_object_impl(nuecs_serialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_t* handle);
+nu_result_t nuecs_entity_remap_impl(nuecs_transfer_context_t context, nuecs_entity_t* handle);
 /* component interface */
 nu_result_t nuecs_component_record_impl(const nuecs_component_info_t* info, nuecs_component_t* handle);
 /* scene plugin */

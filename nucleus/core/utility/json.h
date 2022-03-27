@@ -46,11 +46,13 @@ NU_API const char *nu_json_object_iterator_get_name(nu_json_object_iterator_t it
 NU_API nu_json_value_t nu_json_object_iterator_get_value(nu_json_object_iterator_t it);
 
 NU_API uint32_t nu_json_array_get_size(nu_json_array_t array);
+NU_API nu_json_value_t nu_json_array_get(nu_json_array_t array, uint32_t index);
 NU_API bool nu_json_array_next(nu_json_array_t array, nu_json_array_iterator_t *it);
 NU_API nu_json_value_t nu_json_array_iterator_get_value(nu_json_array_iterator_t it);
 
 NU_API nu_result_t nu_json_object_put_empty_object(nu_json_object_t object, const char *name, nu_json_object_t *handle);
 NU_API nu_result_t nu_json_object_put_empty_array(nu_json_object_t object, const char *name, nu_json_array_t *handle);
+NU_API nu_result_t nu_json_object_put_null(nu_json_object_t object, const char *name);
 NU_API nu_result_t nu_json_object_put_cstr(nu_json_object_t object, const char *name, const char *value);
 NU_API nu_result_t nu_json_object_put_int(nu_json_object_t object, const char *name, int32_t i);
 NU_API nu_result_t nu_json_object_put_uint(nu_json_object_t object, const char *name, uint32_t u);
@@ -65,6 +67,7 @@ NU_API nu_result_t nu_json_object_remove(nu_json_object_t object, const char *na
 
 NU_API nu_result_t nu_json_array_add_empty_object(nu_json_array_t array, nu_json_object_t *handle);
 NU_API nu_result_t nu_json_array_add_empty_array(nu_json_array_t array, nu_json_array_t *handle);
+NU_API nu_result_t nu_json_array_add_null(nu_json_array_t array);
 NU_API nu_result_t nu_json_array_add_cstr(nu_json_array_t array, const char *value);
 NU_API nu_result_t nu_json_array_add_int(nu_json_array_t array, int32_t value);
 NU_API nu_result_t nu_json_array_add_uint(nu_json_array_t array, uint32_t value);
