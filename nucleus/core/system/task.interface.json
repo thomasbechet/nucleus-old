@@ -24,36 +24,21 @@
         {
             "name": "create",
             "parameters": [
-                {
-                    "type": "nu_task_t*",
-                    "name": "task"
-                }
+                { "type": "nu_task_t*", "name": "task" }
             ]
         },
         {
             "name": "perform",
             "parameters": [
-                {
-                    "type": "nu_task_t",
-                    "name": "task"
-                },
-                {
-                    "type": "nu_task_job_t*",
-                    "name": "jobs"
-                },
-                {
-                    "type": "uint32_t",
-                    "name": "count"
-                }
+                { "type": "nu_task_t", "name": "task" },
+                { "type": "nu_task_job_t*", "name": "jobs" },
+                { "type": "uint32_t", "name": "count" }
             ]
         },
         {
             "name": "wait",
             "parameters": [
-                {
-                    "type": "nu_task_t",
-                    "name": "task"
-                }
+                { "type": "nu_task_t", "name": "task" }
             ]
         }
     ]

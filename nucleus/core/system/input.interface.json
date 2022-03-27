@@ -28,76 +28,46 @@
         {
             "name": "get_keyboard_state",
             "parameters": [
-                {
-                    "type": "nu_keyboard_t",
-                    "name": "keyboard"
-                },
-                {
-                    "type": "nu_button_state_t*",
-                    "name": "state"
-                }
+                { "type": "nu_keyboard_t", "name": "keyboard" },
+                { "type": "nu_button_state_t*", "name": "state" }
             ]
         },
         {
             "name": "get_keyboard_text",
             "parameters": [
-                {
-                    "type": "const char**",
-                    "name": "text"
-                },
-                {
-                    "type": "uint32_t*",
-                    "name": "length"
-                }
+                { "type": "const char**", "name": "text" },
+                { "type": "uint32_t*", "name": "length" }
             ]
         },
         {
             "name": "get_mouse_state",
             "parameters": [
-                {
-                    "type": "nu_mouse_t",
-                    "name": "mouse"
-                },
-                {
-                    "type": "nu_button_state_t*",
-                    "name": "state"
-                }
+                { "type": "nu_mouse_t", "name": "mouse" },
+                { "type": "nu_button_state_t*", "name": "state" }
             ]
         },
         {
             "name": "get_mouse_motion",
             "parameters": [
-                {
-                    "type": "nu_vec2f_t",
-                    "name": "motion"
-                }
+                { "type": "nu_vec2f_t", "name": "motion" }
             ]
         },
         {
             "name": "get_mouse_scroll",
             "parameters": [
-                {
-                    "type": "nu_vec2f_t",
-                    "name": "scroll"
-                }
+                { "type": "nu_vec2f_t", "name": "scroll" }
             ]
         },
         {
             "name": "get_cursor_mode",
             "parameters": [
-                {
-                    "type": "nu_cursor_mode_t*",
-                    "name": "mode"
-                }
+                { "type": "nu_cursor_mode_t*", "name": "mode" }
             ]
         },
         {
             "name": "set_cursor_mode",
             "parameters": [
-                {
-                    "type": "nu_cursor_mode_t",
-                    "name": "mode"
-                }
+                { "type": "nu_cursor_mode_t", "name": "mode" }
             ]
         }
     ]

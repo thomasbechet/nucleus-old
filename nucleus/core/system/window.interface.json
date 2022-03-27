@@ -28,37 +28,25 @@
         {
             "name": "set_size",
             "parameters": [
-                {
-                    "type": "const nu_vec2u_t",
-                    "name": "size"
-                }
+                { "type": "const nu_vec2u_t", "name": "size" }
             ]
         },
         {
             "name": "get_size",
             "parameters": [
-                {
-                    "type": "nu_vec2u_t",
-                    "name": "size"
-                }
+                { "type": "nu_vec2u_t", "name": "size" }
             ]
         },
         {
             "name": "set_title",
             "parameters": [
-                {
-                    "type": "const char*",
-                    "name": "title"
-                }
+                { "type": "const char*", "name": "title" }
             ]
         },
         {
             "name": "set_mode",
             "parameters": [
-                {
-                    "type": "nu_window_mode_t",
-                    "name": "mode"
-                }
+                { "type": "nu_window_mode_t", "name": "mode" }
             ]
         }
     ]

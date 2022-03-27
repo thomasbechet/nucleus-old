@@ -5,27 +5,15 @@
         {
             "name": "load_mesh_from_obj",
             "parameters": [
-                {
-                    "type": "const char*",
-                    "name": "path"
-                },
-                {
-                    "type": "nu_renderer_mesh_t*",
-                    "name": "handle"
-                }
+                { "type": "const char*", "name": "path" },
+                { "type": "nu_renderer_mesh_t*", "name": "handle" }
             ]    
         },
         {
             "name": "load_texture",
             "parameters": [
-                {
-                    "type": "const char*",
-                    "name": "path"
-                },
-                {
-                    "type": "nu_renderer_texture_t*",
-                    "name": "handle"
-                }
+                { "type": "const char*", "name": "path" },
+                { "type": "nu_renderer_texture_t*", "name": "handle" }
             ]
         }
     ]

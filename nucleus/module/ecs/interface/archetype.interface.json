@@ -2,9 +2,9 @@
     "namespace": "nuecs",
     "name": "archetype",
     "functions": [
-        {
-            "name": "debug_archetypes",
-            "parameters": []
+        { 
+            "name": "debug_archetypes", 
+            "parameters": [] 
         }
     ]
 }

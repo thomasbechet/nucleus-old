@@ -5,14 +5,8 @@
         {
             "name": "load",
             "parameters": [
-                {
-                    "type": "const char*",
-                    "name": "path"
-                },
-                {
-                    "type": "nulua_plugin_t*",
-                    "name": "handle"
-                }
+                { "type": "const char*", "name": "path" },
+                { "type": "nulua_plugin_t*", "name": "handle" }
             ]    
         }
     ]

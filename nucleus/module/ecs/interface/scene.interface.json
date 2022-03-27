@@ -5,67 +5,40 @@
         {
             "name": "create",
             "parameters": [
-                {
-                    "type": "nuecs_scene_t*",
-                    "name": "scene"
-                }
+                { "type": "nuecs_scene_t*", "name": "scene" }
             ]
         },
         {
             "name": "destroy",
             "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "scene"
-                }
+                { "type": "nuecs_scene_t", "name": "scene" }
             ]
         },
         {
             "name": "progress",
             "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "scene"
-                }
+                { "type": "nuecs_scene_t", "name": "scene" }
             ]    
         },
         {
             "name": "register_system",
             "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "scene"
-                },
-                {
-                    "type": "const nuecs_system_info_t*",
-                    "name": "info"
-                },
-                {
-                    "type": "nuecs_system_t*",
-                    "name": "handle"
-                }
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "const nuecs_system_info_t*", "name": "info" },
+                { "type": "nuecs_system_t*", "name": "handle" }
             ]
         },
         {
             "name": "save_file",
             "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "scene"
-                },
-                {
-                    "type": "const char*",
-                    "name": "filename"
-                }
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "const char*", "name": "filename" }
             ]
         },
         {
             "name": "debug_entities",
             "parameters": [
-                {
-                    "type": "nuecs_scene_t",
-                    "name": "scene"
-                }
+                { "type": "nuecs_scene_t", "name": "scene" }
             ]
         }
     ]

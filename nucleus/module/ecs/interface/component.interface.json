@@ -5,14 +5,8 @@
         {
             "name": "record",
             "parameters": [
-                {
-                    "type": "const nuecs_component_info_t*",
-                    "name": "info"
-                },
-                {
-                    "type": "nuecs_component_t*",
-                    "name": "handle"
-                }
+                { "type": "const nuecs_component_info_t*", "name": "info" },
+                { "type": "nuecs_component_t*", "name": "handle" }
             ]
         }
     ]
