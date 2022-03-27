@@ -7,7 +7,7 @@
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
-                    "name": "scene_handle"
+                    "name": "scene"
                 },
                 {
                     "type": "const nuecs_entity_info_t*",
@@ -24,11 +24,11 @@
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
-                    "name": "scene_handle"
+                    "name": "scene"
                 },
                 {
                     "type": "nuecs_entity_t",
-                    "name": "handle"
+                    "name": "entity"
                 }
             ]    
         },
@@ -37,11 +37,11 @@
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
-                    "name": "scene_handle"
+                    "name": "scene"
                 },
                 {
                     "type": "nuecs_entity_t",
-                    "name": "handle"
+                    "name": "entity"
                 },
                 {
                     "type": "nuecs_component_t",
@@ -58,11 +58,11 @@
             "parameters": [
                 {
                     "type": "nuecs_scene_t",
-                    "name": "scene_handle"
+                    "name": "scene"
                 },
                 {
                     "type": "nuecs_entity_t",
-                    "name": "handle"
+                    "name": "entity"
                 },
                 {
                     "type": "nuecs_component_t",
@@ -75,7 +75,7 @@
             "parameters": [
                 {
                     "type": "nuecs_entity_t",
-                    "name": "handle"
+                    "name": "entity"
                 },
                 {
                     "type": "nuecs_serialization_context_t",

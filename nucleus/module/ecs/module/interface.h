@@ -20,71 +20,71 @@
     {
         return nu_module_get_interface(module, NUECS_SCENE_INTERFACE_NAME, &_nuecs_scene_interface);
     }
-    nu_result_t nuecs_scene_create(nuecs_scene_t* handle)
+    nu_result_t nuecs_scene_create(nuecs_scene_t* scene)
     {
-        return _nuecs_scene_interface.create(handle);
+        return _nuecs_scene_interface.create(scene);
     }
-    nu_result_t nuecs_scene_destroy(nuecs_scene_t handle)
+    nu_result_t nuecs_scene_destroy(nuecs_scene_t scene)
     {
-        return _nuecs_scene_interface.destroy(handle);
+        return _nuecs_scene_interface.destroy(scene);
     }
-    nu_result_t nuecs_scene_progress(nuecs_scene_t handle)
+    nu_result_t nuecs_scene_progress(nuecs_scene_t scene)
     {
-        return _nuecs_scene_interface.progress(handle);
+        return _nuecs_scene_interface.progress(scene);
     }
-    nu_result_t nuecs_scene_register_system(nuecs_scene_t scene_handle, const nuecs_system_info_t* info, nuecs_system_t* handle)
+    nu_result_t nuecs_scene_register_system(nuecs_scene_t scene, const nuecs_system_info_t* info, nuecs_system_t* handle)
     {
-        return _nuecs_scene_interface.register_system(scene_handle, info, handle);
+        return _nuecs_scene_interface.register_system(scene, info, handle);
     }
-    nu_result_t nuecs_scene_save_file(nuecs_scene_t scene_handle, const char* filename)
+    nu_result_t nuecs_scene_save_file(nuecs_scene_t scene, const char* filename)
     {
-        return _nuecs_scene_interface.save_file(scene_handle, filename);
+        return _nuecs_scene_interface.save_file(scene, filename);
     }
-    nu_result_t nuecs_scene_debug_entities(nuecs_scene_t scene_handle)
+    nu_result_t nuecs_scene_debug_entities(nuecs_scene_t scene)
     {
-        return _nuecs_scene_interface.debug_entities(scene_handle);
+        return _nuecs_scene_interface.debug_entities(scene);
     }
     nuecs_query_interface_t _nuecs_query_interface;
     nu_result_t nuecs_query_interface_load(nu_module_t module)
     {
         return nu_module_get_interface(module, NUECS_QUERY_INTERFACE_NAME, &_nuecs_query_interface);
     }
-    nu_result_t nuecs_query_create(nuecs_scene_t scene_handle, const nuecs_query_info_t* info, nuecs_query_t* handle)
+    nu_result_t nuecs_query_create(nuecs_scene_t scene, const nuecs_query_info_t* info, nuecs_query_t* handle)
     {
-        return _nuecs_query_interface.create(scene_handle, info, handle);
+        return _nuecs_query_interface.create(scene, info, handle);
     }
-    nu_result_t nuecs_query_destroy(nuecs_scene_t scene_handle, nuecs_query_t handle)
+    nu_result_t nuecs_query_destroy(nuecs_scene_t scene, nuecs_query_t query)
     {
-        return _nuecs_query_interface.destroy(scene_handle, handle);
+        return _nuecs_query_interface.destroy(scene, query);
     }
-    nu_result_t nuecs_query_resolve_chunks(nuecs_query_t handle, nuecs_query_chunks_t* chunks)
+    nu_result_t nuecs_query_resolve_chunks(nuecs_query_t query, nuecs_query_chunks_t* chunks)
     {
-        return _nuecs_query_interface.resolve_chunks(handle, chunks);
+        return _nuecs_query_interface.resolve_chunks(query, chunks);
     }
     nuecs_entity_interface_t _nuecs_entity_interface;
     nu_result_t nuecs_entity_interface_load(nu_module_t module)
     {
         return nu_module_get_interface(module, NUECS_ENTITY_INTERFACE_NAME, &_nuecs_entity_interface);
     }
-    nu_result_t nuecs_entity_create(nuecs_scene_t scene_handle, const nuecs_entity_info_t* info, nuecs_entity_t* handle)
+    nu_result_t nuecs_entity_create(nuecs_scene_t scene, const nuecs_entity_info_t* info, nuecs_entity_t* handle)
     {
-        return _nuecs_entity_interface.create(scene_handle, info, handle);
+        return _nuecs_entity_interface.create(scene, info, handle);
     }
-    nu_result_t nuecs_entity_destroy(nuecs_scene_t scene_handle, nuecs_entity_t handle)
+    nu_result_t nuecs_entity_destroy(nuecs_scene_t scene, nuecs_entity_t entity)
     {
-        return _nuecs_entity_interface.destroy(scene_handle, handle);
+        return _nuecs_entity_interface.destroy(scene, entity);
     }
-    nu_result_t nuecs_entity_add_component(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
+    nu_result_t nuecs_entity_add_component(nuecs_scene_t scene, nuecs_entity_t entity, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
     {
-        return _nuecs_entity_interface.add_component(scene_handle, handle, component, component_data);
+        return _nuecs_entity_interface.add_component(scene, entity, component, component_data);
     }
-    nu_result_t nuecs_entity_remove_component(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component)
+    nu_result_t nuecs_entity_remove_component(nuecs_scene_t scene, nuecs_entity_t entity, nuecs_component_t component)
     {
-        return _nuecs_entity_interface.remove_component(scene_handle, handle, component);
+        return _nuecs_entity_interface.remove_component(scene, entity, component);
     }
-    nu_result_t nuecs_entity_serialize_json_object(nuecs_entity_t handle, nuecs_serialization_context_t context, nu_json_object_t object, const char* name)
+    nu_result_t nuecs_entity_serialize_json_object(nuecs_entity_t entity, nuecs_serialization_context_t context, nu_json_object_t object, const char* name)
     {
-        return _nuecs_entity_interface.serialize_json_object(handle, context, object, name);
+        return _nuecs_entity_interface.serialize_json_object(entity, context, object, name);
     }
     nu_result_t nuecs_entity_deserialize_json_object(nuecs_serialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_t* handle)
     {
