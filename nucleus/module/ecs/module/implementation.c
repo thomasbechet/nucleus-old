@@ -71,9 +71,9 @@ nu_result_t nuecs_query_destroy_impl(nuecs_scene_t scene_handle, nuecs_query_t h
 {
     return nuecs_query_destroy((nuecs_scene_data_t*)scene_handle, handle);
 }
-nu_result_t nuecs_query_resolve_chunks_impl(nuecs_query_t handle, nuecs_query_chunks_t* chunks)
+nu_result_t nuecs_query_resolve_chunks_impl(nuecs_scene_t scene, nuecs_query_t handle, nuecs_query_chunks_t* chunks)
 {
-    return nuecs_query_resolve_chunks((nuecs_query_data_t*)handle, chunks);
+    return nuecs_query_resolve_chunks((nuecs_scene_data_t*)scene, (nuecs_query_data_t*)handle, chunks);
 }
 /* entity interface */
 nu_result_t nuecs_entity_create_impl(nuecs_scene_t scene_handle, const nuecs_entity_info_t* info, nuecs_entity_t* handle)

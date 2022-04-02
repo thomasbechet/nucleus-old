@@ -20,6 +20,7 @@
         {
             "name": "resolve_chunks",
             "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
                 { "type": "nuecs_query_t", "name": "query" },
                 { "type": "nuecs_query_chunks_t*", "name": "chunks" }
             ]

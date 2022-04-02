@@ -48,6 +48,27 @@ nu_result_t nuecs_query_destroy(nuecs_scene_data_t *scene, nuecs_query_t handle)
 
     return NU_SUCCESS;
 }
+nu_result_t nuecs_query_resolve_chunks(nuecs_scene_data_t *scene, nuecs_query_data_t *query, nuecs_query_chunks_t *chunks)
+{
+    (void)scene;
+    /* update chunks */
+    nuecs_query_chunk_view_t *views_data;
+    uint32_t view_count;
+    nu_array_get_data(query->chunk_views, &views_data, &view_count);
+    nuecs_chunk_data_t **chunks_data;
+    nu_array_get_data(query->chunk_references, &chunks_data, NULL);
+    
+    /* update views count */
+    for (uint32_t i = 0; i < view_count; i++) {
+        views_data[i].count = chunks_data[i]->size;
+    }
+
+    /* return views */
+    chunks->views      = views_data;
+    chunks->view_count = view_count;
+
+    return NU_SUCCESS;
+}
 nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_info_t *info)
 {
     /* allocate memory */
@@ -131,27 +152,6 @@ nu_result_t nuecs_query_try_subscribe(nuecs_query_data_t *query, nuecs_archetype
             nuecs_query_notify_new_chunk(query, chunks[i]);
         }
     }
-
-    return NU_SUCCESS;
-}
-
-nu_result_t nuecs_query_resolve_chunks(nuecs_query_data_t *query, nuecs_query_chunks_t *chunks)
-{
-    /* update chunks */
-    nuecs_query_chunk_view_t *views_data;
-    uint32_t view_count;
-    nu_array_get_data(query->chunk_views, &views_data, &view_count);
-    nuecs_chunk_data_t **chunks_data;
-    nu_array_get_data(query->chunk_references, &chunks_data, NULL);
-    
-    /* update views count */
-    for (uint32_t i = 0; i < view_count; i++) {
-        views_data[i].count = chunks_data[i]->size;
-    }
-
-    /* return views */
-    chunks->views      = views_data;
-    chunks->view_count = view_count;
 
     return NU_SUCCESS;
 }

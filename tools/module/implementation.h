@@ -21,7 +21,7 @@ nu_result_t nuecs_scene_debug_entities_impl(nuecs_scene_t scene);
 /* query interface */
 nu_result_t nuecs_query_create_impl(nuecs_scene_t scene, const nuecs_query_info_t* info, nuecs_query_t* handle);
 nu_result_t nuecs_query_destroy_impl(nuecs_scene_t scene, nuecs_query_t query);
-nu_result_t nuecs_query_resolve_chunks_impl(nuecs_query_t query, nuecs_query_chunks_t* chunks);
+nu_result_t nuecs_query_resolve_chunks_impl(nuecs_scene_t scene, nuecs_query_t query, nuecs_query_chunks_t* chunks);
 /* entity interface */
 nu_result_t nuecs_entity_create_impl(nuecs_scene_t scene, const nuecs_entity_info_t* info, nuecs_entity_t* handle);
 nu_result_t nuecs_entity_destroy_impl(nuecs_scene_t scene, nuecs_entity_t entity);

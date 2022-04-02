@@ -73,9 +73,9 @@
     {
         return _nuecs_query_interface.destroy(scene, query);
     }
-    nu_result_t nuecs_query_resolve_chunks(nuecs_query_t query, nuecs_query_chunks_t* chunks)
+    nu_result_t nuecs_query_resolve_chunks(nuecs_scene_t scene, nuecs_query_t query, nuecs_query_chunks_t* chunks)
     {
-        return _nuecs_query_interface.resolve_chunks(query, chunks);
+        return _nuecs_query_interface.resolve_chunks(scene, query, chunks);
     }
     nuecs_entity_interface_t _nuecs_entity_interface;
     nu_result_t nuecs_entity_interface_load(nu_module_t module)

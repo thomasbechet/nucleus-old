@@ -55,7 +55,7 @@ nu_result_t nuecs_query_destroy_impl(nuecs_scene_t scene, nuecs_query_t query)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_resolve_chunks_impl(nuecs_query_t query, nuecs_query_chunks_t* chunks)
+nu_result_t nuecs_query_resolve_chunks_impl(nuecs_scene_t scene, nuecs_query_t query, nuecs_query_chunks_t* chunks)
 {
     return NU_SUCCESS;
 }
