@@ -31,14 +31,3 @@ nu_result_t nuecs_scene_manager_progress(nuecs_scene_manager_data_t *manager)
     }
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_manager_create_scene(nuecs_scene_manager_data_t *manager, nuecs_scene_t *handle)
-{
-    nuecs_scene_data_t *scene = (nuecs_scene_data_t*)nu_malloc(sizeof(nuecs_scene_data_t));
-    nu_indexed_array_add(manager->scenes, &scene, &scene->id);
-    *handle = (nuecs_scene_t)scene;
-    return nuecs_scene_initialize(scene);
-}
-nu_result_t nuecs_scene_manager_destroy_scene(nuecs_scene_manager_data_t *manager, nuecs_scene_t handle)
-{
-    return NU_SUCCESS;
-}

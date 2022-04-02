@@ -24,11 +24,11 @@ nu_result_t nuecs_archetype_debug_archetypes_impl(void)
 /* scene interface */
 nu_result_t nuecs_scene_create_impl(nuecs_scene_t* handle)
 {
-    return nuecs_scene_manager_create_scene(&_module.scenes, handle);
+    return nuecs_scene_create(&_module.scenes, handle);
 }
 nu_result_t nuecs_scene_destroy_impl(nuecs_scene_t handle)
 {
-    return nuecs_scene_manager_destroy_scene(&_module.scenes, handle);
+    return nuecs_scene_destroy(&_module.scenes, handle);
 }
 nu_result_t nuecs_scene_clear_impl(nuecs_scene_t scene)
 {

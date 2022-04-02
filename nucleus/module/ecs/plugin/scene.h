@@ -4,6 +4,7 @@
 #include <nucleus/module/ecs/plugin/types_public.h>
 #include <nucleus/module/ecs/plugin/archetype.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
+#include <nucleus/module/ecs/plugin/scene_manager.h>
 
 typedef struct {
     nuecs_archetype_data_t *archetype;
@@ -29,20 +30,12 @@ typedef struct {
     uint32_t id;
 } nuecs_scene_data_t;
 
+nu_result_t nuecs_scene_create(nuecs_scene_manager_data_t *manager, nuecs_scene_t *handle);
+nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene_t handle);
 nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene);
-nu_result_t nuecs_scene_create_entity(
-    nuecs_component_manager_data_t *manager,
-    nuecs_scene_data_t *scene, 
-    const nuecs_entity_info_t* info, 
-    nuecs_entity_t *handle
-);
-nu_result_t nuecs_scene_destroy_entity(
-    nuecs_scene_data_t *scene, 
-    nuecs_entity_t handle
-);
 nu_result_t nuecs_scene_serialize_json_object(
     nuecs_component_manager_data_t *manager, 
     nuecs_scene_data_t *scene,
