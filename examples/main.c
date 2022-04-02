@@ -195,6 +195,12 @@ static nu_result_t serialize_position(nuecs_component_data_ptr_t data, nuecs_ser
     nu_json_object_put_vec3f(json, "value", position->pos);
     return NU_SUCCESS;
 }
+static nu_result_t deserialize_position(nuecs_component_data_ptr_t data, nuecs_deserialization_context_t ctx, nu_json_object_t json)
+{
+    position_t *position = (position_t*)data;
+    nu_json_value_as_vec3f(nu_json_object_get_by_name(json, "value"), position->pos);
+    return NU_SUCCESS;
+}
 static nu_result_t serialize_health(nuecs_component_data_ptr_t data, nuecs_serialization_context_t ctx, nu_json_object_t json)
 {
     health_t *health = (health_t*)data;
@@ -221,6 +227,16 @@ static nu_result_t serialize_transform(nuecs_component_data_ptr_t data, nuecs_se
     nuecs_entity_serialize_json_object(transform->parent, ctx, json, "parent");
     nuecs_entity_serialize_json_object(transform->prev, ctx, json, "prev");
     nu_json_object_put_bool(json, "dirty", transform->dirty);
+    return NU_SUCCESS;
+}
+static nu_result_t deserialize_transform(nuecs_component_data_ptr_t data, nuecs_deserialization_context_t ctx, nu_json_object_t json)
+{
+    transform_t *transform = (transform_t*)data;
+    nuecs_entity_deserialize_json_object(ctx, json, "child", &transform->child);
+    nuecs_entity_deserialize_json_object(ctx, json, "next", &transform->next);
+    nuecs_entity_deserialize_json_object(ctx, json, "parent", &transform->parent);
+    nuecs_entity_deserialize_json_object(ctx, json, "prev", &transform->prev);
+    nu_json_value_as_bool(nu_json_object_get_by_name(json, "dirty"), &transform->dirty);
     return NU_SUCCESS;
 }
 
@@ -263,7 +279,7 @@ static nu_result_t on_start(void)
     {
         nuecs_component_info_t info;
         memset(&info, 0, sizeof(nuecs_component_info_t));
-        info.name             = "position_t";
+        info.name             = "position";
         info.size             = sizeof(position_t);
         info.serialize_json   = serialize_position;
         nuecs_component_record(&info, &position_component);
@@ -271,7 +287,7 @@ static nu_result_t on_start(void)
     {
         nuecs_component_info_t info;
         memset(&info, 0, sizeof(nuecs_component_info_t));
-        info.name             = "health_t";
+        info.name             = "health";
         info.size             = sizeof(health_t);
         info.serialize_json   = serialize_health;
         nuecs_component_record(&info, &health_component);
@@ -279,7 +295,7 @@ static nu_result_t on_start(void)
     {
         nuecs_component_info_t info;
         memset(&info, 0, sizeof(nuecs_component_info_t));
-        info.name             = "velocity_t";
+        info.name             = "velocity";
         info.size             = sizeof(velocity_t);
         info.serialize_json   = serialize_velocity;
         nuecs_component_record(&info, &velocity_component);
@@ -287,7 +303,7 @@ static nu_result_t on_start(void)
     {
         nuecs_component_info_t info;
         memset(&info, 0, sizeof(nuecs_component_info_t));
-        info.name             = "score_t";
+        info.name             = "score";
         info.size             = sizeof(score_t);
         info.serialize_json   = serialize_score;
         nuecs_component_record(&info, &score_component);
@@ -295,9 +311,10 @@ static nu_result_t on_start(void)
     {
         nuecs_component_info_t info;
         memset(&info, 0, sizeof(nuecs_component_info_t));
-        info.name             = "transform_t";
+        info.name             = "transform";
         info.size             = sizeof(transform_t);
         info.serialize_json   = serialize_transform;
+        info.deserialize_json = deserialize_transform;
         nuecs_component_record(&info, &transform_component);
     }
 
@@ -326,9 +343,6 @@ static nu_result_t on_start(void)
     transform.prev = NU_NULL_HANDLE;
     transform.dirty = true;
     nuecs_entity_add_component(scene, e3, transform_component, &transform);
-    nuecs_entity_remove_component(scene, e3, position_component);
-
-    nuecs_entity_destroy(scene, e1);
 
     /////////// QUERY ////////////
 
@@ -339,23 +353,42 @@ static nu_result_t on_start(void)
     qinfo.type            = NUECS_QUERY_TYPE_CHUNK;
     NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
 
-    nuecs_archetype_debug_archetypes();
+    // nuecs_archetype_debug_archetypes();
     nuecs_scene_debug_entities(scene);
 
-    nuecs_query_chunks_t chunks;
-    NU_ASSERT(nuecs_query_resolve_chunks(query, &chunks) == NU_SUCCESS);
+    // nuecs_query_chunks_t chunks;
+    // nu_info("test", "before");
+    // NU_ASSERT(nuecs_query_resolve_chunks(query, &chunks) == NU_SUCCESS);
+    // for (uint32_t i = 0; i < chunks.view_count; i++) {
+    //     nu_info("test", "view %d/%d with %d entities", i+1, chunks.view_count, chunks.views[i].count);
+    //     const position_t *positions = (const position_t*)chunks.views[i].components[0];
+    //     for (uint32_t j = 0; j < chunks.views[i].count; j++) {
+    //         nu_info("query", "%lf", positions[j].pos[0]);
+    //     }
+    // }
 
-    nuecs_scene_save_json(scene, "$ROOT/mywork.json");
+    // nuecs_scene_save_json(scene, "$ROOT/mywork.json");
+    // nuecs_scene_clear(scene);
+    // nuecs_scene_debug_entities(scene);
+    // nuecs_scene_load_json(scene, "$ROOT/mywork.json");
+    nuecs_scene_clear(scene);
+    nuecs_scene_load_json(scene, "$ROOT/new.json");
+    nuecs_scene_clear(scene);
+    nuecs_scene_save_json(scene, "$ROOT/new2.json");
 
-    for (uint32_t i = 0; i < chunks.view_count; i++) {
-        nu_info("test", "view %d/%d with %d components", i+1, chunks.view_count, chunks.views[i].count);
-        const position_t *positions = (const position_t*)chunks.views[i].components[0];
-        for (uint32_t j = 0; j < chunks.views[i].count; j++) {
-            nu_info("query", "%lf", positions[j].pos[0]);
-        }
-    }
+    // nuecs_scene_debug_entities(scene);
 
-    nuecs_query_destroy(scene, query);
+    // nu_info("test", "after");
+    // NU_ASSERT(nuecs_query_resolve_chunks(query, &chunks) == NU_SUCCESS);
+    // for (uint32_t i = 0; i < chunks.view_count; i++) {
+    //     nu_info("test", "view %d/%d with %d entities", i+1, chunks.view_count, chunks.views[i].count);
+    //     const position_t *positions = (const position_t*)chunks.views[i].components[0];
+    //     for (uint32_t j = 0; j < chunks.views[i].count; j++) {
+    //         nu_info("query", "%lf", positions[j].pos[0]);
+    //     }
+    // }
+
+    // nuecs_query_destroy(scene, query);
 
     nu_context_request_stop();
 

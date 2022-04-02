@@ -4,9 +4,9 @@
 #include <nucleus/module/ecs/plugin/component.h>
 
 nu_result_t nuecs_sanatize_components(
-    nuecs_component_data_t **in_components,
+    nuecs_component_t *in_components,
     uint32_t in_component_count,
-    nuecs_component_data_t **components,
+    uint32_t *components,
     uint32_t *component_count
 );
 

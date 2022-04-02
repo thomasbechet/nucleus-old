@@ -5,6 +5,9 @@
 #include <nucleus/module/ecs/plugin/component_manager.h>
 #include <nucleus/module/ecs/plugin/scene_manager.h>
 #include <nucleus/module/ecs/plugin/query.h>
+#include <nucleus/module/ecs/plugin/logger.h>
+
+#define NUECS_INVALID_SCENE_MESSAGE "Invalid scene."
 
 typedef struct {
      nuecs_scene_manager_data_t scenes;
@@ -21,11 +24,15 @@ nu_result_t nuecs_archetype_debug_archetypes_impl(void)
 /* scene interface */
 nu_result_t nuecs_scene_create_impl(nuecs_scene_t* handle)
 {
-    return nuecs_scene_create(&_module.scenes, handle);
+    return nuecs_scene_manager_create_scene(&_module.scenes, handle);
 }
 nu_result_t nuecs_scene_destroy_impl(nuecs_scene_t handle)
 {
-    return nuecs_scene_destroy(&_module.scenes, handle);
+    return nuecs_scene_manager_destroy_scene(&_module.scenes, handle);
+}
+nu_result_t nuecs_scene_clear_impl(nuecs_scene_t scene)
+{
+    return nuecs_scene_clear((nuecs_scene_data_t*)scene);
 }
 nu_result_t nuecs_scene_progress_impl(nuecs_scene_t handle)
 {
@@ -35,13 +42,21 @@ nu_result_t nuecs_scene_register_system_impl(nuecs_scene_t scene_handle, const n
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_serialize_json_impl(nuecs_scene_t scene, nu_json_object_t object)
+nu_result_t nuecs_scene_serialize_json_object_impl(nuecs_scene_t scene, nu_json_object_t object)
 {
-    return nuecs_scene_serialize_json(&_module.components, (nuecs_scene_data_t*)scene, object);
+    return nuecs_scene_serialize_json_object(&_module.components, (nuecs_scene_data_t*)scene, object);
+}
+nu_result_t nuecs_scene_deserialize_json_object_impl(nuecs_scene_t scene, nu_json_object_t object)
+{
+    return nuecs_scene_deserialize_json_object(&_module.components, (nuecs_scene_data_t*)scene, object);
 }
 nu_result_t nuecs_scene_save_json_impl(nuecs_scene_t scene, const char* filename)
 {
     return nuecs_scene_save_json(&_module.components, (nuecs_scene_data_t*)scene, filename);
+}
+nu_result_t nuecs_scene_load_json_impl(nuecs_scene_t scene, const char* filename)
+{
+    return nuecs_scene_load_json(&_module.components, (nuecs_scene_data_t*)scene, filename);
 }
 nu_result_t nuecs_scene_debug_entities_impl(nuecs_scene_t scene_handle)
 {
@@ -65,23 +80,23 @@ nu_result_t nuecs_entity_create_impl(nuecs_scene_t scene_handle, const nuecs_ent
 {
     return nuecs_entity_create(&_module.components, (nuecs_scene_data_t*)scene_handle, info, handle);
 }
-nu_result_t nuecs_entity_destroy_impl(nuecs_scene_t scene_handle, nuecs_entity_t handle)
+nu_result_t nuecs_entity_destroy_impl(nuecs_scene_t scene, nuecs_entity_t handle)
 {
-    return nuecs_entity_destroy((nuecs_scene_data_t*)scene_handle, handle);
+    return nuecs_entity_destroy((nuecs_scene_data_t*)scene, handle);
 }
-nu_result_t nuecs_entity_add_component_impl(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
+nu_result_t nuecs_entity_add_component_impl(nuecs_scene_t scene, nuecs_entity_t handle, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
 {
-    return nuecs_entity_add_component(&_module.components, (nuecs_scene_data_t*)scene_handle, handle, component, component_data);
+    return nuecs_entity_add_component(&_module.components, (nuecs_scene_data_t*)scene, handle, component, component_data);
 }
-nu_result_t nuecs_entity_remove_component_impl(nuecs_scene_t scene_handle, nuecs_entity_t handle, nuecs_component_t component)
+nu_result_t nuecs_entity_remove_component_impl(nuecs_scene_t scene, nuecs_entity_t handle, nuecs_component_t component)
 {
-    return nuecs_entity_remove_component(&_module.components, (nuecs_scene_data_t*)scene_handle, handle, component);
+    return nuecs_entity_remove_component(&_module.components, (nuecs_scene_data_t*)scene, handle, component);
 }
 nu_result_t nuecs_entity_serialize_json_object_impl(nuecs_entity_t handle, nuecs_serialization_context_t context, nu_json_object_t object, const char* name)
 {
     return nuecs_entity_serialize_json_object(handle, context, object, name);
 }
-nu_result_t nuecs_entity_deserialize_json_object_impl(nuecs_serialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_t* handle)
+nu_result_t nuecs_entity_deserialize_json_object_impl(nuecs_deserialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_t* handle)
 {
     return nuecs_entity_deserialize_json_object(context, object, name, handle);
 }

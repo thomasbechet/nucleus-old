@@ -1,20 +1,23 @@
 #include <nucleus/module/ecs/plugin/scene.h>
 
-#include <nucleus/module/ecs/plugin/archetype_table.h>
+#include <nucleus/module/ecs/plugin/chunk_table.h>
 #include <nucleus/module/ecs/plugin/utility.h>
 #include <nucleus/module/ecs/plugin/query.h>
 #include <nucleus/module/ecs/plugin/entity.h>
 #include <nucleus/module/ecs/plugin/logger.h>
 
-nu_result_t nuecs_scene_create(nuecs_scene_manager_data_t *manager, nuecs_scene_t* handle)
+nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene)
 {
-    nuecs_scene_data_t *scene = (nuecs_scene_data_t*)nu_malloc(sizeof(nuecs_scene_data_t));
-    nu_indexed_array_add(manager->scenes, &scene, &scene->id);
-    *handle = (nuecs_scene_t)scene;
-    return nuecs_scene_initialize(scene);
-}
-nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene_t handle)
-{
+    nuecs_entity_data_t *entities; uint32_t entity_count;
+    nu_array_get_data(scene->entities, &entities, &entity_count);
+    for (uint32_t i = 0; i < entity_count; i++) {
+        if (entities[i].chunk) {
+            nuecs_entity_t handle;
+            NU_HANDLE_SET_ID(handle, NUECS_ENTITY_BUILD_ID(entities[i].version, i));
+            nuecs_entity_destroy(scene, handle);
+        }
+    }
+
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
@@ -23,7 +26,7 @@ nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
     nu_array_allocate(&scene->entities_to_delete, sizeof(nuecs_entity_t));
     nu_array_allocate(&scene->entities, sizeof(nuecs_entity_data_t));
     nu_array_allocate(&scene->free_indices, sizeof(uint32_t));
-    nuecs_archetype_table_initialize(&scene->archetype_table);
+    nuecs_chunk_table_initialize(&scene->chunk_table);
     nu_indexed_array_allocate(&scene->queries, sizeof(nuecs_query_data_t*));
     scene->next_version = 0;
 
@@ -41,8 +44,11 @@ nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
     }
     nu_indexed_array_free(scene->queries);
 
+    /* entities */
+    nuecs_scene_clear(scene);
+
     /* free other resources */
-    nuecs_archetype_table_terminate(scene->archetype_table);
+    nuecs_chunk_table_terminate(scene->chunk_table);
     nu_array_free(scene->free_indices);
     nu_array_free(scene->entities);
     nu_array_free(scene->entities_to_delete);
@@ -64,7 +70,7 @@ nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene)
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_serialize_json(
+nu_result_t nuecs_scene_serialize_json_object(
     nuecs_component_manager_data_t *manager, 
     nuecs_scene_data_t *scene, 
     nu_json_object_t object
@@ -118,7 +124,7 @@ nu_result_t nuecs_scene_serialize_json(
 
             /* get component */
             nuecs_component_data_t *component;
-            nuecs_component_manager_get_component(manager, id, &component);
+            nu_array_get(manager->components, id, &component);
 
             /* put component data */
             nu_json_object_t j_component;
@@ -143,6 +149,153 @@ nu_result_t nuecs_scene_serialize_json(
 
     return NU_SUCCESS;
 }
+nu_result_t nuecs_scene_deserialize_json_object(
+    nuecs_component_manager_data_t *manager, 
+    nuecs_scene_data_t *scene, 
+    nu_json_object_t object
+)
+{
+    nu_result_t result = NU_SUCCESS;
+
+    /* get entities json list */
+    nu_json_array_t j_entities;
+    result = nu_json_value_as_array(nu_json_object_get_by_name(object, "entities"), &j_entities);
+    NU_CHECK(result == NU_SUCCESS, return result, NUECS_LOGGER_NAME, "Scene json doesn't have 'entities' field.");
+
+    /* components placeholder */
+    uint32_t components[NUECS_MAX_COMPONENT_PER_ENTITY];
+    uint32_t component_count;
+
+    /* get entity count */
+    uint32_t entity_count = nu_json_array_get_size(j_entities);
+
+    /* handles array */
+    nuecs_entity_t *handles = (nuecs_entity_t*)nu_malloc(sizeof(nuecs_entity_t) * entity_count);
+    uint32_t handle_count = 0;
+
+    /******************/
+    /* CREATE ENTRIES */
+    /******************/
+
+    /* iterate over entities */
+    nu_json_array_iterator_t j_entity_iterator = NU_NULL_HANDLE;
+    while (nu_json_array_next(j_entities, &j_entity_iterator)) {
+
+        /* get entity object */
+        nu_json_object_t j_entity;
+        result = nu_json_value_as_object(nu_json_array_iterator_get_value(j_entity_iterator), &j_entity);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Json entity is not an object.");
+
+        /* get entity id */
+        uint32_t entity_id;
+        result = nu_json_value_as_uint(nu_json_object_get_by_name(j_entity, "id"), &entity_id);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Json entity id is not a uint.");
+
+        /* get components field */
+        nu_json_object_t j_components;
+        result = nu_json_value_as_object(nu_json_object_get_by_name(j_entity, "components"), &j_components);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Json component list is not an object.");
+
+        /* initialize component count */
+        component_count = 0;
+
+        /* iterate over components */
+        nu_json_object_iterator_t j_components_iterator = NU_NULL_HANDLE;
+        while (nu_json_object_next(j_components, &j_components_iterator)) {
+
+            /* find component id */
+            uint32_t component_id;
+            result = nuecs_component_manager_find_component_by_name(manager,
+                nu_json_object_iterator_get_name(j_components_iterator), NULL, &component_id);
+            NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to find component %s for entity %d.",
+                nu_json_object_iterator_get_name(j_components_iterator), entity_id);
+            components[component_count++] = component_id;
+        }
+
+        /* add entry */
+        uint32_t index; nuecs_entity_data_t *entity;
+        result = nuecs_entity_add_entry(manager, scene, components, component_count, &index, &entity);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to create entity.");
+
+        /* create handle (not initialize) */
+        nuecs_entity_t handle;
+        NU_HANDLE_SET_ID(handle, NUECS_ENTITY_BUILD_ID(entity->version, index));
+        handles[entity_id] = handle;
+        handle_count++;
+    }
+
+    /**************************/
+    /* DESERIALIZE COMPONENTS */
+    /**************************/
+
+    /* create deserialization context */
+    nuecs_deserialization_context_data_t deserialization;
+    deserialization.handles      = handles;
+    deserialization.handle_count = entity_count;
+    deserialization.scene        = scene;
+
+    /* iterate over entities */
+    j_entity_iterator = NU_NULL_HANDLE;
+    while (nu_json_array_next(j_entities, &j_entity_iterator)) {
+
+        /* get entity object */
+        nu_json_object_t j_entity;
+        result = nu_json_value_as_object(nu_json_array_iterator_get_value(j_entity_iterator), &j_entity);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Json entity is not an object.");
+
+        /* get entity id */
+        uint32_t entity_id;
+        result = nu_json_value_as_uint(nu_json_object_get_by_name(j_entity, "id"), &entity_id);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Entity id is not a uint.");
+
+        /* get components field */
+        nu_json_object_t j_components;
+        result = nu_json_value_as_object(nu_json_object_get_by_name(j_entity, "components"), &j_components);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Component list is not an object.");
+
+        /* get entity entry */
+        nuecs_entity_data_t *entity;
+        nu_array_get(scene->entities, NUECS_ENTITY_GET_INDEX(handles[entity_id]), &entity);
+
+        /* iterate over components */
+        for (uint32_t component_index = 0; component_index < entity->chunk->archetype->component_count; component_index++) {
+
+            /* find component info */
+            nuecs_component_data_t *component;
+            nu_array_get(manager->components, entity->chunk->archetype->component_ids[component_index], &component);
+
+            /* check if the component can be deserialize */
+            if (component->deserialize_json) {
+
+                /* get component json */
+                nu_json_object_t j_component;
+                result = nu_json_value_as_object(nu_json_object_get_by_name(j_components, nu_string_get_cstr(component->name)), &j_component);
+                NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Component %s was not found or is not an object.", nu_string_get_cstr(component->name));
+
+                /* get component data */
+                nuecs_component_data_ptr_t data;
+                nuecs_chunk_get_component(entity->chunk, entity->chunk_id, component_index, &data);
+
+                /* deserialize */
+                result = component->deserialize_json(data, (nuecs_deserialization_context_t)&deserialization, j_component);
+                NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to deserialize component %s for entity %d.",
+                    nu_string_get_cstr(component->name), entity_id);
+            }
+        }
+    }
+
+    nu_free(handles);
+    return NU_SUCCESS;
+
+cleanup0:
+    /* remove added entry */
+    for (uint32_t i = 0; i < handle_count; i++) {
+        nuecs_entity_remove_entry(scene, NUECS_ENTITY_GET_INDEX(handles[i]));
+    }
+    nu_free(handles);
+
+    return result;
+}
 nu_result_t nuecs_scene_save_json(
     nuecs_component_manager_data_t *manager,
     nuecs_scene_data_t *scene,
@@ -150,17 +303,40 @@ nu_result_t nuecs_scene_save_json(
 )
 {
     /* allocate json */
-    nu_json_t json;
+    nu_json_t json; 
+    nu_json_object_t root;
     nu_json_allocate_empty_object(&json);
+    nu_json_value_as_object(nu_json_get_root(json), &root);
+
+    /* serialize scene */
+    nu_result_t result = nuecs_scene_serialize_json_object(manager, scene, root);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to serialize scene.");
+
+    /* save json */
+    result = nu_json_save_file(json, filename, false);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to save scene.");
+
+cleanup0:
+    nu_json_free(json);
+
+    return result;
+}
+nu_result_t nuecs_scene_load_json(
+    nuecs_component_manager_data_t *manager,
+    nuecs_scene_data_t *scene,
+    const char* filename
+)
+{
+    /* allocate json */
+    nu_json_t json;
+    nu_result_t result = nu_json_allocate_from_file(&json, filename);
+    NU_CHECK(result == NU_SUCCESS, return result, NUECS_LOGGER_NAME, "Failed load json scene.");
     nu_json_object_t root;
     nu_json_value_as_object(nu_json_get_root(json), &root);
 
     /* serialize scene */
-    nuecs_scene_serialize_json(manager, scene, root);
-
-    /* save json */
-    nu_result_t result = nu_json_save_file(json, filename, false);
-    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to save scene.");
+    result = nuecs_scene_deserialize_json_object(manager, scene, root);
+    NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to deserialize scene.");
 
 cleanup0:
     nu_json_free(json);
@@ -172,6 +348,7 @@ nu_result_t nuecs_scene_debug_entities(nuecs_scene_data_t *scene)
     nuecs_entity_data_t *entities;
     uint32_t entity_count;
     nu_array_get_data(scene->entities, &entities, &entity_count);
+    nu_info(NUECS_LOGGER_NAME, "|----SCENE----|");
     nu_info(NUECS_LOGGER_NAME, "|VERSION|INDEX|");
     for (uint32_t i = 0; i < entity_count; i++) {
         if (entities[i].chunk) {

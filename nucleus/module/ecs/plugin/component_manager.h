@@ -7,7 +7,7 @@
 typedef struct {
     nu_array_t archetypes;
     nuecs_archetype_data_t *empty_archetype;
-    nu_indexed_array_t components;
+    nu_array_t components;
     uint32_t next_archetype_index;
 } nuecs_component_manager_data_t;
 
@@ -16,30 +16,31 @@ nu_result_t nuecs_component_manager_terminate(nuecs_component_manager_data_t *ma
 
 nu_result_t nuecs_component_manager_record_component(
     nuecs_component_manager_data_t *manager,
-    const nuecs_component_info_t* info, 
-    nuecs_component_t* handle
+    const nuecs_component_info_t *info, 
+    nuecs_component_t *handle
 );
-nu_result_t nuecs_component_manager_get_component(
+nu_result_t nuecs_component_manager_find_component_by_name(
     nuecs_component_manager_data_t *manager,
-    uint32_t component_id, 
-    nuecs_component_data_t **component
+    const char *name,
+    nuecs_component_data_t **component_data,
+    uint32_t *component_id
 );
 nu_result_t nuecs_component_manager_find_archetype(
     nuecs_component_manager_data_t *manager,
-    nuecs_component_data_t **components,
+    uint32_t *component_ids,
     uint32_t component_count,
     nuecs_archetype_data_t **archetype
 );
 nu_result_t nuecs_component_manager_find_next_archetype(
     nuecs_component_manager_data_t *manager,
     nuecs_archetype_data_t *current,
-    nuecs_component_data_t *component,
+    uint32_t component_id,
     nuecs_archetype_data_t **archetype
 );
 nu_result_t nuecs_component_manager_find_previous_archetype(
     nuecs_component_manager_data_t *manager,
     nuecs_archetype_data_t *current,
-    nuecs_component_data_t *component,
+    uint32_t component_id,
     nuecs_archetype_data_t **archetype
 );
 

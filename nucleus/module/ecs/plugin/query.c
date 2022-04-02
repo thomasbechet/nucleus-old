@@ -1,7 +1,7 @@
 #include <nucleus/module/ecs/plugin/query.h>
 
 #include <nucleus/module/ecs/plugin/component_manager.h>
-#include <nucleus/module/ecs/plugin/archetype_table.h>
+#include <nucleus/module/ecs/plugin/chunk_table.h>
 #include <nucleus/module/ecs/plugin/utility.h>
 
 static bool query_reference_equals(const void *user, const void *object)
@@ -12,9 +12,9 @@ static bool query_reference_equals(const void *user, const void *object)
 nu_result_t nuecs_query_create(nuecs_scene_data_t *scene, const nuecs_query_info_t *info, nuecs_query_t *handle)
 {
     /* sanitize components */
-    nuecs_component_data_t *components[NUECS_MAX_COMPONENT_PER_ENTITY];
+    uint32_t components[NUECS_MAX_COMPONENT_PER_ENTITY];
     uint32_t component_count;
-    nuecs_sanatize_components((nuecs_component_data_t**)info->components, info->component_count, components, &component_count);
+    nuecs_sanatize_components(info->components, info->component_count, components, &component_count);
 
     /* allocate query */
     nuecs_query_data_t *query = (nuecs_query_data_t*)nu_malloc(sizeof(nuecs_query_data_t));
@@ -24,7 +24,7 @@ nu_result_t nuecs_query_create(nuecs_scene_data_t *scene, const nuecs_query_info
     /* try to subscribe to archetype entries */
     nuecs_archetype_entry_data_t *entries;
     uint32_t entry_count;
-    nu_array_get_data(scene->archetype_table, &entries, &entry_count);
+    nu_array_get_data(scene->chunk_table, &entries, &entry_count);
     for (uint32_t i = 0; i < entry_count; i++) {
         if (entries[i].archetype) {
             nuecs_query_try_subscribe(query, &entries[i]);
@@ -59,7 +59,8 @@ nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_
     query->component_count = info->component_count;
     query->component_ids = (uint32_t*)nu_malloc(sizeof(info->component_count) * sizeof(uint32_t));
     for (uint32_t i = 0; i < info->component_count; i++) {
-        query->component_ids[i] = ((nuecs_component_data_t*)info->components[i])->id;
+        uint32_t id = NU_HANDLE_GET_ID(info->components[i], id);
+        query->component_ids[i] = id;
     }
     
     return NU_SUCCESS;

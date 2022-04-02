@@ -4,4 +4,4 @@ PROJECT(nucleus VERSION 0.0.1)
 
 # Add subdirectories
 ADD_SUBDIRECTORY(nucleus)
-ADD_SUBDIRECTORY(tests)
+ADD_SUBDIRECTORY(examples)

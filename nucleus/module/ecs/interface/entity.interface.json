@@ -46,7 +46,7 @@
         {
             "name": "deserialize_json_object",
             "parameters": [
-                { "type": "nuecs_serialization_context_t", "name": "context" },
+                { "type": "nuecs_deserialization_context_t", "name": "context" },
                 { "type": "nu_json_object_t", "name": "object" },
                 { "type": "const char*", "name": "name" },
                 { "type": "nuecs_entity_t*", "name": "handle" }

@@ -15,6 +15,12 @@
             ]
         },
         {
+            "name": "clear",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" }
+            ]
+        },
+        {
             "name": "progress",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" }
@@ -29,7 +35,14 @@
             ]
         },
         {
-            "name": "serialize_json",
+            "name": "serialize_json_object",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "nu_json_object_t", "name": "object" }
+            ]
+        },
+        {
+            "name": "deserialize_json_object",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" },
                 { "type": "nu_json_object_t", "name": "object" }
@@ -37,6 +50,13 @@
         },
         {
             "name": "save_json",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "const char*", "name": "filename" }
+            ]
+        },
+        {
+            "name": "load_json",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" },
                 { "type": "const char*", "name": "filename" }

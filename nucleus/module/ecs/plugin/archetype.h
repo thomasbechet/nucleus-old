@@ -19,20 +19,21 @@ typedef struct {
 
 nu_result_t nuecs_archetype_create_empty(nuecs_archetype_data_t **archetype);
 nu_result_t nuecs_archetype_create_next(
-    const nuecs_archetype_data_t *current_archetype,
-    const nuecs_component_data_t *component,
+    nuecs_archetype_data_t *current_archetype,
+    nuecs_component_data_t *component,
+    uint32_t component_id,
     nuecs_archetype_data_t **archetype
 );
 nu_result_t nuecs_archetype_destroy(nuecs_archetype_data_t *archetype);
 
 nu_result_t nuecs_archetype_find_next(
     nuecs_archetype_data_t *current,
-    nuecs_component_data_t *next_component,
+    uint32_t component_id,
     nuecs_archetype_data_t **next
 );
 nu_result_t nuecs_archetype_find_previous(
     nuecs_archetype_data_t *current,
-    nuecs_component_data_t *previous_component,
+    uint32_t component_id,
     nuecs_archetype_data_t **previous
 );
 nu_result_t nuecs_archetype_link_if_previous(
@@ -45,29 +46,5 @@ nu_result_t nuecs_archetype_find_component_index(
     uint32_t component_id, 
     uint32_t *index
 );
-
-// nu_result_t nuecs_archetype_find_component_index(
-//     const nuecs_archetype_data_t *archetype, 
-//     uint32_t component_id,
-//     uint32_t *index
-// );
-// nu_result_t nuecs_archetype_add_entity(
-//     nuecs_archetype_data_t *archetype, 
-//     const nuecs_component_data_t **components,
-//     const nuecs_component_data_ptr_t *components_data,
-//     uint32_t component_count,
-//     nuecs_entity_entry_t *entity
-// );
-// nu_result_t nuecs_archetype_remove_entity(
-//     nuecs_entity_entry_t *entity
-// );
-// nu_result_t nuecs_archetype_new_system(
-//     nuecs_archetype_data_t *archetype, 
-//     nuecs_system_data_t *system
-// );
-// nu_result_t nuecs_archetype_transfer(
-//     nuecs_entity_entry_t *entity,
-//     nuecs_archetype_data_t *dst
-// );
 
 #endif

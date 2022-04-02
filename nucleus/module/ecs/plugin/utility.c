@@ -1,15 +1,17 @@
 #include <nucleus/module/ecs/plugin/utility.h>
 
 nu_result_t nuecs_sanatize_components(
-    nuecs_component_data_t **in_components,
+    nuecs_component_t *in_components,
     uint32_t in_component_count,
-    nuecs_component_data_t **components,
+    uint32_t *components,
     uint32_t *component_count
 )
 {
     /* copy list */
     for (uint32_t i = 0; i < in_component_count; i++) {
-        components[i] = in_components[i];
+        uint32_t id; 
+        NU_HANDLE_GET_ID(in_components[i], id);
+        components[i] = id;
     }
     *component_count = in_component_count;
     /* TODO: remove duplicated components */

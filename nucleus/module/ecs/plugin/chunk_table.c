@@ -1,14 +1,14 @@
-#include <nucleus/module/ecs/plugin/archetype_table.h>
+#include <nucleus/module/ecs/plugin/chunk_table.h>
 
 #include <nucleus/module/ecs/plugin/chunk.h>
 #include <nucleus/module/ecs/plugin/query.h>
 
-nu_result_t nuecs_archetype_table_initialize(nu_array_t *table)
+nu_result_t nuecs_chunk_table_initialize(nu_array_t *table)
 {
     nu_array_allocate(table, sizeof(nuecs_archetype_entry_data_t));
     return NU_SUCCESS;
 }
-nu_result_t nuecs_archetype_table_terminate(nu_array_t table)
+nu_result_t nuecs_chunk_table_terminate(nu_array_t table)
 {
     nuecs_archetype_entry_data_t *data;
     uint32_t size;
@@ -31,7 +31,7 @@ nu_result_t nuecs_archetype_table_terminate(nu_array_t table)
     nu_array_free(table);
     return NU_SUCCESS;
 }
-static nu_result_t nuecs_archetype_table_get_entry(
+static nu_result_t nuecs_chunk_table_get_entry(
     nu_array_t table, 
     const nuecs_archetype_data_t *archetype,
     nuecs_archetype_entry_data_t **entry
@@ -62,7 +62,7 @@ static bool find_chunk_not_full(const void *user, const void *object) {
     nuecs_chunk_data_t *data = *(nuecs_chunk_data_t**)object;
     return data->size < NUECS_CHUNK_SIZE;
 }
-nu_result_t nuecs_archetype_table_get_next_chunk(
+nu_result_t nuecs_chunk_table_get_next_chunk(
     nu_array_t table,
     nu_indexed_array_t queries,
     nuecs_archetype_data_t *archetype,
@@ -71,7 +71,7 @@ nu_result_t nuecs_archetype_table_get_next_chunk(
 {
     /* find archetype entry */
     nuecs_archetype_entry_data_t *entry;
-    nuecs_archetype_table_get_entry(table, archetype, &entry);
+    nuecs_chunk_table_get_entry(table, archetype, &entry);
     
     /* create new archetype entry */
     if (entry->archetype == NULL) {
