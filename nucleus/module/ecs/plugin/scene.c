@@ -324,7 +324,7 @@ nu_result_t nuecs_scene_save_json(
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to serialize scene.");
 
     /* save json */
-    result = nu_json_save_file(json, filename, false);
+    result = nu_json_save_file(json, filename, true);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to save scene.");
 
 cleanup0:
@@ -360,12 +360,12 @@ nu_result_t nuecs_scene_debug_entities(nuecs_scene_data_t *scene)
     uint32_t entity_count;
     nu_array_get_data(scene->entities, &entities, &entity_count);
     nu_info(NUECS_LOGGER_NAME, "|----SCENE----|");
-    nu_info(NUECS_LOGGER_NAME, "|VERSION|INDEX|");
+    nu_info(NUECS_LOGGER_NAME, "|VERSION|INDEX|   UUID   |");
     for (uint32_t i = 0; i < entity_count; i++) {
         if (entities[i].chunk) {
-            nu_info(NUECS_LOGGER_NAME, "|%07X|%05d|", entities[i].version, i);
+            nu_info(NUECS_LOGGER_NAME, "|%07X|%05d|%010u|", entities[i].version, i, NUECS_ENTITY_BUILD_ID(entities[i].version, i));
         } else {
-            nu_info(NUECS_LOGGER_NAME, "|-------|-----|", i);
+            nu_info(NUECS_LOGGER_NAME, "|-------|-----|----------|", i);
         }
     }
 

@@ -328,12 +328,12 @@ static nu_result_t on_start(void)
     nuecs_entity_t e0, e1, e2, e3, e4;
     nuecs_entity_t *entities[] = {&e0, &e1, &e2, &e3, &e4};
 
-    for (uint32_t i = 0; i < 5; i++) {
+    for (uint32_t i = 0; i < 5000; i++) {
         nuecs_entity_info_t info1;
         info1.components      = (nuecs_component_t[]){position_component, velocity_component};
         info1.component_data  = (nuecs_component_data_ptr_t[]){&position, &velocity};
         info1.component_count = 2;
-        nuecs_entity_create(scene, &info1, entities[i]);
+        nuecs_entity_create(scene, &info1, entities[i % 5]);
     }
 
     transform_t transform;
@@ -346,35 +346,35 @@ static nu_result_t on_start(void)
 
     /////////// QUERY ////////////
 
-    nuecs_query_info_t qinfo;
-    nuecs_query_t query;
-    qinfo.component_count = 1;
-    qinfo.components      = &position_component;
-    qinfo.type            = NUECS_QUERY_TYPE_CHUNK;
-    NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
+    // nuecs_query_info_t qinfo;
+    // nuecs_query_t query;
+    // qinfo.component_count = 1;
+    // qinfo.components      = &position_component;
+    // qinfo.type            = NUECS_QUERY_TYPE_CHUNK;
+    // NU_ASSERT(nuecs_query_create(scene, &qinfo, &query) == NU_SUCCESS);
 
     // nuecs_archetype_debug_archetypes();
-    nuecs_scene_debug_entities(scene);
+    // nuecs_scene_debug_entities(scene);
 
-    nuecs_query_chunks_t chunks;
-    nu_info("test", "before");
-    NU_ASSERT(nuecs_query_resolve_chunks(scene, query, &chunks) == NU_SUCCESS);
-    for (uint32_t i = 0; i < chunks.view_count; i++) {
-        nu_info("test", "view %d/%d with %d entities", i+1, chunks.view_count, chunks.views[i].count);
-        const position_t *positions = (const position_t*)chunks.views[i].components[0];
-        for (uint32_t j = 0; j < chunks.views[i].count; j++) {
-            nu_info("query", "%lf", positions[j].pos[0]);
-        }
-    }
+    // nuecs_query_chunks_t chunks;
+    // nu_info("test", "before");
+    // NU_ASSERT(nuecs_query_resolve_chunks(scene, query, &chunks) == NU_SUCCESS);
+    // for (uint32_t i = 0; i < chunks.view_count; i++) {
+    //     nu_info("test", "view %d/%d with %d entities", i+1, chunks.view_count, chunks.views[i].count);
+    //     const position_t *positions = (const position_t*)chunks.views[i].components[0];
+    //     for (uint32_t j = 0; j < chunks.views[i].count; j++) {
+    //         nu_info("query", "%lf", positions[j].pos[0]);
+    //     }
+    // }
 
     // nuecs_scene_save_json(scene, "$ROOT/mywork.json");
     // nuecs_scene_clear(scene);
     // nuecs_scene_debug_entities(scene);
     // nuecs_scene_load_json(scene, "$ROOT/mywork.json");
-    nuecs_scene_clear(scene);
-    nuecs_scene_load_json(scene, "$ROOT/new.json");
-    nuecs_scene_clear(scene);
-    nuecs_scene_save_json(scene, "$ROOT/new2.json");
+    // nuecs_scene_clear(scene);
+    // nuecs_scene_load_json(scene, "$ROOT/new.json");
+    // nuecs_scene_clear(scene);
+    nuecs_scene_save_json(scene, "$ROOT/save.json");
 
     // nuecs_scene_debug_entities(scene);
 
