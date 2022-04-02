@@ -33,14 +33,14 @@ nu_result_t nuecs_component_manager_terminate(nuecs_component_manager_data_t *ma
     nuecs_component_data_t *components; uint32_t component_count;
     nu_array_get_data(manager->components, &components, &component_count);
     for (uint32_t i = 0; i < component_count; i++) {
-        nu_string_free(components[i].name);
+        nuecs_component_terminate(&components[i]);
     }
     nu_array_free(manager->components);
 
     return NU_SUCCESS;
 }
 
-nu_result_t nuecs_component_manager_record_component(
+nu_result_t nuecs_component_manager_build_component(
     nuecs_component_manager_data_t *manager,
     const nuecs_component_info_t *info, 
     nuecs_component_t *handle
@@ -50,17 +50,8 @@ nu_result_t nuecs_component_manager_record_component(
     nuecs_component_data_t *component;
     nu_array_push(manager->components, NULL);
     nu_array_get_last(manager->components, &component);
-
-    /* initialize */
-    nu_string_allocate_cstr(&component->name, info->name);
-    component->size             = info->size;
-    component->serialize_json   = info->serialize_json;
-    component->deserialize_json = info->deserialize_json; 
-
-    /* set the handle */
     NU_HANDLE_SET_ID(*handle, nu_array_get_size(manager->components) - 1);
-
-    return NU_SUCCESS;
+    return nuecs_component_initialize(component, info);
 }
 nu_result_t nuecs_component_manager_find_component_by_name(
     nuecs_component_manager_data_t *manager,

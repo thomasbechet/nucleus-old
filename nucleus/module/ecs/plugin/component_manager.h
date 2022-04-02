@@ -14,7 +14,7 @@ typedef struct {
 nu_result_t nuecs_component_manager_initialize(nuecs_component_manager_data_t *manager);
 nu_result_t nuecs_component_manager_terminate(nuecs_component_manager_data_t *manager);
 
-nu_result_t nuecs_component_manager_record_component(
+nu_result_t nuecs_component_manager_build_component(
     nuecs_component_manager_data_t *manager,
     const nuecs_component_info_t *info, 
     nuecs_component_t *handle

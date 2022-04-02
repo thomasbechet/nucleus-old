@@ -22,7 +22,7 @@ nu_result_t nuecs_scene_progress_impl(nuecs_scene_t scene)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_register_system_impl(nuecs_scene_t scene, const nuecs_system_info_t* info, nuecs_system_t* handle)
+nu_result_t nuecs_scene_set_pipeline_impl(nuecs_scene_t scene, nuecs_pipeline_t pipeline)
 {
     return NU_SUCCESS;
 }
@@ -89,7 +89,16 @@ nu_result_t nuecs_entity_remap_impl(nuecs_transfer_context_t context, nuecs_enti
     return NU_SUCCESS;
 }
 /* component interface */
-nu_result_t nuecs_component_record_impl(const nuecs_component_info_t* info, nuecs_component_t* handle)
+nu_result_t nuecs_component_build_impl(const nuecs_component_info_t* info, nuecs_component_t* handle)
+{
+    return NU_SUCCESS;
+}
+/* system interface */
+nu_result_t nuecs_system_build_impl(nuecs_system_info_t* info, nuecs_system_t* handle)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_system_compile_pipeline_impl(nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle)
 {
     return NU_SUCCESS;
 }

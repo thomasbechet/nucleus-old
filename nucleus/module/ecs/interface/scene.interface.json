@@ -27,11 +27,10 @@
             ]    
         },
         {
-            "name": "register_system",
+            "name": "set_pipeline",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" },
-                { "type": "const nuecs_system_info_t*", "name": "info" },
-                { "type": "nuecs_system_t*", "name": "handle" }
+                { "type": "nuecs_pipeline_t", "name": "pipeline" }
             ]
         },
         {

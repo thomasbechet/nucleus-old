@@ -36,9 +36,9 @@
     {
         return _nuecs_scene_interface.progress(scene);
     }
-    nu_result_t nuecs_scene_register_system(nuecs_scene_t scene, const nuecs_system_info_t* info, nuecs_system_t* handle)
+    nu_result_t nuecs_scene_set_pipeline(nuecs_scene_t scene, nuecs_pipeline_t pipeline)
     {
-        return _nuecs_scene_interface.register_system(scene, info, handle);
+        return _nuecs_scene_interface.set_pipeline(scene, pipeline);
     }
     nu_result_t nuecs_scene_serialize_json_object(nuecs_scene_t scene, nu_json_object_t object)
     {
@@ -115,9 +115,22 @@
     {
         return nu_module_get_interface(module, NUECS_COMPONENT_INTERFACE_NAME, &_nuecs_component_interface);
     }
-    nu_result_t nuecs_component_record(const nuecs_component_info_t* info, nuecs_component_t* handle)
+    nu_result_t nuecs_component_build(const nuecs_component_info_t* info, nuecs_component_t* handle)
     {
-        return _nuecs_component_interface.record(info, handle);
+        return _nuecs_component_interface.build(info, handle);
+    }
+    nuecs_system_interface_t _nuecs_system_interface;
+    nu_result_t nuecs_system_interface_load(nu_module_t module)
+    {
+        return nu_module_get_interface(module, NUECS_SYSTEM_INTERFACE_NAME, &_nuecs_system_interface);
+    }
+    nu_result_t nuecs_system_build(nuecs_system_info_t* info, nuecs_system_t* handle)
+    {
+        return _nuecs_system_interface.build(info, handle);
+    }
+    nu_result_t nuecs_system_compile_pipeline(nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle)
+    {
+        return _nuecs_system_interface.compile_pipeline(info, handle);
     }
     nu_result_t nuecs_interface_load_all(nu_module_t module)
     {
@@ -127,6 +140,7 @@
         result &= nuecs_query_interface_load(module);
         result &= nuecs_entity_interface_load(module);
         result &= nuecs_component_interface_load(module);
+        result &= nuecs_system_interface_load(module);
         return result;
     }
 #else
@@ -140,6 +154,8 @@
     nu_result_t nuecs_entity_interface_load(nu_module_t module);
     extern nuecs_component_interface_t _nuecs_component_interface;
     nu_result_t nuecs_component_interface_load(nu_module_t module);
+    extern nuecs_system_interface_t _nuecs_system_interface;
+    nu_result_t nuecs_system_interface_load(nu_module_t module);
     nu_result_t nuecs_interface_load_all(nu_module_t module);
 #endif
 

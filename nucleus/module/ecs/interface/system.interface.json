@@ -1,0 +1,20 @@
+{
+    "namespace": "nuecs",
+    "name": "system",
+    "functions": [
+        {
+            "name": "build",
+            "parameters": [
+                { "type": "nuecs_system_info_t*", "name": "info" },
+                { "type": "nuecs_system_t*", "name": "handle" }
+            ]
+        },
+        {
+            "name": "compile_pipeline",
+            "parameters": [
+                { "type": "nuecs_pipeline_info_t*", "name": "info" },
+                { "type": "nuecs_pipeline_t*", "name": "handle" }
+            ]
+        }
+    ]
+}

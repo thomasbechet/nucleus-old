@@ -23,7 +23,7 @@ typedef struct {
     nu_result_t (*destroy)(nuecs_scene_t);
     nu_result_t (*clear)(nuecs_scene_t);
     nu_result_t (*progress)(nuecs_scene_t);
-    nu_result_t (*register_system)(nuecs_scene_t, const nuecs_system_info_t*, nuecs_system_t*);
+    nu_result_t (*set_pipeline)(nuecs_scene_t, nuecs_pipeline_t);
     nu_result_t (*serialize_json_object)(nuecs_scene_t, nu_json_object_t);
     nu_result_t (*deserialize_json_object)(nuecs_scene_t, nu_json_object_t);
     nu_result_t (*save_json)(nuecs_scene_t, const char*);
@@ -54,8 +54,15 @@ typedef struct {
 #define NUECS_COMPONENT_INTERFACE_NAME "nuecs_component_interface"
 
 typedef struct {
-    nu_result_t (*record)(const nuecs_component_info_t*, nuecs_component_t*);
+    nu_result_t (*build)(const nuecs_component_info_t*, nuecs_component_t*);
 } nuecs_component_interface_t;
+
+#define NUECS_SYSTEM_INTERFACE_NAME "nuecs_system_interface"
+
+typedef struct {
+    nu_result_t (*build)(nuecs_system_info_t*, nuecs_system_t*);
+    nu_result_t (*compile_pipeline)(nuecs_pipeline_info_t*, nuecs_pipeline_t*);
+} nuecs_system_interface_t;
 
 
 /* plugin */

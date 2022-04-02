@@ -17,20 +17,6 @@ nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene)
-{
-    nuecs_entity_data_t *entities; uint32_t entity_count;
-    nu_array_get_data(scene->entities, &entities, &entity_count);
-    for (uint32_t i = 0; i < entity_count; i++) {
-        if (entities[i].chunk) {
-            nuecs_entity_t handle;
-            NU_HANDLE_SET_ID(handle, NUECS_ENTITY_BUILD_ID(entities[i].version, i));
-            nuecs_entity_destroy(scene, handle);
-        }
-    }
-
-    return NU_SUCCESS;
-}
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
 {
     /* allocate resources */
@@ -63,6 +49,20 @@ nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
     nu_array_free(scene->free_indices);
     nu_array_free(scene->entities);
     nu_array_free(scene->entities_to_delete);
+
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene)
+{
+    nuecs_entity_data_t *entities; uint32_t entity_count;
+    nu_array_get_data(scene->entities, &entities, &entity_count);
+    for (uint32_t i = 0; i < entity_count; i++) {
+        if (entities[i].chunk) {
+            nuecs_entity_t handle;
+            NU_HANDLE_SET_ID(handle, NUECS_ENTITY_BUILD_ID(entities[i].version, i));
+            nuecs_entity_destroy(scene, handle);
+        }
+    }
 
     return NU_SUCCESS;
 }

@@ -4,14 +4,15 @@
 #include <nucleus/module/ecs/module/definition.h>
 #include <nucleus/module/ecs/module/implementation.h>
 
-static const uint32_t interface_count = 6;
+static const uint32_t interface_count = 7;
 static const char *interfaces[] = {
     NU_PLUGIN_INTERFACE_NAME, 
     NUECS_ARCHETYPE_INTERFACE_NAME, 
     NUECS_SCENE_INTERFACE_NAME, 
     NUECS_QUERY_INTERFACE_NAME, 
     NUECS_ENTITY_INTERFACE_NAME, 
-    NUECS_COMPONENT_INTERFACE_NAME
+    NUECS_COMPONENT_INTERFACE_NAME, 
+    NUECS_SYSTEM_INTERFACE_NAME
 };
 
 static const uint32_t plugin_count = 1;
@@ -69,7 +70,7 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->destroy = nuecs_scene_destroy_impl;
         i->clear = nuecs_scene_clear_impl;
         i->progress = nuecs_scene_progress_impl;
-        i->register_system = nuecs_scene_register_system_impl;
+        i->set_pipeline = nuecs_scene_set_pipeline_impl;
         i->serialize_json_object = nuecs_scene_serialize_json_object_impl;
         i->deserialize_json_object = nuecs_scene_deserialize_json_object_impl;
         i->save_json = nuecs_scene_save_json_impl;
@@ -100,7 +101,14 @@ nu_result_t nu_module_interface(const char *name, void *interface)
     } else if (NU_MATCH(name, NUECS_COMPONENT_INTERFACE_NAME)) {
         nuecs_component_interface_t *i = (nuecs_component_interface_t*)interface;
         
-        i->record = nuecs_component_record_impl;
+        i->build = nuecs_component_build_impl;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_SYSTEM_INTERFACE_NAME)) {
+        nuecs_system_interface_t *i = (nuecs_system_interface_t*)interface;
+        
+        i->build = nuecs_system_build_impl;
+        i->compile_pipeline = nuecs_system_compile_pipeline_impl;
 
         return NU_SUCCESS;
     }

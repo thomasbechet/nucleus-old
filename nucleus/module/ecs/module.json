@@ -9,7 +9,8 @@
         "nucleus/module/ecs/interface/scene.interface.json",
         "nucleus/module/ecs/interface/query.interface.json",
         "nucleus/module/ecs/interface/entity.interface.json",
-        "nucleus/module/ecs/interface/component.interface.json"
+        "nucleus/module/ecs/interface/component.interface.json",
+        "nucleus/module/ecs/interface/system.interface.json"
     ],
     "definition_headers": [
         "nucleus/module/ecs/plugin/types_public.h"
@@ -39,6 +40,10 @@
         },
         {
             "path": "nucleus/module/ecs/interface/component.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/module/ecs/interface/system.interface.json",
             "generate_loader": true
         }
     ],
