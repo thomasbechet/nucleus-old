@@ -175,3 +175,8 @@ uint32_t nu_array_remove(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const 
     }
     return count;
 }
+bool nu_array_has(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *value)
+{
+    uint32_t dummy;
+    return nu_array_find_index(array, cmp_pfn, value, &dummy);
+}

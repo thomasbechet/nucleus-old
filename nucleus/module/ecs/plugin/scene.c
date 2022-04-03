@@ -4,6 +4,7 @@
 #include <nucleus/module/ecs/plugin/utility.h>
 #include <nucleus/module/ecs/plugin/query.h>
 #include <nucleus/module/ecs/plugin/entity.h>
+#include <nucleus/module/ecs/plugin/system.h>
 #include <nucleus/module/ecs/plugin/logger.h>
 
 nu_result_t nuecs_scene_create(nuecs_scene_manager_data_t *manager, nuecs_scene_t *handle)
@@ -62,6 +63,28 @@ nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene)
             NU_HANDLE_SET_ID(handle, NUECS_ENTITY_BUILD_ID(entities[i].version, i));
             nuecs_entity_destroy(scene, handle);
         }
+    }
+
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_scene_set_pipeline(
+    nuecs_system_manager_data_t *system_manager,
+    nuecs_scene_data_t *scene,
+    nuecs_pipeline_t pipeline_handle
+)
+{
+    /* get pipeline */
+    uint32_t pipeline_id;
+    NU_HANDLE_GET_ID(pipeline_handle, pipeline_id);
+    nuecs_pipeline_data_t *pipeline;
+    nu_array_get(system_manager->pipelines, pipeline_id, &pipeline);
+
+    /* iterate over systems */
+    nuecs_system_t *systems; uint32_t system_count;
+    nu_array_get_data(pipeline->systems, &systems, &system_count);
+    for (uint32_t i = 0; i < system_count; i++) {
+        
+        
     }
 
     return NU_SUCCESS;

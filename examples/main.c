@@ -263,7 +263,6 @@ static nu_result_t on_start(void)
     nu_module_t ecs_module;
     NU_ASSERT(nu_module_load("$MODULE/nucleus-ecs", &ecs_module) == NU_SUCCESS);
     nu_plugin_require(ecs_module, NUECS_SCENE_PLUGIN_NAME);
-    nuecs_interface_load_all(ecs_module);
 
     /* load sdf interface */
     nu_module_t renderer_module = nu_renderer_get_module();
@@ -276,8 +275,7 @@ static nu_result_t on_start(void)
     NU_ASSERT(nulua_plugin_load("$ENGINE/script/spectator.lua", &plugin));
 
     /* load ecs interface */
-    nuecs_scene_t scene;
-    NU_ASSERT(nuecs_scene_create(&scene) == NU_SUCCESS);
+    nuecs_interface_load_all(ecs_module);
 
     /**************/
     /* COMPONENTS */
@@ -340,6 +338,16 @@ static nu_result_t on_start(void)
         info.callback        = update_velocity_callback;
         nuecs_system_build(&info, &update_velocity_system);
     }
+    nuecs_system_t update_velocity_system2;
+    {
+        nuecs_system_info_t info;
+        memset(&info, 0, sizeof(nuecs_system_info_t));
+        info.name            = "update_velocity2";
+        info.components      = &velocity_component;
+        info.component_count = 1;
+        info.callback        = update_velocity_callback;
+        nuecs_system_build(&info, &update_velocity_system2);
+    }
 
     nuecs_pipeline_t pipeline;
     {
@@ -348,18 +356,24 @@ static nu_result_t on_start(void)
             .dependencies = NULL,
             .dependency_count = 0
         };
+        nuecs_pipeline_node_t n1 = {
+            .system = update_velocity_system2,
+            .dependencies = &n0,
+            .dependency_count = 1
+        };
 
         nuecs_pipeline_info_t info = {
-            .targets = &n0, 
+            .targets = &n1, 
             .target_count = 1
         };
         nuecs_system_compile_pipeline(&info, &pipeline);
     }
 
-    /***********/
+    /*********/
     /* SCENE */
-    /***********/
+    /*********/
 
+    nuecs_scene_t scene;
     nuecs_scene_create(&scene);
     nuecs_scene_load_json(scene, "$ROOT/save.json");
     nuecs_scene_set_pipeline(scene, pipeline);

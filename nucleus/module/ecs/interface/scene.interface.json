@@ -21,17 +21,17 @@
             ]
         },
         {
-            "name": "progress",
-            "parameters": [
-                { "type": "nuecs_scene_t", "name": "scene" }
-            ]    
-        },
-        {
             "name": "set_pipeline",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" },
                 { "type": "nuecs_pipeline_t", "name": "pipeline" }
             ]
+        },
+        {
+            "name": "progress",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" }
+            ]    
         },
         {
             "name": "serialize_json_object",

@@ -11,10 +11,10 @@ typedef struct {
 
 typedef struct {
     uint32_t data;
-} nuecs_pipeline_comment_data_t;
+} nuecs_pipeline_command_data_t;
 
 typedef struct {
-    nu_array_t commands;
+    nu_array_t systems;
 } nuecs_pipeline_data_t;
 
 nu_result_t nuecs_system_initialize(

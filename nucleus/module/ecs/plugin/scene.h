@@ -5,6 +5,7 @@
 #include <nucleus/module/ecs/plugin/archetype.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
 #include <nucleus/module/ecs/plugin/scene_manager.h>
+#include <nucleus/module/ecs/plugin/system_manager.h>
 
 typedef struct {
     nuecs_archetype_data_t *archetype;
@@ -27,6 +28,11 @@ nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene);
+nu_result_t nuecs_scene_set_pipeline(
+    nuecs_system_manager_data_t *system_manager,
+    nuecs_scene_data_t *scene,
+    nuecs_pipeline_t pipeline
+);
 nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene);
 nu_result_t nuecs_scene_serialize_json_object(
     nuecs_component_manager_data_t *manager, 

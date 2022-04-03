@@ -43,7 +43,7 @@ nu_result_t nuecs_scene_progress_impl(nuecs_scene_t handle)
 }
 nu_result_t nuecs_scene_set_pipeline_impl(nuecs_scene_t scene, nuecs_pipeline_t pipeline)
 {
-    return NU_SUCCESS;
+    return nuecs_scene_set_pipeline(&_module.systems, (nuecs_scene_data_t*)scene, pipeline);
 }
 nu_result_t nuecs_scene_serialize_json_object_impl(nuecs_scene_t scene, nu_json_object_t object)
 {
