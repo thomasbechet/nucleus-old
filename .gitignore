@@ -2,4 +2,4 @@ bin/
 build/
 libs/
 .vscode/*
-scripts/module/*
+tools/module/*

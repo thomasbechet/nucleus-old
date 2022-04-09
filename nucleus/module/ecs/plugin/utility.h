@@ -12,4 +12,6 @@ nu_result_t nuecs_sanatize_components(
 
 bool nuecs_is_subset(const uint32_t *a, uint32_t ac, const uint32_t *b, uint32_t bc);
 
+uint8_t nuecs_next_version(uint8_t *a);
+
 #endif

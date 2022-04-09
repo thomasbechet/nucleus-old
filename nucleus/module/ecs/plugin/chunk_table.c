@@ -3,57 +3,63 @@
 #include <nucleus/module/ecs/plugin/chunk.h>
 #include <nucleus/module/ecs/plugin/query.h>
 
-nu_result_t nuecs_chunk_table_initialize(nu_array_t *table)
+nu_result_t nuecs_chunk_table_initialize(nuecs_chunk_table_t *table)
 {
-    nu_array_allocate(table, sizeof(nuecs_archetype_entry_data_t));
+    nu_array_allocate(&table->slots, sizeof(nuecs_archetype_slot_t));
     return NU_SUCCESS;
 }
-nu_result_t nuecs_chunk_table_terminate(nu_array_t table)
+nu_result_t nuecs_chunk_table_terminate(nuecs_chunk_table_t *table)
 {
-    nuecs_archetype_entry_data_t *data;
-    uint32_t size;
-    nu_array_get_data(table, &data, &size);
-    for (uint32_t i = 0; i < size; i++) {
-        if (data[i].archetype) {
+    nuecs_archetype_slot_t *slots; uint32_t slot_count;
+    nu_array_get_data(table->slots, &slots, &slot_count);
+    for (uint32_t i = 0; i < slot_count; i++) {
+
+        /* check if the slot is used */
+        if (slots[i].archetype) {
+
             /* free chunks */
-            nuecs_chunk_data_t **chunks; 
-            uint32_t chunk_count;
-            nu_array_get_data(data[i].chunks, &chunks, &chunk_count);
+            nuecs_chunk_data_t **chunks; uint32_t chunk_count;
+            nu_array_get_data(slots[i].chunks, &chunks, &chunk_count);
             for (uint32_t j = 0; j < chunk_count; j++) {
                 nuecs_chunk_free(chunks[j]);
             }
-            nu_array_free(data[i].chunks);
+            nu_array_free(slots[i].chunks);
 
             /* free query notification list */
-            nu_array_free(data[i].notify_queries);
+            nu_array_free(slots[i].notify_queries);
         }
     }
-    nu_array_free(table);
+    
+    /* free resources */
+    nu_array_free(table->slots);
+
     return NU_SUCCESS;
 }
-static nu_result_t nuecs_chunk_table_get_entry(
-    nu_array_t table, 
+static nu_result_t nuecs_chunk_table_get_slot(
+    nuecs_chunk_table_t *table, 
     const nuecs_archetype_data_t *archetype,
-    nuecs_archetype_entry_data_t **entry
+    nuecs_archetype_slot_t **slot
 )
 {
     /* resize table if needed */
-    uint32_t table_size = nu_array_get_size(table);
-    if (archetype->index >= table_size) {
+    uint32_t slot_count = nu_array_get_size(table->slots);
+    if (archetype->index >= slot_count) {
+
         /* resize table */
         uint32_t new_size = archetype->index + 1;
-        nu_array_resize(table, new_size);
+        nu_array_resize(table->slots, new_size);
+
         /* initialize new items */
-        nuecs_archetype_entry_data_t *data;
-        nu_array_get_data(table, &data, NULL);
-        for (uint32_t i = table_size; i < new_size; i++) {
-            data[i].archetype = NULL;
+        nuecs_archetype_slot_t *slots;
+        nu_array_get_data(table->slots, &slots, NULL);
+        for (uint32_t i = slot_count; i < new_size; i++) {
+            slots[i].archetype = NULL;
         }
     }
 
-    /* get the archetype entry */
-    nuecs_archetype_entry_data_t *pentry; nu_array_get(table, archetype->index, &pentry);
-    *entry = pentry;
+    /* return the archetype slot */
+    nuecs_archetype_slot_t *pslot; nu_array_get(table->slots, archetype->index, &pslot);
+    *slot = pslot;
 
     return NU_SUCCESS;
 }
@@ -63,48 +69,51 @@ static bool find_chunk_not_full(const void *user, const void *object) {
     return data->size < NUECS_CHUNK_SIZE;
 }
 nu_result_t nuecs_chunk_table_get_next_chunk(
-    nu_array_t table,
+    nuecs_chunk_table_t *table,
     nu_indexed_array_t queries,
     nuecs_archetype_data_t *archetype,
-    nuecs_chunk_data_t **output
+    nuecs_chunk_data_t **output,
+    bool *new_chunk
 )
 {
-    /* find archetype entry */
-    nuecs_archetype_entry_data_t *entry;
-    nuecs_chunk_table_get_entry(table, archetype, &entry);
+    /* find archetype slot */
+    nuecs_archetype_slot_t *slot;
+    nuecs_chunk_table_get_slot(table, archetype, &slot);
     
-    /* create new archetype entry */
-    if (entry->archetype == NULL) {
+    /* create new archetype slot */
+    if (slot->archetype == NULL) {
         
-        /* initialize new entry */
-        entry->archetype = archetype;
-        nu_array_allocate(&entry->chunks, sizeof(nuecs_chunk_data_t*));
-        nu_array_allocate(&entry->notify_queries, sizeof(nuecs_query_data_t*));
+        /* initialize new slot */
+        slot->archetype = archetype;
+        nu_array_allocate(&slot->chunks, sizeof(nuecs_chunk_data_t*));
+        nu_array_allocate(&slot->notify_queries, sizeof(nuecs_query_data_t*));
 
         /* try to subscribe queries */
         nuecs_query_data_t **queries_data;
         uint32_t query_count;
         nu_indexed_array_get_data(queries, &queries_data, &query_count);
         for (uint32_t i = 0; i < query_count; i++) {
-            nuecs_query_try_subscribe(queries_data[i], entry);
+            nuecs_query_try_subscribe(queries_data[i], slot);
         }
     }
 
     /* find free chunk */
     nuecs_chunk_data_t *chunk = NULL;
     uint32_t chunk_index;
-    if (nu_array_find_index(entry->chunks, find_chunk_not_full, NULL, &chunk_index)) {
-        nuecs_chunk_data_t **pchunk; nu_array_get(entry->chunks, chunk_index, &pchunk);
+    if (nu_array_find_index(slot->chunks, find_chunk_not_full, NULL, &chunk_index)) {
+        nuecs_chunk_data_t **pchunk; nu_array_get(slot->chunks, chunk_index, &pchunk);
         chunk = *pchunk;
+        *new_chunk = false;
     } else {
         /* create new chunk */
         nuecs_chunk_allocate(archetype, &chunk);
-        nu_array_push(entry->chunks, &chunk);
+        nu_array_push(slot->chunks, &chunk);
+        *new_chunk = true;
 
         /* notify queries */
         nuecs_query_data_t **notify_queries;
         uint32_t notify_query_count;
-        nu_array_get_data(entry->notify_queries, &notify_queries, &notify_query_count);
+        nu_array_get_data(slot->notify_queries, &notify_queries, &notify_query_count);
         for (uint32_t i = 0; i < notify_query_count; i++) {
             nuecs_query_notify_new_chunk(notify_queries[i], chunk);
         }

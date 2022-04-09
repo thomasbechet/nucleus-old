@@ -1,5 +1,7 @@
 #include <nucleus/module/utils/command/command.h>
 
+#include <nucleus/module/utils/command/types_public.h>
+
 #define NUUTILS_LOGGER_NAME "COMMAND"
 
 typedef struct {

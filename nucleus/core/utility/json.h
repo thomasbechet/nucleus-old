@@ -6,6 +6,8 @@
 #include <nucleus/core/utility/result.h>
 #include <nucleus/core/utility/math/math.h>
 
+#define NU_JSON_ITERATOR_INITIALIZE NU_NULL_HANDLE
+
 NU_DECLARE_HANDLE(nu_json_t);
 NU_DECLARE_HANDLE(nu_json_value_t);
 NU_DECLARE_HANDLE(nu_json_object_t);

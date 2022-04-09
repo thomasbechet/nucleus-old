@@ -4,13 +4,14 @@
 #include <nucleus/module/ecs/module/definition.h>
 #include <nucleus/module/ecs/module/implementation.h>
 
-static const uint32_t interface_count = 7;
+static const uint32_t interface_count = 8;
 static const char *interfaces[] = {
     NU_PLUGIN_INTERFACE_NAME, 
     NUECS_ARCHETYPE_INTERFACE_NAME, 
     NUECS_SCENE_INTERFACE_NAME, 
     NUECS_QUERY_INTERFACE_NAME, 
     NUECS_ENTITY_INTERFACE_NAME, 
+    NUECS_ENTITY_REFERENCE_INTERFACE_NAME, 
     NUECS_COMPONENT_INTERFACE_NAME, 
     NUECS_SYSTEM_INTERFACE_NAME
 };
@@ -69,8 +70,8 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->create = nuecs_scene_create_impl;
         i->destroy = nuecs_scene_destroy_impl;
         i->clear = nuecs_scene_clear_impl;
-        i->progress = nuecs_scene_progress_impl;
         i->set_pipeline = nuecs_scene_set_pipeline_impl;
+        i->progress = nuecs_scene_progress_impl;
         i->serialize_json_object = nuecs_scene_serialize_json_object_impl;
         i->deserialize_json_object = nuecs_scene_deserialize_json_object_impl;
         i->save_json = nuecs_scene_save_json_impl;
@@ -83,7 +84,7 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         
         i->create = nuecs_query_create_impl;
         i->destroy = nuecs_query_destroy_impl;
-        i->resolve_chunks = nuecs_query_resolve_chunks_impl;
+        i->resolve = nuecs_query_resolve_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_ENTITY_INTERFACE_NAME)) {
@@ -93,15 +94,23 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->destroy = nuecs_entity_destroy_impl;
         i->add_component = nuecs_entity_add_component_impl;
         i->remove_component = nuecs_entity_remove_component_impl;
-        i->serialize_json_object = nuecs_entity_serialize_json_object_impl;
-        i->deserialize_json_object = nuecs_entity_deserialize_json_object_impl;
-        i->remap = nuecs_entity_remap_impl;
+        i->get_component = nuecs_entity_get_component_impl;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_ENTITY_REFERENCE_INTERFACE_NAME)) {
+        nuecs_entity_reference_interface_t *i = (nuecs_entity_reference_interface_t*)interface;
+        
+        i->bind = nuecs_entity_reference_bind_impl;
+        i->resolve = nuecs_entity_reference_resolve_impl;
+        i->serialize_json_object = nuecs_entity_reference_serialize_json_object_impl;
+        i->deserialize_json_object = nuecs_entity_reference_deserialize_json_object_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_COMPONENT_INTERFACE_NAME)) {
         nuecs_component_interface_t *i = (nuecs_component_interface_t*)interface;
         
         i->build = nuecs_component_build_impl;
+        i->find = nuecs_component_find_impl;
 
         return NU_SUCCESS;
     } else if (NU_MATCH(name, NUECS_SYSTEM_INTERFACE_NAME)) {

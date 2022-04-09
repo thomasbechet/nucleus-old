@@ -19,6 +19,11 @@ nu_result_t nuecs_component_manager_build_component(
     const nuecs_component_info_t *info, 
     nuecs_component_t *handle
 );
+nu_result_t nuecs_component_manager_find_component(
+    nuecs_component_manager_data_t *manager,
+    const char *name,
+    nuecs_component_t *handle
+);
 nu_result_t nuecs_component_manager_find_component_by_name(
     nuecs_component_manager_data_t *manager,
     const char *name,

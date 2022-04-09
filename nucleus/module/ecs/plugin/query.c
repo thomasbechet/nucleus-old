@@ -21,13 +21,12 @@ nu_result_t nuecs_query_create(nuecs_scene_data_t *scene, const nuecs_query_info
     nu_indexed_array_add(scene->queries, &query, &query->id);
     nuecs_query_initialize(query, info);
 
-    /* try to subscribe to archetype entries */
-    nuecs_archetype_entry_data_t *entries;
-    uint32_t entry_count;
-    nu_array_get_data(scene->chunk_table, &entries, &entry_count);
-    for (uint32_t i = 0; i < entry_count; i++) {
-        if (entries[i].archetype) {
-            nuecs_query_try_subscribe(query, &entries[i]);
+    /* try to subscribe to archetype slots */
+    nuecs_archetype_slot_t *slots; uint32_t slot_count;
+    nu_array_get_data(scene->chunk_table.slots, &slots, &slot_count);
+    for (uint32_t i = 0; i < slot_count; i++) {
+        if (slots[i].archetype) {
+            nuecs_query_try_subscribe(query, &slots[i]);
         }
     }
 
@@ -48,7 +47,7 @@ nu_result_t nuecs_query_destroy(nuecs_scene_data_t *scene, nuecs_query_t handle)
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_resolve_chunks(nuecs_scene_data_t *scene, nuecs_query_data_t *query, nuecs_query_chunks_t *chunks)
+nu_result_t nuecs_query_resolve(nuecs_scene_data_t *scene, nuecs_query_data_t *query, nuecs_query_result_t *result)
 {
     (void)scene;
     /* update chunks */
@@ -64,15 +63,15 @@ nu_result_t nuecs_query_resolve_chunks(nuecs_scene_data_t *scene, nuecs_query_da
     }
 
     /* return views */
-    chunks->views      = views_data;
-    chunks->view_count = view_count;
+    result->chunks = views_data;
+    result->count  = view_count;
 
     return NU_SUCCESS;
 }
 nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_info_t *info)
 {
     /* allocate memory */
-    nu_array_allocate(&query->archetype_entries, sizeof(nuecs_archetype_entry_data_t*));
+    nu_array_allocate(&query->archetype_slots, sizeof(nuecs_archetype_slot_t*)); /* FIXME: INVALID !!! */
     nu_array_allocate(&query->chunk_views, sizeof(nuecs_query_chunk_view_t));
     nu_array_allocate(&query->chunk_references, sizeof(nuecs_chunk_data_t*));
 
@@ -89,11 +88,10 @@ nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_
 nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
 {
     /* unsubscribe */
-    nuecs_archetype_entry_data_t **entries;
-    uint32_t entry_count;
-    nu_array_get_data(query->archetype_entries, &entries, &entry_count);
-    for (uint32_t i = 0; i < entry_count; i++) {
-        nu_array_remove(entries[i]->notify_queries, query_reference_equals, &query);
+    nuecs_archetype_slot_t **slots; uint32_t slot_count;
+    nu_array_get_data(query->archetype_slots, &slots, &slot_count);
+    for (uint32_t i = 0; i < slot_count; i++) {
+        nu_array_remove(slots[i]->notify_queries, query_reference_equals, &query);
     }
 
     /* free views */
@@ -106,7 +104,7 @@ nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
 
     /* free resources */
     nu_free(query->component_ids);
-    nu_array_free(query->archetype_entries);
+    nu_array_free(query->archetype_slots);
     nu_array_free(query->chunk_views);
     nu_array_free(query->chunk_references);
 
@@ -134,20 +132,20 @@ nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_
  
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_try_subscribe(nuecs_query_data_t *query, nuecs_archetype_entry_data_t *entry)
+nu_result_t nuecs_query_try_subscribe(nuecs_query_data_t *query, nuecs_archetype_slot_t *slot)
 {
     /* add the query to the notify list */
-    const nuecs_archetype_data_t *archetype = entry->archetype;
+    const nuecs_archetype_data_t *archetype = slot->archetype;
     if (nuecs_is_subset(query->component_ids, query->component_count, archetype->component_ids, archetype->component_count)) {
         
-        /* add references to entry and query (both directions) */
-        nu_array_push(entry->notify_queries, &query);
-        nu_array_push(query->archetype_entries, &entry);
+        /* add references to the slot and query (both directions) */
+        nu_array_push(slot->notify_queries, &query);
+        nu_array_push(query->archetype_slots, &slot);
 
         /* create existing chunk views */
         nuecs_chunk_data_t **chunks;
         uint32_t chunk_count;
-        nu_array_get_data(entry->chunks, &chunks, &chunk_count);
+        nu_array_get_data(slot->chunks, &chunks, &chunk_count);
         for (uint32_t i = 0; i < chunk_count; i++) {
             nuecs_query_notify_new_chunk(query, chunks[i]);
         }

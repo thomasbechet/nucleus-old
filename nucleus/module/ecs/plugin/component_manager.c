@@ -53,6 +53,19 @@ nu_result_t nuecs_component_manager_build_component(
     NU_HANDLE_SET_ID(*handle, nu_array_get_size(manager->components) - 1);
     return nuecs_component_initialize(component, info);
 }
+nu_result_t nuecs_component_manager_find_component(
+    nuecs_component_manager_data_t *manager,
+    const char *name,
+    nuecs_component_t *handle
+)
+{
+    uint32_t component_id;
+    nu_result_t result = nuecs_component_manager_find_component_by_name(manager, name, NULL, &component_id);
+    if (result == NU_SUCCESS) {
+        NU_HANDLE_SET_ID(*handle, component_id);
+    }
+    return result;
+}
 nu_result_t nuecs_component_manager_find_component_by_name(
     nuecs_component_manager_data_t *manager,
     const char *name,
@@ -136,6 +149,7 @@ nu_result_t nuecs_component_manager_find_previous_archetype(
     /* find previous archetype */
     nuecs_archetype_data_t *previous;
     nuecs_archetype_find_previous(current, component_id, &previous);
+    *archetype = previous;
 
     /* not found */
     if (!previous) {

@@ -6,7 +6,7 @@
 
 typedef struct {
     nu_string_t name;
-    nuecs_system_callback_pfn_t callback;
+    // nuecs_system_callback_pfn_t callback;
 } nuecs_system_data_t;
 
 typedef struct {

@@ -169,10 +169,10 @@ typedef struct {
 } score_t;
 
 typedef struct {
-    nuecs_entity_t next;
-    nuecs_entity_t prev;
-    nuecs_entity_t parent;
-    nuecs_entity_t child;
+    nuecs_entity_reference_t next;
+    nuecs_entity_reference_t prev;
+    nuecs_entity_reference_t parent;
+    nuecs_entity_reference_t child;
     bool dirty;
 } transform_t;
 
@@ -222,25 +222,21 @@ static nu_result_t serialize_score(nuecs_component_data_ptr_t data, nuecs_serial
 static nu_result_t serialize_transform(nuecs_component_data_ptr_t data, nuecs_serialization_context_t ctx, nu_json_object_t json)
 {
     transform_t *transform = (transform_t*)data;
-    nuecs_entity_serialize_json_object(transform->child, ctx, json, "child");
-    nuecs_entity_serialize_json_object(transform->next, ctx, json, "next");
-    nuecs_entity_serialize_json_object(transform->parent, ctx, json, "parent");
-    nuecs_entity_serialize_json_object(transform->prev, ctx, json, "prev");
+    nuecs_entity_reference_serialize_json_object(&transform->child, ctx, json, "child");
+    nuecs_entity_reference_serialize_json_object(&transform->next, ctx, json, "next");
+    nuecs_entity_reference_serialize_json_object(&transform->parent, ctx, json, "parent");
+    nuecs_entity_reference_serialize_json_object(&transform->prev, ctx, json, "prev");
     nu_json_object_put_bool(json, "dirty", transform->dirty);
     return NU_SUCCESS;
 }
 static nu_result_t deserialize_transform(nuecs_component_data_ptr_t data, nuecs_deserialization_context_t ctx, nu_json_object_t json)
 {
     transform_t *transform = (transform_t*)data;
-    nuecs_entity_deserialize_json_object(ctx, json, "child", &transform->child);
-    nuecs_entity_deserialize_json_object(ctx, json, "next", &transform->next);
-    nuecs_entity_deserialize_json_object(ctx, json, "parent", &transform->parent);
-    nuecs_entity_deserialize_json_object(ctx, json, "prev", &transform->prev);
+    nuecs_entity_reference_deserialize_json_object(ctx, json, "child", &transform->child);
+    nuecs_entity_reference_deserialize_json_object(ctx, json, "next", &transform->next);
+    nuecs_entity_reference_deserialize_json_object(ctx, json, "parent", &transform->parent);
+    nuecs_entity_reference_deserialize_json_object(ctx, json, "prev", &transform->prev);
     nu_json_value_as_bool(nu_json_object_get_by_name(json, "dirty"), &transform->dirty);
-    return NU_SUCCESS;
-}
-static nu_result_t update_velocity_callback(nuecs_scene_t scene, nuecs_query_t query)
-{
     return NU_SUCCESS;
 }
 
@@ -330,23 +326,35 @@ static nu_result_t on_start(void)
 
     nuecs_system_t update_velocity_system;
     {
-        nuecs_system_info_t info;
-        memset(&info, 0, sizeof(nuecs_system_info_t));
-        info.name            = "update_velocity";
-        info.components      = &velocity_component;
-        info.component_count = 1;
-        info.callback        = update_velocity_callback;
-        nuecs_system_build(&info, &update_velocity_system);
+        // nuecs_component_t components[] = { 
+        //     velocity_component };
+        // nuecs_component_access_t access[] = { 
+        //     NUECS_COMPONENT_ACCESS_READ };
+        // nuecs_system_info_t info = {
+        //     .name            = "update_velocity",
+        //     .type            = NUECS_SYSTEM_TYPE_ENTITY_UPDATE,
+        //     .component_count = 1,
+        //     .components      = components,
+        //     .access          = access,
+        //     .callback        = update_velocity_callback
+        // };
+        // nuecs_system_build(&info, &update_velocity_system);
     }
     nuecs_system_t update_velocity_system2;
     {
-        nuecs_system_info_t info;
-        memset(&info, 0, sizeof(nuecs_system_info_t));
-        info.name            = "update_velocity2";
-        info.components      = &velocity_component;
-        info.component_count = 1;
-        info.callback        = update_velocity_callback;
-        nuecs_system_build(&info, &update_velocity_system2);
+        // nuecs_component_t components[] = { 
+        //     velocity_component };
+        // nuecs_component_access_t access[] = { 
+        //     NUECS_COMPONENT_ACCESS_READ };
+        // nuecs_system_info_t info = {
+        //     .name            = "update_velocity2",
+        //     .type            = NUECS_SYSTEM_TYPE_ENTITY_UPDATE,
+        //     .component_count = 1,
+        //     .components      = components,
+        //     .access          = access,
+        //     .callback        = update_velocity_callback
+        // };
+        // nuecs_system_build(&info, &update_velocity_system2);
     }
 
     nuecs_pipeline_t pipeline;
@@ -375,10 +383,81 @@ static nu_result_t on_start(void)
 
     nuecs_scene_t scene;
     nuecs_scene_create(&scene);
-    nuecs_scene_load_json(scene, "$ROOT/save.json");
+    
+    nuecs_entity_t teste;
+    {
+        nuecs_entity_info_t info;
+        info.component_count = 1;
+        info.components = &velocity_component;
+        velocity_t vel = { .velocity = {1, 2, 3} };
+        nuecs_component_data_ptr_t data[] = {&vel};
+        info.component_data = data;
+        nuecs_entity_create(scene, &info, &teste);
+    }
+
+    {
+        nuecs_entity_t entity;
+        transform_t transform = {
+            .child = NU_NULL_HANDLE,
+            .next = NU_NULL_HANDLE,
+            .parent = NU_NULL_HANDLE,
+            .prev = NU_NULL_HANDLE,
+            .dirty = false
+        };
+        nuecs_entity_reference_bind(scene, &transform.child, teste);
+        nuecs_component_data_ptr_t data[] = {
+            &transform
+        };
+        nuecs_entity_info_t info = {
+            .components = &transform_component,
+            .component_count = 1,
+            .component_data = data
+        };
+        nuecs_entity_create(scene, &info, &entity);
+
+        velocity_t vel = { .velocity = {0, 1, 2} };
+        nuecs_entity_add_component(scene, &entity, velocity_component, &vel);
+        // nuecs_entity_remove_component(scene, &entity, velocity_component);
+
+        for (uint32_t i = 0; i < 100; i++) {
+            nuecs_entity_info_t infos;
+            infos.component_count = 0;
+            nuecs_entity_t ent;
+            nuecs_entity_create(scene, &infos, &ent);
+        }
+
+        nuecs_entity_reference_t ref = NU_NULL_HANDLE;
+        nuecs_entity_reference_bind(scene, &ref, entity);
+
+        nuecs_entity_t e;
+        nuecs_entity_reference_resolve(scene, &ref, &e);
+
+        // nuecs_entity_destroy(scene, entity);
+    }
+
+    // nuecs_scene_save_json(scene, "$ROOT/save.json");
+    nuecs_scene_clear(scene);
+    // nuecs_scene_load_json(scene, "$ROOT/save.json");
     nuecs_scene_set_pipeline(scene, pipeline);
 
-    nu_context_request_stop();
+    nuecs_query_info_t qinfo;
+    qinfo.components = &transform_component;
+    qinfo.component_count = 1;
+    nuecs_query_t query;
+    nuecs_query_create(scene, &qinfo, &query);
+    nuecs_query_result_t result;
+    nuecs_query_resolve(scene, query, &result);
+    for (uint32_t i = 0; i < result.count; i++) {
+        nu_info("test", "%d", result.chunks[i].count);
+        // transform_t *transforms = (transform_t*)transforms;
+        // for (uint32_t j = 0; j < chunks.views[i].count; j++) {
+        //     nuecs_entity_t child;
+        //     nuecs_entity_reference_resolve(scene, &transforms[j].child, &child);
+        //     /* TODO: ajouter les fonctions de lecture de composants / get etc... */
+        // }
+    }
+
+    // nu_context_request_stop();
 
     /* load texture */
     int width, height, channel;
