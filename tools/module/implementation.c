@@ -107,11 +107,12 @@ nu_result_t nuecs_component_find_impl(const char* name, nuecs_component_t* handl
     return NU_SUCCESS;
 }
 /* system interface */
-nu_result_t nuecs_system_build_impl(nuecs_system_info_t* info, nuecs_system_t* handle)
+nu_result_t nuecs_system_build_impl(const nuecs_system_info_t* info, nuecs_system_t* handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_system_compile_pipeline_impl(nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle)
+/* pipeline interface */
+nu_result_t nuecs_pipeline_build_impl(const nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle)
 {
     return NU_SUCCESS;
 }

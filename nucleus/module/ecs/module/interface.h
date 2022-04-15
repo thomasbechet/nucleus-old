@@ -30,8 +30,8 @@ typedef nu_result_t (*__nuecs_entity_reference_serialize_json_object_pfn_t)(nuec
 typedef nu_result_t (*__nuecs_entity_reference_deserialize_json_object_pfn_t)(nuecs_deserialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_reference_t* handle);
 typedef nu_result_t (*__nuecs_component_build_pfn_t)(const nuecs_component_info_t* info, nuecs_component_t* handle);
 typedef nu_result_t (*__nuecs_component_find_pfn_t)(const char* name, nuecs_component_t* handle);
-typedef nu_result_t (*__nuecs_system_build_pfn_t)(nuecs_system_info_t* info, nuecs_system_t* handle);
-typedef nu_result_t (*__nuecs_system_compile_pipeline_pfn_t)(nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle);
+typedef nu_result_t (*__nuecs_system_build_pfn_t)(const nuecs_system_info_t* info, nuecs_system_t* handle);
+typedef nu_result_t (*__nuecs_pipeline_build_pfn_t)(const nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle);
 
 /* loader */
 #ifdef NUECS_LOADER_IMPLEMENTATION
@@ -134,14 +134,22 @@ typedef nu_result_t (*__nuecs_system_compile_pipeline_pfn_t)(nuecs_pipeline_info
         return result;
     }
     __nuecs_system_build_pfn_t __nuecs_system_build = NULL;
-    __nuecs_system_compile_pipeline_pfn_t __nuecs_system_compile_pipeline = NULL;
     nu_result_t nuecs_system_interface_load(nu_module_t module)
     {
         nuecs_system_interface_t interface;
         nu_result_t result = nu_module_get_interface(module, NUECS_SYSTEM_INTERFACE_NAME, &interface);
         if (result == NU_SUCCESS) {
             __nuecs_system_build = interface.build;
-            __nuecs_system_compile_pipeline = interface.compile_pipeline;
+        }
+        return result;
+    }
+    __nuecs_pipeline_build_pfn_t __nuecs_pipeline_build = NULL;
+    nu_result_t nuecs_pipeline_interface_load(nu_module_t module)
+    {
+        nuecs_pipeline_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_PIPELINE_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            __nuecs_pipeline_build = interface.build;
         }
         return result;
     }
@@ -155,6 +163,7 @@ typedef nu_result_t (*__nuecs_system_compile_pipeline_pfn_t)(nuecs_pipeline_info
         result &= nuecs_entity_reference_interface_load(module);
         result &= nuecs_component_interface_load(module);
         result &= nuecs_system_interface_load(module);
+        result &= nuecs_pipeline_interface_load(module);
         return result;
     }
 #else
@@ -190,8 +199,9 @@ typedef nu_result_t (*__nuecs_system_compile_pipeline_pfn_t)(nuecs_pipeline_info
     extern __nuecs_component_find_pfn_t __nuecs_component_find;
     nu_result_t nuecs_component_interface_load(nu_module_t module);
     extern __nuecs_system_build_pfn_t __nuecs_system_build;
-    extern __nuecs_system_compile_pipeline_pfn_t __nuecs_system_compile_pipeline;
     nu_result_t nuecs_system_interface_load(nu_module_t module);
+    extern __nuecs_pipeline_build_pfn_t __nuecs_pipeline_build;
+    nu_result_t nuecs_pipeline_interface_load(nu_module_t module);
     nu_result_t nuecs_interface_load_all(nu_module_t module);
 #endif
 #define nuecs_archetype_debug_archetypes NU_IDENTITY(__nuecs_archetype_debug_archetypes)
@@ -220,6 +230,6 @@ typedef nu_result_t (*__nuecs_system_compile_pipeline_pfn_t)(nuecs_pipeline_info
 #define nuecs_component_build NU_IDENTITY(__nuecs_component_build)
 #define nuecs_component_find NU_IDENTITY(__nuecs_component_find)
 #define nuecs_system_build NU_IDENTITY(__nuecs_system_build)
-#define nuecs_system_compile_pipeline NU_IDENTITY(__nuecs_system_compile_pipeline)
+#define nuecs_pipeline_build NU_IDENTITY(__nuecs_pipeline_build)
 
 #endif

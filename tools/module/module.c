@@ -4,7 +4,7 @@
 #include <nucleus/module/ecs/module/definition.h>
 #include <nucleus/module/ecs/module/implementation.h>
 
-static const uint32_t interface_count = 8;
+static const uint32_t interface_count = 9;
 static const char *interfaces[] = {
     NU_PLUGIN_INTERFACE_NAME, 
     NUECS_ARCHETYPE_INTERFACE_NAME, 
@@ -13,7 +13,8 @@ static const char *interfaces[] = {
     NUECS_ENTITY_INTERFACE_NAME, 
     NUECS_ENTITY_REFERENCE_INTERFACE_NAME, 
     NUECS_COMPONENT_INTERFACE_NAME, 
-    NUECS_SYSTEM_INTERFACE_NAME
+    NUECS_SYSTEM_INTERFACE_NAME, 
+    NUECS_PIPELINE_INTERFACE_NAME
 };
 
 static const uint32_t plugin_count = 1;
@@ -117,7 +118,12 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         nuecs_system_interface_t *i = (nuecs_system_interface_t*)interface;
         
         i->build = nuecs_system_build_impl;
-        i->compile_pipeline = nuecs_system_compile_pipeline_impl;
+
+        return NU_SUCCESS;
+    } else if (NU_MATCH(name, NUECS_PIPELINE_INTERFACE_NAME)) {
+        nuecs_pipeline_interface_t *i = (nuecs_pipeline_interface_t*)interface;
+        
+        i->build = nuecs_pipeline_build_impl;
 
         return NU_SUCCESS;
     }

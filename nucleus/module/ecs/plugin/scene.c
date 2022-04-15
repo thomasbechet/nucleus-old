@@ -6,6 +6,7 @@
 #include <nucleus/module/ecs/plugin/entity.h>
 #include <nucleus/module/ecs/plugin/entity_reference.h>
 #include <nucleus/module/ecs/plugin/system.h>
+#include <nucleus/module/ecs/plugin/pipeline.h>
 #include <nucleus/module/ecs/plugin/logger.h>
 
 nu_result_t nuecs_scene_create(nuecs_scene_manager_data_t *manager, nuecs_scene_t *handle)
@@ -28,12 +29,25 @@ nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
     nu_indexed_array_allocate(&scene->queries, sizeof(nuecs_query_data_t*));
     nu_array_allocate(&scene->references, sizeof(nuecs_entity_reference_data_t));
     nu_array_allocate(&scene->free_references, sizeof(uint32_t));
-    scene->next_reference_version = 0;
+    scene->next_pipeline              = NU_NULL_HANDLE;
+    scene->pipeline_instance.pipeline = NU_NULL_HANDLE;
+    scene->next_reference_version     = 0;
+    scene->destroy                    = false;
 
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
 {
+    /* clear scene */
+
+    /* terminate pipeline */
+    if (scene->pipeline_instance.pipeline) {
+
+        /* */
+
+        nuecs_pipeline_instance_terminate(&scene->pipeline_instance);
+    }
+
     /* queries */
     nuecs_query_data_t **queries;
     uint32_t query_count;
@@ -44,9 +58,6 @@ nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
     }
     nu_indexed_array_free(scene->queries);
 
-    /* entities */
-    nuecs_scene_clear(scene);
-
     /* free other resources */
     nuecs_chunk_table_terminate(&scene->chunk_table);
     nu_array_free(scene->entities_to_delete);
@@ -56,11 +67,10 @@ nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene)
+nu_result_t nuecs_scene_clear(nuecs_component_manager_data_t *manager, nuecs_scene_data_t *scene)
 {
     nuecs_chunk_data_t **chunks; uint32_t chunk_count;
     nu_array_get_data(scene->chunks, &chunks, &chunk_count);
-    nu_info("chunk_count", "%d", chunk_count);
     for (uint32_t i = 0; i < chunk_count; i++) {
         nuecs_entity_t handles[NUECS_CHUNK_SIZE];
         uint8_t size = chunks[i]->size;
@@ -68,7 +78,7 @@ nu_result_t nuecs_scene_clear(nuecs_scene_data_t *scene)
             nuecs_chunk_get_entity(chunks[i], j, &handles[j]);
         }
         for (uint8_t j = 0; j < size; j++) {
-            nuecs_entity_destroy(scene, handles[j]);
+            nuecs_entity_destroy(manager, scene, handles[j]);
         }
     }
 
@@ -80,31 +90,82 @@ nu_result_t nuecs_scene_set_pipeline(
     nuecs_pipeline_t pipeline_handle
 )
 {
-    /* get pipeline */
-    uint32_t pipeline_id;
-    NU_HANDLE_GET_ID(pipeline_handle, pipeline_id);
-    nuecs_pipeline_data_t *pipeline;
-    nu_array_get(system_manager->pipelines, pipeline_id, &pipeline);
-
-    /* iterate over systems */
-    nuecs_system_t *systems; uint32_t system_count;
-    nu_array_get_data(pipeline->systems, &systems, &system_count);
-    for (uint32_t i = 0; i < system_count; i++) {
-        
-        
-    }
-
+    scene->next_pipeline = pipeline_handle;
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_progress(nuecs_scene_data_t *scene)
+static nu_result_t nuecs_scene_flush(
+    nuecs_system_manager_data_t *system_manager,
+    nuecs_component_manager_data_t *component_manager,
+    nuecs_scene_data_t *scene
+)
 {
     /* remove entities */
     nuecs_entity_t *entities; uint32_t entity_count;
     nu_array_get_data(scene->entities_to_delete, &entities, &entity_count);
     for (uint32_t i = 0; i < entity_count; i++) {
-        nuecs_entity_destroy(scene, entities[i]);
+        // nuecs_entity_remove()
+        nuecs_entity_destroy(component_manager, scene, entities[i]);
     }
     nu_array_clear(scene->entities_to_delete);
+    return NU_SUCCESS;
+}
+static nu_result_t nuecs_scene_destory_store_clean(
+    nuecs_component_manager_data_t *component_manager,
+    nuecs_scene_data_t *scene
+)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_scene_progress(
+    nuecs_system_manager_data_t *system_manager,
+    nuecs_component_manager_data_t *component_manager,
+    nuecs_scene_data_t *scene
+)
+{
+    /* check new pipeline */
+    if (scene->next_pipeline) {
+
+        /* terminate old pipeline instance */
+        if (scene->pipeline_instance.pipeline) {
+
+            /* stop stage */
+            nuecs_pipeline_instance_stop_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+
+            /* terminate pipeline */
+            nuecs_pipeline_instance_terminate(&scene->pipeline_instance);
+        }
+
+        /* get pipeline */
+        uint32_t pipeline_id;
+        NU_HANDLE_GET_ID(scene->next_pipeline, pipeline_id);
+        nuecs_pipeline_data_t *pipeline;
+        nu_array_get(system_manager->pipelines, pipeline_id, &pipeline);
+
+        /* create new pipeline instance */
+        nuecs_pipeline_instance_initialize(&scene->pipeline_instance, pipeline);
+
+        /* reset next pipeline */
+        scene->next_pipeline = NU_NULL_HANDLE;
+
+        /* start stage */
+        nuecs_pipeline_instance_start_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+    }
+
+    /* run only if pipeline */
+    if (scene->pipeline_instance.pipeline) {
+        
+        /* load stage */
+        nuecs_pipeline_instance_load_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+
+        /* update stage */
+        nuecs_pipeline_instance_update_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+
+        /* clean entities */
+        nuecs_scene_flush(system_manager, component_manager, scene);
+
+        /* store stage */
+        nuecs_pipeline_instance_store_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+    }
 
     return NU_SUCCESS;
 }
@@ -167,20 +228,24 @@ nu_result_t nuecs_scene_serialize_json_object(
             nuecs_component_data_t *component;
             nu_array_get(manager->components, id, &component);
 
-            /* put component data */
-            nu_json_object_t j_component;
-            nu_json_object_put_empty_object(j_components, nu_string_get_cstr(component->name), &j_component);
+            /* check if the component is serializable */
+            if (component->flags & NUECS_COMPONENT_FLAG_SERIALIZABLE) {
 
-            if (component->serialize_json) {
+                /* put component data */
+                nu_json_object_t j_component;
+                nu_json_object_put_empty_object(j_components, nu_string_get_cstr(component->name), &j_component);
 
-                /* find component data */
-                uint32_t index;
-                nuecs_archetype_find_component_index(archetype, id, &index);
-                nuecs_component_data_ptr_t data;
-                nuecs_chunk_get_component(*chunk, entities[i], index, &data);
+                if (component->serialize_json) {
 
-                /* serialize component */
-                component->serialize_json(data, (nuecs_serialization_context_t)&serialization, j_component);
+                    /* find component data */
+                    uint32_t index;
+                    nuecs_archetype_find_component_index(archetype, id, &index);
+                    nuecs_component_data_ptr_t data;
+                    nuecs_chunk_get_component(*chunk, entities[i], index, &data);
+
+                    /* serialize component */
+                    component->serialize_json(data, (nuecs_serialization_context_t)&serialization, j_component);
+                }
             }
         }
 
@@ -249,10 +314,13 @@ nu_result_t nuecs_scene_deserialize_json_object(
 
             /* find component id */
             uint32_t component_id;
+            nuecs_component_data_t *component;
             result = nuecs_component_manager_find_component_by_name(manager,
-                nu_json_object_iterator_get_name(j_components_iterator), NULL, &component_id);
+                nu_json_object_iterator_get_name(j_components_iterator), &component, &component_id);
             NU_CHECK(result == NU_SUCCESS, goto cleanup0, NUECS_LOGGER_NAME, "Failed to find component %s for entity %d.",
                 nu_json_object_iterator_get_name(j_components_iterator), id);
+            NU_CHECK(component->flags & NUECS_COMPONENT_FLAG_SERIALIZABLE, goto cleanup0, NUECS_LOGGER_NAME,
+                "Not serializable component found : %s.", nu_json_object_iterator_get_name(j_components_iterator));
             components[component_count++] = component_id;
         }
 

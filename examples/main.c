@@ -185,6 +185,35 @@ typedef struct {
 // }
 
 typedef struct {
+    nuecs_query_t player_query;
+} move_player_system_t;
+
+static nu_result_t move_player_initialize(void *state, nuecs_scene_t scene)
+{
+    move_player_system_t *system = (move_player_system_t*)state;
+    nuecs_component_t player_component;
+    nuecs_component_find("player", &player_component);
+    nuecs_query_info_t info = {
+        .exclude_component_count = 0,
+        .include_component_count = 1,
+        .include_components      = &player_component
+    };
+    nuecs_query_create(scene, &info, &system->player_query);
+    return NU_SUCCESS;
+}
+static nu_result_t move_player_terminate(void *state, nuecs_scene_t scene)
+{
+    move_player_system_t *system = (move_player_system_t*)state;
+    nuecs_query_destroy(scene, &system->player_query);
+    return NU_SUCCESS;
+}
+static nu_result_t move_player_invoke(void *state, nuecs_scene_t scene)
+{
+    move_player_system_t *system = (move_player_system_t*)state;
+    return NU_SUCCESS;
+}
+
+typedef struct {
     uint32_t id;
     uint32_t v;
 } stest;
@@ -324,57 +353,42 @@ static nu_result_t on_start(void)
     /* SYSTEMS */
     /***********/
 
-    nuecs_system_t update_velocity_system;
+    nuecs_system_t move_player_system;
     {
-        // nuecs_component_t components[] = { 
-        //     velocity_component };
-        // nuecs_component_access_t access[] = { 
-        //     NUECS_COMPONENT_ACCESS_READ };
-        // nuecs_system_info_t info = {
-        //     .name            = "update_velocity",
-        //     .type            = NUECS_SYSTEM_TYPE_ENTITY_UPDATE,
-        //     .component_count = 1,
-        //     .components      = components,
-        //     .access          = access,
-        //     .callback        = update_velocity_callback
-        // };
-        // nuecs_system_build(&info, &update_velocity_system);
+        nuecs_component_dependency_t dependency = {
+            .component = velocity_component,
+            .access = NUECS_COMPONENT_ACCESS_WRITE
+        };
+        nuecs_system_info_t info = {
+            .name             = "move_player",
+            .initialize       = move_player_initialize,
+            .terminate        = move_player_terminate,
+            .invoke           = move_player_invoke,
+            .state_size       = sizeof(move_player_system_t),
+            .dependency_count = 1,
+            .dependencies     = &dependency
+        };
+        nuecs_system_build(&info, &move_player_system);
     }
-    nuecs_system_t update_velocity_system2;
-    {
-        // nuecs_component_t components[] = { 
-        //     velocity_component };
-        // nuecs_component_access_t access[] = { 
-        //     NUECS_COMPONENT_ACCESS_READ };
-        // nuecs_system_info_t info = {
-        //     .name            = "update_velocity2",
-        //     .type            = NUECS_SYSTEM_TYPE_ENTITY_UPDATE,
-        //     .component_count = 1,
-        //     .components      = components,
-        //     .access          = access,
-        //     .callback        = update_velocity_callback
-        // };
-        // nuecs_system_build(&info, &update_velocity_system2);
-    }
+
+    /*************/
+    /* PIPELINES */
+    /*************/
 
     nuecs_pipeline_t pipeline;
     {
         nuecs_pipeline_node_t n0 = {
-            .system = update_velocity_system,
-            .dependencies = NULL,
+            .system           = move_player_system,
+            .stage            = NUECS_PIPELINE_STAGE_UPDATE,
+            .dependencies     = NULL,
             .dependency_count = 0
         };
-        nuecs_pipeline_node_t n1 = {
-            .system = update_velocity_system2,
-            .dependencies = &n0,
-            .dependency_count = 1
-        };
-
         nuecs_pipeline_info_t info = {
-            .targets = &n1, 
-            .target_count = 1
+            .name       = "main_pipeline",
+            .nodes      = &n0,
+            .node_count = 1 
         };
-        nuecs_system_compile_pipeline(&info, &pipeline);
+        nuecs_pipeline_build(&info, &pipeline);
     }
 
     /*********/
@@ -441,8 +455,10 @@ static nu_result_t on_start(void)
     nuecs_scene_set_pipeline(scene, pipeline);
 
     nuecs_query_info_t qinfo;
-    qinfo.components = &transform_component;
-    qinfo.component_count = 1;
+    qinfo.include_components      = &transform_component;
+    qinfo.include_component_count = 1;
+    qinfo.exclude_components      = NULL;
+    qinfo.exclude_component_count = 0;
     nuecs_query_t query;
     nuecs_query_create(scene, &qinfo, &query);
     nuecs_query_result_t result;

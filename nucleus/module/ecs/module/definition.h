@@ -68,9 +68,14 @@ typedef struct {
 #define NUECS_SYSTEM_INTERFACE_NAME "nuecs_system_interface"
 
 typedef struct {
-    nu_result_t (*build)(nuecs_system_info_t*, nuecs_system_t*);
-    nu_result_t (*compile_pipeline)(nuecs_pipeline_info_t*, nuecs_pipeline_t*);
+    nu_result_t (*build)(const nuecs_system_info_t*, nuecs_system_t*);
 } nuecs_system_interface_t;
+
+#define NUECS_PIPELINE_INTERFACE_NAME "nuecs_pipeline_interface"
+
+typedef struct {
+    nu_result_t (*build)(const nuecs_pipeline_info_t*, nuecs_pipeline_t*);
+} nuecs_pipeline_interface_t;
 
 
 /* plugin */

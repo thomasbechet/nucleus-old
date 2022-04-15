@@ -37,8 +37,9 @@ nu_result_t nuecs_entity_reference_deserialize_json_object_impl(nuecs_deserializ
 nu_result_t nuecs_component_build_impl(const nuecs_component_info_t* info, nuecs_component_t* handle);
 nu_result_t nuecs_component_find_impl(const char* name, nuecs_component_t* handle);
 /* system interface */
-nu_result_t nuecs_system_build_impl(nuecs_system_info_t* info, nuecs_system_t* handle);
-nu_result_t nuecs_system_compile_pipeline_impl(nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle);
+nu_result_t nuecs_system_build_impl(const nuecs_system_info_t* info, nuecs_system_t* handle);
+/* pipeline interface */
+nu_result_t nuecs_pipeline_build_impl(const nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle);
 /* scene plugin */
 nu_result_t nuecs_scene_plugin_initialize_impl(void);
 nu_result_t nuecs_scene_plugin_terminate_impl(void);

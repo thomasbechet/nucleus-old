@@ -1,6 +1,7 @@
 #include <nucleus/module/ecs/plugin/system_manager.h>
 
 #include <nucleus/module/ecs/plugin/system.h>
+#include <nucleus/module/ecs/plugin/pipeline.h>
 
 nu_result_t nuecs_system_manager_initialize(nuecs_system_manager_data_t *manager)
 {

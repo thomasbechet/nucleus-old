@@ -11,7 +11,8 @@
         "nucleus/module/ecs/interface/entity.interface.json",
         "nucleus/module/ecs/interface/entity.reference.interface.json",
         "nucleus/module/ecs/interface/component.interface.json",
-        "nucleus/module/ecs/interface/system.interface.json"
+        "nucleus/module/ecs/interface/system.interface.json",
+        "nucleus/module/ecs/interface/pipeline.interface.json"
     ],
     "definition_headers": [
         "nucleus/module/ecs/plugin/types_public.h"
@@ -43,6 +44,10 @@
         },
         {
             "path": "nucleus/module/ecs/interface/system.interface.json",
+            "generate_loader": true
+        },
+        {
+            "path": "nucleus/module/ecs/interface/pipeline.interface.json",
             "generate_loader": true
         }
     ],

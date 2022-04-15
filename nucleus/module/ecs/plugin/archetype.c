@@ -53,7 +53,8 @@ static nu_result_t archetype_link(nuecs_archetype_data_t *a, nuecs_archetype_dat
 nu_result_t nuecs_archetype_create_empty(nuecs_archetype_data_t **archetype)
 {
     nuecs_archetype_data_t *new = (nuecs_archetype_data_t*)nu_malloc(sizeof(nuecs_archetype_data_t));
-    new->component_count = 0;
+    new->component_count  = 0;
+    new->has_system_state = false;
     nu_array_allocate(&new->edges, sizeof(nuecs_archetype_edge_t));
     *archetype = new;
 
@@ -71,17 +72,22 @@ nu_result_t nuecs_archetype_create_next(
     nu_array_allocate(&new->edges, sizeof(nuecs_archetype_edge_t));
 
     /* copy info from current archetype */
-    new->component_count = current_archetype->component_count + 1;
-    new->component_ids   = (uint32_t*)nu_malloc(sizeof(uint32_t) * new->component_count);
-    new->data_sizes      = (uint32_t*)nu_malloc(sizeof(uint32_t) * new->component_count);
+    new->component_count  = current_archetype->component_count + 1;
+    new->component_ids    = (uint32_t*)nu_malloc(sizeof(uint32_t) * new->component_count);
+    new->data_sizes       = (uint32_t*)nu_malloc(sizeof(uint32_t) * new->component_count);
+    new->is_system_state  = (bool*)nu_malloc(sizeof(bool) * new->component_count);
+
     for (uint32_t i = 0; i < current_archetype->component_count; i++) {
-        new->component_ids[i] = current_archetype->component_ids[i];
-        new->data_sizes[i]    = current_archetype->data_sizes[i];
+        new->component_ids[i]   = current_archetype->component_ids[i];
+        new->data_sizes[i]      = current_archetype->data_sizes[i];
+        new->is_system_state[i] = current_archetype->is_system_state[i];
     }
     /* copy info from next component */
-    new->component_ids[current_archetype->component_count] = component_id;
-    new->data_sizes[current_archetype->component_count]    = component->size;
-    
+    new->component_ids[current_archetype->component_count]   = component_id;
+    new->data_sizes[current_archetype->component_count]      = component->size;
+    new->is_system_state[current_archetype->component_count] = (bool)(component->flags & NUECS_COMPONENT_FLAG_SYSTEM_STATE);
+    new->has_system_state = (current_archetype->has_system_state || new->is_system_state[current_archetype->component_count]);
+
     /* return */
     *archetype = new;
 
@@ -93,6 +99,7 @@ nu_result_t nuecs_archetype_destroy(nuecs_archetype_data_t *archetype)
     if (archetype->component_count > 0) {
         nu_free(archetype->component_ids);
         nu_free(archetype->data_sizes);
+        nu_free(archetype->is_system_state);
     }
     nu_free(archetype);
 

@@ -8,6 +8,8 @@ typedef struct {
     uint32_t component_count;
     uint32_t *data_sizes;
     uint32_t *component_ids;
+    bool *is_system_state;
+    bool has_system_state;
     uint32_t index;
 } nuecs_archetype_data_t;
 

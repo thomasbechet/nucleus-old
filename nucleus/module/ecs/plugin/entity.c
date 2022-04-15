@@ -41,7 +41,53 @@ nu_result_t nuecs_entity_create(
 
     return NU_SUCCESS;
 }
+static nu_result_t nuecs_entity_remove_components(
+    nuecs_component_manager_data_t *manager,
+    nuecs_scene_data_t *scene, 
+    nuecs_entity_t *handle,
+    uint32_t *component_ids,
+    uint32_t component_count
+)
+{
+    /* get chunk */
+    nuecs_chunk_data_t **pchunk;
+    nu_array_get(scene->chunks, NUECS_ENTITY_CHUNK(*handle), &pchunk);
+    nuecs_chunk_data_t *chunk = *pchunk;
+
+    /* find previous archetype */
+    nuecs_archetype_data_t *new_archetype = chunk->archetype;
+    for (uint32_t i = 0; i < component_count; i++) {
+        nuecs_archetype_data_t *previous_archetype;
+        nuecs_component_manager_find_previous_archetype(manager, chunk->archetype, component_ids[i], &previous_archetype);
+        new_archetype = previous_archetype;
+    }
+
+    /* get reference index and reset */
+    uint32_t reference_index;
+    nuecs_chunk_get_entity_reference(chunk, *handle, &reference_index);
+    nuecs_chunk_set_entity_reference(chunk, *handle, NUECS_ENTITY_REFERENCE_NONE);
+
+    /* find new chunk */
+    nuecs_chunk_data_t *new_chunk; bool is_new_chunk;
+    nuecs_chunk_table_get_next_chunk(&scene->chunk_table, scene->queries, new_archetype, &new_chunk, &is_new_chunk);
+    if (is_new_chunk) {
+        new_chunk->id = nu_array_get_size(scene->chunks);
+        nu_array_push(scene->chunks, &new_chunk);
+    }
+
+    /* update reference index */
+    if (reference_index != NUECS_ENTITY_REFERENCE_NONE) {
+        nuecs_entity_reference_data_t *reference;
+        nu_array_get(scene->references, reference_index, &reference);
+        reference->entity = *handle;
+        nuecs_chunk_set_entity_reference(new_chunk, *handle, reference_index);
+    }
+
+    /* transfer data */
+    return nuecs_chunk_transfer(chunk, new_chunk, handle);
+}
 nu_result_t nuecs_entity_destroy(
+    nuecs_component_manager_data_t *manager,
     nuecs_scene_data_t *scene, 
     nuecs_entity_t handle
 )
@@ -52,11 +98,22 @@ nu_result_t nuecs_entity_destroy(
     nu_array_get(scene->chunks, chunk_id, &pchunk);
     nuecs_chunk_data_t *chunk = *pchunk;
 
-    /* check entity */
-    if (!nuecs_chunk_check_entity(chunk, handle)) return NU_FAILURE;
+    /* check system state component */
+    if (chunk->archetype->has_system_state) {
 
-    /* remove entry */
-    return nuecs_chunk_remove(chunk, handle);
+        uint32_t components_to_remove[NUECS_MAX_COMPONENT_PER_ENTITY];
+        uint32_t component_count = 0;
+        for (uint32_t i = 0; i < chunk->archetype->component_count; i++) {
+            if (!chunk->archetype->is_system_state[i]) {
+                components_to_remove[component_count++] = chunk->archetype->component_ids[i];
+            }
+        }
+
+        return nuecs_entity_remove_components(manager, scene, &handle, components_to_remove, component_count);
+    } 
+
+    /* no state component, can be removed directly */
+    return nuecs_entity_remove(scene, handle);
 }
 nu_result_t nuecs_entity_add(
     nuecs_component_manager_data_t *manager,
@@ -204,35 +261,8 @@ nu_result_t nuecs_entity_remove_component(
     /* check entity has component */
     if (!archetype_has_component(chunk->archetype, component_id)) return NU_FAILURE;
 
-    /* find previous archetype */
-    nuecs_archetype_data_t *previous_archetype;
-    nuecs_component_manager_find_previous_archetype(manager, chunk->archetype, component_id, &previous_archetype);
-
-    /* find previous chunk */
-    nuecs_chunk_data_t *previous_chunk; bool new_chunk;
-    nuecs_chunk_table_get_next_chunk(&scene->chunk_table, scene->queries, previous_archetype, &previous_chunk, &new_chunk);
-    if (new_chunk) {
-        previous_chunk->id = nu_array_get_size(scene->chunks);
-        nu_array_push(scene->chunks, &previous_chunk);
-    }
-
-    /* get reference index and reset */
-    uint32_t reference_index;
-    nuecs_chunk_get_entity_reference(chunk, *handle, &reference_index);
-    nuecs_chunk_set_entity_reference(chunk, *handle, NUECS_ENTITY_REFERENCE_NONE);
-
-    /* transfer data */
-    nuecs_chunk_transfer(chunk, previous_chunk, handle);
-
-    /* update reference index */
-    if (reference_index != NUECS_ENTITY_REFERENCE_NONE) {
-        nuecs_entity_reference_data_t *reference;
-        nu_array_get(scene->references, reference_index, &reference);
-        reference->entity = *handle;
-        nuecs_chunk_set_entity_reference(previous_chunk, *handle, reference_index);
-    }
-
-    return NU_SUCCESS;
+    /* remove component */
+    return nuecs_entity_remove_components(manager, scene, handle, &component_id, 1);
 }
 nu_result_t nuecs_entity_get_component(
     nuecs_component_manager_data_t *manager,

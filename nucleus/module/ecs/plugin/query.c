@@ -12,14 +12,19 @@ static bool query_reference_equals(const void *user, const void *object)
 nu_result_t nuecs_query_create(nuecs_scene_data_t *scene, const nuecs_query_info_t *info, nuecs_query_t *handle)
 {
     /* sanitize components */
-    uint32_t components[NUECS_MAX_COMPONENT_PER_ENTITY];
-    uint32_t component_count;
-    nuecs_sanatize_components(info->components, info->component_count, components, &component_count);
+    uint32_t include_components[NUECS_MAX_COMPONENT_PER_ENTITY];
+    uint32_t include_component_count;
+    nuecs_sanatize_components(info->include_components, info->include_component_count, 
+        include_components, &include_component_count);
+    uint32_t exclude_components[NUECS_MAX_COMPONENT_PER_ENTITY];
+    uint32_t exclude_component_count;
+    nuecs_sanatize_components(info->exclude_components, info->exclude_component_count, 
+        exclude_components, &exclude_component_count);
 
     /* allocate query */
     nuecs_query_data_t *query = (nuecs_query_data_t*)nu_malloc(sizeof(nuecs_query_data_t));
     nu_indexed_array_add(scene->queries, &query, &query->id);
-    nuecs_query_initialize(query, info);
+    nuecs_query_initialize(query, include_components, include_component_count, exclude_components, exclude_component_count);
 
     /* try to subscribe to archetype slots */
     nuecs_archetype_slot_t *slots; uint32_t slot_count;
@@ -68,7 +73,13 @@ nu_result_t nuecs_query_resolve(nuecs_scene_data_t *scene, nuecs_query_data_t *q
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_info_t *info)
+nu_result_t nuecs_query_initialize(
+    nuecs_query_data_t *query, 
+    uint32_t *include_components, 
+    uint32_t include_component_count,
+    uint32_t *exclude_components,
+    uint32_t exclude_component_count
+)
 {
     /* allocate memory */
     nu_array_allocate(&query->archetype_slots, sizeof(nuecs_archetype_slot_t*)); /* FIXME: INVALID !!! */
@@ -76,11 +87,15 @@ nu_result_t nuecs_query_initialize(nuecs_query_data_t *query, const nuecs_query_
     nu_array_allocate(&query->chunk_references, sizeof(nuecs_chunk_data_t*));
 
     /* copy component ids */
-    query->component_count = info->component_count;
-    query->component_ids = (uint32_t*)nu_malloc(sizeof(info->component_count) * sizeof(uint32_t));
-    for (uint32_t i = 0; i < info->component_count; i++) {
-        uint32_t id = NU_HANDLE_GET_ID(info->components[i], id);
-        query->component_ids[i] = id;
+    query->include_component_count = include_component_count;
+    query->include_component_ids   = (uint32_t*)nu_malloc(sizeof(include_component_count) * sizeof(uint32_t));
+    for (uint32_t i = 0; i < include_component_count; i++) {
+        query->include_component_ids[i] = include_components[i];
+    }
+    query->exclude_component_count = exclude_component_count;
+    query->exclude_component_ids   = (uint32_t*)nu_malloc(sizeof(exclude_component_count) * sizeof(uint32_t));
+    for (uint32_t i = 0; i < exclude_component_count; i++) {
+        query->exclude_component_ids[i] = exclude_components[i];
     }
     
     return NU_SUCCESS;
@@ -103,7 +118,8 @@ nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
     }
 
     /* free resources */
-    nu_free(query->component_ids);
+    nu_free(query->include_component_ids);
+    nu_free(query->exclude_component_ids);
     nu_array_free(query->archetype_slots);
     nu_array_free(query->chunk_views);
     nu_array_free(query->chunk_references);
@@ -118,12 +134,12 @@ nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_
 
     /* recover allocated view */
     nuecs_query_chunk_view_t *view; nu_array_get_last(query->chunk_views, &view);
-    view->components = (nuecs_component_data_ptr_t*)nu_malloc(sizeof(nuecs_component_data_ptr_t) * query->component_count);
+    view->components = (nuecs_component_data_ptr_t*)nu_malloc(sizeof(nuecs_component_data_ptr_t) * query->include_component_count);
 
     /* setup component data ptrs */
-    for (uint32_t i = 0; i < query->component_count; i++) {
+    for (uint32_t i = 0; i < query->include_component_count; i++) {
         for (uint32_t j = 0; j < chunk->archetype->component_count; j++) {
-            if (query->component_ids[i] == chunk->archetype->component_ids[j]) {
+            if (query->include_component_ids[i] == chunk->archetype->component_ids[j]) {
                 view->components[i] = chunk->component_list_ptrs[j];
                 break;
             }
@@ -134,9 +150,43 @@ nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_
 }
 nu_result_t nuecs_query_try_subscribe(nuecs_query_data_t *query, nuecs_archetype_slot_t *slot)
 {
-    /* add the query to the notify list */
+    /* get archetype */
     const nuecs_archetype_data_t *archetype = slot->archetype;
-    if (nuecs_is_subset(query->component_ids, query->component_count, archetype->component_ids, archetype->component_count)) {
+
+    /* check include all components */
+    bool include_all = true;
+    for (uint32_t i = 0; i < query->include_component_count; i++) {
+        bool found = false;
+        for (uint32_t j = 0; j < archetype->component_count; j++) {
+            if (archetype->component_ids[j] == query->include_component_ids[j]) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) {
+            include_all = false;
+            break;
+        }
+    }
+
+    /* check exclude all components */
+    bool exclude_all = true;
+    for (uint32_t i = 0; i < query->exclude_component_count; i++) {
+        bool found = false;
+        for (uint32_t j = 0; j < archetype->component_count; j++) {
+            if (archetype->component_ids[j] == query->exclude_component_ids[j]) {
+                found = true;
+                break;
+            }
+        }
+        if (found) {
+            exclude_all = false;
+            break;
+        }
+    }
+
+    /* subscribe to the slot */
+    if (include_all && exclude_all) {
         
         /* add references to the slot and query (both directions) */
         nu_array_push(slot->notify_queries, &query);

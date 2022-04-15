@@ -6,6 +6,7 @@
 #include <nucleus/module/ecs/plugin/component_manager.h>
 #include <nucleus/module/ecs/plugin/system_manager.h>
 #include <nucleus/module/ecs/plugin/scene_manager.h>
+#include <nucleus/module/ecs/plugin/pipeline_manager.h>
 #include <nucleus/module/ecs/plugin/query.h>
 #include <nucleus/module/ecs/plugin/logger.h>
 #include <nucleus/module/ecs/plugin/system.h>
@@ -13,9 +14,10 @@
 #define NUECS_INVALID_SCENE_MESSAGE "Invalid scene."
 
 typedef struct {
-     nuecs_scene_manager_data_t scenes;
-     nuecs_component_manager_data_t components;
-     nuecs_system_manager_data_t systems;
+    nuecs_scene_manager_data_t scenes;
+    nuecs_component_manager_data_t components;
+    nuecs_system_manager_data_t systems;
+    nuecs_pipeline_manager_data_t pipelines;
 } nuecs_module_data_t;
 
 static nuecs_module_data_t _module;
@@ -36,7 +38,7 @@ nu_result_t nuecs_scene_destroy_impl(nuecs_scene_t handle)
 }
 nu_result_t nuecs_scene_clear_impl(nuecs_scene_t scene)
 {
-    return nuecs_scene_clear((nuecs_scene_data_t*)scene);
+    return nuecs_scene_clear(&_module.components, (nuecs_scene_data_t*)scene);
 }
 nu_result_t nuecs_scene_progress_impl(nuecs_scene_t handle)
 {
@@ -86,7 +88,7 @@ nu_result_t nuecs_entity_create_impl(nuecs_scene_t scene_handle, const nuecs_ent
 }
 nu_result_t nuecs_entity_destroy_impl(nuecs_scene_t scene, nuecs_entity_t handle)
 {
-    return nuecs_entity_destroy((nuecs_scene_data_t*)scene, handle);
+    return nuecs_entity_destroy(&_module.components, (nuecs_scene_data_t*)scene, handle);
 }
 nu_result_t nuecs_entity_add_component_impl(nuecs_scene_t scene, nuecs_entity_t* entity, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
 {
@@ -127,13 +129,14 @@ nu_result_t nuecs_component_find_impl(const char* name, nuecs_component_t* handl
     return nuecs_component_manager_find_component(&_module.components, name, handle);
 }
 /* system interface */
-nu_result_t nuecs_system_build_impl(nuecs_system_info_t* info, nuecs_system_t* handle)
+nu_result_t nuecs_system_build_impl(const nuecs_system_info_t* info, nuecs_system_t* handle)
 {
     return nuecs_system_manager_build_system(&_module.systems, info, handle);
 }
-nu_result_t nuecs_system_compile_pipeline_impl(nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle)
+/* pipeline interface */
+nu_result_t nuecs_pipeline_build_impl(const nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle)
 {
-    return nuecs_system_manager_compile_pipeline(&_module.systems, info, handle);
+    return nuecs_pipeline_manager_build_component(&_module.pipelines, info, handle);
 }
 /* scene plugin */
 nu_result_t nuecs_scene_plugin_initialize_impl(void)
@@ -141,10 +144,12 @@ nu_result_t nuecs_scene_plugin_initialize_impl(void)
     nuecs_component_manager_initialize(&_module.components);
     nuecs_scene_manager_initialize(&_module.scenes);
     nuecs_system_manager_initialize(&_module.systems);
+    nuecs_pipeline_manager_initialize(&_module.pipelines);
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_plugin_terminate_impl(void)
 {
+    nuecs_pipeline_manager_terminate(&_module.pipelines);
     nuecs_system_manager_terminate(&_module.systems);
     nuecs_scene_manager_terminate(&_module.scenes);
     nuecs_component_manager_terminate(&_module.components);

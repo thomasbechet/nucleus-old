@@ -1,0 +1,13 @@
+{
+    "namespace": "nuecs",
+    "name": "pipeline",
+    "functions": [
+        {
+            "name": "build",
+            "parameters": [
+                { "type": "const nuecs_pipeline_info_t*", "name": "info" },
+                { "type": "nuecs_pipeline_t*", "name": "handle" }
+            ]
+        }
+    ]
+}

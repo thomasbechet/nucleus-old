@@ -7,6 +7,7 @@ nu_result_t nuecs_component_initialize(
 {
     nu_string_allocate_cstr(&component->name, info->name);
     component->size             = info->size;
+    component->flags            = info->flags;
     component->serialize_json   = info->serialize_json;
     component->deserialize_json = info->deserialize_json; 
 

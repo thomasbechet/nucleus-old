@@ -13,6 +13,7 @@ nu_result_t nuecs_entity_create(
     nuecs_entity_t *handle
 );
 nu_result_t nuecs_entity_destroy(
+    nuecs_component_manager_data_t *manager,
     nuecs_scene_data_t *scene, 
     nuecs_entity_t handle
 );
