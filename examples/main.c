@@ -188,7 +188,7 @@ typedef struct {
     nuecs_query_t player_query;
 } move_player_system_t;
 
-static nu_result_t move_player_initialize(void *state, nuecs_scene_t scene)
+static nu_result_t move_player_start(void *state, nuecs_scene_t scene)
 {
     move_player_system_t *system = (move_player_system_t*)state;
     nuecs_component_t player_component;
@@ -199,17 +199,20 @@ static nu_result_t move_player_initialize(void *state, nuecs_scene_t scene)
         .include_components      = &player_component
     };
     nuecs_query_create(scene, &info, &system->player_query);
+    nu_info("test", "START");
     return NU_SUCCESS;
 }
-static nu_result_t move_player_terminate(void *state, nuecs_scene_t scene)
+static nu_result_t move_player_stop(void *state, nuecs_scene_t scene)
 {
+    nu_info("test", "STOP");
     move_player_system_t *system = (move_player_system_t*)state;
-    nuecs_query_destroy(scene, &system->player_query);
+    nuecs_query_destroy(scene, system->player_query);
     return NU_SUCCESS;
 }
-static nu_result_t move_player_invoke(void *state, nuecs_scene_t scene)
+static nu_result_t move_player_update(void *state, nuecs_scene_t scene)
 {
     move_player_system_t *system = (move_player_system_t*)state;
+    nu_info("test", "player system !");
     return NU_SUCCESS;
 }
 
@@ -313,6 +316,7 @@ static nu_result_t on_start(void)
         info.name             = "position";
         info.size             = sizeof(position_t);
         info.serialize_json   = serialize_position;
+        info.flags            = NUECS_COMPONENT_FLAG_SERIALIZABLE;
         nuecs_component_build(&info, &position_component);
     }
     {
@@ -321,6 +325,7 @@ static nu_result_t on_start(void)
         info.name             = "health";
         info.size             = sizeof(health_t);
         info.serialize_json   = serialize_health;
+        info.flags            = NUECS_COMPONENT_FLAG_SERIALIZABLE;
         nuecs_component_build(&info, &health_component);
     }
     {
@@ -329,6 +334,7 @@ static nu_result_t on_start(void)
         info.name             = "velocity";
         info.size             = sizeof(velocity_t);
         info.serialize_json   = serialize_velocity;
+        info.flags            = NUECS_COMPONENT_FLAG_SERIALIZABLE;
         nuecs_component_build(&info, &velocity_component);
     }
     {
@@ -337,6 +343,7 @@ static nu_result_t on_start(void)
         info.name             = "score";
         info.size             = sizeof(score_t);
         info.serialize_json   = serialize_score;
+        info.flags            = NUECS_COMPONENT_FLAG_SERIALIZABLE;
         nuecs_component_build(&info, &score_component);
     }
     {
@@ -346,6 +353,7 @@ static nu_result_t on_start(void)
         info.size             = sizeof(transform_t);
         info.serialize_json   = serialize_transform;
         info.deserialize_json = deserialize_transform;
+        info.flags            = NUECS_COMPONENT_FLAG_SERIALIZABLE;
         nuecs_component_build(&info, &transform_component);
     }
 
@@ -361,9 +369,9 @@ static nu_result_t on_start(void)
         };
         nuecs_system_info_t info = {
             .name             = "move_player",
-            .initialize       = move_player_initialize,
-            .terminate        = move_player_terminate,
-            .invoke           = move_player_invoke,
+            .start            = move_player_start,
+            .stop             = move_player_stop,
+            .update           = move_player_update,
             .state_size       = sizeof(move_player_system_t),
             .dependency_count = 1,
             .dependencies     = &dependency
@@ -377,16 +385,13 @@ static nu_result_t on_start(void)
 
     nuecs_pipeline_t pipeline;
     {
-        nuecs_pipeline_node_t n0 = {
-            .system           = move_player_system,
-            .stage            = NUECS_PIPELINE_STAGE_UPDATE,
-            .dependencies     = NULL,
-            .dependency_count = 0
+        nuecs_system_t systems[] = {
+            move_player_system
         };
         nuecs_pipeline_info_t info = {
-            .name       = "main_pipeline",
-            .nodes      = &n0,
-            .node_count = 1 
+            .name         = "main_pipeline",
+            .systems      = systems,
+            .system_count = 1
         };
         nuecs_pipeline_build(&info, &pipeline);
     }
@@ -397,6 +402,7 @@ static nu_result_t on_start(void)
 
     nuecs_scene_t scene;
     nuecs_scene_create(&scene);
+    nuecs_scene_set_pipeline(scene, pipeline);
     
     nuecs_entity_t teste;
     {
@@ -431,9 +437,9 @@ static nu_result_t on_start(void)
 
         velocity_t vel = { .velocity = {0, 1, 2} };
         nuecs_entity_add_component(scene, &entity, velocity_component, &vel);
-        // nuecs_entity_remove_component(scene, &entity, velocity_component);
+        nuecs_entity_remove_component(scene, &entity, velocity_component);
 
-        for (uint32_t i = 0; i < 100; i++) {
+        for (uint32_t i = 0; i < 5; i++) {
             nuecs_entity_info_t infos;
             infos.component_count = 0;
             nuecs_entity_t ent;
@@ -446,13 +452,12 @@ static nu_result_t on_start(void)
         nuecs_entity_t e;
         nuecs_entity_reference_resolve(scene, &ref, &e);
 
-        // nuecs_entity_destroy(scene, entity);
+        nuecs_entity_destroy(scene, teste);
     }
 
     // nuecs_scene_save_json(scene, "$ROOT/save.json");
     nuecs_scene_clear(scene);
-    // nuecs_scene_load_json(scene, "$ROOT/save.json");
-    nuecs_scene_set_pipeline(scene, pipeline);
+    nuecs_scene_load_json(scene, "$ROOT/save.json");
 
     nuecs_query_info_t qinfo;
     qinfo.include_components      = &transform_component;
@@ -473,7 +478,7 @@ static nu_result_t on_start(void)
         // }
     }
 
-    // nu_context_request_stop();
+    nu_context_request_stop();
 
     /* load texture */
     int width, height, channel;

@@ -5,9 +5,9 @@
 
 typedef struct {
     nu_string_t name;
-    nuecs_system_initialize_pfn_t initialize;
-    nuecs_system_terminate_pfn_t terminate;
-    nuecs_system_invoke_pfn_t invoke;
+    nuecs_system_start_pfn_t start;
+    nuecs_system_stop_pfn_t stop;
+    nuecs_system_update_pfn_t update;
     uint32_t state_size;
 } nuecs_system_data_t;
 

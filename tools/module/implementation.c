@@ -1,131 +1,84 @@
-#include <nucleus/module/ecs/module/implementation.h>
+#include <nucleus/module/vulkan/module/implementation.h>
 
-/* archetype interface */
-nu_result_t nuecs_archetype_debug_archetypes_impl(void)
+/* renderer interface */
+nu_result_t nuvk_renderer_initialize_impl(void)
 {
     return NU_SUCCESS;
 }
-/* scene interface */
-nu_result_t nuecs_scene_create_impl(nuecs_scene_t* scene)
+nu_result_t nuvk_renderer_terminate_impl(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_destroy_impl(nuecs_scene_t scene)
+nu_result_t nuvk_renderer_start_impl(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_clear_impl(nuecs_scene_t scene)
+nu_result_t nuvk_renderer_stop_impl(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_set_pipeline_impl(nuecs_scene_t scene, nuecs_pipeline_t pipeline)
+nu_result_t nuvk_renderer_render_impl(void)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_progress_impl(nuecs_scene_t scene)
+nu_result_t nuvk_renderer_camera_create_impl(const nu_renderer_camera_create_info_t* info, nu_renderer_camera_t* handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_serialize_json_object_impl(nuecs_scene_t scene, nu_json_object_t object)
+nu_result_t nuvk_renderer_camera_destroy_impl(nu_renderer_camera_t handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_deserialize_json_object_impl(nuecs_scene_t scene, nu_json_object_t object)
+nu_result_t nuvk_renderer_camera_set_fov_impl(nu_renderer_camera_t handle, float fov)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_save_json_impl(nuecs_scene_t scene, const char* filename)
+nu_result_t nuvk_renderer_camera_set_view_impl(nu_renderer_camera_t handle, const nu_vec3f_t eye, const nu_vec3f_t forward, const nu_vec3f_t up)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_load_json_impl(nuecs_scene_t scene, const char* filename)
+nu_result_t nuvk_renderer_viewport_set_size_impl(const nu_vec2u_t size)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_scene_debug_entities_impl(nuecs_scene_t scene)
+nu_result_t nuvk_renderer_viewport_get_size_impl(nu_vec2u_t size)
 {
     return NU_SUCCESS;
 }
-/* query interface */
-nu_result_t nuecs_query_create_impl(nuecs_scene_t scene, const nuecs_query_info_t* info, nuecs_query_t* handle)
+/* renderer interface */
+nu_result_t nuvk_renderer_sdf_create_impl(const nuvk_sdf_info_t* info, nuvk_sdf_t* handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_destroy_impl(nuecs_scene_t scene, nuecs_query_t query)
+nu_result_t nuvk_renderer_sdf_destroy_impl(nuvk_sdf_t handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_resolve_impl(nuecs_scene_t scene, nuecs_query_t query, nuecs_query_result_t* result)
+nu_result_t nuvk_renderer_sdf_get_primitive_impl(nuvk_sdf_primitives_t primitive, nuvk_sdf_t* sdf)
 {
     return NU_SUCCESS;
 }
-/* entity interface */
-nu_result_t nuecs_entity_create_impl(nuecs_scene_t scene, const nuecs_entity_info_t* info, nuecs_entity_t* handle)
+nu_result_t nuvk_renderer_material_create_impl(const nuvk_material_info_t* info, nuvk_material_t* handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_entity_destroy_impl(nuecs_scene_t scene, nuecs_entity_t entity)
+nu_result_t nuvk_renderer_material_destroy_impl(nuvk_material_t handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_entity_add_component_impl(nuecs_scene_t scene, nuecs_entity_t* entity, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
+nu_result_t nuvk_renderer_sdf_instance_create_impl(const nuvk_sdf_instance_info_t* info, nuvk_sdf_instance_t* handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_entity_remove_component_impl(nuecs_scene_t scene, nuecs_entity_t* entity, nuecs_component_t component)
+nu_result_t nuvk_renderer_sdf_instance_destroy_impl(nuvk_sdf_instance_t handle)
 {
     return NU_SUCCESS;
 }
-nu_result_t nuecs_entity_get_component_impl(nuecs_scene_t scene, nuecs_entity_t entity, nuecs_component_t component, nuecs_component_data_ptr_t* data)
+nu_result_t nuvk_renderer_sdf_instance_update_transform_impl(nuvk_sdf_instance_t handle, const nuvk_sdf_transform_t* transform)
 {
     return NU_SUCCESS;
 }
-/* entity_reference interface */
-nu_result_t nuecs_entity_reference_bind_impl(nuecs_scene_t scene, nuecs_entity_reference_t* handle, nuecs_entity_t entity)
-{
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_entity_reference_resolve_impl(nuecs_scene_t scene, nuecs_entity_reference_t* handle, nuecs_entity_t* entity)
-{
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_entity_reference_serialize_json_object_impl(nuecs_entity_reference_t* handle, nuecs_serialization_context_t context, nu_json_object_t object, const char* name)
-{
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_entity_reference_deserialize_json_object_impl(nuecs_deserialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_reference_t* handle)
-{
-    return NU_SUCCESS;
-}
-/* component interface */
-nu_result_t nuecs_component_build_impl(const nuecs_component_info_t* info, nuecs_component_t* handle)
-{
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_component_find_impl(const char* name, nuecs_component_t* handle)
-{
-    return NU_SUCCESS;
-}
-/* system interface */
-nu_result_t nuecs_system_build_impl(const nuecs_system_info_t* info, nuecs_system_t* handle)
-{
-    return NU_SUCCESS;
-}
-/* pipeline interface */
-nu_result_t nuecs_pipeline_build_impl(const nuecs_pipeline_info_t* info, nuecs_pipeline_t* handle)
-{
-    return NU_SUCCESS;
-}
-/* scene plugin */
-nu_result_t nuecs_scene_plugin_initialize_impl(void)
-{
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_scene_plugin_terminate_impl(void)
-{
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_scene_plugin_update_impl(void)
+nu_result_t nuvk_renderer_sdf_instance_update_data_impl(nuvk_sdf_instance_t handle, const void* data)
 {
     return NU_SUCCESS;
 }

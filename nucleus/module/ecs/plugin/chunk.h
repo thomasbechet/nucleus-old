@@ -38,7 +38,7 @@ typedef struct {
     uint8_t version;
 } nuecs_chunk_row_t;
 
-typedef struct {
+typedef struct nuecs_chunk_data {
     nuecs_archetype_data_t *archetype;
     uint16_t id;
     uint8_t size;
@@ -88,12 +88,12 @@ nu_result_t nuecs_chunk_get_entity(
     uint8_t index,
     nuecs_entity_t *handle
 );
-nu_result_t nuecs_chunk_set_entity_reference(
+nu_result_t nuecs_chunk_set_entity_reference_index(
     nuecs_chunk_data_t *chunk,
     nuecs_entity_t handle,
     uint32_t index
 );
-nu_result_t nuecs_chunk_get_entity_reference(
+nu_result_t nuecs_chunk_get_entity_reference_index(
     nuecs_chunk_data_t *chunk,
     nuecs_entity_t handle,
     uint32_t *index

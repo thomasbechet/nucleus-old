@@ -11,9 +11,10 @@
 
 /* interface */
 #define NULUA_PLUGIN_INTERFACE_NAME "nulua_plugin_interface"
+typedef nu_result_t (*nulua_plugin_load_pfn_t)(const char* path, nulua_plugin_t* handle);
 
 typedef struct {
-    nu_result_t (*load)(const char*, nulua_plugin_t*);
+    nulua_plugin_load_pfn_t load;
 } nulua_plugin_interface_t;
 
 

@@ -12,6 +12,7 @@ NU_DECLARE_HANDLE(nuecs_component_t);
 NU_DECLARE_HANDLE(nuecs_system_t);
 NU_DECLARE_HANDLE(nuecs_pipeline_t);
 NU_DECLARE_HANDLE(nuecs_query_t);
+NU_DECLARE_HANDLE(nuecs_command_buffer_t);
 NU_DECLARE_HANDLE(nuecs_serialization_context_t);
 NU_DECLARE_HANDLE(nuecs_deserialization_context_t);
 NU_DECLARE_HANDLE(nuecs_transfer_context_t);
@@ -47,39 +48,24 @@ typedef struct {
     nuecs_component_access_t access;
 } nuecs_component_dependency_t;
 
-typedef nu_result_t (*nuecs_system_initialize_pfn_t)(void*, nuecs_scene_t);
-typedef nu_result_t (*nuecs_system_terminate_pfn_t)(void*, nuecs_scene_t);
-typedef nu_result_t (*nuecs_system_invoke_pfn_t)(void*, nuecs_scene_t);
+typedef nu_result_t (*nuecs_system_start_pfn_t)(void*, nuecs_scene_t);
+typedef nu_result_t (*nuecs_system_stop_pfn_t)(void*, nuecs_scene_t);
+typedef nu_result_t (*nuecs_system_update_pfn_t)(void*, nuecs_scene_t);
 
 typedef struct {
     const char *name;
     uint32_t state_size;
     nuecs_component_dependency_t *dependencies;
     uint32_t dependency_count;
-    nuecs_system_initialize_pfn_t initialize;
-    nuecs_system_terminate_pfn_t terminate;
-    nuecs_system_invoke_pfn_t invoke;
+    nuecs_system_start_pfn_t start;
+    nuecs_system_stop_pfn_t stop;
+    nuecs_system_update_pfn_t update;
 } nuecs_system_info_t;
-
-typedef enum {
-    NUECS_PIPELINE_STAGE_START,
-    NUECS_PIPELINE_STAGE_LOAD,
-    NUECS_PIPELINE_STAGE_UPDATE,
-    NUECS_PIPELINE_STAGE_STORE,
-    NUECS_PIPELINE_STAGE_STOP
-} nuecs_pipeline_stage_t;
-
-typedef struct nuecs_pipeline_node_t {
-    nuecs_system_t system;
-    nuecs_pipeline_stage_t stage;
-    struct nuecs_pipeline_node_t *dependencies;
-    uint32_t dependency_count;
-} nuecs_pipeline_node_t;
 
 typedef struct {
     const char *name;
-    nuecs_pipeline_node_t *nodes;
-    uint32_t node_count;
+    nuecs_system_t *systems;
+    uint32_t system_count;
 } nuecs_pipeline_info_t;
 
 typedef struct {

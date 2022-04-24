@@ -223,7 +223,7 @@ nu_result_t nuecs_chunk_get_entity(
         chunk->rows[index].index_to_id, chunk->id);
     return NU_SUCCESS;
 }
-nu_result_t nuecs_chunk_set_entity_reference(
+nu_result_t nuecs_chunk_set_entity_reference_index(
     nuecs_chunk_data_t *chunk,
     nuecs_entity_t handle,
     uint32_t index
@@ -233,7 +233,7 @@ nu_result_t nuecs_chunk_set_entity_reference(
     chunk->rows[id].reference_index = index;
     return NU_SUCCESS;
 }
-nu_result_t nuecs_chunk_get_entity_reference(
+nu_result_t nuecs_chunk_get_entity_reference_index(
     nuecs_chunk_data_t *chunk,
     nuecs_entity_t handle,
     uint32_t *index

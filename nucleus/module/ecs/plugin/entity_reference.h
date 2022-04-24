@@ -3,7 +3,6 @@
 
 #include <nucleus/module/ecs/plugin/chunk.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
-#include <nucleus/module/ecs/plugin/types_public.h>
 #include <nucleus/module/ecs/plugin/scene.h>
 
 #define NUECS_ENTITY_REFERENCE_VERSION_MASK 0xFF000000
@@ -39,11 +38,6 @@ typedef struct {
 typedef struct {
     uint32_t *remap;
 } nuecs_transfer_context_data_t;
-
-typedef struct {
-    nuecs_entity_t entity;
-    uint8_t version;
-} nuecs_entity_reference_data_t;
 
 nu_result_t nuecs_entity_reference_bind(
     nuecs_scene_data_t *scene,

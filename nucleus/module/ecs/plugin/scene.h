@@ -1,25 +1,27 @@
 #ifndef NUECS_SCENE_H
 #define NUECS_SCENE_H
 
-#include <nucleus/module/ecs/plugin/types_public.h>
-#include <nucleus/module/ecs/plugin/archetype.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
 #include <nucleus/module/ecs/plugin/scene_manager.h>
 #include <nucleus/module/ecs/plugin/system_manager.h>
-#include <nucleus/module/ecs/plugin/chunk_table.h>
 #include <nucleus/module/ecs/plugin/pipeline.h>
+#include <nucleus/module/ecs/plugin/archetype.h>
+#include <nucleus/module/ecs/plugin/chunk_table.h>
+#include <nucleus/module/ecs/plugin/query_table.h>
+#include <nucleus/module/ecs/plugin/reference_table.h>
 
-typedef struct {
-    nu_array_t entities_to_delete;   /* nuecs_entity_t */
-    nu_array_t chunks;               /* nuecs_chunk_data_t* */
-    nuecs_chunk_table_t chunk_table; /* nuecs_archetype_entry_t */
-    nu_indexed_array_t queries;      /* nuecs_query_data_t* */
-    nu_array_t references;           /* nuecs_entity_reference_data_t */
-    nu_array_t free_references;      /* uint32_t */
-    uint8_t next_reference_version;
+typedef struct nuecs_scene_data {
+    nuecs_archetype_tree_t archetype_tree;
+    nuecs_chunk_table_t chunk_table;
+    nuecs_query_table_t query_table;
+    nuecs_reference_table_t reference_table;
+
+    nu_array_t entities_to_delete; /* nuecs_entity_t */
+    
     nuecs_pipeline_t next_pipeline;
     nuecs_pipeline_instance_data_t pipeline_instance;
     bool destroy;
+
     uint32_t id;
 } nuecs_scene_data_t;
 

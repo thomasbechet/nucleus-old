@@ -16,7 +16,7 @@ nu_result_t nuecs_system_manager_build_system(
     const nuecs_system_info_t *info, 
     nuecs_system_t *handle
 );
-nu_result_t nuecs_system_manager_compile_pipeline(
+nu_result_t nuecs_system_manager_build_pipeline(
     nuecs_system_manager_data_t *manager,
     const nuecs_pipeline_info_t *info, 
     nuecs_pipeline_t *handle

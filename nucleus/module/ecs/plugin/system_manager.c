@@ -43,7 +43,7 @@ nu_result_t nuecs_system_manager_build_system(
     NU_HANDLE_SET_ID(*handle, nu_array_get_size(manager->systems) - 1);
     return nuecs_system_initialize(system, info);
 }
-nu_result_t nuecs_system_manager_compile_pipeline(
+nu_result_t nuecs_system_manager_build_pipeline(
     nuecs_system_manager_data_t *manager,
     const nuecs_pipeline_info_t *info, 
     nuecs_pipeline_t *handle

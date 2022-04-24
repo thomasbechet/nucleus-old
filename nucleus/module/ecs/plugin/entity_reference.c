@@ -2,6 +2,7 @@
 
 #include <nucleus/module/ecs/plugin/utility.h>
 #include <nucleus/module/ecs/plugin/logger.h>
+#include <nucleus/module/ecs/plugin/reference_table.h>
 
 nu_result_t nuecs_entity_reference_bind(
     nuecs_scene_data_t *scene,
@@ -16,48 +17,30 @@ nu_result_t nuecs_entity_reference_bind(
     }
 
     /* get chunk */
-    nuecs_chunk_data_t **pchunk;
-    nu_array_get(scene->chunks, NUECS_ENTITY_CHUNK(entity), &pchunk);
-    nuecs_chunk_data_t *chunk = *pchunk;
+    nuecs_chunk_data_t *chunk;
+    nuecs_chunk_table_get_chunk(&scene->chunk_table, NUECS_ENTITY_CHUNK(entity), &chunk);
 
     /* check version */
     if (!nuecs_chunk_check_entity(chunk, entity)) {
-        *handle = NU_NULL_HANDLE;
-        return NU_FAILURE; /* tried to bind with an invalid handle */
+        *handle = NU_NULL_HANDLE; /* tried to bind with an invalid handle */
+        return NU_FAILURE;
     }
 
     /* get reference index */
-    uint32_t reference_index;
-    nuecs_chunk_get_entity_reference(chunk, entity, &reference_index);
+    uint32_t reference_index; uint8_t version;
+    nuecs_chunk_get_entity_reference_index(chunk, entity, &reference_index);
 
     /* create reference if needed */
     if (reference_index == NUECS_ENTITY_REFERENCE_NONE) {
 
         /* create reference */
-        if (!nu_array_is_empty(scene->free_references)) {
-            uint32_t *pdata;
-            nu_array_get_last(scene->free_references, &pdata);
-            reference_index = *pdata;
-            nu_array_pop(scene->free_references);
-        } else {
-            reference_index = nu_array_get_size(scene->references);
-            nuecs_entity_reference_data_t ref = {
-                .entity  = entity,
-                .version = nuecs_next_version(&scene->next_reference_version)
-            };
-            nu_array_push(scene->references, &ref);
-        }
-
-        /* set reference index */
-        nuecs_chunk_set_entity_reference(chunk, entity, reference_index);
+        nuecs_reference_table_add_entity_reference(&scene->reference_table, entity, &reference_index, &version);
+        /* update chunk */
+        nuecs_chunk_set_entity_reference_index(chunk, entity, reference_index);
     }
-
-    /* get reference */
-    nuecs_entity_reference_data_t *reference;
-    nu_array_get(scene->references, reference_index, &reference);
     
     /* return handle */
-    *handle = NUECS_ENTITY_REFERENCE_BUILD_HANDLE(reference->version, reference_index);
+    *handle = NUECS_ENTITY_REFERENCE_BUILD_HANDLE(version, reference_index);
 
     return NU_SUCCESS;
 }
@@ -75,21 +58,14 @@ nu_result_t nuecs_entity_reference_resolve(
         return NU_SUCCESS;
     }
 
-    /* get reference */
-    nuecs_entity_reference_data_t *reference;
-    nu_array_get(scene->references, NUECS_ENTITY_REFERENCE_INDEX(*handle), &reference);
+    /* get reference (+ check version) */
+    if (nuecs_reference_table_get_entity_reference(&scene->reference_table, NUECS_ENTITY_REFERENCE_INDEX(*handle), NUECS_ENTITY_REFERENCE_VERSION(*handle), entity) != NU_SUCCESS) {
 
-    /* check version */
-    if (reference->version != NUECS_ENTITY_REFERENCE_VERSION(*handle)) {
-        
         /* invalid reference, update reference and return NULL */
         *handle = NU_NULL_HANDLE;
         *entity = NU_NULL_HANDLE;
         return NU_SUCCESS;
     }
-
-    /* return entity */
-    *entity = reference->entity;
 
     return NU_SUCCESS;
 }

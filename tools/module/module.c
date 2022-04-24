@@ -1,25 +1,18 @@
 /* Generated file: DO NOT EDIT ! */
-#include <nucleus/module/ecs/module/module.h>
+#include <nucleus/module/vulkan/module/module.h>
 
-#include <nucleus/module/ecs/module/definition.h>
-#include <nucleus/module/ecs/module/implementation.h>
+#include <nucleus/module/vulkan/module/definition.h>
+#include <nucleus/module/vulkan/module/implementation.h>
 
-static const uint32_t interface_count = 9;
+static const uint32_t interface_count = 3;
 static const char *interfaces[] = {
     NU_PLUGIN_INTERFACE_NAME, 
-    NUECS_ARCHETYPE_INTERFACE_NAME, 
-    NUECS_SCENE_INTERFACE_NAME, 
-    NUECS_QUERY_INTERFACE_NAME, 
-    NUECS_ENTITY_INTERFACE_NAME, 
-    NUECS_ENTITY_REFERENCE_INTERFACE_NAME, 
-    NUECS_COMPONENT_INTERFACE_NAME, 
-    NUECS_SYSTEM_INTERFACE_NAME, 
-    NUECS_PIPELINE_INTERFACE_NAME
+    NU_RENDERER_INTERFACE_NAME, 
+    NUVK_RENDERER_INTERFACE_NAME
 };
 
-static const uint32_t plugin_count = 1;
+static const uint32_t plugin_count = 0;
 static const char *plugins[] = {
-    NUECS_SCENE_PLUGIN_NAME
 };
 
 static nu_result_t plugin_get_list(uint32_t *count, const char ***plugin_list)
@@ -30,20 +23,14 @@ static nu_result_t plugin_get_list(uint32_t *count, const char ***plugin_list)
 }
 static nu_result_t plugin_get_callbacks(const char *name, nu_plugin_callbacks_t *callbacks)
 {
-    if (NU_MATCH(name, NUECS_SCENE_PLUGIN_NAME)) {
-        callbacks->initialize = nuecs_scene_plugin_initialize_impl;
-        callbacks->terminate = nuecs_scene_plugin_terminate_impl;
-        callbacks->update = nuecs_scene_plugin_update_impl;
-        return NU_SUCCESS;
-    }
 
     return NU_FAILURE;
 }
 
 nu_result_t nu_module_info(nu_module_info_t *info)
 {
-    info->name = NUECS_MODULE_NAME;
-    info->id = NUECS_MODULE_ID;
+    info->name = NUVK_MODULE_NAME;
+    info->id = NUVK_MODULE_ID;
     info->flags = NU_MODULE_FLAG_NONE;
     info->interface_count = interface_count;
     info->interfaces = interfaces;
@@ -59,71 +46,34 @@ nu_result_t nu_module_interface(const char *name, void *interface)
         i->get_list = plugin_get_list;
 
         return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_ARCHETYPE_INTERFACE_NAME)) {
-        nuecs_archetype_interface_t *i = (nuecs_archetype_interface_t*)interface;
+    } else if (NU_MATCH(name, NU_RENDERER_INTERFACE_NAME)) {
+        nu_renderer_interface_t *i = (nu_renderer_interface_t*)interface;
         
-        i->debug_archetypes = nuecs_archetype_debug_archetypes_impl;
+        i->initialize = nuvk_renderer_initialize_impl;
+        i->terminate = nuvk_renderer_terminate_impl;
+        i->start = nuvk_renderer_start_impl;
+        i->stop = nuvk_renderer_stop_impl;
+        i->render = nuvk_renderer_render_impl;
+        i->camera_create = nuvk_renderer_camera_create_impl;
+        i->camera_destroy = nuvk_renderer_camera_destroy_impl;
+        i->camera_set_fov = nuvk_renderer_camera_set_fov_impl;
+        i->camera_set_view = nuvk_renderer_camera_set_view_impl;
+        i->viewport_set_size = nuvk_renderer_viewport_set_size_impl;
+        i->viewport_get_size = nuvk_renderer_viewport_get_size_impl;
 
         return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_SCENE_INTERFACE_NAME)) {
-        nuecs_scene_interface_t *i = (nuecs_scene_interface_t*)interface;
+    } else if (NU_MATCH(name, NUVK_RENDERER_INTERFACE_NAME)) {
+        nuvk_renderer_interface_t *i = (nuvk_renderer_interface_t*)interface;
         
-        i->create = nuecs_scene_create_impl;
-        i->destroy = nuecs_scene_destroy_impl;
-        i->clear = nuecs_scene_clear_impl;
-        i->set_pipeline = nuecs_scene_set_pipeline_impl;
-        i->progress = nuecs_scene_progress_impl;
-        i->serialize_json_object = nuecs_scene_serialize_json_object_impl;
-        i->deserialize_json_object = nuecs_scene_deserialize_json_object_impl;
-        i->save_json = nuecs_scene_save_json_impl;
-        i->load_json = nuecs_scene_load_json_impl;
-        i->debug_entities = nuecs_scene_debug_entities_impl;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_QUERY_INTERFACE_NAME)) {
-        nuecs_query_interface_t *i = (nuecs_query_interface_t*)interface;
-        
-        i->create = nuecs_query_create_impl;
-        i->destroy = nuecs_query_destroy_impl;
-        i->resolve = nuecs_query_resolve_impl;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_ENTITY_INTERFACE_NAME)) {
-        nuecs_entity_interface_t *i = (nuecs_entity_interface_t*)interface;
-        
-        i->create = nuecs_entity_create_impl;
-        i->destroy = nuecs_entity_destroy_impl;
-        i->add_component = nuecs_entity_add_component_impl;
-        i->remove_component = nuecs_entity_remove_component_impl;
-        i->get_component = nuecs_entity_get_component_impl;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_ENTITY_REFERENCE_INTERFACE_NAME)) {
-        nuecs_entity_reference_interface_t *i = (nuecs_entity_reference_interface_t*)interface;
-        
-        i->bind = nuecs_entity_reference_bind_impl;
-        i->resolve = nuecs_entity_reference_resolve_impl;
-        i->serialize_json_object = nuecs_entity_reference_serialize_json_object_impl;
-        i->deserialize_json_object = nuecs_entity_reference_deserialize_json_object_impl;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_COMPONENT_INTERFACE_NAME)) {
-        nuecs_component_interface_t *i = (nuecs_component_interface_t*)interface;
-        
-        i->build = nuecs_component_build_impl;
-        i->find = nuecs_component_find_impl;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_SYSTEM_INTERFACE_NAME)) {
-        nuecs_system_interface_t *i = (nuecs_system_interface_t*)interface;
-        
-        i->build = nuecs_system_build_impl;
-
-        return NU_SUCCESS;
-    } else if (NU_MATCH(name, NUECS_PIPELINE_INTERFACE_NAME)) {
-        nuecs_pipeline_interface_t *i = (nuecs_pipeline_interface_t*)interface;
-        
-        i->build = nuecs_pipeline_build_impl;
+        i->sdf_create = nuvk_renderer_sdf_create_impl;
+        i->sdf_destroy = nuvk_renderer_sdf_destroy_impl;
+        i->sdf_get_primitive = nuvk_renderer_sdf_get_primitive_impl;
+        i->material_create = nuvk_renderer_material_create_impl;
+        i->material_destroy = nuvk_renderer_material_destroy_impl;
+        i->sdf_instance_create = nuvk_renderer_sdf_instance_create_impl;
+        i->sdf_instance_destroy = nuvk_renderer_sdf_instance_destroy_impl;
+        i->sdf_instance_update_transform = nuvk_renderer_sdf_instance_update_transform_impl;
+        i->sdf_instance_update_data = nuvk_renderer_sdf_instance_update_data_impl;
 
         return NU_SUCCESS;
     }

@@ -11,17 +11,21 @@
 
 /* interface */
 #define NUUTILS_LOADER_INTERFACE_NAME "nuutils_loader_interface"
+typedef nu_result_t (*nuutils_loader_load_mesh_from_obj_pfn_t)(const char* path, nu_renderer_mesh_t* handle);
+typedef nu_result_t (*nuutils_loader_load_texture_pfn_t)(const char* path, nu_renderer_texture_t* handle);
 
 typedef struct {
-    nu_result_t (*load_mesh_from_obj)(const char*, nu_renderer_mesh_t*);
-    nu_result_t (*load_texture)(const char*, nu_renderer_texture_t*);
+    nuutils_loader_load_mesh_from_obj_pfn_t load_mesh_from_obj;
+    nuutils_loader_load_texture_pfn_t load_texture;
 } nuutils_loader_interface_t;
 
 #define NUUTILS_COMMAND_INTERFACE_NAME "nuutils_command_interface"
+typedef nu_result_t (*nuutils_command_get_event_id_pfn_t)(nu_event_id_t* id);
+typedef nu_result_t (*nuutils_command_execute_pfn_t)(const char* command);
 
 typedef struct {
-    nu_result_t (*get_event_id)(nu_event_id_t*);
-    nu_result_t (*execute)(const char*);
+    nuutils_command_get_event_id_pfn_t get_event_id;
+    nuutils_command_execute_pfn_t execute;
 } nuutils_command_interface_t;
 
 

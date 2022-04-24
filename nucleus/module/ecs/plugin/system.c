@@ -6,9 +6,9 @@ nu_result_t nuecs_system_initialize(
 )
 {
     nu_string_allocate_cstr(&system->name, info->name);
-    system->initialize = info->initialize;
-    system->terminate  = info->terminate;
-    system->invoke     = info->invoke;
+    system->start      = info->start;
+    system->stop       = info->stop;
+    system->update     = info->update;
     system->state_size = info->state_size;
     return NU_SUCCESS;
 }

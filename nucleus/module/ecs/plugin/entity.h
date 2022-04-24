@@ -1,9 +1,7 @@
 #ifndef NUECS_ENTITY_H
 #define NUECS_ENTITY_H
 
-#include <nucleus/module/ecs/plugin/chunk.h>
 #include <nucleus/module/ecs/plugin/component_manager.h>
-#include <nucleus/module/ecs/plugin/types_public.h>
 #include <nucleus/module/ecs/plugin/scene.h>
 
 nu_result_t nuecs_entity_create(

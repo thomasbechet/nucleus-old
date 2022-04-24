@@ -4,21 +4,12 @@
 
 #include <{{ module.directory }}/definition.h>
 
-/* functions definition */
-{%- for interface in module.implement_interfaces %}
-{%- if interface.generate_loader %}
-{%- for function in interface.definition.functions %}
-typedef nu_result_t (*__{{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }}_pfn_t)({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }});
-{%- endfor %}
-{%- endif %}
-{%- endfor %}
-
 /* loader */
 #ifdef {{ module.namespace|upper }}_LOADER_IMPLEMENTATION
     {%- for interface in module.implement_interfaces %}
     {%- if interface.generate_loader %}
     {%- for function in interface.definition.functions %}
-    __{{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }}_pfn_t __{{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }} = NULL;
+    {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }}_pfn_t {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }} = NULL;
     {%- endfor %}
     nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_interface_load(nu_module_t module)
     {
@@ -26,7 +17,7 @@ typedef nu_result_t (*__{{ interface.definition.namespace }}_{{ interface.defini
         nu_result_t result = nu_module_get_interface(module, {{ module.namespace|upper }}_{{ interface.definition.name|upper }}_INTERFACE_NAME, &interface);
         if (result == NU_SUCCESS) {
             {%- for function in interface.definition.functions %}
-            __{{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }} = interface.{{ function.name }};
+            {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }} = interface.{{ function.name }};
             {%- endfor %}
         }
         return result;
@@ -47,7 +38,7 @@ typedef nu_result_t (*__{{ interface.definition.namespace }}_{{ interface.defini
     {%- for interface in module.implement_interfaces %}
     {%- if interface.generate_loader %}
     {%- for function in interface.definition.functions %}
-    extern __{{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }}_pfn_t __{{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }};
+    extern {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }}_pfn_t {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }};
     {%- endfor %}
     nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_interface_load(nu_module_t module);
     {%- for function in interface.functions %}
@@ -57,13 +48,5 @@ typedef nu_result_t (*__{{ interface.definition.namespace }}_{{ interface.defini
     {%- endfor %}
     nu_result_t {{ module.namespace }}_interface_load_all(nu_module_t module);
 #endif
-
-{%- for interface in module.implement_interfaces %}
-{%- if interface.generate_loader %}
-{%- for function in interface.definition.functions %}
-#define {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }} NU_IDENTITY(__{{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }})
-{%- endfor %}
-{%- endif %}
-{%- endfor %}
 
 #endif

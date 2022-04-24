@@ -2,10 +2,11 @@
 #define NUECS_QUERY_H
 
 #include <nucleus/module/ecs/plugin/types_public.h>
-#include <nucleus/module/ecs/plugin/scene.h>
-#include <nucleus/module/ecs/plugin/chunk.h>
 
-typedef struct {
+typedef struct nuecs_scene_data nuecs_scene_data_t;
+typedef struct nuecs_chunk_data nuecs_chunk_data_t;
+
+typedef struct nuecs_query_data {
     nu_array_t chunk_views;
     nu_array_t chunk_references;
     nu_array_t archetype_slots;
@@ -27,7 +28,6 @@ nu_result_t nuecs_query_initialize(
     uint32_t exclude_component_count
 );
 nu_result_t nuecs_query_terminate(nuecs_query_data_t *query);
-nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_data_t *chunk);
-nu_result_t nuecs_query_try_subscribe(nuecs_query_data_t *query, nuecs_archetype_slot_t *slot);
+nu_result_t nuecs_query_add_new_chunk(nuecs_query_data_t *query, nuecs_chunk_data_t *chunk);
 
 #endif

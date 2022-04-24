@@ -1,11 +1,13 @@
 #include <nucleus/module/ecs/plugin/scene.h>
 
-#include <nucleus/module/ecs/plugin/chunk_table.h>
 #include <nucleus/module/ecs/plugin/utility.h>
 #include <nucleus/module/ecs/plugin/query.h>
 #include <nucleus/module/ecs/plugin/entity.h>
 #include <nucleus/module/ecs/plugin/entity_reference.h>
 #include <nucleus/module/ecs/plugin/system.h>
+#include <nucleus/module/ecs/plugin/pipeline.h>
+#include <nucleus/module/ecs/plugin/chunk_table.h>
+#include <nucleus/module/ecs/plugin/query_table.h>
 #include <nucleus/module/ecs/plugin/pipeline.h>
 #include <nucleus/module/ecs/plugin/logger.h>
 
@@ -23,54 +25,40 @@ nu_result_t nuecs_scene_destroy(nuecs_scene_manager_data_t *manager, nuecs_scene
 nu_result_t nuecs_scene_initialize(nuecs_scene_data_t *scene)
 {
     /* allocate resources */
-    nu_array_allocate(&scene->entities_to_delete, sizeof(nuecs_entity_t));
-    nu_array_allocate(&scene->chunks, sizeof(nuecs_chunk_data_t*));
+    nuecs_archetype_tree_initialize(&scene->archetype_tree);
     nuecs_chunk_table_initialize(&scene->chunk_table);
-    nu_indexed_array_allocate(&scene->queries, sizeof(nuecs_query_data_t*));
-    nu_array_allocate(&scene->references, sizeof(nuecs_entity_reference_data_t));
-    nu_array_allocate(&scene->free_references, sizeof(uint32_t));
+    nuecs_query_table_initialize(&scene->query_table);
+    nuecs_reference_table_initialize(&scene->reference_table);
+    
+    nu_array_allocate(&scene->entities_to_delete, sizeof(nuecs_entity_t));
+    
     scene->next_pipeline              = NU_NULL_HANDLE;
     scene->pipeline_instance.pipeline = NU_NULL_HANDLE;
-    scene->next_reference_version     = 0;
     scene->destroy                    = false;
 
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_terminate(nuecs_scene_data_t *scene)
 {
-    /* clear scene */
-
     /* terminate pipeline */
     if (scene->pipeline_instance.pipeline) {
-
-        /* */
-
+        nuecs_pipeline_instance_stop(&scene->pipeline_instance, (nuecs_scene_t)scene);
         nuecs_pipeline_instance_terminate(&scene->pipeline_instance);
     }
 
-    /* queries */
-    nuecs_query_data_t **queries;
-    uint32_t query_count;
-    nu_indexed_array_get_data(scene->queries, &queries, &query_count);
-    for (uint32_t i = 0; i < query_count; i++) {
-        nuecs_query_terminate(queries[i]);
-        nu_free(queries[i]);
-    }
-    nu_indexed_array_free(scene->queries);
-
     /* free other resources */
-    nuecs_chunk_table_terminate(&scene->chunk_table);
     nu_array_free(scene->entities_to_delete);
-    nu_array_free(scene->chunks);
-    nu_array_free(scene->references);
-    nu_array_free(scene->free_references);
+    nuecs_reference_table_terminate(&scene->reference_table);
+    nuecs_query_table_terminate(&scene->query_table);
+    nuecs_chunk_table_terminate(&scene->chunk_table);
+    nuecs_archetype_tree_terminate(&scene->archetype_tree);
 
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_clear(nuecs_component_manager_data_t *manager, nuecs_scene_data_t *scene)
 {
     nuecs_chunk_data_t **chunks; uint32_t chunk_count;
-    nu_array_get_data(scene->chunks, &chunks, &chunk_count);
+    nu_array_get_data(scene->chunk_table.chunk_references, &chunks, &chunk_count);
     for (uint32_t i = 0; i < chunk_count; i++) {
         nuecs_entity_t handles[NUECS_CHUNK_SIZE];
         uint8_t size = chunks[i]->size;
@@ -81,7 +69,6 @@ nu_result_t nuecs_scene_clear(nuecs_component_manager_data_t *manager, nuecs_sce
             nuecs_entity_destroy(manager, scene, handles[j]);
         }
     }
-
     return NU_SUCCESS;
 }
 nu_result_t nuecs_scene_set_pipeline(
@@ -109,13 +96,6 @@ static nu_result_t nuecs_scene_flush(
     nu_array_clear(scene->entities_to_delete);
     return NU_SUCCESS;
 }
-static nu_result_t nuecs_scene_destory_store_clean(
-    nuecs_component_manager_data_t *component_manager,
-    nuecs_scene_data_t *scene
-)
-{
-    return NU_SUCCESS;
-}
 nu_result_t nuecs_scene_progress(
     nuecs_system_manager_data_t *system_manager,
     nuecs_component_manager_data_t *component_manager,
@@ -129,42 +109,30 @@ nu_result_t nuecs_scene_progress(
         if (scene->pipeline_instance.pipeline) {
 
             /* stop stage */
-            nuecs_pipeline_instance_stop_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+            nuecs_pipeline_instance_stop(&scene->pipeline_instance, (nuecs_scene_t)scene);
 
             /* terminate pipeline */
             nuecs_pipeline_instance_terminate(&scene->pipeline_instance);
         }
 
-        /* get pipeline */
-        uint32_t pipeline_id;
-        NU_HANDLE_GET_ID(scene->next_pipeline, pipeline_id);
-        nuecs_pipeline_data_t *pipeline;
-        nu_array_get(system_manager->pipelines, pipeline_id, &pipeline);
-
         /* create new pipeline instance */
-        nuecs_pipeline_instance_initialize(&scene->pipeline_instance, pipeline);
+        nuecs_pipeline_instance_initialize(&scene->pipeline_instance, system_manager, scene->next_pipeline);
 
         /* reset next pipeline */
         scene->next_pipeline = NU_NULL_HANDLE;
 
         /* start stage */
-        nuecs_pipeline_instance_start_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+        nuecs_pipeline_instance_start(&scene->pipeline_instance, (nuecs_scene_t)scene);
     }
 
     /* run only if pipeline */
     if (scene->pipeline_instance.pipeline) {
-        
-        /* load stage */
-        nuecs_pipeline_instance_load_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
 
         /* update stage */
-        nuecs_pipeline_instance_update_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
+        nuecs_pipeline_instance_update(&scene->pipeline_instance, system_manager, (nuecs_scene_t)scene);
 
         /* clean entities */
         nuecs_scene_flush(system_manager, component_manager, scene);
-
-        /* store stage */
-        nuecs_pipeline_instance_store_stage(&scene->pipeline_instance, (nuecs_scene_t)scene);
     }
 
     return NU_SUCCESS;
@@ -186,7 +154,7 @@ nu_result_t nuecs_scene_serialize_json_object(
 
     /* get chunks */
     nuecs_chunk_data_t **chunks; uint32_t chunk_count;
-    nu_array_get_data(scene->chunks, &chunks, &chunk_count);
+    nu_array_get_data(scene->chunk_table.chunk_references, &chunks, &chunk_count);
 
     /* compute array of entities */
     for (uint32_t i = 0; i < chunk_count; i++) {
@@ -216,11 +184,11 @@ nu_result_t nuecs_scene_serialize_json_object(
         nu_json_object_put_empty_object(j_entity, "components", &j_components);
 
         /* get chunk */
-        nuecs_chunk_data_t **chunk;
-        nu_array_get(scene->chunks, NUECS_ENTITY_CHUNK(entities[i]), &chunk);
+        nuecs_chunk_data_t *chunk;
+        nuecs_chunk_table_get_chunk(&scene->chunk_table, NUECS_ENTITY_CHUNK(entities[i]), &chunk);
 
         /* iterate over components */
-        const nuecs_archetype_data_t *archetype = (*chunk)->archetype;
+        const nuecs_archetype_data_t *archetype = chunk->archetype;
         for (uint32_t j = 0; j < archetype->component_count; j++) {
             uint32_t id = archetype->component_ids[j];
 
@@ -241,7 +209,7 @@ nu_result_t nuecs_scene_serialize_json_object(
                     uint32_t index;
                     nuecs_archetype_find_component_index(archetype, id, &index);
                     nuecs_component_data_ptr_t data;
-                    nuecs_chunk_get_component(*chunk, entities[i], index, &data);
+                    nuecs_chunk_get_component(chunk, entities[i], index, &data);
 
                     /* serialize component */
                     component->serialize_json(data, (nuecs_serialization_context_t)&serialization, j_component);
@@ -359,11 +327,11 @@ nu_result_t nuecs_scene_deserialize_json_object(
 
         /* get handle and chunk */
         nuecs_entity_t entity = deserialization.entities[id];
-        nuecs_chunk_data_t **chunk;
-        nu_array_get(scene->chunks, NUECS_ENTITY_CHUNK(entity), &chunk);
+        nuecs_chunk_data_t *chunk;
+        nuecs_chunk_table_get_chunk(&scene->chunk_table, NUECS_ENTITY_CHUNK(entity), &chunk);
 
         /* iterate over components */
-        const nuecs_archetype_data_t *archetype = (*chunk)->archetype;
+        const nuecs_archetype_data_t *archetype = chunk->archetype;
         for (uint32_t component_index = 0; component_index < archetype->component_count; component_index++) {
 
             /* find component info */
@@ -380,7 +348,7 @@ nu_result_t nuecs_scene_deserialize_json_object(
 
                 /* get component data */
                 nuecs_component_data_ptr_t data;
-                nuecs_chunk_get_component(*chunk, entity, component_index, &data);
+                nuecs_chunk_get_component(chunk, entity, component_index, &data);
 
                 /* deserialize */
                 result = component->deserialize_json(data, (nuecs_deserialization_context_t)&deserialization, j_component);

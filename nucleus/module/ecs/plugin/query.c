@@ -1,13 +1,8 @@
 #include <nucleus/module/ecs/plugin/query.h>
 
-#include <nucleus/module/ecs/plugin/component_manager.h>
-#include <nucleus/module/ecs/plugin/chunk_table.h>
+#include <nucleus/module/ecs/plugin/scene.h>
+#include <nucleus/module/ecs/plugin/chunk.h>
 #include <nucleus/module/ecs/plugin/utility.h>
-
-static bool query_reference_equals(const void *user, const void *object)
-{
-    return *((nuecs_query_data_t**)user) == *((nuecs_query_data_t**)object);
-}
 
 nu_result_t nuecs_query_create(nuecs_scene_data_t *scene, const nuecs_query_info_t *info, nuecs_query_t *handle)
 {
@@ -21,19 +16,10 @@ nu_result_t nuecs_query_create(nuecs_scene_data_t *scene, const nuecs_query_info
     nuecs_sanatize_components(info->exclude_components, info->exclude_component_count, 
         exclude_components, &exclude_component_count);
 
-    /* allocate query */
-    nuecs_query_data_t *query = (nuecs_query_data_t*)nu_malloc(sizeof(nuecs_query_data_t));
-    nu_indexed_array_add(scene->queries, &query, &query->id);
-    nuecs_query_initialize(query, include_components, include_component_count, exclude_components, exclude_component_count);
-
-    /* try to subscribe to archetype slots */
-    nuecs_archetype_slot_t *slots; uint32_t slot_count;
-    nu_array_get_data(scene->chunk_table.slots, &slots, &slot_count);
-    for (uint32_t i = 0; i < slot_count; i++) {
-        if (slots[i].archetype) {
-            nuecs_query_try_subscribe(query, &slots[i]);
-        }
-    }
+    /* create query */
+    nuecs_query_data_t *query;
+    nuecs_query_table_create_query(&scene->query_table, &scene->chunk_table, 
+        include_components, include_component_count, exclude_components, exclude_component_count, &query);
 
     /* save handle */
     *handle = (nuecs_query_t)query;
@@ -44,12 +30,7 @@ nu_result_t nuecs_query_destroy(nuecs_scene_data_t *scene, nuecs_query_t handle)
 {
     /* recover handles */
     nuecs_query_data_t *query = (nuecs_query_data_t*)handle;
-
-    /* remove and terminate query */
-    nu_indexed_array_remove(scene->queries, query->id);
-    nuecs_query_terminate(query);
-    nu_free(query);
-
+    nuecs_query_table_destroy_query(&scene->query_table, query);
     return NU_SUCCESS;
 }
 nu_result_t nuecs_query_resolve(nuecs_scene_data_t *scene, nuecs_query_data_t *query, nuecs_query_result_t *result)
@@ -82,7 +63,7 @@ nu_result_t nuecs_query_initialize(
 )
 {
     /* allocate memory */
-    nu_array_allocate(&query->archetype_slots, sizeof(nuecs_archetype_slot_t*)); /* FIXME: INVALID !!! */
+    nu_array_allocate(&query->archetype_slots, sizeof(uint32_t));
     nu_array_allocate(&query->chunk_views, sizeof(nuecs_query_chunk_view_t));
     nu_array_allocate(&query->chunk_references, sizeof(nuecs_chunk_data_t*));
 
@@ -102,16 +83,8 @@ nu_result_t nuecs_query_initialize(
 }
 nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
 {
-    /* unsubscribe */
-    nuecs_archetype_slot_t **slots; uint32_t slot_count;
-    nu_array_get_data(query->archetype_slots, &slots, &slot_count);
-    for (uint32_t i = 0; i < slot_count; i++) {
-        nu_array_remove(slots[i]->notify_queries, query_reference_equals, &query);
-    }
-
     /* free views */
-    nuecs_query_chunk_view_t *views;
-    uint32_t view_count;
+    nuecs_query_chunk_view_t *views; uint32_t view_count;
     nu_array_get_data(query->chunk_views, &views, &view_count);
     for (uint32_t i = 0; i < view_count; i++) {
         nu_free(views[i].components);
@@ -126,7 +99,7 @@ nu_result_t nuecs_query_terminate(nuecs_query_data_t *query)
 
     return NU_SUCCESS;
 }
-nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_data_t *chunk)
+nu_result_t nuecs_query_add_new_chunk(nuecs_query_data_t *query, nuecs_chunk_data_t *chunk)
 {
     /* create new view */
     nu_array_push(query->chunk_views, NULL);
@@ -146,60 +119,5 @@ nu_result_t nuecs_query_notify_new_chunk(nuecs_query_data_t *query, nuecs_chunk_
         }
     }
  
-    return NU_SUCCESS;
-}
-nu_result_t nuecs_query_try_subscribe(nuecs_query_data_t *query, nuecs_archetype_slot_t *slot)
-{
-    /* get archetype */
-    const nuecs_archetype_data_t *archetype = slot->archetype;
-
-    /* check include all components */
-    bool include_all = true;
-    for (uint32_t i = 0; i < query->include_component_count; i++) {
-        bool found = false;
-        for (uint32_t j = 0; j < archetype->component_count; j++) {
-            if (archetype->component_ids[j] == query->include_component_ids[j]) {
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            include_all = false;
-            break;
-        }
-    }
-
-    /* check exclude all components */
-    bool exclude_all = true;
-    for (uint32_t i = 0; i < query->exclude_component_count; i++) {
-        bool found = false;
-        for (uint32_t j = 0; j < archetype->component_count; j++) {
-            if (archetype->component_ids[j] == query->exclude_component_ids[j]) {
-                found = true;
-                break;
-            }
-        }
-        if (found) {
-            exclude_all = false;
-            break;
-        }
-    }
-
-    /* subscribe to the slot */
-    if (include_all && exclude_all) {
-        
-        /* add references to the slot and query (both directions) */
-        nu_array_push(slot->notify_queries, &query);
-        nu_array_push(query->archetype_slots, &slot);
-
-        /* create existing chunk views */
-        nuecs_chunk_data_t **chunks;
-        uint32_t chunk_count;
-        nu_array_get_data(slot->chunks, &chunks, &chunk_count);
-        for (uint32_t i = 0; i < chunk_count; i++) {
-            nuecs_query_notify_new_chunk(query, chunks[i]);
-        }
-    }
-
     return NU_SUCCESS;
 }
