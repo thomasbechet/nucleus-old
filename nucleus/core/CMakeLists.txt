@@ -20,7 +20,6 @@ endif()
 INCLUDE_DIRECTORIES(
     ../../externals/cglm/include/
     ../../externals/ini/include/
-    ../../externals/json/include/
     ../../externals/cJSON/include/
     ../../
 )

@@ -6,26 +6,21 @@
 
 /* loader */
 #ifdef NUGLFW_LOADER_IMPLEMENTATION
-    nuglfw_window_interface_t _nuglfw_window_interface;
+    nuglfw_window_get_required_instance_extensions_pfn_t nuglfw_window_get_required_instance_extensions = NULL;
+    nuglfw_window_create_window_surface_pfn_t nuglfw_window_create_window_surface = NULL;
+    nuglfw_window_present_surface_pfn_t nuglfw_window_present_surface = NULL;
+    nuglfw_window_swap_buffers_pfn_t nuglfw_window_swap_buffers = NULL;
     nu_result_t nuglfw_window_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, NUGLFW_WINDOW_INTERFACE_NAME, &_nuglfw_window_interface);
-    }
-    nu_result_t nuglfw_window_get_required_instance_extensions(const char*** extensions, uint32_t* extension_count)
-    {
-        return _nuglfw_window_interface.get_required_instance_extensions(extensions, extension_count);
-    }
-    nu_result_t nuglfw_window_create_window_surface(void* instance, void* surface, const void* allocator_ptr)
-    {
-        return _nuglfw_window_interface.create_window_surface(instance, surface, allocator_ptr);
-    }
-    nu_result_t nuglfw_window_present_surface(const nu_vec2u_t size, void* pixels)
-    {
-        return _nuglfw_window_interface.present_surface(size, pixels);
-    }
-    nu_result_t nuglfw_window_swap_buffers(void)
-    {
-        return _nuglfw_window_interface.swap_buffers();
+        nuglfw_window_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUGLFW_WINDOW_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuglfw_window_get_required_instance_extensions = interface.get_required_instance_extensions;
+            nuglfw_window_create_window_surface = interface.create_window_surface;
+            nuglfw_window_present_surface = interface.present_surface;
+            nuglfw_window_swap_buffers = interface.swap_buffers;
+        }
+        return result;
     }
     nu_result_t nuglfw_interface_load_all(nu_module_t module)
     {
@@ -34,7 +29,10 @@
         return result;
     }
 #else
-    extern nuglfw_window_interface_t _nuglfw_window_interface;
+    extern nuglfw_window_get_required_instance_extensions_pfn_t nuglfw_window_get_required_instance_extensions;
+    extern nuglfw_window_create_window_surface_pfn_t nuglfw_window_create_window_surface;
+    extern nuglfw_window_present_surface_pfn_t nuglfw_window_present_surface;
+    extern nuglfw_window_swap_buffers_pfn_t nuglfw_window_swap_buffers;
     nu_result_t nuglfw_window_interface_load(nu_module_t module);
     nu_result_t nuglfw_interface_load_all(nu_module_t module);
 #endif

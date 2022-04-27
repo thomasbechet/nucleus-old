@@ -32,4 +32,7 @@
 /* noop */
 #define NU_NOOP
 
+/* identity */
+#define NU_IDENTITY(x) x
+
 #endif

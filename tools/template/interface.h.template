@@ -8,17 +8,20 @@
 #ifdef {{ module.namespace|upper }}_LOADER_IMPLEMENTATION
     {%- for interface in module.implement_interfaces %}
     {%- if interface.generate_loader %}
-    {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t _{{ interface.definition.namespace }}_{{ interface.definition.name }}_interface;
+    {%- for function in interface.definition.functions %}
+    {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }}_pfn_t {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }} = NULL;
+    {%- endfor %}
     nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, {{ module.namespace|upper }}_{{ interface.definition.name|upper }}_INTERFACE_NAME, &_{{ module.namespace }}_{{ interface.definition.name }}_interface);
+        {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, {{ module.namespace|upper }}_{{ interface.definition.name|upper }}_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            {%- for function in interface.definition.functions %}
+            {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }} = interface.{{ function.name }};
+            {%- endfor %}
+        }
+        return result;
     }
-    {%- for function in interface.definition.functions %}
-    nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }})
-    {
-        return _{{ interface.definition.namespace }}_{{ interface.definition.name }}_interface.{{ function.name }}({{ function.parameters|map(attribute='name')|join(', ') }});
-    }
-    {%- endfor %}
     {%- endif %}
     {%- endfor %}
     nu_result_t {{ module.namespace }}_interface_load_all(nu_module_t module)
@@ -34,7 +37,9 @@
 #else
     {%- for interface in module.implement_interfaces %}
     {%- if interface.generate_loader %}
-    extern {{ interface.definition.namespace }}_{{ interface.definition.name }}_interface_t _{{ interface.definition.namespace }}_{{ interface.definition.name }}_interface;
+    {%- for function in interface.definition.functions %}
+    extern {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }}_pfn_t {{ interface.definition.namespace }}_{{ interface.definition.name }}_{{ function.name }};
+    {%- endfor %}
     nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_interface_load(nu_module_t module);
     {%- for function in interface.functions %}
     nu_result_t {{ module.namespace }}_{{ interface.definition.name }}_{{ function.name }}({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }});

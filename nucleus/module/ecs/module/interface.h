@@ -6,118 +6,123 @@
 
 /* loader */
 #ifdef NUECS_LOADER_IMPLEMENTATION
-    nuecs_archetype_interface_t _nuecs_archetype_interface;
+    nuecs_archetype_debug_archetypes_pfn_t nuecs_archetype_debug_archetypes = NULL;
     nu_result_t nuecs_archetype_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, NUECS_ARCHETYPE_INTERFACE_NAME, &_nuecs_archetype_interface);
+        nuecs_archetype_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_ARCHETYPE_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_archetype_debug_archetypes = interface.debug_archetypes;
+        }
+        return result;
     }
-    nu_result_t nuecs_archetype_debug_archetypes(void)
-    {
-        return _nuecs_archetype_interface.debug_archetypes();
-    }
-    nuecs_scene_interface_t _nuecs_scene_interface;
+    nuecs_scene_create_pfn_t nuecs_scene_create = NULL;
+    nuecs_scene_destroy_pfn_t nuecs_scene_destroy = NULL;
+    nuecs_scene_clear_pfn_t nuecs_scene_clear = NULL;
+    nuecs_scene_set_pipeline_pfn_t nuecs_scene_set_pipeline = NULL;
+    nuecs_scene_progress_pfn_t nuecs_scene_progress = NULL;
+    nuecs_scene_serialize_json_object_pfn_t nuecs_scene_serialize_json_object = NULL;
+    nuecs_scene_deserialize_json_object_pfn_t nuecs_scene_deserialize_json_object = NULL;
+    nuecs_scene_save_json_pfn_t nuecs_scene_save_json = NULL;
+    nuecs_scene_load_json_pfn_t nuecs_scene_load_json = NULL;
+    nuecs_scene_debug_entities_pfn_t nuecs_scene_debug_entities = NULL;
     nu_result_t nuecs_scene_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, NUECS_SCENE_INTERFACE_NAME, &_nuecs_scene_interface);
+        nuecs_scene_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_SCENE_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_scene_create = interface.create;
+            nuecs_scene_destroy = interface.destroy;
+            nuecs_scene_clear = interface.clear;
+            nuecs_scene_set_pipeline = interface.set_pipeline;
+            nuecs_scene_progress = interface.progress;
+            nuecs_scene_serialize_json_object = interface.serialize_json_object;
+            nuecs_scene_deserialize_json_object = interface.deserialize_json_object;
+            nuecs_scene_save_json = interface.save_json;
+            nuecs_scene_load_json = interface.load_json;
+            nuecs_scene_debug_entities = interface.debug_entities;
+        }
+        return result;
     }
-    nu_result_t nuecs_scene_create(nuecs_scene_t* scene)
-    {
-        return _nuecs_scene_interface.create(scene);
-    }
-    nu_result_t nuecs_scene_destroy(nuecs_scene_t scene)
-    {
-        return _nuecs_scene_interface.destroy(scene);
-    }
-    nu_result_t nuecs_scene_clear(nuecs_scene_t scene)
-    {
-        return _nuecs_scene_interface.clear(scene);
-    }
-    nu_result_t nuecs_scene_progress(nuecs_scene_t scene)
-    {
-        return _nuecs_scene_interface.progress(scene);
-    }
-    nu_result_t nuecs_scene_register_system(nuecs_scene_t scene, const nuecs_system_info_t* info, nuecs_system_t* handle)
-    {
-        return _nuecs_scene_interface.register_system(scene, info, handle);
-    }
-    nu_result_t nuecs_scene_serialize_json_object(nuecs_scene_t scene, nu_json_object_t object)
-    {
-        return _nuecs_scene_interface.serialize_json_object(scene, object);
-    }
-    nu_result_t nuecs_scene_deserialize_json_object(nuecs_scene_t scene, nu_json_object_t object)
-    {
-        return _nuecs_scene_interface.deserialize_json_object(scene, object);
-    }
-    nu_result_t nuecs_scene_save_json(nuecs_scene_t scene, const char* filename)
-    {
-        return _nuecs_scene_interface.save_json(scene, filename);
-    }
-    nu_result_t nuecs_scene_load_json(nuecs_scene_t scene, const char* filename)
-    {
-        return _nuecs_scene_interface.load_json(scene, filename);
-    }
-    nu_result_t nuecs_scene_debug_entities(nuecs_scene_t scene)
-    {
-        return _nuecs_scene_interface.debug_entities(scene);
-    }
-    nuecs_query_interface_t _nuecs_query_interface;
+    nuecs_query_create_pfn_t nuecs_query_create = NULL;
+    nuecs_query_destroy_pfn_t nuecs_query_destroy = NULL;
+    nuecs_query_resolve_pfn_t nuecs_query_resolve = NULL;
     nu_result_t nuecs_query_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, NUECS_QUERY_INTERFACE_NAME, &_nuecs_query_interface);
+        nuecs_query_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_QUERY_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_query_create = interface.create;
+            nuecs_query_destroy = interface.destroy;
+            nuecs_query_resolve = interface.resolve;
+        }
+        return result;
     }
-    nu_result_t nuecs_query_create(nuecs_scene_t scene, const nuecs_query_info_t* info, nuecs_query_t* handle)
-    {
-        return _nuecs_query_interface.create(scene, info, handle);
-    }
-    nu_result_t nuecs_query_destroy(nuecs_scene_t scene, nuecs_query_t query)
-    {
-        return _nuecs_query_interface.destroy(scene, query);
-    }
-    nu_result_t nuecs_query_resolve_chunks(nuecs_scene_t scene, nuecs_query_t query, nuecs_query_chunks_t* chunks)
-    {
-        return _nuecs_query_interface.resolve_chunks(scene, query, chunks);
-    }
-    nuecs_entity_interface_t _nuecs_entity_interface;
+    nuecs_entity_create_pfn_t nuecs_entity_create = NULL;
+    nuecs_entity_destroy_pfn_t nuecs_entity_destroy = NULL;
+    nuecs_entity_add_component_pfn_t nuecs_entity_add_component = NULL;
+    nuecs_entity_remove_component_pfn_t nuecs_entity_remove_component = NULL;
+    nuecs_entity_get_component_pfn_t nuecs_entity_get_component = NULL;
     nu_result_t nuecs_entity_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, NUECS_ENTITY_INTERFACE_NAME, &_nuecs_entity_interface);
+        nuecs_entity_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_ENTITY_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_entity_create = interface.create;
+            nuecs_entity_destroy = interface.destroy;
+            nuecs_entity_add_component = interface.add_component;
+            nuecs_entity_remove_component = interface.remove_component;
+            nuecs_entity_get_component = interface.get_component;
+        }
+        return result;
     }
-    nu_result_t nuecs_entity_create(nuecs_scene_t scene, const nuecs_entity_info_t* info, nuecs_entity_t* handle)
+    nuecs_entity_reference_bind_pfn_t nuecs_entity_reference_bind = NULL;
+    nuecs_entity_reference_resolve_pfn_t nuecs_entity_reference_resolve = NULL;
+    nuecs_entity_reference_serialize_json_object_pfn_t nuecs_entity_reference_serialize_json_object = NULL;
+    nuecs_entity_reference_deserialize_json_object_pfn_t nuecs_entity_reference_deserialize_json_object = NULL;
+    nu_result_t nuecs_entity_reference_interface_load(nu_module_t module)
     {
-        return _nuecs_entity_interface.create(scene, info, handle);
+        nuecs_entity_reference_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_ENTITY_REFERENCE_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_entity_reference_bind = interface.bind;
+            nuecs_entity_reference_resolve = interface.resolve;
+            nuecs_entity_reference_serialize_json_object = interface.serialize_json_object;
+            nuecs_entity_reference_deserialize_json_object = interface.deserialize_json_object;
+        }
+        return result;
     }
-    nu_result_t nuecs_entity_destroy(nuecs_scene_t scene, nuecs_entity_t entity)
-    {
-        return _nuecs_entity_interface.destroy(scene, entity);
-    }
-    nu_result_t nuecs_entity_add_component(nuecs_scene_t scene, nuecs_entity_t entity, nuecs_component_t component, nuecs_component_data_ptr_t component_data)
-    {
-        return _nuecs_entity_interface.add_component(scene, entity, component, component_data);
-    }
-    nu_result_t nuecs_entity_remove_component(nuecs_scene_t scene, nuecs_entity_t entity, nuecs_component_t component)
-    {
-        return _nuecs_entity_interface.remove_component(scene, entity, component);
-    }
-    nu_result_t nuecs_entity_serialize_json_object(nuecs_entity_t entity, nuecs_serialization_context_t context, nu_json_object_t object, const char* name)
-    {
-        return _nuecs_entity_interface.serialize_json_object(entity, context, object, name);
-    }
-    nu_result_t nuecs_entity_deserialize_json_object(nuecs_deserialization_context_t context, nu_json_object_t object, const char* name, nuecs_entity_t* handle)
-    {
-        return _nuecs_entity_interface.deserialize_json_object(context, object, name, handle);
-    }
-    nu_result_t nuecs_entity_remap(nuecs_transfer_context_t context, nuecs_entity_t* handle)
-    {
-        return _nuecs_entity_interface.remap(context, handle);
-    }
-    nuecs_component_interface_t _nuecs_component_interface;
+    nuecs_component_build_pfn_t nuecs_component_build = NULL;
+    nuecs_component_find_pfn_t nuecs_component_find = NULL;
     nu_result_t nuecs_component_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, NUECS_COMPONENT_INTERFACE_NAME, &_nuecs_component_interface);
+        nuecs_component_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_COMPONENT_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_component_build = interface.build;
+            nuecs_component_find = interface.find;
+        }
+        return result;
     }
-    nu_result_t nuecs_component_record(const nuecs_component_info_t* info, nuecs_component_t* handle)
+    nuecs_system_build_pfn_t nuecs_system_build = NULL;
+    nu_result_t nuecs_system_interface_load(nu_module_t module)
     {
-        return _nuecs_component_interface.record(info, handle);
+        nuecs_system_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_SYSTEM_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_system_build = interface.build;
+        }
+        return result;
+    }
+    nuecs_pipeline_build_pfn_t nuecs_pipeline_build = NULL;
+    nu_result_t nuecs_pipeline_interface_load(nu_module_t module)
+    {
+        nuecs_pipeline_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUECS_PIPELINE_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuecs_pipeline_build = interface.build;
+        }
+        return result;
     }
     nu_result_t nuecs_interface_load_all(nu_module_t module)
     {
@@ -126,20 +131,48 @@
         result &= nuecs_scene_interface_load(module);
         result &= nuecs_query_interface_load(module);
         result &= nuecs_entity_interface_load(module);
+        result &= nuecs_entity_reference_interface_load(module);
         result &= nuecs_component_interface_load(module);
+        result &= nuecs_system_interface_load(module);
+        result &= nuecs_pipeline_interface_load(module);
         return result;
     }
 #else
-    extern nuecs_archetype_interface_t _nuecs_archetype_interface;
+    extern nuecs_archetype_debug_archetypes_pfn_t nuecs_archetype_debug_archetypes;
     nu_result_t nuecs_archetype_interface_load(nu_module_t module);
-    extern nuecs_scene_interface_t _nuecs_scene_interface;
+    extern nuecs_scene_create_pfn_t nuecs_scene_create;
+    extern nuecs_scene_destroy_pfn_t nuecs_scene_destroy;
+    extern nuecs_scene_clear_pfn_t nuecs_scene_clear;
+    extern nuecs_scene_set_pipeline_pfn_t nuecs_scene_set_pipeline;
+    extern nuecs_scene_progress_pfn_t nuecs_scene_progress;
+    extern nuecs_scene_serialize_json_object_pfn_t nuecs_scene_serialize_json_object;
+    extern nuecs_scene_deserialize_json_object_pfn_t nuecs_scene_deserialize_json_object;
+    extern nuecs_scene_save_json_pfn_t nuecs_scene_save_json;
+    extern nuecs_scene_load_json_pfn_t nuecs_scene_load_json;
+    extern nuecs_scene_debug_entities_pfn_t nuecs_scene_debug_entities;
     nu_result_t nuecs_scene_interface_load(nu_module_t module);
-    extern nuecs_query_interface_t _nuecs_query_interface;
+    extern nuecs_query_create_pfn_t nuecs_query_create;
+    extern nuecs_query_destroy_pfn_t nuecs_query_destroy;
+    extern nuecs_query_resolve_pfn_t nuecs_query_resolve;
     nu_result_t nuecs_query_interface_load(nu_module_t module);
-    extern nuecs_entity_interface_t _nuecs_entity_interface;
+    extern nuecs_entity_create_pfn_t nuecs_entity_create;
+    extern nuecs_entity_destroy_pfn_t nuecs_entity_destroy;
+    extern nuecs_entity_add_component_pfn_t nuecs_entity_add_component;
+    extern nuecs_entity_remove_component_pfn_t nuecs_entity_remove_component;
+    extern nuecs_entity_get_component_pfn_t nuecs_entity_get_component;
     nu_result_t nuecs_entity_interface_load(nu_module_t module);
-    extern nuecs_component_interface_t _nuecs_component_interface;
+    extern nuecs_entity_reference_bind_pfn_t nuecs_entity_reference_bind;
+    extern nuecs_entity_reference_resolve_pfn_t nuecs_entity_reference_resolve;
+    extern nuecs_entity_reference_serialize_json_object_pfn_t nuecs_entity_reference_serialize_json_object;
+    extern nuecs_entity_reference_deserialize_json_object_pfn_t nuecs_entity_reference_deserialize_json_object;
+    nu_result_t nuecs_entity_reference_interface_load(nu_module_t module);
+    extern nuecs_component_build_pfn_t nuecs_component_build;
+    extern nuecs_component_find_pfn_t nuecs_component_find;
     nu_result_t nuecs_component_interface_load(nu_module_t module);
+    extern nuecs_system_build_pfn_t nuecs_system_build;
+    nu_result_t nuecs_system_interface_load(nu_module_t module);
+    extern nuecs_pipeline_build_pfn_t nuecs_pipeline_build;
+    nu_result_t nuecs_pipeline_interface_load(nu_module_t module);
     nu_result_t nuecs_interface_load_all(nu_module_t module);
 #endif
 

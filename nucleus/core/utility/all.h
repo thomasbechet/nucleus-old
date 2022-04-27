@@ -2,6 +2,7 @@
 #define NU_COMMON_H
 
 #include <nucleus/core/utility/container/array.h>
+#include <nucleus/core/utility/container/vector.h>
 #include <nucleus/core/utility/container/hashmap.h>
 #include <nucleus/core/utility/container/indexed_array.h>
 #include <nucleus/core/utility/io.h>

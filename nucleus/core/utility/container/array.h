@@ -26,5 +26,6 @@ NU_API void nu_array_resize(nu_array_t array, uint32_t size);
 NU_API void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second);
 NU_API void nu_array_swap_last(nu_array_t array, uint32_t index);
 NU_API uint32_t nu_array_remove(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *value);
+NU_API bool nu_array_has(nu_array_t array, nu_array_equals_pfn_t cmp_pfn, const void *value);
 
 #endif

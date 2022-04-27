@@ -7,11 +7,11 @@ OPTION(NU_DEBUG_MEMORY        "Debug memory"            ON)
 
 OPTION(NU_BUILD_CORE          "Build nucleus-core"      ON)
 
-OPTION(NU_BUILD_MODULE_VULKAN "Build nucleus-vulkan"    ON)
-OPTION(NU_BUILD_MODULE_GLFW   "Build nucleus-glfw"      ON)
-OPTION(NU_BUILD_MODULE_UTILS  "Build nucleus-utils"     ON)
-OPTION(NU_BUILD_MODULE_LUA    "Build nucleus-lua"       ON)
-OPTION(NU_BUILD_MODULE_ECS    "Build nucleus-ecs"       ON)
+OPTION(NU_BUILD_MODULE_VULKAN "Build nucleus-vulkan"    OFF)
+OPTION(NU_BUILD_MODULE_GLFW   "Build nucleus-glfw"      OFF)
+OPTION(NU_BUILD_MODULE_UTILS  "Build nucleus-utils"     OFF)
+OPTION(NU_BUILD_MODULE_LUA    "Build nucleus-lua"       OFF)
+OPTION(NU_BUILD_MODULE_ECS    "Build nucleus-ecs"       OFF)
 
 # Add compile definitions
 IF (NU_DEBUG)

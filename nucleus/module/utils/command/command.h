@@ -1,7 +1,7 @@
 #ifndef NUUTILS_COMMAND_H
 #define NUUTILS_COMMAND_H
 
-#include <nucleus/module/utils/module/interface.h>
+#include <nucleus/nucleus.h>
 
 /* plugin interface */
 nu_result_t nuutils_command_plugin_initialize(void);

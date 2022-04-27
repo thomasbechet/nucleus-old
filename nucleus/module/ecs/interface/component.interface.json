@@ -3,9 +3,16 @@
     "name": "component",
     "functions": [
         {
-            "name": "record",
+            "name": "build",
             "parameters": [
                 { "type": "const nuecs_component_info_t*", "name": "info" },
+                { "type": "nuecs_component_t*", "name": "handle" }
+            ]
+        },
+        {
+            "name": "find",
+            "parameters": [
+                { "type": "const char*", "name": "name" },
                 { "type": "nuecs_component_t*", "name": "handle" }
             ]
         }

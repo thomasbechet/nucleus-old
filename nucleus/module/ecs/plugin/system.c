@@ -1,34 +1,63 @@
 #include <nucleus/module/ecs/plugin/system.h>
 
-// #define CHUNK_VIEW_SIZE(c) (sizeof(nuecs_chunk_view_t) + sizeof(nuecs_component_data_ptr_t) * (c - 1))
+nu_result_t nuecs_system_initialize(
+    nuecs_system_data_t *system,
+    const nuecs_system_info_t *info
+)
+{
+    nu_string_allocate_cstr(&system->name, info->name);
+    system->start      = info->start;
+    system->stop       = info->stop;
+    system->update     = info->update;
+    system->state_size = info->state_size;
+    return NU_SUCCESS;
+}
+nu_result_t nuecs_system_terminate(
+    nuecs_system_data_t *system
+)
+{
+    nu_string_free(system->name);
+    return NU_SUCCESS;
+}
 
-// nu_result_t nuecs_system_create(nuecs_system_data_t *system, nuecs_component_data_t **components, uint32_t component_count)
+// nu_result_t nuecs_pipeline_initialize(
+//     nuecs_pipeline_data_t *pipeline,
+//     const nuecs_pipeline_info_t *info
+// )
 // {
-//     nu_array_allocate(&system->chunks, CHUNK_VIEW_SIZE(component_count));
-//     system->component_ids = (uint32_t*)nu_malloc(sizeof(uint32_t) * component_count);
-//     for (uint32_t i = 0; i < component_count; i++) {
-//         system->component_ids[i] = components[i]->id;
+//     /* TODO: detect cyclic dependencies */
+
+//     /* allocate systems handles */
+//     nu_array_allocate(&pipeline->systems, sizeof(nuecs_system_t));
+
+//     /* allocate working node array */
+//     nu_array_t node_array;
+//     nu_array_allocate(&node_array, sizeof(nuecs_pipeline_node_t*));
+
+//     /* process list of nodes */
+//     for (uint32_t i = 0; i < info->target_count; i++) {
+//         nuecs_pipeline_process_nodes(node_array, &info->targets[i]);
 //     }
-//     system->component_count = component_count;
+
+//     /* compute list of systems */
+//     nuecs_pipeline_node_t **nodes; uint32_t node_count;
+//     nu_array_get_data(node_array, &nodes, &node_count);
+//     for (uint32_t i = 0; i < node_count; i++) {
+//         if (nodes[i]->system != NU_NULL_HANDLE) {
+//             nu_array_push(pipeline->systems, &nodes[i]->system);
+//         }
+//     }
+
+//     /* free resources */
+//     nu_array_free(node_array);
 
 //     return NU_SUCCESS;
 // }
-// nu_result_t nuecs_system_destroy(nuecs_system_data_t *system)
+// nu_result_t nuecs_pipeline_terminate(
+//     nuecs_pipeline_data_t *pipeline
+// )
 // {
-//     nu_array_free(system->chunks);
-//     nu_free(system->component_ids);
-
-//     return NU_SUCCESS;
-// }
-// nu_result_t nuecs_system_update(nuecs_system_data_t *system)
-// {
-//     /* iterate over chunks */
-//     uint32_t view_count  = nu_array_get_size(system->chunks);
-//     for (uint32_t i = 0; i < view_count; i++) {
-//         nuecs_chunk_view_t *view = nu_array_get(system->chunks, i); /* sizeof(view) is unknown */
-//         if (view->chunk->frame_size == 0) continue;
-//         system->update(view->components, view->chunk->frame_size);
-//     }
+//     nu_array_free(pipeline->systems);
 
 //     return NU_SUCCESS;
 // }

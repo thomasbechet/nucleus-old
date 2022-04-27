@@ -37,3 +37,9 @@ bool nuecs_is_subset(const uint32_t *a, uint32_t ac, const uint32_t *b, uint32_t
     }
     return has_all;
 }
+
+uint8_t nuecs_next_version(uint8_t *a)
+{
+    *a = ((*a) + 51) % 255;
+    return *a;
+}

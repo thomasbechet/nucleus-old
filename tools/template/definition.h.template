@@ -15,9 +15,13 @@
 {%- for interface in module.define_interfaces %}
 #define {{ interface.namespace|upper }}_{{ interface.name|upper }}_INTERFACE_NAME "{{ interface.namespace }}_{{ interface.name }}_interface"
 
+{%- for function in interface.functions %}
+typedef nu_result_t (*{{ interface.namespace }}_{{ interface.name }}_{{ function.name }}_pfn_t)({% for param in function.parameters %}{{ param.type }} {{ param.name }}{{ ', ' if not loop.last }}{% endfor %}{{ 'void' if not function.parameters }});
+{%- endfor %}
+
 typedef struct {
     {%- for function in interface.functions %}
-    nu_result_t (*{{ function.name }})({{ function.parameters|map(attribute='type')|join(', ') }}{{ 'void' if not function.parameters }});
+    {{ interface.namespace }}_{{ interface.name }}_{{ function.name }}_pfn_t {{ function.name }};
     {%- endfor %}
 } {{ interface.namespace }}_{{ interface.name }}_interface_t;
 {% endfor %}

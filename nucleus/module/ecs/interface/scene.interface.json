@@ -21,18 +21,17 @@
             ]
         },
         {
+            "name": "set_pipeline",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "nuecs_pipeline_t", "name": "pipeline" }
+            ]
+        },
+        {
             "name": "progress",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" }
             ]    
-        },
-        {
-            "name": "register_system",
-            "parameters": [
-                { "type": "nuecs_scene_t", "name": "scene" },
-                { "type": "const nuecs_system_info_t*", "name": "info" },
-                { "type": "nuecs_system_t*", "name": "handle" }
-            ]
         },
         {
             "name": "serialize_json_object",

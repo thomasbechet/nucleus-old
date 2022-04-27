@@ -21,7 +21,7 @@
             "name": "add_component",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" },
-                { "type": "nuecs_entity_t", "name": "entity" },
+                { "type": "nuecs_entity_t*", "name": "entity" },
                 { "type": "nuecs_component_t", "name": "component" },
                 { "type": "nuecs_component_data_ptr_t", "name": "component_data" }
             ]    
@@ -30,33 +30,17 @@
             "name": "remove_component",
             "parameters": [
                 { "type": "nuecs_scene_t", "name": "scene" },
-                { "type": "nuecs_entity_t", "name": "entity" },
+                { "type": "nuecs_entity_t*", "name": "entity" },
                 { "type": "nuecs_component_t", "name": "component" }
             ]    
         },
         {
-            "name": "serialize_json_object",
+            "name": "get_component",
             "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
                 { "type": "nuecs_entity_t", "name": "entity" },
-                { "type": "nuecs_serialization_context_t", "name": "context" },
-                { "type": "nu_json_object_t", "name": "object" },
-                { "type": "const char*", "name": "name" }
-            ]
-        },
-        {
-            "name": "deserialize_json_object",
-            "parameters": [
-                { "type": "nuecs_deserialization_context_t", "name": "context" },
-                { "type": "nu_json_object_t", "name": "object" },
-                { "type": "const char*", "name": "name" },
-                { "type": "nuecs_entity_t*", "name": "handle" }
-            ]
-        },
-        {
-            "name": "remap",
-            "parameters": [
-                { "type": "nuecs_transfer_context_t", "name": "context" },
-                { "type": "nuecs_entity_t*", "name": "handle" }
+                { "type": "nuecs_component_t", "name": "component" },
+                { "type": "nuecs_component_data_ptr_t*", "name": "data" }
             ]
         }
     ]

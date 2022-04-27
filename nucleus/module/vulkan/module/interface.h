@@ -6,46 +6,31 @@
 
 /* loader */
 #ifdef NUVK_LOADER_IMPLEMENTATION
-    nuvk_renderer_interface_t _nuvk_renderer_interface;
+    nuvk_renderer_sdf_create_pfn_t nuvk_renderer_sdf_create = NULL;
+    nuvk_renderer_sdf_destroy_pfn_t nuvk_renderer_sdf_destroy = NULL;
+    nuvk_renderer_sdf_get_primitive_pfn_t nuvk_renderer_sdf_get_primitive = NULL;
+    nuvk_renderer_material_create_pfn_t nuvk_renderer_material_create = NULL;
+    nuvk_renderer_material_destroy_pfn_t nuvk_renderer_material_destroy = NULL;
+    nuvk_renderer_sdf_instance_create_pfn_t nuvk_renderer_sdf_instance_create = NULL;
+    nuvk_renderer_sdf_instance_destroy_pfn_t nuvk_renderer_sdf_instance_destroy = NULL;
+    nuvk_renderer_sdf_instance_update_transform_pfn_t nuvk_renderer_sdf_instance_update_transform = NULL;
+    nuvk_renderer_sdf_instance_update_data_pfn_t nuvk_renderer_sdf_instance_update_data = NULL;
     nu_result_t nuvk_renderer_interface_load(nu_module_t module)
     {
-        return nu_module_get_interface(module, NUVK_RENDERER_INTERFACE_NAME, &_nuvk_renderer_interface);
-    }
-    nu_result_t nuvk_renderer_sdf_create(const nuvk_sdf_info_t* info, nuvk_sdf_t* handle)
-    {
-        return _nuvk_renderer_interface.sdf_create(info, handle);
-    }
-    nu_result_t nuvk_renderer_sdf_destroy(nuvk_sdf_t handle)
-    {
-        return _nuvk_renderer_interface.sdf_destroy(handle);
-    }
-    nu_result_t nuvk_renderer_sdf_get_primitive(nuvk_sdf_primitives_t primitive, nuvk_sdf_t* sdf)
-    {
-        return _nuvk_renderer_interface.sdf_get_primitive(primitive, sdf);
-    }
-    nu_result_t nuvk_renderer_material_create(const nuvk_material_info_t* info, nuvk_material_t* handle)
-    {
-        return _nuvk_renderer_interface.material_create(info, handle);
-    }
-    nu_result_t nuvk_renderer_material_destroy(nuvk_material_t handle)
-    {
-        return _nuvk_renderer_interface.material_destroy(handle);
-    }
-    nu_result_t nuvk_renderer_sdf_instance_create(const nuvk_sdf_instance_info_t* info, nuvk_sdf_instance_t* handle)
-    {
-        return _nuvk_renderer_interface.sdf_instance_create(info, handle);
-    }
-    nu_result_t nuvk_renderer_sdf_instance_destroy(nuvk_sdf_instance_t handle)
-    {
-        return _nuvk_renderer_interface.sdf_instance_destroy(handle);
-    }
-    nu_result_t nuvk_renderer_sdf_instance_update_transform(nuvk_sdf_instance_t handle, const nuvk_sdf_transform_t* transform)
-    {
-        return _nuvk_renderer_interface.sdf_instance_update_transform(handle, transform);
-    }
-    nu_result_t nuvk_renderer_sdf_instance_update_data(nuvk_sdf_instance_t handle, const void* data)
-    {
-        return _nuvk_renderer_interface.sdf_instance_update_data(handle, data);
+        nuvk_renderer_interface_t interface;
+        nu_result_t result = nu_module_get_interface(module, NUVK_RENDERER_INTERFACE_NAME, &interface);
+        if (result == NU_SUCCESS) {
+            nuvk_renderer_sdf_create = interface.sdf_create;
+            nuvk_renderer_sdf_destroy = interface.sdf_destroy;
+            nuvk_renderer_sdf_get_primitive = interface.sdf_get_primitive;
+            nuvk_renderer_material_create = interface.material_create;
+            nuvk_renderer_material_destroy = interface.material_destroy;
+            nuvk_renderer_sdf_instance_create = interface.sdf_instance_create;
+            nuvk_renderer_sdf_instance_destroy = interface.sdf_instance_destroy;
+            nuvk_renderer_sdf_instance_update_transform = interface.sdf_instance_update_transform;
+            nuvk_renderer_sdf_instance_update_data = interface.sdf_instance_update_data;
+        }
+        return result;
     }
     nu_result_t nuvk_interface_load_all(nu_module_t module)
     {
@@ -54,7 +39,15 @@
         return result;
     }
 #else
-    extern nuvk_renderer_interface_t _nuvk_renderer_interface;
+    extern nuvk_renderer_sdf_create_pfn_t nuvk_renderer_sdf_create;
+    extern nuvk_renderer_sdf_destroy_pfn_t nuvk_renderer_sdf_destroy;
+    extern nuvk_renderer_sdf_get_primitive_pfn_t nuvk_renderer_sdf_get_primitive;
+    extern nuvk_renderer_material_create_pfn_t nuvk_renderer_material_create;
+    extern nuvk_renderer_material_destroy_pfn_t nuvk_renderer_material_destroy;
+    extern nuvk_renderer_sdf_instance_create_pfn_t nuvk_renderer_sdf_instance_create;
+    extern nuvk_renderer_sdf_instance_destroy_pfn_t nuvk_renderer_sdf_instance_destroy;
+    extern nuvk_renderer_sdf_instance_update_transform_pfn_t nuvk_renderer_sdf_instance_update_transform;
+    extern nuvk_renderer_sdf_instance_update_data_pfn_t nuvk_renderer_sdf_instance_update_data;
     nu_result_t nuvk_renderer_interface_load(nu_module_t module);
     nu_result_t nuvk_interface_load_all(nu_module_t module);
 #endif

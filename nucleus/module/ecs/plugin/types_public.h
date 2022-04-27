@@ -7,10 +7,12 @@
 
 NU_DECLARE_HANDLE(nuecs_scene_t);
 NU_DECLARE_HANDLE(nuecs_entity_t);
+NU_DECLARE_HANDLE(nuecs_entity_reference_t);
 NU_DECLARE_HANDLE(nuecs_component_t);
 NU_DECLARE_HANDLE(nuecs_system_t);
-NU_DECLARE_HANDLE(nuecs_archetype_t);
+NU_DECLARE_HANDLE(nuecs_pipeline_t);
 NU_DECLARE_HANDLE(nuecs_query_t);
+NU_DECLARE_HANDLE(nuecs_command_buffer_t);
 NU_DECLARE_HANDLE(nuecs_serialization_context_t);
 NU_DECLARE_HANDLE(nuecs_deserialization_context_t);
 NU_DECLARE_HANDLE(nuecs_transfer_context_t);
@@ -18,25 +20,53 @@ NU_DECLARE_HANDLE(nuecs_transfer_context_t);
 typedef void *nuecs_component_data_ptr_t;
 typedef nu_result_t (*nuecs_component_serialize_json_pfn_t)(nuecs_component_data_ptr_t, nuecs_serialization_context_t, nu_json_object_t);
 typedef nu_result_t (*nuecs_component_deserialize_json_pfn_t)(nuecs_component_data_ptr_t, nuecs_deserialization_context_t, nu_json_object_t);
-typedef nu_result_t (*nuecs_component_initialize_pfn_t)(nuecs_component_data_ptr_t);
-typedef nu_result_t (*nuecs_component_terminate_pfn_t)(nuecs_component_data_ptr_t);
 typedef nu_result_t (*nuecs_component_transfer_pfn_t)(nuecs_component_data_ptr_t, nuecs_transfer_context_t);
+
+typedef enum {
+    NUECS_COMPONENT_FLAG_NONE         = 0x0,
+    NUECS_COMPONENT_FLAG_SYSTEM_STATE = 0x1,
+    NUECS_COMPONENT_FLAG_SERIALIZABLE = 0x2,
+    NUECS_COMPONENT_FLAG_SINGLETON    = 0x4
+} nuecs_component_flags_t;
 
 typedef struct {
     const char *name;
     uint32_t size;
-    nuecs_component_initialize_pfn_t initialize;
-    nuecs_component_terminate_pfn_t terminate;
+    uint8_t flags;
     nuecs_component_serialize_json_pfn_t serialize_json;
     nuecs_component_deserialize_json_pfn_t deserialize_json;
     nuecs_component_transfer_pfn_t transfer;
 } nuecs_component_info_t;
 
+typedef enum {
+    NUECS_COMPONENT_ACCESS_READ,
+    NUECS_COMPONENT_ACCESS_WRITE
+} nuecs_component_access_t;
+
 typedef struct {
-    nuecs_component_t *components;
-    uint32_t component_count;
-    nu_result_t (*update)(nuecs_component_data_ptr_t *components, uint32_t count);
+    nuecs_component_t component;
+    nuecs_component_access_t access;
+} nuecs_component_dependency_t;
+
+typedef nu_result_t (*nuecs_system_start_pfn_t)(void*, nuecs_scene_t);
+typedef nu_result_t (*nuecs_system_stop_pfn_t)(void*, nuecs_scene_t);
+typedef nu_result_t (*nuecs_system_update_pfn_t)(void*, nuecs_scene_t);
+
+typedef struct {
+    const char *name;
+    uint32_t state_size;
+    nuecs_component_dependency_t *dependencies;
+    uint32_t dependency_count;
+    nuecs_system_start_pfn_t start;
+    nuecs_system_stop_pfn_t stop;
+    nuecs_system_update_pfn_t update;
 } nuecs_system_info_t;
+
+typedef struct {
+    const char *name;
+    nuecs_system_t *systems;
+    uint32_t system_count;
+} nuecs_pipeline_info_t;
 
 typedef struct {
     nuecs_component_t *components;
@@ -44,17 +74,11 @@ typedef struct {
     uint32_t component_count;
 } nuecs_entity_info_t;
 
-typedef enum {
-    NUECS_QUERY_TYPE_CHUNK,
-    NUECS_QUERY_TYPE_ENTITY,
-    NUECS_QUERY_ALL_ENTITIES,
-    NUECS_QUERY_INITIALIZED_ENTITIES
-} nuecs_query_type_t;
-
 typedef struct {
-    nuecs_component_t *components;
-    uint32_t component_count;
-    nuecs_query_type_t type;
+    nuecs_component_t *include_components;
+    uint32_t include_component_count;
+    nuecs_component_t *exclude_components;
+    uint32_t exclude_component_count;
 } nuecs_query_info_t;
 
 typedef struct {
@@ -63,8 +87,8 @@ typedef struct {
 } nuecs_query_chunk_view_t;
 
 typedef struct {
-    nuecs_query_chunk_view_t *views;
-    uint32_t view_count;
-} nuecs_query_chunks_t;
+    nuecs_query_chunk_view_t *chunks;
+    uint32_t count;
+} nuecs_query_result_t;
 
 #endif

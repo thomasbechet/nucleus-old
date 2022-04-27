@@ -1,0 +1,40 @@
+{
+    "namespace": "nuecs",
+    "name": "entity_reference",
+    "functions": [
+        {
+            "name": "bind",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "nuecs_entity_reference_t*", "name": "handle" },
+                { "type": "nuecs_entity_t", "name": "entity" }
+            ]    
+        },
+        {
+            "name": "resolve",
+            "parameters": [
+                { "type": "nuecs_scene_t", "name": "scene" },
+                { "type": "nuecs_entity_reference_t*", "name": "handle" },
+                { "type": "nuecs_entity_t*", "name": "entity" }
+            ]
+        },
+        {
+            "name": "serialize_json_object",
+            "parameters": [
+                { "type": "nuecs_entity_reference_t*", "name": "handle" },
+                { "type": "nuecs_serialization_context_t", "name": "context" },
+                { "type": "nu_json_object_t", "name": "object" },
+                { "type": "const char*", "name": "name" }
+            ]
+        },
+        {
+            "name": "deserialize_json_object",
+            "parameters": [
+                { "type": "nuecs_deserialization_context_t", "name": "context" },
+                { "type": "nu_json_object_t", "name": "object" },
+                { "type": "const char*", "name": "name" },
+                { "type": "nuecs_entity_reference_t*", "name": "handle" }
+            ]
+        }
+    ]
+}
