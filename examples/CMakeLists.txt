@@ -14,8 +14,9 @@ INCLUDE_DIRECTORIES(
 
 ADD_EXECUTABLE(
     ${PROJECT_NAME}
-    main.c
+    #main.c
     #containers_test.c
+    test.c
 )
 
 TARGET_LINK_LIBRARIES(

@@ -1,7 +1,6 @@
 #ifndef NUECS_PIPELINE_H
 #define NUECS_PIPELINE_H
 
-#include <nucleus/module/ecs/plugin/types_public.h>
 #include <nucleus/module/ecs/plugin/system_manager.h>
 
 typedef struct {

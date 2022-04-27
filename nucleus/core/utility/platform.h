@@ -29,12 +29,24 @@
     #else
         #define NU_ALIGN(X) __attribute((aligned(X)))
     #endif
+    /* typeof */
+    #if defined(_MSC_VER)
+        #define NU_TYPEOF(X) _Generic(X)
+    #else
+        #define NU_TYPEOF(X) typeof(X)
+    #endif
 #elif defined(NU_PLATFORM_UNIX)
     /* api */
     #define NU_API_EXPORT __attribute__((visibility("default")))
     #define NU_API_IMPORT
     /* memory aligment */
     #define NU_ALIGN(X) __attribute((aligned(X)))
+    /* typeof */
+    #if defined(_MSC_VER)
+        #define NU_TYPEOF(X) _Generic(X)
+    #else
+        #define NU_TYPEOF(X) typeof(X)
+    #endif
 #else
     /* api */
     #define NU_API_EXPORT

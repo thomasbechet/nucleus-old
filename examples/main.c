@@ -280,6 +280,13 @@ static uint32_t nu_random()
 }
 static nu_result_t on_start(void)
 {
+    nu_vector(uint32_t) vec;
+    nu_vector_allocate(&vec);
+    nu_info("test", "size %d", nu_vector_get_size(vec));
+    nu_vector_push(&vec, 5);
+    nu_info("test", "size %d", nu_vector_get_size(vec));
+    nu_vector_free(vec);
+
     nu_module_t module;
     NU_ASSERT(nu_module_load("$MODULE/nucleus-utils", &module) == NU_SUCCESS);
     nu_plugin_require(module, NUUTILS_COMMAND_PLUGIN_NAME);
