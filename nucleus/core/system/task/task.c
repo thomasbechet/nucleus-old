@@ -21,15 +21,15 @@ nu_result_t nu_task_initialize(void)
     nu_task_api_t api = nu_config_get().task.api;
 
     if (api != NU_TASK_API_NONE) {
-        /* get task module */
+        // Get task module
         result = nu_module_load("$MODULE_DIR/none", &_system.module);
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_TASK_NAME, "Failed to get module.");
 
-        /* get task interface */
+        // Get task interface
         result = nu_module_get_interface(_system.module, NU_TASK_INTERFACE_NAME, &_system.interface);
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_TASK_NAME, "Failed to get interface.");
 
-        /* initialize task system */
+        // Initialize task system
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_TASK_NAME, "Failed to initialize task system.");

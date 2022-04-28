@@ -1,6 +1,6 @@
 #include <nucleus/core/config/config.h>
 
-/* Dependencies with nu_core_log(), should be moved */
+// Dependencies with nu_core_log(), should be moved
 #include <nucleus/core/coresystem/logger/logger.h>
 
 #include <stdlib.h>
@@ -44,23 +44,23 @@ static nu_result_t load_ini_file(void)
     int code = ini_parse("engine/nucleus.ini", handler, NULL);
     NU_CHECK(code >= 0, return NU_FAILURE, NU_LOGGER_NAME, "Failed to parse ini file.");
 
-    /* context */
+    // Context
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MAJOR, 0, &_system.config.context.version_major);
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_MINOR, 0, &_system.config.context.version_minor);
     nu_config_get_uint(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_VERSION_PATCH, 1, &_system.config.context.version_patch);
     nu_config_get_bool(NU_CONFIG_CONTEXT_SECTION, NU_CONFIG_CONTEXT_LOG_CONFIG, true, &_system.config.context.log_config);
 
-    /* logger */
+    // Logger
     nu_config_get_bool(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_ENABLE_LOG_FILE, false, &_system.config.logger.enable_log_file);
     nu_config_get_bool(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_ENABLE_CORE_LOG_FILE, false, &_system.config.logger.enable_core_log_file);
     nu_config_get_cstr(NU_CONFIG_LOGGER_SECTION, NU_CONFIG_LOGGER_LOG_FILE_DIRECTORY, NU_PATH_ROOT_DIRECTORY, &_system.config.logger.log_file_directory);
 
-    /* task */
+    // Task
     const char *task_api;
     nu_config_get_cstr(NU_CONFIG_TASK_SECTION, NU_CONFIG_TASK_API, NULL, &task_api);
     _system.config.task.api = NU_TASK_API_NONE;
 
-    /* window */
+    // Window
     const char *window_api;
     nu_config_get_cstr(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_API, NULL, &window_api);
     if (NU_MATCH(window_api, "glfw")) {
@@ -83,7 +83,7 @@ static nu_result_t load_ini_file(void)
     nu_config_get_uint(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_HEIGHT, 900, &_system.config.window.height);
     nu_config_get_bool(NU_CONFIG_WINDOW_SECTION, NU_CONFIG_WINDOW_VSYNC, true, &_system.config.window.vsync);
 
-    /* input */
+    // Input
     const char *input_api;
     nu_config_get_cstr(NU_CONFIG_INPUT_SECTION, NU_CONFIG_INPUT_API, "", &input_api);
     if (NU_MATCH(input_api, "glfw")) {
@@ -102,7 +102,7 @@ static nu_result_t load_ini_file(void)
         _system.config.input.cursor_mode = NU_CURSOR_MODE_DISABLE;
     }
 
-    /* renderer */
+    // Renderer
     const char *renderer_api;
     nu_config_get_cstr(NU_CONFIG_RENDERER_SECTION, NU_CONFIG_RENDERER_API, "", &renderer_api);
     if (NU_MATCH(renderer_api, "softrast")) {
@@ -261,7 +261,7 @@ nu_result_t nu_config_log(void)
     const char *name_header    = "NAME";
     const char *value_header   = "VALUE";
 
-    /* compute maximal length */
+    // Compute maximal length
     uint32_t max_section = strlen(section_header);
     uint32_t max_name    = strlen(name_header);
     uint32_t max_value   = strlen(value_header);

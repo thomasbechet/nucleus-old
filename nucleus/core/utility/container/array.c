@@ -51,7 +51,7 @@ void nu_array_allocate_from(nu_array_t *array, const void *data, uint32_t object
     nu_array_header_t *header = (nu_array_header_t*)(*array);
     header->size = object_count;
 
-    /* copy data content to the array */
+    // Copy data content to the array
     memcpy(header->data, data, object_count * object_size);
 }
 void nu_array_free(nu_array_t array)
@@ -151,11 +151,11 @@ void nu_array_swap(nu_array_t array, uint32_t first, uint32_t second)
         void *dfirst  = header->data + first * header->object_size;
         void *dsecond = header->data + second * header->object_size;
         void *dswap   = (uint8_t*)header + sizeof(nu_array_header_t);
-        /* copy first to the swap space */
+        // Copy first to the swap space
         memcpy(dswap, dfirst, header->object_size);
-        /* copy second to first */
+        // Copy second to first
         memcpy(dfirst, dsecond, header->object_size);
-        /* copy swap space (first) to second */
+        // Copy swap space (first) to second
         memcpy(dsecond, dswap, header->object_size);
     }
 }

@@ -16,7 +16,7 @@ static nu_result_t on_start(void)
     }
     nu_vector_free(vec);
 
-    /* exit */
+    // Exit
     nu_context_request_stop();
 
     return NU_SUCCESS;

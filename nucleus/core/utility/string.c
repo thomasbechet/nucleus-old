@@ -306,14 +306,15 @@ static inline uint32_t nu_string_replace_ncstr(nu_string_t *str, const char *tok
         uint32_t count = 0;
         uint32_t index;
         while ((index = nu_string_find_first_ncstr(cstr, len, token, ntoken)) != len) {
-            /* update index in the whole string view */
+            
+            // Update index in the whole string view
             index += (cstr - first);
 
-            /* replace the token by other */
+            // Replace the token by other
             nu_string_erase(str, index, ntoken);
             nu_string_insert_ncstr(str, other, nother, index);
 
-            /* update string pointer and length */
+            // Update string pointer and length
             cstr = nu_string_get_cstr(*str) + (index + nother);
             len = nstr - index - ntoken;
 
@@ -351,16 +352,16 @@ void nu_string_trim(nu_string_t *str)
 
     char *pstart = pstr;
 
-    /* trim leading space */
+    // Trim leading space
     while (isspace(*pstart)) pstart++;
 
-    /* all spaces ? */
+    // All spaces ?
     if (*pstart == '\0') {
         nu_string_realloc_(str, 0);
         return;
     }
 
-    /* trim trailing space */
+    // Trim trailing space
     char *pend = pstr + len - 1;
     while (pend > pstart && isspace(*pend)) pend--;
 
@@ -385,17 +386,17 @@ static inline void nu_string_split_ncstr(const char *cstr, uint32_t n, const cha
     if (len == 0) return;
 
     for (i = 0; i < len; i++) {
-        /* find separator */
+        // Find separator
         if ((i <= (len - dlen)) && (memcmp(s + i, delim, dlen) == 0)) {
             tlen = i - start;
-            if (tlen != 0) { /* valid token */
+            if (tlen != 0) { // Valid token
                 nu_string_array_add_ncstr(tokens, s + start, tlen);
             }
             start = i = i + dlen;
         }
     }
 
-    /* add final token */
+    // Add final token
     tlen = len - start;
     if (tlen > 0) {
         nu_string_array_add_ncstr(tokens, s + start, tlen);
@@ -453,22 +454,22 @@ uint32_t nu_string_array_get_length(nu_string_array_t array)
 void nu_string_array_add_ncstr(nu_string_array_t array, const char *cstr, uint32_t n)
 {
     nu_string_array_header_t *header = (nu_string_array_header_t*)array;
-    /* realloc data */
+    // Realloc data
     if (header->head + n + 1 > header->data_capacity) {
         header->data_capacity = (header->head + n + 1) * 2;
         header->data = (char*)nu_realloc(header->data, header->data_capacity);
     }
-    /* realloc indexes */
+    // Realloc indexes
     if (header->length >= header->index_capacity) {
         header->index_capacity *= 2;
         header->indexes = (uint32_t*)nu_realloc(header->indexes, header->index_capacity);
     }
-    /* save index */
+    // Save index
     header->indexes[header->length] = header->head;
-    /* copy the cstr */
+    // Copy the cstr
     memcpy(header->data + header->head, cstr, n);
     header->data[header->head + n] = '\0';
-    /* udpate meta data */
+    // Udpate meta data
     header->head += n + 1;
     header->length++;
 }

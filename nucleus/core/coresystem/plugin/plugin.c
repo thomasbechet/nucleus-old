@@ -17,14 +17,14 @@ static nu_system_data_t _system;
 
 nu_result_t nu_plugin_initialize(void)
 {
-    /* allocate memory */
+    // Allocate memory
     nu_array_allocate(&_system.plugins, sizeof(nu_plugin_data_t));
 
     return NU_SUCCESS;
 }
 nu_result_t nu_plugin_terminate(void)
 {
-    /* free resources */
+    // Free resources
     nu_plugin_data_t *plugins;
     uint32_t plugin_count;
     nu_array_get_data(_system.plugins, &plugins, &plugin_count);
@@ -93,7 +93,7 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
     nu_result_t result;
     result = NU_SUCCESS;
 
-    /* check exists */
+    // Check exists
     nu_plugin_data_t *plugins;
     uint32_t size;
     nu_array_get_data(_system.plugins, &plugins, &size);
@@ -103,37 +103,37 @@ nu_result_t nu_plugin_require(nu_module_t module, const char *plugin_name)
         }
     }
 
-    /* create new plugin */
+    // Create new plugin
     nu_plugin_data_t plugin;
     memset(&plugin, 0, sizeof(nu_plugin_data_t));
 
-    /* get plugin interface */
+    // Get plugin interface
     nu_plugin_interface_t interface;
     result = nu_module_get_interface(module, NU_PLUGIN_INTERFACE_NAME, (nu_pfn_t*)&interface);
     NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_NAME, "Failed to get '%s' interface for plugin: %s.", NU_PLUGIN_INTERFACE_NAME, plugin_name);
 
-    /* get callbacks */
+    // Get callbacks
     result = interface.get_callbacks(plugin_name, &plugin.callbacks);
     NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_NAME, "Failed to get plugin callbacks: %s.", plugin);
 
-    /* save plugin name and module*/
+    // Save plugin name and module
     plugin.module = module;
     nu_string_allocate_cstr(&plugin.name, plugin_name);
 
-    /* initialize plugin */
+    // Initialize plugin
     if (plugin.callbacks.initialize) {
         result = plugin.callbacks.initialize();
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_NAME, "Failed to initialize plugin: %s.", plugin_name);
     }
 
-    /* add the plugin */
+    // Add the plugin
     nu_array_push(_system.plugins, &plugin);
 
     return NU_SUCCESS;
 }
 nu_result_t nu_plugin_get_list(nu_module_t module, uint32_t *count, const char ***plugins)
 {
-    /* get plugin interface */
+    // Get plugin interface
     nu_plugin_interface_t interface;
     nu_result_t result = nu_module_get_interface(module, NU_PLUGIN_INTERFACE_NAME, (nu_pfn_t*)&interface);
     if (result != NU_SUCCESS) {
@@ -141,6 +141,6 @@ nu_result_t nu_plugin_get_list(nu_module_t module, uint32_t *count, const char *
         *plugins = NULL;
     }
 
-    /* get list */
+    // Get list
     return interface.get_list(count, plugins);
 }

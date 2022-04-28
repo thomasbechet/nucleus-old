@@ -3,23 +3,26 @@
 #include <nucleus/core/coresystem/memory/memory.h>
 
 #if defined(NU_PLATFORM_UNIX)
-/* taken from https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
+// Taken from https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950
+#include <limits.h>
+#include <sys/stat.h>
+#include <errno.h>
 static nu_result_t create_directory(const char *dir)
 {
     const size_t len = strlen(dir);
     char _dir[PATH_MAX];
     char *p;
 
-    /* copy string so its mutable */
+    // Copy string so its mutable
     if (len > sizeof(_dir) - 1) {
         return NU_FAILURE;
     }   
     strcpy(_dir, dir);
 
-    /* iterate the string */
+    // Iterate the string
     for (p = _dir + 1; *p; p++) {
         if (*p == '/') {
-            /* temporarily truncate */
+            // Temporarily truncate
             *p = '\0';
 
             if (mkdir(_dir, S_IRWXU) != 0) {

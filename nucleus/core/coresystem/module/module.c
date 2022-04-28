@@ -71,19 +71,19 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
 {
     nu_result_t result;
 
-    /* reset memory */
+    // Reset memory
     memset(module, 0, sizeof(nu_module_data_t));
     nu_string_allocate_cstr(&module->path, path_cstr);
     nu_string_resolve_path(&module->path);
 
-    /* extract directory and filename */
+    // Extract directory and filename
     nu_string_t filename, directory;
     nu_string_get_directory(module->path, &directory);
     nu_string_get_filename(module->path, &filename);
 
-    /* loading module */
-#if defined(NU_PLATFORM_WINDOWS)
+    // Loading module
     nu_string_t final_path;
+#if defined(NU_PLATFORM_WINDOWS)
     
     #if defined(__MINGW32__)
         nu_string_allocate_format(&final_path, "%slib%s.dll", nu_string_get_cstr(directory),
@@ -95,22 +95,20 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
 
     module->raw = LoadLibraryA(nu_string_get_cstr(final_path));
 
-    nu_string_free(final_path);
 #elif defined(NU_PLATFORM_UNIX)
     nu_string_allocate_format(&final_path, "%slib%s.so", nu_string_get_cstr(directory),
         nu_string_get_cstr(filename));
 
-    module->raw = dlopen(path, RTLD_LAZY);
-
-    nu_string_free(final_path);
+    module->raw = dlopen(nu_string_get_cstr(final_path), RTLD_LAZY);
 #endif
+    nu_string_free(final_path);
 
     nu_string_free(directory);
     nu_string_free(filename);
 
     NU_CHECK(module->raw, goto cleanup0, NU_LOGGER_NAME, "Failed to load module '%s'.", path_cstr);
 
-    /* get module info */
+    // Get module info
     nu_module_info_loader_pfn_t module_get_info;
     result = get_function(module, NU_MODULE_INFO_NAME, (nu_pfn_t*)&module_get_info);
     NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME, "'%s' function is required to load the module '%s'.", NU_MODULE_INFO_NAME, path_cstr);
@@ -118,7 +116,7 @@ static nu_result_t load_module(const char *path_cstr, nu_module_data_t *module)
     result = module_get_info(&module->info);
     NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME, "Failed to retrieve info from module '%s'.", path_cstr);
 
-    /* get interface loader */
+    // Get interface loader
     if (module->info.interface_count > 0) {
         result = get_function(module, NU_MODULE_INTERFACE_NAME, (nu_pfn_t*)&module->interface_loader);
         NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME, "Module '%s' has interfaces but no interface loader.", module->info.name);
@@ -136,14 +134,14 @@ cleanup0:
 
 nu_result_t nu_module_initialize(void)
 {
-    /* allocate module array */
+    // Allocate module array
     nu_indexed_array_allocate(&_system.modules, sizeof(nu_module_data_t));
 
     return NU_SUCCESS;
 }
 nu_result_t nu_module_terminate(void)
 {
-    /* unload all module */
+    // Unload all module
     nu_module_data_t *data;
     uint32_t size;
     nu_indexed_array_get_data(_system.modules, &data, &size);
@@ -151,7 +149,7 @@ nu_result_t nu_module_terminate(void)
         unload_module(&data[i]);
     }
 
-    /* free resources */
+    // Free resources
     nu_indexed_array_free(_system.modules);
 
     return NU_SUCCESS;
@@ -167,18 +165,18 @@ nu_result_t nu_module_stop(void)
 
 nu_result_t nu_module_load(const char *path, nu_module_t *handle)
 {
-    /* load module */
+    // Load module
     nu_module_data_t module;
     if (load_module(path, &module) != NU_SUCCESS) {
         return NU_FAILURE;
     }
 
-    /* save id */
+    // Save id
     uint32_t id;
     nu_indexed_array_add(_system.modules, &module, &id);
     NU_HANDLE_SET_ID(*handle, id);
 
-    /* store handle */
+    // Store handle
     nu_module_data_t *pmodule; nu_indexed_array_get(_system.modules, id, &pmodule);
     pmodule->handle = *handle;
 
@@ -251,30 +249,30 @@ static void print_module_line_at_index(
     char *name, char *id, char *flag, char *interface, char *plugin, uint32_t n
 )
 {
-    /* set default value */
+    // Set default value
     strncpy(name,      "", n);
     strncpy(id,        "", n);
     strncpy(flag,      "", n);
     strncpy(interface, "", n);
     strncpy(plugin,    "", n);
 
-    /* name + id */
+    // Name + Id
     if (index == 0) {
         strncpy(name, module->info.name, n);
         nu_snprintf(id, n, "0x%x", module->info.id);
     }
 
-    /* flag */
+    // Flag
     if (index < flag_count) strncpy(flag, flags[index], n);
 
-    /* interface */
+    // Interface
     if (index == 0 && module->info.interface_count == 0) {
         strncpy(interface, "none", n);
     } else if (index < module->info.interface_count) {
         strncpy(interface, module->info.interfaces[index], n);
     }
 
-    /* plugin */
+    // Plugin
     if (index == 0 && plugin_count == 0) {
         strncpy(plugin, "none", n);
     } else if (index < plugin_count) {
@@ -293,12 +291,12 @@ static void compute_max(
     *max_plugin    = strlen(HEADER_PLUGINS);
     for (uint32_t m = 0; m < module_count; m++) {
 
-        /* plugins */
+        // Plugins
         const char **plugins;
         uint32_t plugin_count;
         nu_plugin_get_list(modules[m].handle, &plugin_count, &plugins);
 
-        /* flags */
+        // Flags
         char flags[MAX_MODULE_FLAG_COUNT][128];
         uint32_t flag_count, count;
         module_get_line_count_with_flags(&modules[m], flags, 128, &flag_count, &count);
@@ -376,35 +374,35 @@ static void log_line(
 }
 nu_result_t nu_module_log(void)
 {
-    /* get module data */
+    // Get module data
     nu_module_data_t *modules;
     uint32_t module_count;
     nu_indexed_array_get_data(_system.modules, &modules, &module_count);
 
-    /* compute max */
+    // Compute max
     uint32_t max_name, max_id, max_flag, max_interface, max_plugin;
     compute_max(modules, module_count, &max_name, &max_id, &max_flag, &max_interface, &max_plugin);
 
-    /* display header */
+    // Display header
     log_transition_line(max_name, max_id, max_flag, max_interface, max_plugin);
     log_line(max_name, max_id, max_flag, max_interface, max_plugin, HEADER_NAME, HEADER_ID, HEADER_FLAGS, HEADER_INTERFACES, HEADER_PLUGINS);
 
-    /* display */
+    // Display
     log_transition_line(max_name, max_id, max_flag, max_interface, max_plugin);
     for (uint32_t i = 0; i < module_count; i++) {
         const nu_module_data_t *module = &modules[i];
 
-        /* flags */
+        // Flags
         char flags[MAX_MODULE_FLAG_COUNT][128];
         uint32_t flag_count, count;
         module_get_line_count_with_flags(module, flags, 128, &flag_count, &count);
 
-        /* plugins */
+        // Plugins
         const char **plugins;
         uint32_t plugin_count;
         nu_plugin_get_list(module->handle, &plugin_count, &plugins);
 
-        /* show line */
+        // Show line
         for (uint32_t l = 0; l < count; l++) {
             char name[128];
             char id[128];

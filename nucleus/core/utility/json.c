@@ -52,23 +52,23 @@ nu_result_t nu_json_allocate_from_cstr(nu_json_t *json, const char *cstr)
 }
 nu_result_t nu_json_save_file(nu_json_t json, const char *filename, bool minify)
 {
-    /* resolve path */
+    // Resolve path
     nu_string_t path;
     nu_string_allocate_cstr(&path, filename);
     nu_string_resolve_path(&path);
 
-    /* open file */
+    // Open file
     nu_file_t file;
     nu_result_t result = nu_file_open(&file, nu_string_get_cstr(path), NU_IO_MODE_WRITE);
     NU_CHECK(result == NU_SUCCESS, goto cleanup0, NU_LOGGER_NAME,
         "Failed to open file: %s.", nu_string_get_cstr(path));
 
-    /* render json */
+    // Render json
     char *buffer = minify ? cJSON_PrintUnformatted((const cJSON*)json) : cJSON_Print((const cJSON*)json);
     NU_CHECK(result == NU_SUCCESS, goto cleanup1, NU_LOGGER_NAME,
         "Failed to render json.");
 
-    /* write file */
+    // Write file
     result = nu_file_write_cstr(file, buffer);
     NU_CHECK(result == NU_SUCCESS, goto cleanup2, NU_LOGGER_NAME,
         "Failed to write file.");

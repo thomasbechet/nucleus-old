@@ -18,14 +18,14 @@ static nu_system_data_t _system;
 
 nu_result_t nu_event_initialize(void)
 {
-    /* allocate resources */
+    // Allocate resources
     nu_array_allocate(&_system.events, sizeof(nu_event_data_t));
 
     return NU_SUCCESS;
 }
 nu_result_t nu_event_terminate(void)
 {
-    /* terminate all messages */
+    // Terminate all messages
     nu_event_data_t *events;
     uint32_t event_count;
     nu_array_get_data(_system.events, &events, &event_count);
@@ -40,7 +40,7 @@ nu_result_t nu_event_terminate(void)
         nu_array_clear(events[ei].messages);
     }
 
-    /* free message buffers */
+    // Free message buffers
     for (uint32_t i = 0; i < event_count; i++) {
         nu_array_free(events[i].messages);
         nu_array_free(events[i].subscribers);
@@ -60,28 +60,28 @@ nu_result_t nu_event_stop(void)
 
 nu_result_t nu_event_register(const nu_event_register_info_t *info, nu_event_id_t *id)
 {
-    /* create event */
+    // Create event
     nu_event_data_t event;
     nu_array_allocate(&event.messages, info->size);
     nu_array_allocate(&event.subscribers, sizeof(nu_event_callback_pfn_t));
     event.initialize = info->initialize;
     event.terminate  = info->terminate;
 
-    /* save the id */
+    // Save the id
     *id = nu_array_get_size(_system.events);
 
-    /* add the event */
+    // Add the event
     nu_array_push(_system.events, &event);
 
     return NU_SUCCESS;
 }
 nu_result_t nu_event_post(nu_event_id_t id, void *data)
 {
-    /* add the message */
+    // Add the message
     nu_event_data_t *event; nu_array_get(_system.events, id, &event);
     nu_array_push(event->messages, data);
 
-    /* initialize message */
+    // Initialize message
     if (event->initialize) {
         event->initialize(data);
     }
@@ -99,23 +99,23 @@ nu_result_t nu_event_dispatch(nu_event_id_t id)
 {
     nu_event_data_t *event; nu_array_get(_system.events, id, &event);
 
-    /* dispatch */
+    // Dispatch
     uint32_t message_count = nu_array_get_size(event->messages);
     nu_event_callback_pfn_t *subscribers;
     uint32_t subscriber_count;
     nu_array_get_data(event->subscribers, &subscribers, &subscriber_count);
     for (uint32_t mi = 0; mi < message_count; mi++) {
-        /* send message */
+        // Send message
         void *data; nu_array_get(event->messages, mi, &data);
         for (uint32_t si = 0; si < subscriber_count; si++) {
             subscribers[si](id, data);
         }
-        /* terminate message */
+        // Terminate message
         if (event->terminate) {
             event->terminate(data);
         }
     }
-    /* clear messages */
+    // Clear messages
     nu_array_clear(event->messages);
 
     return NU_SUCCESS;
@@ -124,7 +124,7 @@ nu_result_t nu_event_dispatch_all(void)
 {
     uint32_t event_count = nu_array_get_size(_system.events);
     for (uint32_t ei = 0; ei < event_count; ei++) {
-        nu_event_dispatch(ei); /* id are indices */
+        nu_event_dispatch(ei); // Id are indices
     }
 
     return NU_SUCCESS;

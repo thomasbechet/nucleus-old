@@ -41,20 +41,20 @@ nu_result_t nu_renderer_initialize(void)
     memset(&_system, 0, sizeof(nu_system_data_t));
     nu_renderer_api_t api = nu_config_get().renderer.api;
 
-    /* initialize event */
+    // Initialize event
     result = initialize_event();
     NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to initialize event.");
 
     if (api != NU_RENDERER_API_NONE) {
-        /* get renderer module */
+        // Get renderer module
         result = nu_module_load(nu_renderer_api_names[api], &_system.module);
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to get module.");
 
-        /* get renderer interface */
+        // Get renderer interface
         result = nu_module_get_interface(_system.module, NU_RENDERER_INTERFACE_NAME, &_system.interface);
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to get interface.");
 
-        /* initialize renderer system */
+        // Initialize renderer system
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_RENDERER_NAME, "Failed to initialize renderer system.");

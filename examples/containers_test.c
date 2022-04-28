@@ -17,7 +17,7 @@ static uint32_t nu_random()
 }
 static nu_result_t on_start(void)
 {
-    /* test nu_array_swap */
+    // Test nu_array_swap
     {
         nu_array_t ar;
         uint32_t val;
@@ -38,7 +38,7 @@ static nu_result_t on_start(void)
         nu_array_free(ar);
     }
     
-    /* test nu_indexed_array_t */
+    // Test nu_indexed_array_t
     {
         nu_indexed_array_t iar;
         nu_array_t ids;
@@ -72,7 +72,7 @@ static nu_result_t on_start(void)
         nu_array_free(ids);
     }
 
-    /* test hashmap */
+    // Test hashmap
     {
         
     }

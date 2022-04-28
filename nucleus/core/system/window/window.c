@@ -25,15 +25,15 @@ nu_result_t nu_window_initialize(void)
     nu_window_api_t api = nu_config_get().window.api;
 
     if (api != NU_WINDOW_API_NONE) {
-        /* get module */
+        // Get module
         result = nu_module_load(nu_window_api_names[api], &_system.module);
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_WINDOW_NAME, "Failed to get module.");
 
-        /* get window interface */
+        // Get window interface
         result = nu_module_get_interface(_system.module, NU_WINDOW_INTERFACE_NAME, &_system.interface);
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_WINDOW_NAME, "Failed to get interface.");
 
-        /* initialize window system */
+        // Initialize window system
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_WINDOW_NAME, "Failed to initialize window system.");

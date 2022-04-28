@@ -103,7 +103,7 @@ void nu_vlog(nu_severity_t severity, const char *id, const char *format, va_list
     }
     fprintf(stdout, "[%s] ", id);
     vfprintf(stdout, format, args);
-    printf(stdout, "\n");
+    fprintf(stdout, "\n");
     fprintf(stdout, "\x1B[0m");
 #endif
 }

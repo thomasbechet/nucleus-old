@@ -21,19 +21,19 @@ nu_result_t nu_input_initialize(void)
     nu_input_api_t api = nu_config_get().input.api;
 
     if (api != NU_INPUT_API_NONE) {
-        /* load module */
-        if (api == NU_INPUT_API_GLFW) { /* use existing glfw window module */
-            _system.module = nu_window_get_module(); /* copy module handle */
+        // Load module
+        if (api == NU_INPUT_API_GLFW) { // Use existing glfw window module
+            _system.module = nu_window_get_module(); // Copy module handle
         } else {
             _system.module = NU_NULL_HANDLE;
         }
         NU_CHECK(_system.module != NU_NULL_HANDLE, return NU_FAILURE, NU_LOGGER_INPUT_NAME, "Unsupported api.");
 
-        /* get input interface */
+        // Get input interface
         result = nu_module_get_interface(_system.module, NU_INPUT_INTERFACE_NAME, &_system.interface);
         NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_INPUT_NAME, "Failed to get interface.");
 
-        /* initialize input system */
+        // Initialize input system
         if (_system.interface.initialize) {
             result = _system.interface.initialize();
             NU_CHECK(result == NU_SUCCESS, return result, NU_LOGGER_INPUT_NAME, "Failed to initialize input system.");

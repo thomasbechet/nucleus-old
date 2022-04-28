@@ -299,22 +299,22 @@ static nu_result_t on_start(void)
     NU_ASSERT(nu_module_load("$MODULE/nucleus-ecs", &ecs_module) == NU_SUCCESS);
     nu_plugin_require(ecs_module, NUECS_SCENE_PLUGIN_NAME);
 
-    /* load sdf interface */
+    // Load sdf interface
     nu_module_t renderer_module = nu_renderer_get_module();
     nuvk_renderer_interface_load(renderer_module);
 
-    /* load lua interface */
+    // Load lua interface
     NU_ASSERT(nulua_interface_load_all(lua_module) == NU_SUCCESS);
     nulua_plugin_t plugin;
     NU_ASSERT(nulua_plugin_load("$ENGINE/script/test.lua", &plugin));
     NU_ASSERT(nulua_plugin_load("$ENGINE/script/spectator.lua", &plugin));
 
-    /* load ecs interface */
+    // Load ecs interface
     nuecs_interface_load_all(ecs_module);
 
-    /**************/
-    /* COMPONENTS */
-    /**************/
+    // +------------+
+    // | COMPONENTS |
+    // +------------+
 
     nuecs_component_t position_component, health_component, velocity_component, score_component, transform_component;
     {
@@ -364,9 +364,9 @@ static nu_result_t on_start(void)
         nuecs_component_build(&info, &transform_component);
     }
 
-    /***********/
-    /* SYSTEMS */
-    /***********/
+    // +---------+
+    // | SYSTEMS |
+    // +---------+
 
     nuecs_system_t move_player_system;
     {
@@ -386,9 +386,9 @@ static nu_result_t on_start(void)
         nuecs_system_build(&info, &move_player_system);
     }
 
-    /*************/
-    /* PIPELINES */
-    /*************/
+    // +-----------+
+    // | PIPELINES |
+    // +-----------+
 
     nuecs_pipeline_t pipeline;
     {
@@ -403,9 +403,9 @@ static nu_result_t on_start(void)
         nuecs_pipeline_build(&info, &pipeline);
     }
 
-    /*********/
-    /* SCENE */
-    /*********/
+    // +-------+
+    // | SCENE |
+    // +-------+
 
     nuecs_scene_t scene;
     nuecs_scene_create(&scene);
@@ -487,7 +487,7 @@ static nu_result_t on_start(void)
 
     nu_context_request_stop();
 
-    /* load texture */
+    // Load texture
     int width, height, channel;
     unsigned char *ima_data;
     ima_data = stbi_load("engine/texture/brick.jpg", &width, &height, &channel, STBI_rgb);
@@ -511,7 +511,7 @@ static nu_result_t on_update(void)
         once = 0;
     }
 
-    /* quit handling */
+    // Quit handling
     nu_button_state_t escape_state;
     nu_input_get_keyboard_state(NU_KEYBOARD_ESCAPE, &escape_state);
     if (escape_state & NU_BUTTON_PRESSED) {
