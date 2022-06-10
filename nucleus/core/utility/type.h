@@ -3,6 +3,8 @@
 
 typedef void (*nu_pfn_t)(void);
 
+typedef intptr_t nu_word_t;
+
 typedef enum {
     NU_TYPE_INT32,
     NU_TYPE_UINT32,

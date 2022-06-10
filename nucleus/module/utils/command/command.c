@@ -30,7 +30,7 @@ nu_result_t nuutils_command_plugin_initialize(void)
     nu_result_t result;
 
     /* register command event */
-    nu_event_register_info_t info;
+    nu_event_info_t info;
     info.initialize = nuutils_command_event_initialize;
     info.terminate  = nuutils_command_event_terminate;
     info.size       = sizeof(nuutils_command_event_t);

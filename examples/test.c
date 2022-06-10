@@ -1,33 +1,37 @@
 #include <nucleus/nucleus.h>
+#include "testmodule/module.h"
+#include "test2module/module.h"
 
-#define MAIN_LOGGER_NAME "MAIN"
+typedef struct {
+    uint32_t it;
+} my_api_t;
 
-static nu_result_t on_start(void)
+static my_api_t *s_my_api;
+
+int main(int argc, char *argv[]) 
 {
-    nu_vector(uint32_t) vec;
+    // Initialize nucleus
+    nu_initialize();
 
-    nu_vector_allocate(&vec);
-    for (uint32_t i = 0; i < 10; i++) {
-        nu_vector_push_value(&vec, i);
-    }
-    nu_vector_erase(vec, 9);
-    for (uint32_t i = 0; i < nu_vector_get_size(vec); i++) {
-        nu_info("test", "%d", vec[i]);
-    }
-    nu_vector_free(vec);
+    // Open modules
+    nu_module_t module = nu_module_open("testmodule");
+    nu_module_open("test2module");
 
-    // Exit
-    nu_context_request_stop();
+    nu_allocator_t a = nu_allocator_create_freelist("test");
+    nu_logger_t logger = nu_logger_create("test");
 
-    return NU_SUCCESS;
-}
+    s_my_api = nu_api_get(my_api_t);
 
-int main(int argc, char *argv[])
-{
-    nu_context_init_info_t info;
-    memset(&info, 0, sizeof(nu_context_init_info_t));
-    info.callback.start  = on_start;
-    nu_context_init(&info);
+    // Log
+    nu_config_load("engine/nucleus.ini");
+    nu_config_log();
+    nu_module_log();
 
+    // Reload module
+    NU_ASSERT(nu_module_hotreload(module));
+
+    // Terminate framework
+    nu_terminate();
+    printf("end reached.\n");
     return 0;
 }

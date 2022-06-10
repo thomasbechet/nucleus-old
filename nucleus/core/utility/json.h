@@ -5,6 +5,7 @@
 #include <nucleus/core/utility/macro.h>
 #include <nucleus/core/utility/result.h>
 #include <nucleus/core/utility/math/math.h>
+#include <nucleus/core/api/allocator.h>
 
 #define NU_JSON_ITERATOR_INITIALIZE NU_NULL_HANDLE
 
@@ -15,10 +16,10 @@ NU_DECLARE_HANDLE(nu_json_object_iterator_t);
 NU_DECLARE_HANDLE(nu_json_array_t);
 NU_DECLARE_HANDLE(nu_json_array_iterator_t);
 
-NU_API nu_result_t nu_json_allocate_empty_object(nu_json_t *json);
-NU_API nu_result_t nu_json_allocate_empty_array(nu_json_t *json);
-NU_API nu_result_t nu_json_allocate_from_file(nu_json_t *json, const char *filename);
-NU_API nu_result_t nu_json_allocate_from_cstr(nu_json_t *json, const char *cstr);
+NU_API nu_json_t nu_json_allocate_empty_object(nu_allocator_t allocator);
+NU_API nu_json_t nu_json_allocate_empty_array(nu_allocator_t allocator);
+NU_API nu_json_t nu_json_allocate_from_file(nu_allocator_t allocator, const char *filename);
+NU_API nu_json_t nu_json_allocate_from_cstr(nu_allocator_t allocator, const char *cstr);
 NU_API void nu_json_free(nu_json_t json);
 NU_API nu_result_t nu_json_save_file(nu_json_t json, const char *filename, bool minify);
 NU_API nu_json_value_t nu_json_get_root(nu_json_t json);
