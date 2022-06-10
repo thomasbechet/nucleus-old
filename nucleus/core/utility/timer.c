@@ -1,21 +1,25 @@
 #include <nucleus/core/utility/timer.h>
 
-#include <nucleus/core/coresystem/memory/memory.h>
+#include <nucleus/core/system/allocator/api.h>
 
 #if defined(NU_PLATFORM_WINDOWS)
 #include <Windows.h>
 
 typedef struct {
+    nu_allocator_t allocator;
     LARGE_INTEGER t0;
 } nu_timer_data_t;
 
-void nu_timer_allocate(nu_timer_t *timer) 
+nu_timer_t nu_timer_allocate(nu_allocator_t allocator) 
 {
-    *timer = (nu_timer_t)nu_malloc(sizeof(nu_timer_data_t));
+    nu_timer_data_t *data = nu_malloc(allocator, sizeof(*data));
+    data->allocator = allocator;
+    return (nu_timer_t)data;
 }
 void nu_timer_free(nu_timer_t timer) 
 {
-    nu_free(timer);
+    nu_timer_data_t *data = (nu_timer_data_t*)timer;
+    nu_free(data->allocator, data);
 }
 void nu_timer_start(nu_timer_t timer)
 {
@@ -37,6 +41,7 @@ float nu_timer_get_time_elapsed(nu_timer_t timer)
 #include <time.h>
 
 typedef struct {
+    nu_allocator_t allocator;
     struct timespec start;
 } nu_timer_data_t;
 
@@ -52,13 +57,16 @@ static inline void timespec_diff(struct timespec *start, struct timespec *stop, 
     return;
 }
 
-void nu_timer_allocate(nu_timer_t *timer) 
+nu_timer_t nu_timer_allocate(nu_allocator_t allocator) 
 {
-    *timer = (nu_timer_t)nu_malloc(sizeof(nu_timer_data_t));
+    nu_timer_data_t *data = nu_malloc(allocator, sizeof(*data));
+    data->allocator = allocator;
+    return (nu_timer_t)data;
 }
 void nu_timer_free(nu_timer_t timer) 
 {
-    nu_free(timer);
+    nu_timer_data_t *data = (nu_timer_data_t*)timer;
+    nu_free(data->allocator, data);
 }
 void nu_timer_start(nu_timer_t timer)
 {

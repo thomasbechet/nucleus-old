@@ -3,3 +3,6 @@ build/
 libs/
 .vscode/*
 tools/module/*
+/vs-build
+.vs/
+CMakeSettings.json

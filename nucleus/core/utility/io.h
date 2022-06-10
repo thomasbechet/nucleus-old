@@ -14,10 +14,10 @@ typedef enum {
     NU_IO_MODE_APPEND
 } nu_io_mode_t;
 
-NU_API nu_result_t nu_file_open(nu_file_t *file, const char *filename, nu_io_mode_t mode);
+NU_API nu_file_t nu_file_open(const char *filename, nu_io_mode_t mode);
 NU_API nu_result_t nu_file_close(nu_file_t file);
-NU_API nu_result_t nu_io_readall_bytes(const char *filename, uint32_t *nbytes, int8_t **buf);
-NU_API nu_result_t nu_io_readall_string(const char *filename, nu_string_t *str);
+NU_API int8_t *nu_io_readall_bytes(nu_allocator_t allocator, const char *filename, uint32_t *nbytes);
+NU_API nu_string_t nu_io_readall_string(nu_allocator_t allocator, const char *filename);
 NU_API nu_result_t nu_file_write_vprintf(nu_file_t file, const char *format, va_list args);
 NU_API nu_result_t nu_file_write_printf(nu_file_t file, const char *format, ...);
 NU_API nu_result_t nu_file_write_string(nu_file_t file, nu_string_t str);
