@@ -27,6 +27,7 @@ static nu_time_t get_timestamp(const char *path)
 #elif defined(NU_PLATFORM_UNIX)
 #include <libgen.h>
 #include <dlfcn.h>
+#include <sys/stat.h>
 static nu_time_t get_timestamp(const char *path)
 {
     struct stat stats;
@@ -137,12 +138,13 @@ static bool api_equals_orphan(const void *a, const void *user)
 
 static nu_pfn_t get_library_function(const void *raw_handle, const char *function_name)
 {
+    nu_pfn_t function;
 #if defined(NU_PLATFORM_WINDOWS)
     UINT old_mode = SetErrorMode(SEM_FAILCRITICALERRORS);
-    nu_pfn_t function = (nu_pfn_t)GetProcAddress((HMODULE)raw_handle, function_name);
+    function = (nu_pfn_t)GetProcAddress((HMODULE)raw_handle, function_name);
     SetErrorMode(old_mode);
 #elif defined(NU_PLATFORM_UNIX)
-    nu_pfn_t function = dlsym((void*)raw_handle, function_name);
+    *(void**)(&function) = dlsym((void*)raw_handle, function_name);
 #endif
     return function;
 }

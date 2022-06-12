@@ -621,12 +621,12 @@ nu_string_t nu_string_allocate_vformat_(nu_allocator_t allocator, const char *fo
 {
     va_list args_temp;
     va_copy(args_temp, args);
-    uint32_t n = vsnprintf(NULL, 0, format, args); // n doesn't contains the end character
+    uint32_t n = vsnprintf(NULL, 0, format, args_temp); // n doesn't contains the end character
     va_end(args_temp);
     nu_string_t str = nu_string_allocate_capacity_(allocator, n, file, line);
     nu_vector_resize_((nu_vector_t*)&str, n + 1, sizeof(char), file, line);
     va_copy(args_temp, args);
-    vsnprintf(str, n + 1, format, args);
+    vsnprintf(str, n + 1, format, args_temp);
     va_end(args_temp);
     return str;
 }
@@ -668,13 +668,13 @@ nu_string_t nu_string_append_vformat_(nu_string_t *pstr, const char *format, va_
 {
     va_list args_temp;
     va_copy(args_temp, args);
-    uint32_t n = vsnprintf(NULL, 0, format, args);
+    uint32_t n = vsnprintf(NULL, 0, format, args_temp);
     va_end(args_temp);
     nu_vector(char) vec = *pstr;
     uint32_t size = nu_vector_size(vec);
     nu_vector_resize_((nu_vector_t*)&vec, size + n, sizeof(char), file, line);
     va_copy(args_temp, args);
-    vsnprintf(vec + n, n, format, args);
+    vsnprintf(vec + n, n, format, args_temp);
     va_end(args_temp);
     *pstr = vec;
     return *pstr;
