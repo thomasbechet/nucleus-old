@@ -11,6 +11,6 @@
 #include <nucleus/core/utility/type.h>
 #include <nucleus/core/utility/check.h>
 #include <nucleus/core/utility/interrupt.h>
-#include <nucleus/core/utility/timer.h>
+#include <nucleus/core/utility/time.h>
 
 #endif

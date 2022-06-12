@@ -22,4 +22,5 @@ NU_API void nu_module_info(nu_module_info_t *info)
     info->name             = NU_TEST2_MODULE_NAME;
     info->callbacks.load   = nutest2_module_load;
     info->callbacks.unload = nutest2_module_unload;
+    info->allow_hotreload  = false;
 }

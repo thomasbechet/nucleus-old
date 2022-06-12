@@ -1,18 +1,19 @@
 #ifndef NU_API_ENGINE_H
 #define NU_API_ENGINE_H
 
-#include <nucleus/core/utility/result.h>
+#include <nucleus/core/utility/common.h>
 
 typedef struct {
-    nu_result_t (*start)(void);
-    nu_result_t (*update)(void);
-    nu_result_t (*fixed_update)(void);
-    nu_result_t (*late_update)(void);
-    nu_result_t (*stop)(void);
+    void (*start)(void);
+    void (*update)(void);
+    void (*fixed_update)(void);
+    void (*late_update)(void);
+    void (*stop)(void);
 } nu_engine_callbacks_t;
 
 typedef struct {
     nu_engine_callbacks_t callbacks;
+    bool auto_hotreload;
 } nu_engine_info_t;
 
 typedef struct {

@@ -16,6 +16,7 @@ typedef enum {
 
 NU_API nu_file_t nu_file_open(const char *filename, nu_io_mode_t mode);
 NU_API nu_result_t nu_file_close(nu_file_t file);
+NU_API nu_result_t nu_file_copy(const char *src, const char *dst);
 NU_API int8_t *nu_io_readall_bytes(nu_allocator_t allocator, const char *filename, uint32_t *nbytes);
 NU_API nu_string_t nu_io_readall_string(nu_allocator_t allocator, const char *filename);
 NU_API nu_result_t nu_file_write_vprintf(nu_file_t file, const char *format, va_list args);

@@ -30,4 +30,5 @@ NU_API void nu_module_info(nu_module_info_t *info)
     info->name             = NU_TEST_MODULE_NAME;
     info->callbacks.load   = nu_module_load;
     info->callbacks.unload = nu_module_unload;
+    info->allow_hotreload  = true;
 }

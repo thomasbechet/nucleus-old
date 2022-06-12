@@ -20,6 +20,7 @@ extern "C" {
 #include <nucleus/core/system/config/api.h>
 #include <nucleus/core/system/event/api.h>
 #include <nucleus/core/system/module/api.h>
+#include <nucleus/core/system/engine/api.h>
 #include <nucleus/core/utility/table_printer.h>
 
 NU_API void nu_initialize(void);

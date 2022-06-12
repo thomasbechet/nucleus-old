@@ -44,7 +44,7 @@ nu_result_t nu_engine_register_api(void)
 
 nu_result_t nu_engine_run(const nu_engine_info_t *info)
 {
-    (void)info;
+    s_state.callback = info->callbacks;
 
     const float fixed_timestep   = 1.0f / 50.0f * 1000.0f;
     const float maximum_timestep = 1.0f / 10.0f * 1000.0f;
@@ -57,11 +57,17 @@ nu_result_t nu_engine_run(const nu_engine_info_t *info)
     nu_timer_start(s_state.timer);
 
     if (s_state.callback.start) {
-        NU_CHECK(s_state.callback.start() == NU_SUCCESS, goto cleanup0,
-            nu_logger_get_core(), "Failed to call 'start' application callback.");
+        s_state.callback.start();
     }
 
+    // Engine loop
     while (!s_state.should_stop) {
+
+        // Update modules
+        if (info->auto_hotreload) {
+            nu_module_hotreload_outdated();
+        }
+        
         // Compute delta
         delta = nu_timer_get_time_elapsed(s_state.timer);
         nu_timer_start(s_state.timer);
@@ -89,8 +95,7 @@ nu_result_t nu_engine_run(const nu_engine_info_t *info)
 
             // Process fixed update
             if (s_state.callback.fixed_update) {
-                NU_CHECK(s_state.callback.fixed_update() == NU_SUCCESS, goto cleanup0,
-                    nu_logger_get_core(), "Failed to call 'fixed_update' application callback.");
+                s_state.callback.fixed_update();
             }
             
             // NU_CHECK(nu_plugin_fixed_update() == NU_SUCCESS, goto cleanup0,
@@ -121,12 +126,11 @@ nu_result_t nu_engine_run(const nu_engine_info_t *info)
     }
 
     if (s_state.callback.stop) {
-        NU_CHECK(s_state.callback.stop() == NU_SUCCESS, goto cleanup0,
-            nu_logger_get_core(), "Failed to call 'stop' application callback.");
+        s_state.callback.stop();
     }
 
     // Free resources
-cleanup0:
+// cleanup0:
     nu_timer_free(s_state.timer);
 
     return NU_SUCCESS;

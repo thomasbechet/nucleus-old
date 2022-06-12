@@ -3,10 +3,15 @@
 #include "test2module/module.h"
 
 typedef struct {
-    uint32_t it;
-} my_api_t;
+    nu_logger_t logger;
+} nu_state_t;
 
-static my_api_t *s_my_api;
+static nu_state_t ctx;
+
+static void fixed_update(void)
+{
+    nu_info(ctx.logger, "Update %f", nu_engine_get_delta_time());
+}
 
 int main(int argc, char *argv[]) 
 {
@@ -16,19 +21,21 @@ int main(int argc, char *argv[])
     // Open modules
     nu_module_t module = nu_module_open("testmodule");
     nu_module_open("test2module");
-
-    nu_allocator_t a = nu_allocator_create_freelist("test");
-    nu_logger_t logger = nu_logger_create("test");
-
-    s_my_api = nu_api_get(my_api_t);
-
-    // Log
-    nu_config_load("engine/nucleus.ini");
-    nu_config_log();
+    // nu_module_close(module);
     nu_module_log();
 
     // Reload module
-    NU_ASSERT(nu_module_hotreload(module));
+    nu_config_load("engine/nucleus.ini");
+    // NU_ASSERT(nu_module_hotreload(module));
+
+    ctx.logger = nu_logger_create("TEST");
+
+    // Run engine
+    nu_engine_info_t info;
+    memset(&info, 0, sizeof(info));
+    info.callbacks.fixed_update = fixed_update;
+    info.auto_hotreload = true;
+    NU_ASSERT(nu_engine_run(&info));
 
     // Terminate framework
     nu_terminate();

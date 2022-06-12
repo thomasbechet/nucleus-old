@@ -82,6 +82,10 @@ nu_result_t nu_file_close(nu_file_t file)
     fclose((FILE*)file);
     return NU_SUCCESS;
 }
+nu_result_t nu_file_copy(const char *src, const char *dst)
+{
+    
+}
 int8_t *nu_io_readall_bytes(nu_allocator_t allocator, const char *filename, uint32_t *nbytes)
 {
     FILE *fp = fopen(filename, "rb");
