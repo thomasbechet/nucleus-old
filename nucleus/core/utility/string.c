@@ -682,11 +682,11 @@ nu_string_t nu_string_append_vformat_(nu_string_t *pstr, const char *format, va_
 nu_string_t nu_string_insert_(nu_string_t *pstr, const char *s, uint32_t len, uint32_t index, const char *file, uint32_t line)
 {
     if (len > 0) {
-        nu_vector(char) vec  = *pstr;
+        nu_vector(char) vec  = (*pstr);
         uint32_t size = nu_vector_size(vec);
-        NU_ASSERT(index <= len);
+        NU_ASSERT(index < size);
         nu_vector_resize_((nu_vector_t*)&vec, size + len, sizeof(char), file, line);
-        memmove(vec + index + size, vec + index, len - index + 1);
+        memmove(vec + index + len, vec + index, size - index + 1);
         memcpy(vec + index, s, len);
         *pstr = vec;
     }
@@ -785,16 +785,14 @@ nu_string_t nu_string_set_(nu_string_t *str, const char *s, uint32_t len, const 
     return (*str = vec);
 }
 
-#define NU_ENGINE_TOKEN "$ENGINE"
-#define NU_MODULE_TOKEN "$MODULE"
-#define NU_ROOT_TOKEN   "$ROOT"
+#define NU_ENGINE_TOKEN "$engine"
+#define NU_ROOT_TOKEN   "$root"
 #define NU_WINDOWS_SLASH "//"
 #define NU_WINDOWS_BSLASH "\\"
 
 nu_string_t nu_string_resolve_path_(nu_string_t *pstr, const char *file, uint32_t line)
 {
     nu_string_replace_(pstr, NU_ENGINE_TOKEN, strlen(NU_ENGINE_TOKEN), NU_PATH_ENGINE_DIRECTORY, strlen(NU_PATH_ENGINE_DIRECTORY), file, line);
-    nu_string_replace_(pstr, NU_MODULE_TOKEN, strlen(NU_MODULE_TOKEN), NU_PATH_MODULE_DIRECTORY, strlen(NU_PATH_MODULE_DIRECTORY), file, line);
     nu_string_replace_(pstr, NU_ROOT_TOKEN, strlen(NU_ROOT_TOKEN), NU_PATH_ROOT_DIRECTORY, strlen(NU_PATH_ROOT_DIRECTORY), file, line);
 
     nu_string_replace_(pstr, NU_WINDOWS_SLASH, strlen(NU_WINDOWS_SLASH), NU_PATH_SEPARATOR, strlen(NU_PATH_SEPARATOR), file, line);

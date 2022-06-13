@@ -23,7 +23,12 @@ extern "C" {
 #include <nucleus/core/system/engine/api.h>
 #include <nucleus/core/utility/table_printer.h>
 
-NU_API void nu_initialize(void);
+typedef struct {
+    bool enable_hotreload;
+    bool load_engine_config;
+} nu_initialize_info_t;
+
+NU_API void nu_initialize(const nu_initialize_info_t *info);
 NU_API void nu_terminate(void);
 
 #ifdef __cplusplus

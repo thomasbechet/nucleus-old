@@ -15,6 +15,7 @@ static void nu_module_load(nu_module_t module, bool hotreload)
     } else {
         nu_info(ctx->logger, "Test module reloaded !");
     }
+    printf("Hello There Salut mon poted !\n");
 }
 static void nu_module_unload(nu_module_t module, bool hotreload)
 {
@@ -30,5 +31,5 @@ NU_API void nu_module_info(nu_module_info_t *info)
     info->name             = NU_TEST_MODULE_NAME;
     info->callbacks.load   = nu_module_load;
     info->callbacks.unload = nu_module_unload;
-    info->allow_hotreload  = true;
+    info->enable_hotreload = true;
 }

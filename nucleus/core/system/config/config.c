@@ -63,6 +63,13 @@ nu_result_t nu_config_terminate(void)
     nu_vector_free(s_state.parameters);
     return NU_SUCCESS;
 }
+nu_result_t nu_config_configure(bool load_engine_config)
+{
+    if (load_engine_config) {
+        return nu_config_load("$engine/engine.ini");
+    }
+    return NU_SUCCESS;
+}
 nu_result_t nu_config_register_api(void)
 {
     return nu_module_register_api(nu_module_get_core(), nu_config_api_t, &s_config_api);
@@ -76,7 +83,7 @@ nu_result_t nu_config_load(const char *path)
 {
     nu_string_t resolved_path = nu_string_allocate(nu_allocator_get_core(), path);
     nu_string_resolve_path(&resolved_path);
-    int code = ini_parse(path, handler, NULL);
+    int code = ini_parse(resolved_path, handler, NULL);
     nu_string_free(resolved_path);
     NU_CHECK(code >= 0, return NU_FAILURE, nu_logger_get_core(), "Failed to load configuration file: '%s'.", path);
     return NU_SUCCESS;

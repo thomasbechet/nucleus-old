@@ -19,6 +19,7 @@ typedef struct {
     float delta_time;
     bool should_stop;
     nu_timer_t timer;
+    bool enable_hotreload;
 } nu_state_t;
 
 static nu_state_t s_state;
@@ -33,6 +34,19 @@ static const nu_engine_api_t s_engine_api = {
 // |                              PRIVATE API                                 |
 // +--------------------------------------------------------------------------+
 
+nu_result_t nu_engine_initialize(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu_engine_terminate(void)
+{
+    return NU_SUCCESS;
+}
+nu_result_t nu_engine_configure(bool enable_hotreload)
+{
+    s_state.enable_hotreload = enable_hotreload;
+    return NU_SUCCESS;
+}
 nu_result_t nu_engine_register_api(void)
 {
     return nu_module_register_api(nu_module_get_core(), nu_engine_api_t, &s_engine_api);
@@ -63,8 +77,8 @@ nu_result_t nu_engine_run(const nu_engine_info_t *info)
     // Engine loop
     while (!s_state.should_stop) {
 
-        // Update modules
-        if (info->auto_hotreload) {
+        // Auto hotreload
+        if (s_state.enable_hotreload) {
             nu_module_hotreload_outdated();
         }
         

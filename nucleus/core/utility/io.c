@@ -2,6 +2,8 @@
 
 #include <nucleus/core/system/allocator/allocator.h>
 #include <nucleus/core/system/allocator/api.h>
+#include <nucleus/core/system/logger/logger.h>
+#include <nucleus/core/system/logger/api.h>
 
 #if defined(NU_PLATFORM_UNIX)
 // Taken from https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950
@@ -43,12 +45,37 @@ static nu_result_t create_directory(const char *dir)
 
     return NU_SUCCESS;
 }
+static nu_time_t last_write_time(const char *path)
+{
+    struct stat stats;
+    if (stat(path, &stats) == -1) {
+        return -1;
+    }
+    if (stats.st_size == 0) {
+        return -1;
+    }
+    return stats.st_mtim.tv_sec;
+}
 #elif defined(NU_PLATFORM_WINDOWS)
 #include <windows.h>
 static nu_result_t create_directory(const char *dir)
 {
     CreateDirectory(dir, NULL);
     return NU_SUCCESS;
+}
+static nu_time_t last_write_time(const char *path)
+{
+    WIN32_FILE_ATTRIBUTE_DATA attributes;
+    if (!GetFileAttributesEx(path, GetFileExInfoStandard, &attributes)) {
+        return 0;
+    }
+    if (attributes.nFileSizeHigh == 0 && attributes.nFileSizeLow == 0) {
+        return 0;
+    }
+    LARGE_INTEGER time;
+    time.HighPart = attributes.ftLastWriteTime.dwHighDateTime;
+    time.LowPart  = attributes.ftLastWriteTime.dwLowDateTime;
+    return (nu_time_t)time.QuadPart / 10000000 - 11644473600LL;
 }
 #endif
 
@@ -84,8 +111,31 @@ nu_result_t nu_file_close(nu_file_t file)
 }
 nu_result_t nu_file_copy(const char *src, const char *dst)
 {
-    (void)src; (void)dst;
-    return NU_FAILURE; //TODO:
+    nu_file_t f_src = nu_file_open(src, NU_IO_MODE_READ);
+    NU_CHECK(f_src != NU_NULL_HANDLE, return NU_FAILURE, nu_logger_get_core(),
+        "Failed to open source '%s'.", src);
+    nu_file_t f_dst = nu_file_open(dst, NU_IO_MODE_WRITE);
+    NU_CHECK(f_dst != NU_NULL_HANDLE, goto cleanup0, nu_logger_get_core(),
+        "Failed to open destination '%s'.", dst);
+
+    int a;
+    while ((a = fgetc((FILE*)f_src)) != EOF) {
+        fputc(a, (FILE*)f_dst);
+    }
+
+    nu_file_close(f_dst);
+cleanup0:
+    nu_file_close(f_src);
+
+    return NU_SUCCESS;
+}
+nu_result_t nu_file_remove(const char *filename)
+{
+    return remove(filename) == 0 ? NU_SUCCESS : NU_FAILURE; 
+}
+nu_result_t nu_file_last_write_time(const char *filename)
+{
+    return last_write_time(filename);
 }
 int8_t *nu_io_readall_bytes(nu_allocator_t allocator, const char *filename, uint32_t *nbytes)
 {

@@ -13,7 +13,6 @@ typedef struct {
 
 typedef struct {
     nu_engine_callbacks_t callbacks;
-    bool auto_hotreload;
 } nu_engine_info_t;
 
 typedef struct {

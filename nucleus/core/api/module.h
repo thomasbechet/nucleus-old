@@ -20,7 +20,7 @@ typedef struct {
 typedef struct {
     nu_module_callbacks_t callbacks;
     const char *name;
-    bool allow_hotreload;
+    bool enable_hotreload;
 } nu_module_info_t;
 
 typedef void (*nu_module_info_pfn_t)(nu_module_info_t *info);

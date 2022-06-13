@@ -8,40 +8,14 @@
 #include <nucleus/core/system/logger/api.h>
 #include <nucleus/core/utility/table_printer.h>
 
-#if defined(NU_PLATFORM_WINDOWS)
-#include <windows.h>
-static nu_time_t get_timestamp(const char *path)
-{
-    WIN32_FILE_ATTRIBUTE_DATA attributes;
-    if (!GetFileAttributesEx(path, GetFileExInfoStandard, &attributes)) {
-        return 0;
-    }
-    if (attributes.nFileSizeHigh == 0 && attributes.nFileSizeLow == 0) {
-        return 0;
-    }
-    LARGE_INTEGER time;
-    time.HighPart = attributes.ftLastWriteTime.dwHighDateTime;
-    time.LowPart  = attributes.ftLastWriteTime.dwLowDateTime;
-    return (nu_time_t)time.QuadPart / 10000000 - 11644473600LL;
-}
-#elif defined(NU_PLATFORM_UNIX)
-#include <libgen.h>
+#if defined(NU_PLATFORM_UNIX)
 #include <dlfcn.h>
-#include <sys/stat.h>
-static nu_time_t get_timestamp(const char *path)
-{
-    struct stat stats;
-    if (stat(path, &stats) == -1) {
-        return -1;
-    }
-    if (stats.st_size == 0) {
-        return -1;
-    }
-    return stats.st_mtim.tv_sec;
-}
+#elif defined(NU_PLATFORM_WINDOWS)
+#include <windows.h>
 #endif
 
 #define NU_MODULE_INFO_FUNCTION_NAME "nu_module_info"
+#define NU_MODULE_MAX_NAME_LENGTH    64
 
 typedef struct {
     // API name
@@ -65,7 +39,9 @@ typedef struct {
     // Keep the module id
     nu_module_t handle;
     // Module info
-    nu_module_info_t info;
+    nu_module_callbacks_t callbacks;
+    bool enable_hotreload;
+    char name[NU_MODULE_MAX_NAME_LENGTH];
 
     // Persistent module data on core allocator
     void *persitent_data;
@@ -83,6 +59,7 @@ typedef struct {
     nu_vector(nu_api_data_t) apis;
     uint32_t next_id;
     nu_module_t core_module;
+    bool enable_hotreload;
 } nu_state_t;
 
 static nu_state_t s_state;
@@ -111,7 +88,7 @@ static bool module_equals_by_name(const void *a, const void *user)
 {
     const nu_module_data_t *module = a;
     const char *name               = user;
-    return NU_MATCH(module->info.name, name);
+    return NU_MATCH(module->name, name);
 }
 static bool api_equals_by_name(const void *a, const void *user)
 {
@@ -181,8 +158,8 @@ static nu_string_t compute_final_path(const char *path_cstr)
 }
 static void *load_library(const char *path)
 {
-#if defined(NU_PLATFORM_WINDOWS)    
-    return LoadLibraryA(path);
+#if defined(NU_PLATFORM_WINDOWS)
+    return (void*)LoadLibraryA(path);
 #elif defined(NU_PLATFORM_UNIX)
     return dlopen(path, RTLD_LAZY);
 #endif
@@ -197,9 +174,9 @@ static void unload_library(void *raw_handle)
     dlclose(raw_handle);
 #endif
 }
-static void invalidate_apis(nu_vector(nu_api_data_t) apis, nu_module_t handle)
+static void invalidate_apis(nu_module_t handle)
 {
-    for (nu_api_data_t *it = apis; it != nu_vector_end(apis); it++) {
+    for (nu_api_data_t *it = s_state.apis; it != nu_vector_end(s_state.apis); it++) {
         if (it->module == handle) {
             memset(it->data, 0, it->size);
             it->module = NU_NULL_HANDLE;
@@ -208,61 +185,60 @@ static void invalidate_apis(nu_vector(nu_api_data_t) apis, nu_module_t handle)
 }
 static bool module_can_hotreload(const nu_module_data_t *module)
 {
-    return module->type == NU_MODULE_TYPE_SHARED && module->info.allow_hotreload;
+    return s_state.enable_hotreload && module->type == NU_MODULE_TYPE_SHARED && module->enable_hotreload;
 }
 static nu_result_t module_hotreload(nu_module_data_t *module)
 {
+    nu_result_t result = NU_SUCCESS;
+
     // Check is static
     if (!module_can_hotreload(module)) return NU_FAILURE;
 
-    // Keep old info
-    void *old_library = module->library;
-    nu_module_info_t old_info = module->info;
-    nu_time_t old_timestamp = module->timestamp;
-
-    // Load new library
-    module->library = load_library(module->path);
-    NU_CHECK(module->library, goto cleanup0, nu_logger_get_core(), "Failed to reload library.");
-
-    // Get new timestamp
-    module->timestamp = get_timestamp(module->path);
-    NU_CHECK(module->timestamp != 0, goto cleanup0, nu_logger_get_core(), "Failed to get timestamp.");
-
-    // Get the info function pointer
-    nu_module_info_pfn_t info_pfn = (nu_module_info_pfn_t)get_library_function(module->library, NU_MODULE_INFO_FUNCTION_NAME);
-    NU_CHECK(info_pfn, goto cleanup1, nu_logger_get_core(), "Failed to get module info.");
-
-    // Get new module info
-    memset(&module->info, 0, sizeof(module->info));
-    info_pfn(&module->info);
-
-    // Ensure the name has not changed
-    NU_CHECK(NU_MATCH(module->info.name, old_info.name), goto cleanup2, nu_logger_get_core(),
-        "Module name updated, unable to hotreload.");
-
     // Hotunload
-    if (old_info.callbacks.unload) {
-        old_info.callbacks.unload(module->handle, true);
+    if (module->callbacks.unload) {
+        module->callbacks.unload(module->handle, true);
     }
 
-    // Unload old module
-    unload_library(old_library);
+    // Invalidate APIs
+    invalidate_apis(module->handle);
+
+    // Unload the library
+    unload_library(module->library);
+
+    // Load the new library
+#if defined(NU_PLATFORM_WINDOWS)
+    nu_string_t tmp_path = nu_string_allocate(nu_allocator_get_core(), module->path);
+    nu_string_append(&tmp_path, ".tmp");
+    result = nu_file_copy(module->path, tmp_path);
+    nu_string_free(tmp_path);
+    NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, nu_logger_get_core(), "Failed to copy dll: '%s'.", module->path);
+    module->library = load_library(tmp_path);
+    NU_CHECK(module->library, return NU_FAILURE, nu_logger_get_core(), "Failed to load tmp library: '%s'.", module->path);
+#else
+    module->library = load_library(module->path);
+    NU_CHECK(module->library, return NU_FAILURE, nu_logger_get_core(), "Failed to reload library: '%s'.", module->path);
+#endif
+
+    // Get new timestamp
+    module->timestamp = nu_file_last_write_time(module->path);
+    NU_CHECK(module->timestamp != 0, goto cleanup0, nu_logger_get_core(), "Failed to get timestamp.");
+
+    // Get the new info (only callbacks are copied)
+    nu_module_info_pfn_t info_pfn = (nu_module_info_pfn_t)get_library_function(module->library, NU_MODULE_INFO_FUNCTION_NAME);
+    NU_CHECK(info_pfn, goto cleanup0, nu_logger_get_core(), "Failed to get module info.");
+    nu_module_info_t info;
+    memset(&info, 0, sizeof(info));
+    info_pfn(&info);
+    module->callbacks = info.callbacks;
 
     // Hotreload
-    if (module->info.callbacks.load) {
-        module->info.callbacks.load(module->handle, true);
+    if (module->callbacks.load) {
+        module->callbacks.load(module->handle, true);
     }
 
     return NU_SUCCESS;
-
-cleanup2:
-    module->info = old_info;
-cleanup1:
-    unload_library(module->library);
 cleanup0:
-    module->library = old_library;
-    module->timestamp = old_timestamp;
-
+    unload_library(module->library);
     return NU_FAILURE;
 }
 
@@ -273,9 +249,10 @@ cleanup0:
 nu_result_t nu_module_initialize(void)
 {
     // Allocate resources
-    s_state.modules = nu_vector_allocate(nu_allocator_get_core(), nu_module_data_t);
-    s_state.apis    = nu_vector_allocate(nu_allocator_get_core(), nu_api_data_t);
-    s_state.next_id = 0;
+    s_state.modules          = nu_vector_allocate(nu_allocator_get_core(), nu_module_data_t);
+    s_state.apis             = nu_vector_allocate(nu_allocator_get_core(), nu_api_data_t);
+    s_state.next_id          = 0;
+    s_state.enable_hotreload = false;
 
     // Create core module
     nu_module_info_t core_info = {
@@ -307,6 +284,11 @@ nu_result_t nu_module_terminate(void)
 
     return NU_SUCCESS;
 }
+nu_result_t nu_module_configure(bool enable_hotreload)
+{
+    s_state.enable_hotreload = enable_hotreload;
+    return NU_SUCCESS;
+}
 nu_module_t nu_module_get_core(void)
 {
     return s_state.core_module;
@@ -315,12 +297,12 @@ nu_result_t nu_module_hotreload_outdated(void)
 {
     for (nu_module_data_t *it = s_state.modules; it != nu_vector_end(s_state.modules); it++) {
         if (module_can_hotreload(it)) {
-            nu_time_t timestamp = get_timestamp(it->path);
+            nu_time_t timestamp = nu_file_last_write_time(it->path);
             if (timestamp > it->timestamp) {
                 nu_result_t result = module_hotreload(it);
                 NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, nu_logger_get_core(),
-                    "Failed to auto hotreload module '%s'.", it->info.name);
-                nu_info(nu_logger_get_core(), "Module '%s' hotreloaded.", it->info.name);
+                    "Failed to auto hotreload module '%s'.", it->name);
+                nu_info(nu_logger_get_core(), "Hotreload of module '%s'.", it->name);
             }
         }
     }
@@ -343,32 +325,56 @@ nu_module_t nu_module_open(const char *path)
     module.path = final_path;
 
     // Get the last write time
-    module.timestamp = get_timestamp(module.path);
+    module.timestamp = nu_file_last_write_time(module.path);
     NU_CHECK(module.timestamp != 0, goto cleanup0, nu_logger_get_core(), "Failed to get last write time '%s'.", final_path);
 
     // Load the library
     module.library = load_library(final_path);
     NU_CHECK(module.library, goto cleanup0, nu_logger_get_core(), "Failed to load library '%s'.", final_path);
 
-    // Get the info function pointer
+    // Get the info
     nu_module_info_pfn_t info_pfn = (nu_module_info_pfn_t)get_library_function(module.library, NU_MODULE_INFO_FUNCTION_NAME);
     NU_CHECK(info_pfn, goto cleanup1, nu_logger_get_core(), "Failed to get module info.");
-
-    // Get info
-    memset(&module.info, 0, sizeof(module.info));
-    info_pfn(&module.info);
+    nu_module_info_t info;
+    memset(&info, 0, sizeof(info));
+    info_pfn(&info);
+    strncpy(module.name, info.name, NU_MODULE_MAX_NAME_LENGTH);
+    module.enable_hotreload = info.enable_hotreload;
+    module.callbacks        = info.callbacks;
 
     // Ensure the name doesn't exists
-    NU_CHECK(nu_vector_find(s_state.modules, module_equals_by_name, module.info.name) == NULL, goto cleanup1,
-        nu_logger_get_core(), "Module with name '%s' already exists.", module.info.name);
+    NU_CHECK(nu_vector_find(s_state.modules, module_equals_by_name, module.name) == NULL, goto cleanup1,
+        nu_logger_get_core(), "Module with name '%s' already exists.", module.name);
+
+    // Windows locks the dll file when loaded. If hotreload is
+    // enable, a temporary dll file is created.
+#if defined(NU_PLATFORM_WINDOWS)
+    if (s_state.enable_hotreload && module.enable_hotreload) {
+        // 1. Unload the current dll
+        unload_library(module.library);
+        // 2. Copy the dll to tmp file
+        nu_string_t tmp_path = nu_string_allocate(nu_allocator_get_core(), module.path);
+        nu_string_append(&tmp_path, ".tmp");
+        nu_result_t result = nu_file_copy(module.path, tmp_path);
+        nu_string_free(tmp_path);
+        NU_CHECK(result == NU_SUCCESS, goto cleanup0, nu_logger_get_core(), "Failed to copy dll: '%s'.", module.path);
+        // 3. Load the tmp file
+        module.library = load_library(tmp_path);
+        NU_CHECK(module.library, goto cleanup0, nu_logger_get_core(), "Failed to load tmp library.");
+        // 4. Get the correct callbacks
+        memset(&info, 0, sizeof(info));
+        info_pfn(&info);
+        module.callbacks = info.callbacks;
+    }
+#endif
 
     // Create the module
     NU_HANDLE_SET_ID(module.handle, s_state.next_id++);
     nu_vector_push_value(&s_state.modules, module);
 
     // Invoke load callback
-    if (module.info.callbacks.load) {
-        module.info.callbacks.load(module.handle, false);
+    if (module.callbacks.load) {
+        module.callbacks.load(module.handle, false);
     }
 
     return module.handle;
@@ -388,19 +394,21 @@ nu_module_t nu_module_open_static(nu_module_info_t info)
     module.type = NU_MODULE_TYPE_STATIC;
 
     // Save info
-    module.info = info;
+    module.callbacks        = info.callbacks;
+    module.enable_hotreload = false;
+    strncpy(module.name, info.name, NU_MODULE_MAX_NAME_LENGTH);
 
     // Ensure the name doesn't exists
-    NU_CHECK(nu_vector_find(s_state.modules, module_equals_by_name, module.info.name) == NULL, return NU_FAILURE,
-        nu_logger_get_core(), "Module with name '%s' already exists.", module.info.name);
+    NU_CHECK(nu_vector_find(s_state.modules, module_equals_by_name, module.name) == NULL, return NU_FAILURE,
+        nu_logger_get_core(), "Module with name '%s' already exists.", module.name);
 
     // Create the module
     NU_HANDLE_SET_ID(module.handle, s_state.next_id++); 
     nu_vector_push_value(&s_state.modules, module);
 
     // Invoke load callback
-    if (module.info.callbacks.load) {
-        module.info.callbacks.load(module.handle, false);
+    if (module.callbacks.load) {
+        module.callbacks.load(module.handle, false);
     }
 
     return module.handle;
@@ -414,22 +422,37 @@ nu_result_t nu_module_close(nu_module_t handle)
     nu_module_data_t *module = &s_state.modules[module_index];
 
     // Call unload callback
-    if (module->info.callbacks.unload) {
-        module->info.callbacks.unload(module->handle, false);
+    if (module->callbacks.unload) {
+        module->callbacks.unload(module->handle, false);
     }
 
     // Invalidate APIs
-    invalidate_apis(s_state.apis, handle);
+    invalidate_apis(handle);
 
     // Free persistent state
     if (module->persitent_data) {
         nu_free(nu_allocator_get_core(), module->persitent_data);
     }
 
-    // Free resources
-    if (module->library) {
+    if (module->type == NU_MODULE_TYPE_SHARED) {
+        // Unload the library
         unload_library(module->library);
+        
+        // Remove tmp dll file on Windows
+    #if defined(NU_PLATFORM_WINDOWS)
+        if (s_state.enable_hotreload && module->enable_hotreload) {
+            nu_string_t tmp_path = nu_string_allocate(nu_allocator_get_core(), module->path);
+            nu_string_append(&tmp_path, ".tmp");
+            nu_result_t result = nu_file_remove(tmp_path);
+            nu_string_free(tmp_path);
+            if (result != NU_SUCCESS) {
+                nu_warning(nu_logger_get_core(), "Failed to remove temporary file for dll '%s'.", module->path);
+            }
+        }
+    #endif
     }
+
+    // Free resources
     if (module->path) {
         nu_string_free(module->path);
     }
@@ -628,7 +651,7 @@ void nu_module_log(void)
         
         // Module info
         nu_table_printer_row(tp, "%s|%s|%s|%s|%s|%s",
-            data_it->info.name,
+            data_it->name,
             data_it->type == NU_MODULE_TYPE_STATIC ? "static" : "shared",
             first != NULL ? first->name : "none",
             module_can_hotreload(data_it) ? "enable" : "disable",

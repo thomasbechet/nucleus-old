@@ -5,6 +5,7 @@
 
 nu_result_t nu_config_initialize(void);
 nu_result_t nu_config_terminate(void);
+nu_result_t nu_config_configure(bool load_engine_config);
 nu_result_t nu_config_register_api(void);
 
 #endif

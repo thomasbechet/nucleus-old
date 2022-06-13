@@ -10,13 +10,18 @@ static nu_state_t ctx;
 
 static void fixed_update(void)
 {
-    nu_info(ctx.logger, "Update %f", nu_engine_get_delta_time());
+    // nu_info(ctx.logger, "Update %f", nu_engine_get_delta_time());
+    nu_engine_request_stop();
 }
 
 int main(int argc, char *argv[]) 
 {
     // Initialize nucleus
-    nu_initialize();
+    nu_initialize_info_t initialize_info = {
+        .enable_hotreload   = true,
+        .load_engine_config = true
+    };
+    nu_initialize(&initialize_info);
 
     // Open modules
     nu_module_t module = nu_module_open("testmodule");
@@ -24,9 +29,9 @@ int main(int argc, char *argv[])
     // nu_module_close(module);
     nu_module_log();
 
-    // Reload module
-    nu_config_load("engine/nucleus.ini");
-    // NU_ASSERT(nu_module_hotreload(module));
+    // Log config
+    nu_config_log();
+    NU_ASSERT(nu_module_hotreload(module));
 
     ctx.logger = nu_logger_create("TEST");
 
@@ -34,7 +39,6 @@ int main(int argc, char *argv[])
     nu_engine_info_t info;
     memset(&info, 0, sizeof(info));
     info.callbacks.fixed_update = fixed_update;
-    info.auto_hotreload = true;
     NU_ASSERT(nu_engine_run(&info));
 
     // Terminate framework

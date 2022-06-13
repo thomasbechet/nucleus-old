@@ -5,6 +5,7 @@
 
 nu_result_t nu_module_initialize(void);
 nu_result_t nu_module_terminate(void);
+nu_result_t nu_module_configure(bool enable_hotreload);
 nu_module_t nu_module_get_core(void);
 nu_result_t nu_module_hotreload_outdated(void);
 
