@@ -1,7 +1,23 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
+cmake_minimum_required(VERSION 3.9.0)
 
-PROJECT(nucleus VERSION 0.0.1)
+# Project
+project(nucleus VERSION 0.0.1)
 
-# Add subdirectories
-ADD_SUBDIRECTORY(nucleus)
-ADD_SUBDIRECTORY(examples)
+# Build type
+set(CMAKE_BUILD_TYPE Release)
+
+# Build directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# Compiler flags
+if (MSVC)
+	add_compile_options(/W2 /WX)
+else (UNIX OR MINGW)
+    add_compile_options(-pedantic -Wall -Wextra -Werror)
+endif()
+
+# Projects
+add_subdirectory(nucleus)
+add_subdirectory(examples)

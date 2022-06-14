@@ -1,11 +1,5 @@
 #include <examples/test2module/module.h>
 
-typedef struct {
-    uint32_t mystate;
-} nutest2_module_state_t;
-
-static nutest2_module_state_t *state;
-
 static void nutest2_module_load(nu_module_t module, bool hotreload)
 {
     (void)module;

@@ -15,10 +15,10 @@ static void nu_module_load(nu_module_t module, bool hotreload)
     } else {
         nu_info(ctx->logger, "Test module reloaded !");
     }
-    printf("Hello There Salut mon poted !\n");
 }
 static void nu_module_unload(nu_module_t module, bool hotreload)
 {
+    (void)module;
     if (!hotreload) {
         nu_info(ctx->logger, "Test module will unload :(");
     } else {

@@ -58,7 +58,7 @@ static uint32_t compute_section_width(const nu_line_data_t *start_it)
     // Compute max column sizes
     uint8_t max_sizes[MAX_COLUMN_COUNT];
     memset(max_sizes, 0, sizeof(uint8_t) * MAX_COLUMN_COUNT);
-    uint8_t column_count;
+    uint8_t column_count = 0;
     for (const nu_line_data_t *it = start_it; it->type != NU_LINE_TYPE_END_SECTION; it++) {
         if (it->type == NU_LINE_TYPE_SEPARATOR) continue;
         compute_sizes(it, &column_count, max_sizes);
@@ -180,7 +180,7 @@ static void render(nu_table_printer_data_t *data)
             // Compute section column sizes
             uint8_t sizes[MAX_COLUMN_COUNT];
             memset(sizes, 0, sizeof(uint8_t) * MAX_COLUMN_COUNT);
-            uint8_t column_count;
+            uint8_t column_count = 0;
             for (const nu_line_data_t *sub_it = current; sub_it->type != NU_LINE_TYPE_END_SECTION; sub_it++) {
                 if (sub_it->type == NU_LINE_TYPE_SEPARATOR) continue;
                 compute_sizes(sub_it, &column_count, sizes);

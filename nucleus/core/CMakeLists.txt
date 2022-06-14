@@ -1,34 +1,12 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
+project(nucleus VERSION 0.0.1 LANGUAGES C DESCRIPTION "The nucleus core library")
 
-PROJECT(nucleus LANGUAGES C VERSION 0.0.1)
+# Source files
+file(GLOB_RECURSE sources_ini ${CMAKE_SOURCE_DIR}/externals/ini/include/*.c)
+file(GLOB_RECURSE sources_cjson ${CMAKE_SOURCE_DIR}/externals/cJSON/include/*.c)
+file(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
 
-SET(CMAKE_BUILD_TYPE Debug)
-#SET(CMAKE_BUILD_TYPE Release)
-
-if (MSVC)
-	ADD_COMPILE_OPTIONS(/W2 /WX)
-else (UNIX OR MINGW)
-    ADD_COMPILE_OPTIONS(-pedantic -Wall -Wextra -Werror)
-endif()
-
-FIND_PACKAGE(OpenMP)
-if (OPENMP_FOUND)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
-endif()
-
-INCLUDE_DIRECTORIES(
-    ../../externals/cglm/include/
-    ../../externals/ini/include/
-    ../../externals/cJSON/include/
-    ../../
-)
-
-FILE(GLOB_RECURSE sources_ini ${CMAKE_CURRENT_SOURCE_DIR}/../../externals/ini/include/*.c)
-FILE(GLOB_RECURSE sources_cjson ${CMAKE_CURRENT_SOURCE_DIR}/../../externals/cJSON/include/*.c)
-FILE(GLOB_RECURSE sources ${CMAKE_CURRENT_SOURCE_DIR}/*.c)
-
-ADD_LIBRARY(
+# Compile and link
+add_library(
     ${PROJECT_NAME} SHARED
     ${sources_ini}
     ${sources_cjson}
@@ -38,7 +16,7 @@ ADD_LIBRARY(
 if (MSVC)
 
 elseif (MINGW)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+    target_link_libraries(${PROJECT_NAME}
         -static
         -static-libgcc
         -static-libstdc++
@@ -46,23 +24,9 @@ elseif (MINGW)
         mingw32
     )
 elseif (UNIX)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME}
+    target_link_libraries(${PROJECT_NAME}
         pthread
         dl
         m
-    )
-endif()
-
-if (MSVC OR MINGW)
-    INSTALL(
-        TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/
-        ARCHIVE DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../libs/
-        RUNTIME DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../build/bin/
-    )
-elseif (UNIX)
-    INSTALL(
-        TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../../build/bin/
     )
 endif()

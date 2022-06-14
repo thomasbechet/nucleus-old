@@ -72,28 +72,22 @@ static nu_module_api_t s_module_api = {
     .log         = nu_module_log
 };
 
-// static bool module_equals_by_path(const void *a, const void *user)
-// {
-//     const nu_module_data_t *module = a;
-//     const char *path               = user;
-//     return NU_MATCH(module->path, path);
-// }
 static bool module_equals_by_handle(const void *a, const void *user)
 {
-    const nu_module_data_t *module = a;
-    const nu_module_t *handle      = user;
+    const nu_module_data_t *module = (const nu_module_data_t*)a;
+    const nu_module_t *handle      = (const nu_module_t*)user;
     return module->handle == *handle;
 }
 static bool module_equals_by_name(const void *a, const void *user)
 {
-    const nu_module_data_t *module = a;
-    const char *name               = user;
+    const nu_module_data_t *module = (const nu_module_data_t*)a;
+    const char *name               = (const char*)user;
     return NU_MATCH(module->name, name);
 }
 static bool api_equals_by_name(const void *a, const void *user)
 {
-    const nu_api_data_t *api = a;
-    const char *name         = user;
+    const nu_api_data_t *api = (const nu_api_data_t*)a;
+    const char *name         = (const char*)user;
     return NU_MATCH(api->name, name);
 }
 typedef struct {
@@ -324,13 +318,13 @@ nu_module_t nu_module_open(const char *path)
     module.type = NU_MODULE_TYPE_SHARED;
     module.path = final_path;
 
-    // Get the last write time
-    module.timestamp = nu_file_last_write_time(module.path);
-    NU_CHECK(module.timestamp != 0, goto cleanup0, nu_logger_get_core(), "Failed to get last write time '%s'.", final_path);
-
     // Load the library
     module.library = load_library(final_path);
     NU_CHECK(module.library, goto cleanup0, nu_logger_get_core(), "Failed to load library '%s'.", final_path);
+
+    // Get the last write time
+    module.timestamp = nu_file_last_write_time(module.path);
+    NU_CHECK(module.timestamp != 0, goto cleanup1, nu_logger_get_core(), "Failed to get last write time '%s'.", final_path);
 
     // Get the info
     nu_module_info_pfn_t info_pfn = (nu_module_info_pfn_t)get_library_function(module.library, NU_MODULE_INFO_FUNCTION_NAME);
@@ -338,7 +332,7 @@ nu_module_t nu_module_open(const char *path)
     nu_module_info_t info;
     memset(&info, 0, sizeof(info));
     info_pfn(&info);
-    strncpy(module.name, info.name, NU_MODULE_MAX_NAME_LENGTH);
+    strncpy(module.name, info.name, NU_MODULE_MAX_NAME_LENGTH - 1);
     module.enable_hotreload = info.enable_hotreload;
     module.callbacks        = info.callbacks;
 
@@ -396,7 +390,7 @@ nu_module_t nu_module_open_static(nu_module_info_t info)
     // Save info
     module.callbacks        = info.callbacks;
     module.enable_hotreload = false;
-    strncpy(module.name, info.name, NU_MODULE_MAX_NAME_LENGTH);
+    strncpy(module.name, info.name, NU_MODULE_MAX_NAME_LENGTH - 1);
 
     // Ensure the name doesn't exists
     NU_CHECK(nu_vector_find(s_state.modules, module_equals_by_name, module.name) == NULL, return NU_FAILURE,

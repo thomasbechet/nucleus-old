@@ -1,35 +1,26 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 3.1.0)
+project(nucleus_test LANGUAGES C VERSION 0.0.1)
 
-PROJECT(nucleus_test LANGUAGES C VERSION 0.0.1)
-
-ADD_SUBDIRECTORY(testmodule)
-ADD_SUBDIRECTORY(test2module)
-
-ADD_COMPILE_DEFINITIONS(NU_DEBUG)
-SET(CMAKE_BUILD_TYPE Debug)
-
-INCLUDE_DIRECTORIES(
-    ../
-    ../externals/stb/include/
-    ../externals/tinyobjloader/include/
-    ../externals/json/include/
+# Include sources
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/
+    ${CMAKE_SOURCE_DIR}/
+    ${CMAKE_SOURCE_DIR}/externals/stb/include/
+    ${CMAKE_SOURCE_DIR}/externals/tinyobjloader/include/
+    ${CMAKE_SOURCE_DIR}/externals/json/include/
 )
 
-ADD_EXECUTABLE(
-    ${PROJECT_NAME}
-    #main.c
-    #containers_test.c
-    test.c
-)
+# Compile and link
+add_executable(${PROJECT_NAME} test.c)
+target_link_libraries(${PROJECT_NAME} PRIVATE nucleus)
+set_property(TARGET ${PROJECT_NAME} PROPERTY VS_DEBUGGER_WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin/$(Configuration))
 
-TARGET_LINK_LIBRARIES(
-    ${PROJECT_NAME} PRIVATE
-    nucleus
-    testmodule
-    test2module
-)
+# Add test modules
+add_subdirectory(testmodule)
+add_subdirectory(test2module)
 
-INSTALL(
-    TARGETS ${PROJECT_NAME}
-    RUNTIME DESTINATION "${CMAKE_CURRENT_SOURCE_DIR}/../build/bin"
+# Add run command
+add_custom_target(run
+    COMMAND ${PROJECT_NAME}
+    DEPENDS ${PROJECT_NAME}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )

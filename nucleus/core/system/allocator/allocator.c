@@ -153,7 +153,7 @@ nu_allocator_t nu_allocator_create_freelist(const char *name)
     nu_allocator_data_t *allocator = nu_vector_push(&s_state.allocators);
     allocator->type = NU_ALLOCATOR_TYPE_FREELIST;
     nu_allocator_freelist_initialize(&allocator->freelist);
-    strncpy(allocator->name, name, MAX_NAME_LENGTH);
+    strncpy(allocator->name, name, MAX_NAME_LENGTH - 1);
     return handle;
 }
 nu_allocator_t nu_allocator_create_linear(const char *name, size_t max_size)
@@ -162,7 +162,7 @@ nu_allocator_t nu_allocator_create_linear(const char *name, size_t max_size)
     nu_allocator_data_t *allocator = nu_vector_push(&s_state.allocators);
     allocator->type = NU_ALLOCATOR_TYPE_LINEAR;
     nu_allocator_linear_initialize(&allocator->linear, max_size);
-    strncpy(allocator->name, name, MAX_NAME_LENGTH);
+    strncpy(allocator->name, name, MAX_NAME_LENGTH - 1);
     return handle;
 }
 nu_allocator_t nu_allocator_create_stack(const char *name)

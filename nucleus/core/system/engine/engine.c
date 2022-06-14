@@ -36,6 +36,7 @@ static const nu_engine_api_t s_engine_api = {
 
 nu_result_t nu_engine_initialize(void)
 {
+    s_state.should_stop = false;
     return NU_SUCCESS;
 }
 nu_result_t nu_engine_terminate(void)

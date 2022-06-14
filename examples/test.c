@@ -11,10 +11,10 @@ static nu_state_t ctx;
 static void fixed_update(void)
 {
     // nu_info(ctx.logger, "Update %f", nu_engine_get_delta_time());
-    nu_engine_request_stop();
+    //nu_engine_request_stop();
 }
 
-int main(int argc, char *argv[]) 
+int main(void)
 {
     // Initialize nucleus
     nu_initialize_info_t initialize_info = {
@@ -24,14 +24,13 @@ int main(int argc, char *argv[])
     nu_initialize(&initialize_info);
 
     // Open modules
-    nu_module_t module = nu_module_open("testmodule");
+    nu_module_open("testmodule");
     nu_module_open("test2module");
-    // nu_module_close(module);
     nu_module_log();
 
     // Log config
     nu_config_log();
-    NU_ASSERT(nu_module_hotreload(module));
+    // NU_ASSERT(nu_module_hotreload(module));
 
     ctx.logger = nu_logger_create("TEST");
 

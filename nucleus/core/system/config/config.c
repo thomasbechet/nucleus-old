@@ -42,9 +42,9 @@ static int handler(void *user, const char *section, const char *name, const char
 
     // Store data
     nu_config_parameter_t *param = nu_vector_push(&s_state.parameters);
-    strncpy(param->section, section, MAX_SECTION_SIZE);
-    strncpy(param->name, name, MAX_NAME_SIZE);
-    strncpy(param->value, value, MAX_VALUE_SIZE);
+    strncpy(param->section, section, MAX_SECTION_SIZE - 1);
+    strncpy(param->name, name, MAX_NAME_SIZE - 1);
+    strncpy(param->value, value, MAX_VALUE_SIZE - 1);
 
     return 1;
 }

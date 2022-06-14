@@ -27,7 +27,7 @@ nu_json_t nu_json_allocate_empty_array(nu_allocator_t allocator)
 }
 nu_json_t nu_json_allocate_from_file(nu_allocator_t allocator, const char *filename)
 {
-    (void)allocator;
+    nu_json_t json = NU_NULL_HANDLE;
         
     nu_string_t path = nu_string_allocate(allocator, filename);
     nu_string_resolve_path(&path);
@@ -36,7 +36,7 @@ nu_json_t nu_json_allocate_from_file(nu_allocator_t allocator, const char *filen
     NU_CHECK(json_str != NU_NULL_HANDLE, goto cleanup0, nu_logger_get_core(), 
         "Failed to read json file: %s.", path);
 
-    nu_json_t json = nu_json_parse(json_str, nu_string_size(json_str));
+    json = nu_json_parse(json_str, nu_string_size(json_str));
 
     nu_string_free(json_str);
 cleanup0:
@@ -51,6 +51,8 @@ nu_json_t nu_json_allocate_from_cstr(nu_allocator_t allocator, const char *cstr)
 }
 nu_result_t nu_json_save_file(nu_json_t json, const char *filename, bool minify)
 {
+    nu_result_t result = NU_FAILURE;
+
     // Resolve path
     nu_string_t path = nu_string_allocate(nu_allocator_get_core(), filename);
     nu_string_resolve_path(&path);
@@ -66,7 +68,7 @@ nu_result_t nu_json_save_file(nu_json_t json, const char *filename, bool minify)
         "Failed to render json.");
 
     // Write file
-    nu_result_t result = nu_file_write_cstr(file, buffer);
+    result = nu_file_write_cstr(file, buffer);
     NU_CHECK(result == NU_SUCCESS, goto cleanup2, nu_logger_get_core(),
         "Failed to write file.");
 

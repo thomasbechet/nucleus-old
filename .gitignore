@@ -1,8 +1,9 @@
 bin/
 build/
+vs-build/
+mingw-build/
 libs/
 .vscode/*
 tools/module/*
-/vs-build
 .vs/
 CMakeSettings.json
