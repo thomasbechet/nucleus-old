@@ -183,8 +183,6 @@ static bool module_can_hotreload(const nu_module_data_t *module)
 }
 static nu_result_t module_hotreload(nu_module_data_t *module)
 {
-    nu_result_t result = NU_SUCCESS;
-
     // Check is static
     if (!module_can_hotreload(module)) return NU_FAILURE;
 
@@ -203,7 +201,7 @@ static nu_result_t module_hotreload(nu_module_data_t *module)
 #if defined(NU_PLATFORM_WINDOWS)
     nu_string_t tmp_path = nu_string_allocate(nu_allocator_get_core(), module->path);
     nu_string_append(&tmp_path, ".tmp");
-    result = nu_file_copy(module->path, tmp_path);
+    nu_result_t result = nu_file_copy(module->path, tmp_path);
     nu_string_free(tmp_path);
     NU_CHECK(result == NU_SUCCESS, return NU_FAILURE, nu_logger_get_core(), "Failed to copy dll: '%s'.", module->path);
     module->library = load_library(tmp_path);

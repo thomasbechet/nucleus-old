@@ -149,10 +149,9 @@ int8_t *nu_io_readall_bytes(nu_allocator_t allocator, const char *filename, uint
     if (*nbytes == 0) return NULL;
 
     int8_t *buf = nu_malloc(allocator, *nbytes * sizeof(*buf));
-    fread(buf, *nbytes, 1, fp);
-
+    size_t total = fread(buf, *nbytes, 1, fp);
     fclose(fp);
-
+    if (total != *nbytes) return NULL;
     return buf;
 }
 nu_string_t nu_io_readall_string(nu_allocator_t allocator, const char* filename)
@@ -161,16 +160,18 @@ nu_string_t nu_io_readall_string(nu_allocator_t allocator, const char* filename)
     if (!fp) return NU_NULL_HANDLE;
 
     fseek(fp, 0, SEEK_END);
-    uint32_t nbytes = ftell(fp);
+    size_t nbytes = ftell(fp);
     rewind(fp);
 
     if (nbytes == 0) return NU_NULL_HANDLE;
 
-    nu_string_t str = nu_string_allocate_capacity(allocator, nbytes);
-    fread(str, nbytes, 1, fp);
-
+    nu_string_t str = nu_string_allocate_capacity(allocator, (uint32_t)nbytes);
+    size_t total = fread(str, nbytes, 1, fp);
     fclose(fp);
-
+    if (total != nbytes) {
+        nu_string_free(str);
+        return NU_NULL_HANDLE;
+    }
     return str;
 }
 nu_result_t nu_file_write_vprintf(nu_file_t file, const char *format, va_list args)
