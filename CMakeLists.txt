@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 3.9.0)
 # Project
 project(nucleus VERSION 0.0.1)
 
+include(${CMAKE_SOURCE_DIR}/cmake/GLFW.cmake)
+
 # Build type
 set(CMAKE_BUILD_TYPE Release)
 
